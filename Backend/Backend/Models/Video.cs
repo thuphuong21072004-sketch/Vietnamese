@@ -5,17 +5,12 @@ namespace Backend.Models
     public class Video
     {
         public int VideoId { get; set; }
-
-        public string YoutubeId { get; set; }
-
-        public string Title { get; set; }
+        public string YoutubeId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
 
         public int CreatedBy { get; set; }
-
-        [ForeignKey("CreatedBy")]
-        public User User { get; set; }
         public int Status { get; set; }
 
-        public ICollection<Transcript> Transcripts { get; set; }
+        public ICollection<Transcript>? Transcripts { get; set; }
     }
 }

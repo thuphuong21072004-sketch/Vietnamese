@@ -56,6 +56,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<UserService, UserServiceImpl>();
 builder.Services.AddScoped<VideoService, VideoServiceImpl>();
 builder.Services.AddScoped<LearningService, LearningServiceImpl>();
+builder.Services.AddScoped<TestService, TestServiceImpl>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserContextUtil>();
@@ -70,6 +71,19 @@ builder.Services.AddScoped<ProgressRepository, ProgressRepositoryImpl>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<QuizRepository, QuizRepositoryImpl>();
+builder.Services.AddScoped<PlacementRepository, PlacementRepositoryImpl>();
+
+builder.Services.AddScoped<PartRepository, PartRepositoryImpl>();
+
+builder.Services.AddScoped<PassageRepository, PassageRepositoryImpl>();
+
+builder.Services.AddScoped<QuestionRepository, QuestionRepositoryImpl>();
+
+builder.Services.AddScoped<AnswerRepository, AnswerRepositoryImpl>();
+
+builder.Services.AddScoped<UserAnswerRepository, UserAnswerRepositoryImpl>();
+
+builder.Services.AddScoped<UserQuizRepository, UserQuizRepositoryImpl>();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();

@@ -2,19 +2,21 @@
 
 namespace Backend.Models
 {
+    [Table("UserQuiz")]
     public class UserQuiz
     {
         public int UserQuizId { get; set; }
+
         public int UserId { get; set; }
         public int QuizId { get; set; }
-        public double Score { get; set; }
-        public DateTime? CompletedDate { get; set; }
+
+        public decimal Score { get; set; }
+        public DateTime CompletedDate { get; set; }
+
         public bool IsPassed { get; set; }
+        public User? User { get; set; }
+        public Quiz? Quiz { get; set; }
 
-        [ForeignKey("QuizId")] 
-        public virtual Quiz Quiz { get; set; }
-
-        [ForeignKey("UserId")] 
-        public virtual User User { get; set; }
+        public ICollection<UserAnswer>? UserAnswers { get; set; }
     }
 }

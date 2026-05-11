@@ -12,5 +12,8 @@ namespace Backend.Repository
         Task SaveLevel();
         Task<int> GetMaxOrderIndex();
         IQueryable<Level> GetQueryable();
+        Task<Level?> GetNextLevel(int levelId);
+        Task<Level?> GetByName(string name);
+
     }
 }

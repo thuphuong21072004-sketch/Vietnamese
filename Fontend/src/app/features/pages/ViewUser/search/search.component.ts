@@ -26,11 +26,12 @@ export class SearchComponent implements OnInit {
   currentTime = 0;
 
   subtitle = '';
-  highlightedSubtitle = '';
 
   isPlaying = true;
 
   player: any;
+
+  dictionaryData: any = null;
 
   constructor(private videoService: VideoService) {}
 
@@ -43,36 +44,44 @@ export class SearchComponent implements OnInit {
   startSearch() {
     if (!this.keyword.trim()) return;
 
-    this.hasSearched = false;
+    this.hasSearched = true;
     this.noResult = false;
     this.videoId = '';
-    this.highlightedSubtitle = '';
+    this.results = [];
+    this.dictionaryData = null;
+    this.searchkeyword = this.keyword;
 
-    setTimeout(() => {
-      this.searchkeyword = this.keyword;
-      this.hasSearched = true;
-
-      this.videoService.searchVideo(this.keyword).subscribe((res) => {
+    this.videoService.searchVideo(this.keyword).subscribe({
+      next: (res) => {
         if (!res || res.length === 0) {
           this.noResult = true;
-          this.results = [];
           return;
         }
-
-        this.noResult = false;
         this.results = res;
         this.index = 0;
-
         const video = res[0];
-
         this.videoId = video.youtubeId;
         this.subtitle = video.subtitle;
         this.currentTime = Math.floor(video.startTime);
-
         this.loadVideo();
-        this.highlightSubtitle();
-      });
-    }, 0);
+      },
+      error: (err) => console.error('Error finding video:', err),
+    });
+
+    this.videoService.getDefinition(this.keyword).subscribe({
+      next: (data: any) => {
+        
+        if (data && (data.meanings.length > 0 || data.translation)) {
+          this.dictionaryData = data;
+        } else {
+          this.dictionaryData = null;
+        }
+      },
+      error: (err) => {
+        console.error('Dictionary not found:', err);
+        this.dictionaryData = null;
+      },
+    });
   }
 
   loadVideo() {
@@ -87,22 +96,11 @@ export class SearchComponent implements OnInit {
         playerVars: {
           start: this.currentTime,
           autoplay: 1,
-          mute: 1,
+          mute: 0,
           rel: 0,
         },
       });
     }, 100);
-  }
-
-  highlightSubtitle() {
-    if (!this.subtitle) return;
-
-    const escaped = this.searchkeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    this.highlightedSubtitle = this.subtitle.replace(
-      new RegExp(escaped, 'gi'),
-      `<span class="highlight">$&</span>`,
-    );
   }
 
   previousVideo() {
@@ -117,8 +115,6 @@ export class SearchComponent implements OnInit {
     this.currentTime = Math.floor(video.startTime);
 
     this.loadVideo();
-
-    this.highlightSubtitle();
   }
 
   nextVideo() {
@@ -133,8 +129,6 @@ export class SearchComponent implements OnInit {
     this.currentTime = Math.floor(video.startTime);
 
     this.loadVideo();
-
-    this.highlightSubtitle();
   }
 
   back5() {
@@ -168,6 +162,12 @@ export class SearchComponent implements OnInit {
     } else {
       this.player.playVideo();
       this.isPlaying = true;
+    }
+  }
+  playAudio(url: string) {
+    if (url) {
+      const audio = new Audio(url);
+      audio.play().catch((err) => console.error('Lỗi phát âm thanh:', err));
     }
   }
 }

@@ -7,10 +7,11 @@ import { UnitDTO } from '../../../../models/unit.model';
 import { CourseDTO } from '../../../../models/course.model';
 import { Router, RouterLink } from '@angular/router';
 import { BaseService } from '../../../../services/base.service';
+import { QuizComponent } from '../quiz/test.component';
 @Component({
   selector: 'app-Unit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, QuizComponent],
   templateUrl: './unit.component.html',
   styleUrls: ['./unit.component.css'],
 })
@@ -19,10 +20,12 @@ export class UnitComponent implements OnInit {
   units: UnitDTO[] = [];
   course: CourseDTO | null = null;
 
+  showCourseQuiz = false;
+
   constructor(
     private route: ActivatedRoute,
     private learningService: LearningService,
-    private baseService:BaseService,
+    private baseService: BaseService,
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +49,7 @@ export class UnitComponent implements OnInit {
   }
 
   trackById(index: number, item: any) {
-    return item.UnitId;
+    return item.unitId;
   }
 
   isValidAllRows(): boolean {
@@ -73,5 +76,4 @@ export class UnitComponent implements OnInit {
         this.baseService.handleError(err, 'Error when deleting lesson'),
     });
   }
-  
 }

@@ -1,6 +1,6 @@
 ﻿using Backend.Data;
-using Backend.dto;
 using Backend.Models;
+using Backend.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.impl
@@ -8,99 +8,155 @@ namespace Backend.Repository.impl
     public class LevelRepositoryImpl : LevelRepository
     {
         private readonly AppDbContext _context;
+
         public LevelRepositoryImpl(AppDbContext context)
         {
             _context = context;
         }
-        /*
-         * lấy tất cả các cấp độ
-         * 26/03/2026
-         * thuphuong21072004
+
+        /* 
+         * Lấy danh sách tất cả các cấp độ
+         * O(N) 
+         * thuphuong21072004 
          */
-        public async Task<List<Level>> GetAllLevels( bool? isActive)
+        public async Task<List<Level>> GetAllLevels(bool? isActive)
         {
-            var query = _context.Levels.AsQueryable();
+            var query = _context.Levels.AsNoTracking();
 
             if (isActive.HasValue)
                 query = query.Where(l => l.IsActive == isActive.Value);
 
-            return await query
-                .OrderBy(x => x.OrderIndex)
-                .ToListAsync();
+            return await query.OrderBy(x => x.OrderIndex).ToListAsync();
         }
-        /*
-         * lấy cấp độ theo id
-         * 26/03/2026
-         * thuphuong21072004
-         */
-        public async Task<Level> GetLevelById(int id)
-        {
-            return await _context.Levels.FindAsync(id);
-        }
-        /*
-         * thêm cấp độ mới
-         * 26/03/2026
-         * thuphuong21072004
+
+        /* 
+         * Thêm một cấp độ mới
+         * O(1) 
+         * thuphuong21072004 
          */
         public async Task AddLevel(Level level)
         {
             await _context.Levels.AddAsync(level);
         }
-        /*
-         * sửa thông tin cấp độ
-         * 26/03/2026
-         * thuphuong21072004
+
+        /* 
+         * Cập nhật thông tin cấp độ
+         * O(1) 
+         * thuphuong21072004 
          */
         public async Task UpdateLevel(Level level)
         {
             _context.Levels.Update(level);
         }
-        /*
-         * xóa cấp độ và toàn bộ dữ liệu liên quan
-         * 26/03/2026
-         * thuphuong21072004
+
+        /* 
+         * Xóa hàng loạt cấp độ và toàn bộ dữ liệu liên quan (Course, Unit, Quiz...)
+         * O(1) 
+         * thuphuong21072004 
          */
         public async Task DeleteLevels(List<int> ids)
         {
-            var levels = await _context.Levels
-                .Where(x => ids.Contains(x.LevelId))
-                .ToListAsync();
+            if (ids == null || !ids.Any()) return;
 
-            _context.Levels.RemoveRange(levels);
+            var courseIds = await _context.Courses.Where(c => ids.Contains(c.LevelId)).Select(c => c.CourseId).ToListAsync();
+            var unitIds = await _context.Units.Where(u => courseIds.Contains(u.CourseId)).Select(u => u.UnitId).ToListAsync();
 
-            await _context.SaveChangesAsync();
+            var quizIds = await _context.Quizzes.Where(q =>
+                (q.RefType == "UNIT" && unitIds.Contains(q.RefId)) ||
+                (q.RefType == "COURSE_JUMP" && courseIds.Contains(q.RefId)) ||
+                (q.RefType == "LEVEL_JUMP" && ids.Contains(q.RefId)))
+                .Select(q => q.QuizId).ToListAsync();
+
+            var partIds = await _context.Parts.Where(p => quizIds.Contains(p.QuizId)).Select(p => p.PartId).ToListAsync();
+            var passageIds = await _context.Passages.Where(p => partIds.Contains(p.PartId)).Select(p => p.PassageId).ToListAsync();
+
+            var questionIds = await _context.Questions.Where(q =>
+                quizIds.Contains(q.QuizId) ||
+                (q.PartId != null && partIds.Contains(q.PartId.Value)) ||
+                (q.PassageId != null && passageIds.Contains(q.PassageId.Value)))
+                .Select(q => q.QuestionId).ToListAsync();
+
+            var answerIds = await _context.Answers.Where(a => questionIds.Contains(a.QuestionId)).Select(a => a.AnswerId).ToListAsync();
+
+            await _context.UserAnswer.Where(x => answerIds.Contains(x.AnswerId)).ExecuteDeleteAsync();
+            await _context.UserQuiz.Where(x => quizIds.Contains(x.QuizId)).ExecuteDeleteAsync();
+            await _context.Answers.Where(x => answerIds.Contains(x.AnswerId)).ExecuteDeleteAsync();
+            await _context.Questions.Where(x => questionIds.Contains(x.QuestionId)).ExecuteDeleteAsync();
+            await _context.Passages.Where(x => passageIds.Contains(x.PassageId)).ExecuteDeleteAsync();
+            await _context.Parts.Where(x => partIds.Contains(x.PartId)).ExecuteDeleteAsync();
+            await _context.Quizzes.Where(x => quizIds.Contains(x.QuizId)).ExecuteDeleteAsync();
+            await _context.Units.Where(x => unitIds.Contains(x.UnitId)).ExecuteDeleteAsync();
+            await _context.Courses.Where(x => courseIds.Contains(x.CourseId)).ExecuteDeleteAsync();
+            await _context.Levels.Where(x => ids.Contains(x.LevelId)).ExecuteDeleteAsync();
         }
-        /*
-         * lưu thay đổi vào database
-         * 26/03/2026
-         * thuphuong21072004
+
+        /* 
+         * Lưu các thay đổi của cấp độ
+         * O(1) 
+         * thuphuong21072004 
          */
         public async Task SaveLevel()
         {
             await _context.SaveChangesAsync();
         }
-        /*
-         * lấy order index lớn nhất của cấp độ
-         * 
-         * thuphuong21072004
+
+        /* 
+         * Lấy chỉ số sắp xếp lớn nhất hiện tại
+         * O(1) 
+         * thuphuong21072004 
          */
         public async Task<int> GetMaxOrderIndex()
         {
-            var max = await _context.Levels
-                .Select(x => (int?)x.OrderIndex)
-                .MaxAsync();
-
-            return max ?? 0;
+            return await _context.Levels.MaxAsync(x => (int?)x.OrderIndex) ?? 0;
         }
-        /*
-         * 
-         * 
-         * thuphuong21072004
+
+        /* 
+         * Lấy Queryable để thực hiện các truy vấn linh hoạt
+         * O(1) 
+         * thuphuong21072004 
          */
         public IQueryable<Level> GetQueryable()
         {
-          
             return _context.Levels.AsNoTracking();
+        }
+
+        /* 
+         * Tìm kiếm cấp độ theo tên
+         * O(1) 
+         * thuphuong21072004 
+         */
+        public async Task<Level?> GetByName(string name)
+        {
+            return await _context.Levels.AsNoTracking().FirstOrDefaultAsync(x => x.LevelName == name);
+        }
+
+        /* 
+         * Lấy thông tin cấp độ theo ID
+         * O(1) 
+         * thuphuong21072004 
+         */
+        public async Task<Level?> GetLevelById(int id)
+        {
+            return await _context.Levels.AsNoTracking().FirstOrDefaultAsync(x => x.LevelId == id);
+        }
+
+        /* 
+         * Lấy cấp độ tiếp theo dựa trên chỉ số sắp xếp
+         * O(1) 
+         * thuphuong21072004 
+         */
+        public async Task<Level?> GetNextLevel(int levelId)
+        {
+            var currentOrder = await _context.Levels
+                .Where(x => x.LevelId == levelId)
+                .Select(x => x.OrderIndex)
+                .FirstOrDefaultAsync();
+
+            return await _context.Levels
+                .AsNoTracking()
+                .Where(x => x.OrderIndex > currentOrder && x.IsActive)
+                .OrderBy(x => x.OrderIndex)
+                .FirstOrDefaultAsync();
         }
     }
 }

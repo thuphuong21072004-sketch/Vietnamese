@@ -3,6 +3,8 @@
     public class SubmitQuizDTO
     {
         public int QuizId { get; set; }
-        public List<int> AnswerIds { get; set; }
+
+        public List<int> AnswerIds
+        { get; set; } = new();
     }
 }

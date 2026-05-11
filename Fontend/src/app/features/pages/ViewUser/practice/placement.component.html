@@ -1,0 +1,77 @@
+<div class="placement-page">
+
+    <div class="page-header">
+
+        <h1>
+            Placement Tests
+        </h1>
+
+        <p>
+            Choose your placement test
+        </p>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading...
+
+    </div>
+
+    <div *ngIf="!loading" class="placement-grid">
+
+        <div class="placement-card random-card" (click)="openRandom()">
+
+            <div class="random-icon">
+
+                🎲
+
+            </div>
+
+            <h2>
+                Random Test
+            </h2>
+
+            <p>
+                Start random placement
+            </p>
+
+        </div>
+
+        <div *ngFor="
+                let p of placements;
+                let i = index
+            " class="placement-card">
+
+            <div class="placement-number">
+
+                {{ i + 1 }}
+
+            </div>
+
+            <h2>
+
+                {{ p.name }}
+
+            </h2>
+
+            <p>
+
+                {{
+                p.description ||
+                'Placement Test'
+                }}
+
+            </p>
+
+            <button class="start-btn" (click)="openPlacement(p)">
+
+                Start Test
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

@@ -4,8 +4,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LevelDTO } from '../models/level.model';
 import { CourseDTO } from '../models/course.model';
 import { UnitDTO } from '../models/unit.model';
-import { QuizDTO } from '../models/quiz.model';
-import { SubmitQuizDTO } from '../models/submit-quiz.model';
 
 @Injectable({
   providedIn: 'root',
@@ -85,22 +83,6 @@ export class LearningService {
     return this.http.post<any>(`${this.apiUrl}/uploadMedia`, formData);
   }
 
-  // QUIZ
-  saveQuiz(dto: QuizDTO): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/quiz/full`, dto, {
-      responseType: 'text' as 'json',
-    });
-  }
-  deleteQuiz(quizId: number): Observable<string> {
-    return this.http.delete<string>(
-      `${this.apiUrl}/deleteQuiz?id=${quizId}`,
-      this.getOptions(true),
-    );
-  }
-  getQuiz(unitId: number): Observable<QuizDTO> {
-    return this.http.get<QuizDTO>(`${this.apiUrl}/allQuiz?UnitId=${unitId}`);
-  }
-
   // USER
   getLearningPath(): Observable<LevelDTO[]> {
     return this.http.get<LevelDTO[]>(`${this.apiUrl}/learning-path`);
@@ -111,17 +93,6 @@ export class LearningService {
       this.getOptions(),
     );
   }
-  submitQuiz(dto: SubmitQuizDTO): Observable<string> {
-    return this.http.post<string>(
-      `${this.apiUrl}/submitQuiz`,
-      dto,
-      this.getOptions(true),
-    );
-  }
-  getMyQuizResult(quizId: number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/my-quiz-result?quizId=${quizId}`,
-      this.getOptions(),
-    );
-  }
+  
+  
 }

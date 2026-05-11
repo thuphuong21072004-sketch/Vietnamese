@@ -60,4 +60,10 @@
 
     <button class="save-btn" (click)="saveCourses()">Save All</button>
 
+    <button class="btn-primary" [disabled]="levelId === 0" (click)="showLevelQuiz = !showLevelQuiz">
+        {{ showLevelQuiz ? 'Hide Level Quiz' : 'Manage Level Quiz' }}
+    </button>
+    
+    <app-quiz *ngIf="showLevelQuiz && levelId > 0" [refId]="levelId" [refType]="'LEVEL_JUMP'">
+    </app-quiz>
 </div>

@@ -24,7 +24,7 @@
     
     <ul *ngIf="role == null">
     <li><button class="menu-btn" routerLink="/home">Home</button></li>
-    <li><button class="menu-btn" routerLink="/search">Vocabulary Search</button></li>
+    <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
 
     <li>
         <button class="menu-btn" (click)="toggleMenu()">Account Settings</button>
@@ -40,7 +40,7 @@
         <li><button class="menu-btn" routerLink="/home">Home</button></li>
         <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
         <li><button class="menu-btn" routerLink="/user/units">Courses</button></li>
-        <li><button class="menu-btn" routerLink="/practice">Practice Tests</button></li>
+        <li><button class="menu-btn" routerLink="/user/tests">Practice Tests</button></li>
         <li><button class="menu-btn" routerLink="/pronunciation">Pronunciation Practice</button></li>
         <li><button class="menu-btn" routerLink="/classes">Online Classes</button></li>
         <li><button class="menu-btn" routerLink="/saved">Saved Lessons</button></li>
@@ -72,7 +72,7 @@
         <li><button class="menu-btn" routerLink="admin/users">Manage Users</button></li>
         <li><button class="menu-btn" routerLink="admin/videos">Manage Videos</button></li>
         <li><button class="menu-btn" routerLink="admin/levels">Manage Lessons</button></li>
-        <li><button class="menu-btn" routerLink="/ManageTests">Manage Tests</button></li>
+        <li><button class="menu-btn" routerLink="admin/placements">Manage Tests</button></li>
         <li>
         
             <button class="menu-btn" (click)="toggleMenu()">
@@ -95,7 +95,6 @@
     </ul>
 </aside>
 
-<!-- MAIN CONTENT -->
 
 <div class="content">
     <router-outlet></router-outlet>

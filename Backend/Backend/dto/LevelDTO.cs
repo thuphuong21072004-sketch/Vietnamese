@@ -9,7 +9,7 @@
         public bool IsActive { get; set; }
         public bool? Status { get; set; }
         public bool IsDelete { get; set; }
-        public List<CourseDTO> Courses { get; set; }
+        public List<CourseDTO> Courses { get; set; } = new();
 
 
     }

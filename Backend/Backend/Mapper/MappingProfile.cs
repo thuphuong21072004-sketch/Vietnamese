@@ -9,25 +9,40 @@ namespace Backend.Mapper
         public MappingProfile()
         {
             CreateMap<Video, VideoDTO>().ReverseMap();
+
             CreateMap<Transcript, TranscriptDTO>()
-                .ForMember(dest => dest.YoutubeId, opt => opt.MapFrom(src => src.Video.YoutubeId))
+                .ForMember(dest => dest.YoutubeId,
+                    opt => opt.MapFrom(src =>
+                        src.Video != null ? src.Video.YoutubeId : null))
                 .ReverseMap();
 
             CreateMap<Level, LevelDTO>().ReverseMap();
+
             CreateMap<Course, CourseDTO>().ReverseMap();
+
             CreateMap<Unit, UnitDTO>().ReverseMap();
 
             CreateMap<Quiz, QuizDTO>()
-                .ForMember(dest => dest.Questions, opt => opt.MapFrom(src => src.Questions))
-                .ReverseMap(); 
-
-            CreateMap<Question, QuestionDTO>()
-                .ForMember(dest => dest.Answers, opt => opt.MapFrom(src => src.Answers))
                 .ReverseMap();
 
-            
-            CreateMap<Answer, AnswerDTO>().ReverseMap();
+            CreateMap<Part, PartDTO>()
+                .ReverseMap();
 
+            CreateMap<Passage, PassageDTO>()
+                .ReverseMap();
+
+            CreateMap<Question, QuestionDTO>()
+                .ReverseMap();
+
+            CreateMap<Answer, AnswerDTO>()
+                .ReverseMap();
+            CreateMap<UserQuiz, UserQuizDTO>()
+    .ReverseMap();
+
+            CreateMap<UserAnswer, UserAnswerDTO>()
+                .ReverseMap();
+            CreateMap<PlacementTest, PlacementTestDTO>()
+    .ReverseMap();
         }
     }
 }

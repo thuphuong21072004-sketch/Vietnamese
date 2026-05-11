@@ -11,7 +11,7 @@
         public string? CreatedBy { get; set; }
         public bool? Status { get; set; }
         public bool IsDelete { get; set; }
-        public List<UnitDTO> Units { get; set; }
+        public List<UnitDTO> Units { get; set; } = new();
 
 
     }

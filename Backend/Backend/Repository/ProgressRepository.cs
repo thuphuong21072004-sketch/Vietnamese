@@ -5,22 +5,22 @@ namespace Backend.Repository
     public interface ProgressRepository
     {
 
-        Task<UserLevel?> GetUserLevel(int userId, int levelId);
-        Task<UserCourse?> GetUserCourseByCourseId(int userId, int courseId);
-        Task<List<UserProgress>> GetUserUnits(int userId, int courseId);
-        Task<UserLevel?> GetCurrentLevel(int userId);
-        Task<UserCourse?> GetCurrentCourse(int userId);
-        Task AddUserLevel(UserLevel userLevel);
-        Task AddUserCourse(UserCourse userCourse);
+        Task<UserProgress?> GetUserLevel(int userId, int levelId, string refType);
+        Task<UserProgress?> GetUserCourseByCourseId(int userId, int courseId, string refType);
+        Task<List<UserProgress>> GetUserUnits(int userId, int courseId, string refType);
+        Task<UserProgress?> GetCurrentProgress(int userId, string refType);
+        Task AddUserLevel(int userId, int levelId, string refType);
+        Task AddUserCourse(int userId, int courseId, string refType);
         Task AddUserProgress(UserProgress userProgress);
         Task Save();
 
-        Task<List<UserCourse>> GetUserCourses(int userId, int levelId);
-        Task<UserProgress?> GetUserUnitByUnitId(int userId, int UnitId);
-
-        Task<bool> HasUserLevel(int userId);
-        Task<bool> HasUserCourse(int userId);
-        Task<bool> HasUserUnit(int userId);
+        Task<List<UserProgress>> GetUserCourses(int userId, int levelId, string refType);
+        Task<UserProgress?> GetUserUnitByUnitId(int userId, int unitId, string refType);
+        Task<List<UserProgress>> GetUserProgress(int userId, int courseId, string refType);
+        Task<bool> HasUserProgress(int userId, string refType);
+        Task<UserProgress?> GetUserProgress(int userId, string refType, int refId);
+        Task<List<UserProgress>> GetUserLevels(int userId, string refType );
+        Task UpdateUserProgress(UserProgress progress);
 
     }
 }

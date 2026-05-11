@@ -45,8 +45,71 @@
             <button (click)="nextVideo()">⏭</button>
         </div>
 
-        <div class="subtitle-box" *ngIf="highlightedSubtitle">
-            <p [innerHTML]="highlightedSubtitle"></p>
+        <div class="dictionary-container" *ngIf="dictionaryData">
+        
+            <div class="dict-header">
+        
+                <h2>
+                    {{ dictionaryData.word }}
+                </h2>
+        
+                <div class="dict-sub">
+                    Vietnamese → English
+                </div>
+        
+            </div>
+        
+            <div *ngFor="
+              let group of dictionaryData.meanings
+            " class="meaning-group">
+        
+                <div class="word-type">
+        
+                    {{ group[0] }}
+        
+                </div>
+        
+                <div *ngFor="let sense of group[2]" class="sense-box">
+        
+                    <div class="english-word">
+        
+                        {{ sense[0] }}
+        
+                    </div>
+        
+                    <div class="similar-word">
+        
+                        <span>Similar:</span>
+        
+                        {{ sense[1].join(', ') }}
+        
+                    </div>
+        
+                </div>
+        
+            </div>
+        
+            <div *ngIf="
+              dictionaryData.examples &&
+              dictionaryData.examples.length > 0
+            " class="example-box">
+        
+                <div class="example-title">
+        
+                    Example Sentences
+        
+                </div>
+        
+                <div *ngFor="
+                let ex of dictionaryData.examples
+              " class="example-item">
+        
+                    <div [innerHTML]="ex[0]"></div>
+        
+                </div>
+        
+            </div>
+        
         </div>
 
     </div>

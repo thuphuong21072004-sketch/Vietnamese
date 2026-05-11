@@ -1,0 +1,189 @@
+# =========================
+# OS files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =========================
+# Logs and diagnostics
+# =========================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+# Environment and secrets
+# =========================
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+
+# ASP.NET Core local settings can contain secrets.
+**/appsettings.Local.json
+**/appsettings.*.local.json
+**/appsettings.Production.json
+**/appsettings.Staging.json
+
+# =========================
+# Node.js / Angular frontend
+# =========================
+node_modules/
+**/node_modules/
+npm-cache/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+dist/
+**/dist/
+build/
+**/build/
+out-tsc/
+**/out-tsc/
+.angular/cache/
+**/.angular/cache/
+.cache/
+**/.cache/
+.vite/
+**/.vite/
+coverage/
+**/coverage/
+
+# Keep package manifests and lockfiles tracked.
+!package.json
+!package-lock.json
+!yarn.lock
+!pnpm-lock.yaml
+
+# =========================
+# .NET / ASP.NET Core backend
+# =========================
+bin/
+obj/
+**/bin/
+**/obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+TestResults/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupkg
+*.symbols.nupkg
+*.dll
+*.exe
+*.pdb
+*.cache
+*.vsidx
+*.dtbcache.v2
+*.futdcache.v2
+
+# Keep real project files tracked.
+!**/*.csproj
+!**/*.sln
+
+# Entity Framework migrations are source code and should stay tracked.
+!**/Migrations/**/*.cs
+
+# =========================
+# Visual Studio / VS Code / IDEs
+# =========================
+.vs/
+**/.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# Python scripts and virtual environments
+# =========================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+env/
+.env/
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+htmlcov/
+
+# =========================
+# Databases, dumps, and runtime data
+# =========================
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+*.bak
+*.dump
+*.tmp
+*.temp
+tmp/
+temp/
+
+# =========================
+# Uploaded/generated media
+# =========================
+# These folders look runtime-generated in the ASP.NET app. Commit curated
+# seed assets elsewhere if they are required by the application.
+Backend/Backend/wwwroot/audios/
+Backend/Backend/wwwroot/videos/
+Backend/Backend/wwwroot/uploads/
+
+# =========================
+# Deployment artifacts
+# =========================
+publish/
+PublishProfiles/
+*.Publish.xml
+*.pubxml.user

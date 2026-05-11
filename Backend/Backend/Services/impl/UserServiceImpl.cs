@@ -61,14 +61,16 @@ namespace Backend.Services.impl
          * 08/03/2026
          * thuphuong21072004
          */
-        public async Task<object> Login(LoginDTO request)
+        public async Task<object?> Login(LoginDTO request)
         {
-            
             var userData = await _userrepository.GetUserWithRole(request.Email);
 
             if (userData == null) return null;
 
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, (string)userData.Password);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(
+                request.Password,
+                (string)userData.PasswordHash
+            );
 
             if (!isPasswordValid) return null;
 
@@ -79,7 +81,10 @@ namespace Backend.Services.impl
                 Email = userData.Email
             };
 
-            return new { token = _jwtService.GenerateToken(userDto, (string)userData.RoleName) };
+            return new
+            {
+                token = _jwtService.GenerateToken(userDto, (string)userData.RoleName)
+            };
         }
         /*
          * ăng ký tài khoản mới và tạo token cho user
@@ -115,10 +120,10 @@ namespace Backend.Services.impl
             var user = await _userrepository.GetUserById(userId);
             if (user == null) throw new Exception("User not found");
 
-            if (!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password))
+            if (!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.PasswordHash))
                 throw new Exception("The old password is incorrect.");
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
 
             await _userrepository.Update(user);
             await _userrepository.Save();

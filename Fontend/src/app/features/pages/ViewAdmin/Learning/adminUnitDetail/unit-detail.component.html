@@ -1,146 +1,30 @@
 <div class="admin-container">
-
     <div class="admin-card">
         <div class="card-header">
             <h2>{{ unitId > 0 ? 'Edit Unit' : 'Add New Unit' }}</h2>
         </div>
-
         <div class="card-body">
-
             <div class="upload-zone" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()"
                 (drop)="onDrop($event)">
-
                 <div class="upload-content">
-                    
-
-                <input type="file" (change)="onFileSelect($event)" accept="video/*">
+                    <input type="file" (change)="onFileSelect($event)" accept="video/*">
+                </div>
             </div>
-            </div>
-
             <div class="video-preview" *ngIf="videoFullUrl">
-                <video [src]="videoFullUrl" controls></video>
+                <video [src]="videoFullUrl" controls (loadedmetadata)="onVideoLoaded($event)"></video>
             </div>
-
             <div class="form-grid">
                 <input [(ngModel)]="unit.unitName" placeholder="Unit title">
                 <textarea [(ngModel)]="unit.description" placeholder="Description"></textarea>
                 <textarea [(ngModel)]="unit.objective" placeholder="Objective"></textarea>
-                <input [value]="tempVideoUrl || unit.videoUrl" readonly>
             </div>
-
-            <button class="btn-primary" (click)="save()">Save</button>
-
+            <button class="btn-primary" (click)="save()">Save Unit</button>
         </div>
     </div>
-
-    <div class="admin-card">
-
-        <div class="card-header">
-            <h3>Quiz</h3>
-            <button class="btn-primary" *ngIf="!quiz" (click)="addQuiz()">Create Quiz</button>
-        </div>
-
-        <div *ngIf="quiz" class="card-body">
-
-            <input [(ngModel)]="quiz.quizName" placeholder="Quiz name">
-            <input type="number" [(ngModel)]="quiz.passScore">
-
-            <div *ngFor="let q of quiz.questions; let i = index">
-
-                <div *ngIf="!q.isDelete" class="question-box">
-
-                    <div class="question-top">
-                        <span>Q{{ i + 1 }}</span>
-
-                        <input [(ngModel)]="q.questionText" placeholder="Question">
-
-                        <label class="icon-btn">
-                            🖼️
-                            <input type="file" (change)="handleMediaUpload($event, q)" accept="image/*" hidden>
-                        </label>
-
-                        <label class="icon-btn">
-                            🎧
-                            <input type="file" (change)="handleMediaUpload($event, q)" accept="audio/*" hidden>
-                        </label>
-
-                        <button (click)="deleteQuestion(q)">X</button>
-                    </div>
-
-                    <div class="question-media">
-                    
-                        <div *ngIf="q.questionText && !q.imageUrl && !q.audioUrl">
-                            {{ q.questionText }}
-                        </div>
-                    
-                        <div *ngIf="q.imageUrl" class="media-box">
-                            <img [src]="'http://localhost:5108/images/' + q.imageUrl">
-                            <span class="remove-media" (click)="removeMedia(q)">×</span>
-                        </div>
-                    
-                        <div *ngIf="q.audioUrl" class="media-box">
-                            <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl"></audio>
-                            <span class="remove-media" (click)="removeMedia(q)">×</span>
-                        </div>
-                    
-                    </div>
-
-                    <div class="answers-grid">
-
-                        <ng-container *ngFor="let a of q.answers">
-                        
-                            <div class="answer-row" *ngIf="!a.isDelete">
-                        
-                                <input type="radio" [name]="'q' + i" [checked]="a.isCorrect" (change)="selectCorrectAnswer(q, a)" />
-                        
-                                <div class="answer-content">
-                        
-                                    <input *ngIf="!a.imageUrl && !a.audioUrl" [(ngModel)]="a.answerText" placeholder="Answer">
-                        
-                                    <div *ngIf="a.imageUrl" class="media-box">
-                                        <img [src]="'http://localhost:5108/images/' + a.imageUrl">
-                                        <span class="remove-media" (click)="removeMedia(a)">×</span>
-                                    </div>
-                        
-                                    <div *ngIf="a.audioUrl" class="media-box">
-                                        <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl"></audio>
-                                        <span class="remove-media" (click)="removeMedia(a)">×</span>
-                                    </div>
-                        
-                                </div>
-                        
-                                <div class="icons">
-                                    <label class="icon-btn">
-                                        🖼️
-                                        <input type="file" (change)="handleMediaUpload($event, a)" accept="image/*" hidden>
-                                    </label>
-                        
-                                    <label class="icon-btn">
-                                        🎧
-                                        <input type="file" (change)="handleMediaUpload($event, a)" accept="audio/*" hidden>
-                                    </label>
-                                </div>
-                        
-                                <button class="delete-btn" (click)="deleteAnswer(a)">X</button>
-                        
-                            </div>
-                        
-                        </ng-container>
-
-                    </div>
-
-                    <button class="btn-primary" (click)="addAnswer(q)">Add Answer</button>
-
-                </div>
-
-            </div>
-
-            <button class="btn-primary" (click)="addQuestion()">Add Question</button>
-            <button class="btn-primary" (click)="saveQuiz()">Save Quiz</button>
-            <button class="delete-btn" (click)="deleteQuiz()">
-                Delete Quiz
-            </button>
-        </div>
-    </div>
-
+    <button *ngIf="unitId > 0" class="btn-primary" (click)="showQuiz = !showQuiz">
+        {{ showQuiz ? 'Hide Quiz' : 'Manage Quiz' }}
+    </button>
+    
+    <app-quiz *ngIf="unitId > 0 && showQuiz" [refId]="unitId" [refType]="'UNIT'">
+    </app-quiz>
 </div>

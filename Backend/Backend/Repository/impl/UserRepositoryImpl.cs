@@ -2,8 +2,6 @@
 using Backend.dto;
 using Backend.Models;
 using Backend.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repository.impl
@@ -16,28 +14,10 @@ namespace Backend.Repository.impl
         {
             _context = context;
         }
-        /*
-         * đăng nhập người dùng
-         * thuphuong21072004
-         */
-        public async Task<dynamic?> Login(string email, string password)
-        {
-            var query = from user in _context.Users
-                        join role in _context.Roles on user.RoleId equals role.RoleId
-                        where user.Email == email && user.Password == password
-                        select new
-                        {
-                           
-                            UserId = user.UserId,
-                            Name = user.Name,
-                            Email = user.Email,
-                            RoleName = role.RoleName
-                        };
 
-            return await query.FirstOrDefaultAsync();
-        }
         /*
-         * kiểm tra email đã tồn tại
+         * Kiểm tra email đã tồn tại
+         * O(n)
          * thuphuong21072004
          */
         public async Task<bool> IsEmailExist(string email)
@@ -45,39 +25,41 @@ namespace Backend.Repository.impl
             return await _context.Users
                 .AnyAsync(u => u.Email == email);
         }
+
         /*
-         * đăng ký người dùng mới
-         * 
+         * Đăng ký người dùng mới
+         * O(n)
          * thuphuong21072004
          */
-        
         public async Task<User> Register(string name, string email, string password)
         {
-            
             var role = await _context.Roles
                 .FirstOrDefaultAsync(r => r.RoleName == "User");
 
             if (role == null)
             {
-                throw new Exception("Role 'User' không tồn tại trong Database. Hãy kiểm tra lại bảng Roles!");
+                throw new Exception("Role 'User' không tồn tại trong Database");
             }
 
             var user = new User
             {
                 Name = name,
                 Email = email,
-                Password = password,
-                RoleId = role.RoleId, 
+                PasswordHash = password,
+                RoleId = role.RoleId,
                 Status = 1
             };
 
             _context.Users.Add(user);
+
             await _context.SaveChangesAsync();
 
             return user;
         }
+
         /*
-         * lấy thông tin người dùng theo id
+         * Lấy thông tin người dùng theo id
+         * O(n)
          * thuphuong21072004
          */
         public async Task<User?> GetUserById(int userId)
@@ -85,57 +67,84 @@ namespace Backend.Repository.impl
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
+
         /*
-         * cập nhật thông tin người dùng
+         * Cập nhật thông tin người dùng
+         * O(1)
          * thuphuong21072004
          */
         public async Task Update(User user)
         {
             _context.Users.Update(user);
+
+            await Task.CompletedTask;
         }
+
         /*
-         * lưu thay đổi vào database
+         * Lưu thay đổi vào database
+         * O(1)
          * thuphuong21072004
          */
         public async Task Save()
         {
             await _context.SaveChangesAsync();
         }
+
         /*
-         * đếm số lượng người dùng theo điều kiện tìm kiếm
+         * Đếm số lượng người dùng
+         * O(n)
          * thuphuong21072004
          */
         public async Task<int> CountUsers(string? email, int? status, int? roleId)
         {
-            var query = _context.Users.AsQueryable();
+            IQueryable<User> query = _context.Users;
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrWhiteSpace(email))
+            {
                 query = query.Where(u => u.Email.Contains(email));
+            }
 
             if (status.HasValue)
+            {
                 query = query.Where(u => u.Status == status.Value);
+            }
 
             if (roleId.HasValue)
+            {
                 query = query.Where(u => u.RoleId == roleId.Value);
+            }
 
             return await query.CountAsync();
         }
+
         /*
-         * lấy danh sách người dùng theo điều kiện tìm kiếm và phân trang
+         * Lấy danh sách người dùng phân trang
+         * O(n)
          * thuphuong21072004
          */
-        public async Task<List<UserDTO>> GetUsers(string? email, int? status, int? roleId, int page, int pageSize)
+        public async Task<List<UserDTO>> GetUsers(
+            string? email,
+            int? status,
+            int? roleId,
+            int page,
+            int pageSize)
         {
-            var query = _context.Users.AsQueryable();
+            IQueryable<User> query = _context.Users;
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrWhiteSpace(email))
+            {
                 query = query.Where(u => u.Email.Contains(email));
+            }
 
             if (status.HasValue)
+            {
                 query = query.Where(u => u.Status == status.Value);
+            }
 
             if (roleId.HasValue)
+            {
                 query = query.Where(u => u.RoleId == roleId.Value);
+            }
 
             return await query
                 .OrderByDescending(u => u.UserId)
@@ -147,39 +156,32 @@ namespace Backend.Repository.impl
                     Name = u.Name,
                     Email = u.Email,
                     Status = u.Status,
-                    RoleId = u.RoleId 
+                    RoleId = u.RoleId
                 })
                 .ToListAsync();
         }
+
         /*
-         * lấy user theo email
-         * 
-         * thuphuong21072004
-         */
-        public async Task<User?> GetUserByEmail(string email)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        }
-        /*
-         * lấy quyền theo email
-         * 
+         * Lấy thông tin người dùng kèm quyền
+         * O(n)
          * thuphuong21072004
          */
         public async Task<dynamic?> GetUserWithRole(string email)
         {
-            var query = from user in _context.Users
-                        join role in _context.Roles on user.RoleId equals role.RoleId
-                        where user.Email == email 
-                        select new
-                        {
-                            user.UserId,
-                            user.Name,
-                            user.Email,
-                            user.Password, 
-                            RoleName = role.RoleName
-                        };
-
-            return await query.FirstOrDefaultAsync();
+            return await (
+                from user in _context.Users
+                join role in _context.Roles
+                    on user.RoleId equals role.RoleId
+                where user.Email == email
+                select new
+                {
+                    UserId = user.UserId,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PasswordHash = user.PasswordHash,
+                    RoleName = role.RoleName
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

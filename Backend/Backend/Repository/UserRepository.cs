@@ -5,7 +5,6 @@ namespace Backend.Repository
 {
     public interface UserRepository
     {
-        Task<dynamic?> Login(string email, string password);
         Task<bool> IsEmailExist(string email);
         Task<User> Register(string name, string email, string password);
 
@@ -15,7 +14,6 @@ namespace Backend.Repository
 
         Task<List<UserDTO>> GetUsers(string? email, int? status, int? roleId, int page, int pageSize);
         Task<int> CountUsers(string? email, int? status, int? roleId);
-        Task<User?> GetUserByEmail(string email);
         Task<dynamic?> GetUserWithRole(string email);
     }
 }

@@ -21,14 +21,5 @@ namespace Backend.Services
         Task<List<LevelDTO>> GetMyProgress();
         Task<List<LevelDTO>> GetAllLearningPath();
 
-        Task<QuizDTO> GetQuizByUnit(int UnitId);
-        Task UnlockNextLevel(int UnitId);
-        Task UnlockNextCourse(int UnitId);
-        Task UnlockNextUnit(int UnitId);
-        Task SubmitQuiz(int quizId, List<int> answerIds);
-        Task<UserQuiz?> GetMyQuizResult(int quizId);
-        Task SaveQuiz(QuizDTO dto);
-        Task DeleteQuiz(int quizId);
-
     }
 }

@@ -6,13 +6,11 @@ namespace Backend.Models
     public class Transcript
     {
         public int TranscriptId { get; set; }
-
         public int VideoId { get; set; }
 
-        public string Sentence { get; set; }
-
+        public string Sentence { get; set; } = string.Empty;
         public double StartTime { get; set; }
-        [ForeignKey("VideoId")]
-        public virtual Video Video { get; set; }
+
+        public Video? Video { get; set; }
     }
 }

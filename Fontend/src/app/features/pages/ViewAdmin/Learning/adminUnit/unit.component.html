@@ -46,4 +46,9 @@
         Delete Selected
     </button>
 
+    <button class="btn-primary" [disabled]="courseId === 0" (click)="showCourseQuiz = !showCourseQuiz">
+        {{ showCourseQuiz ? 'Hide Course Quiz' : 'Manage Course Quiz' }}
+    </button>
+    <app-quiz *ngIf="showCourseQuiz && courseId > 0" [refId]="courseId" [refType]="'COURSE_JUMP'">
+    </app-quiz>
 </div>

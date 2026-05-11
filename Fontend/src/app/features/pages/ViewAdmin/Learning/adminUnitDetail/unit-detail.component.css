@@ -12,8 +12,7 @@
     background: #fff;
 }
 
-.card-header h2,
-.card-header h3 {
+.card-header h2 {
     margin-bottom: 10px;
 }
 
@@ -21,183 +20,31 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 15px;
 }
 
 input, textarea {
-    padding: 6px;
+    padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
     width: 100%;
 }
 
-button {
-    padding: 6px 10px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: #2563eb;
-    color: white;
-    border-radius: 6px;
-}
-
 .upload-zone {
-    border: 2px dashed var(--primary);
+    border: 2px dashed #7b3fe4;
     padding: 30px 20px;
     text-align: center;
     border-radius: 12px;
     margin-bottom: 15px;
-    background: var(--primary-light);
-    transition: 0.2s;
+    background: #f5f3ff;
     cursor: pointer;
-    align-items: center;
-}
-
-.upload-zone:hover {
-    background: #ebe5ff;
-    transform: scale(1.01);
-}
-
-.upload-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    color: var(--primary);
-    font-weight: 500;
-    text-align: center;
-}
-
-.upload-content div:first-child {
-    font-size: 32px;
 }
 
 .video-preview video {
     width: 100%;
     max-width: 600px;
     border-radius: 8px;
-    
-    display: flex;
-    justify-content: center;
-}
-
-.question-box {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-top: 15px;
-    border-radius: 8px;
-}
-
-.question-top {
-    display: grid;
-    grid-template-columns: 50px 1fr auto auto auto;
-    gap: 10px;
-    align-items: center;
-}
-
-.question-media img {
-    width: 120px;
-    margin-top: 8px;
-    border-radius: 6px;
-}
-
-.question-media audio {
-    margin-top: 5px;
-    height: 30px;
-}
-
-.answers-grid {
-    margin-top: 10px;
-}
-
-.answer-row {
-    display: grid;
-    grid-template-columns: 30px 1fr auto auto;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    margin-top: 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #fafafa;
-}
-
-.answer-row input[type="radio"] {
-    justify-self: center;
-}
-
-.answer-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.answer-content img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.answer-content audio {
-    height: 30px;
-}
-
-.icons {
-    display: flex;
-    gap: 6px;
-}
-
-.icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
-    background: #f9fafb;
-}
-
-.icon-btn:hover {
-    background: #e5e7eb;
-}
-
-.delete-btn {
-    background: red;
-    color: white;
-    border-radius: 6px;
-    padding: 6px 10px;
-}
-.media-box {
-    position: relative;
-    display: inline-block;
-}
-
-.media-box img {
-    width: 80px;
-    border-radius: 6px;
-}
-
-.media-box audio {
-    height: 30px;
-}
-
-.remove-media {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: red;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    margin-bottom: 15px;
 }
 button {
     padding: 8px 14px;
@@ -205,34 +52,14 @@ button {
     border: none;
     cursor: pointer;
     font-weight: 500;
-    transition: 0.2s;
 }
-.btn-primary,
-button:last-child {
+
+.btn-primary {
     background: linear-gradient(135deg, #7b3fe4, #5a2db5);
     color: white;
-    
 }
 
-.btn-primary:hover,
-button:last-child:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(123,63,228,0.3);
-}
-button:not(.delete-btn):not(.btn-primary) {
-    background: #f5f3ff;
-    color: var(--primary);
-    border: 1px solid #ddd;
-}
-
-button:not(.delete-btn):not(.btn-primary):hover {
-    background: #ede9fe;
-}
 .delete-btn {
     background: #ef4444;
     color: white;
-}
-
-.delete-btn:hover {
-    background: #dc2626;
 }

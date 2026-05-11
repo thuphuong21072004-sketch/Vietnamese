@@ -1,0 +1,921 @@
+<div class="admin-card">
+
+    <div class="card-header">
+
+        <div>
+
+            <h2>
+                Quiz Management
+            </h2>
+
+            <p *ngIf="quiz">
+
+                Total Score:
+                <strong>
+                    {{ totalScore }}
+                </strong>
+
+            </p>
+
+        </div>
+
+        <button *ngIf="!quiz" class="btn-primary" (click)="addQuiz()">
+
+            + Create Quiz
+
+        </button>
+
+    </div>
+
+    <div *ngIf="loading" class="loading-box">
+
+        Loading...
+
+    </div>
+
+    <div *ngIf="quiz" class="card-body">
+
+        <div class="quiz-info">
+
+            <div class="input-group">
+
+                <label>
+                    Quiz Name
+                </label>
+
+                <input [(ngModel)]="quiz.quizName" placeholder="Quiz name..." />
+
+            </div>
+
+            <div class="row">
+
+                <div class="input-group">
+
+                    <label>
+                        Time Limit (minutes)
+                    </label>
+                    
+                    <div class="time-limit-box">
+                    
+                        <label class="checkbox-row">
+                    
+                            <input type="checkbox" [checked]="quiz.timeLimit != null" (change)="
+                                quiz.timeLimit =
+                                $any($event.target).checked
+                                    ? 30
+                                    : null
+                            " />
+                    
+                            Enable timer
+                    
+                        </label>
+                    
+                        <input *ngIf="quiz.timeLimit != null" type="number" min="1" [ngModel]="quiz.timeLimit" (ngModelChange)="
+                            quiz.timeLimit =
+                              $event
+                                ? +$event
+                                : null
+                          " placeholder="Minutes..." />
+                    
+                    </div>
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>
+                        Pass Score
+                    </label>
+
+                    <input type="number" [(ngModel)]="quiz.passScore" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div *ngIf="quiz.questions?.length && quiz.parts?.length === 0">
+
+            <div class="question-card" *ngFor="let q of quiz.questions; let i = index">
+
+                <div *ngIf="!q.isDelete">
+
+                    <div class="question-header question-inline-header">
+
+                        <h4>
+                            Câu {{ i + 1 }}
+                        </h4>
+                        <div class="question-inline-content">
+                        
+                            <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
+                            </textarea>
+                        
+                            <div *ngIf="q.imageUrl" class="media-preview small">
+                        
+                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
+                        
+                                <button class="remove-media" (click)="q.imageUrl = null">
+                                    ×
+                                </button>
+                        
+                            </div>
+                        
+                            <div *ngIf="q.audioUrl" class="media-preview small">
+                        
+                                <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                </audio>
+                        
+                                <button class="remove-media" (click)="q.audioUrl = null">
+                                    ×
+                                </button>
+                        
+                            </div>
+                        
+                        </div>
+
+                        <div class="question-toolbar question-toolbar-full">
+
+                            <div class="media-tools">
+
+                                <label class="upload-btn">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+
+                                        <rect x="3" y="3" width="18" height="18" rx="2">
+                                        </rect>
+
+                                        <circle cx="8.5" cy="8.5" r="1.5">
+                                        </circle>
+
+                                        <path d="M21 15l-5-5L5 21">
+                                        </path>
+
+                                    </svg>
+
+                                    <input hidden type="file" accept="image/*"
+                                        (change)="q.audioUrl = null; handleMediaUpload($event, q)" />
+
+                                </label>
+
+                                <label class="upload-btn">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+
+                                        <path d="M9 18V5l12-2v13">
+                                        </path>
+
+                                        <circle cx="6" cy="18" r="3">
+                                        </circle>
+
+                                        <circle cx="18" cy="16" r="3">
+                                        </circle>
+
+                                    </svg>
+
+                                    <input hidden type="file" accept="audio/*"
+                                        (change)="q.imageUrl = null; handleMediaUpload($event, q)" />
+
+                                </label>
+
+                            </div>
+
+                            <button class="btn-danger" (click)="deleteQuestion(q, quiz.questions)">
+
+                                Delete
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="score-box">
+
+                        <label>
+                            Score
+                        </label>
+
+                        <input type="number" [(ngModel)]="q.score" />
+
+                    </div>
+
+                    <div class="answers-box">
+
+                        <div class="answer-item" *ngFor="let a of q.answers; let ai = index">
+                        
+                            <div *ngIf="!a.isDelete" class="answer-row">
+                        
+                                <input type="radio" [name]="'quiz-answer-' + getQuestionIndex(q)" [checked]="a.isCorrect"
+                                    (change)="selectCorrectAnswer(q, a)" />
+                        
+                                <input *ngIf="!a.imageUrl && !a.audioUrl" class="answer-text-input" [(ngModel)]="a.answerText"
+                                    placeholder="Answer..." />
+                        
+                                <div *ngIf="a.imageUrl" class="media-preview small">
+                                
+                                    <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
+                                
+                                    <button class="remove-media" (click)="a.imageUrl = null">
+                                        ×
+                                    </button>
+                                
+                                </div>
+                                
+                                <div *ngIf="a.audioUrl" class="media-preview small">
+                                
+                                    <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                    </audio>
+                                
+                                    <button class="remove-media" (click)="a.audioUrl = null">
+                                        ×
+                                    </button>
+                                
+                                </div>
+                                
+                                <label class="upload-btn">
+                        
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                        
+                                        <rect x="3" y="3" width="18" height="18" rx="2">
+                                        </rect>
+                        
+                                        <circle cx="8.5" cy="8.5" r="1.5">
+                                        </circle>
+                        
+                                        <path d="M21 15l-5-5L5 21"></path>
+                        
+                                    </svg>
+                        
+                                    <input hidden type="file" accept="image/*" (change)="a.audioUrl = null; handleMediaUpload($event, a)" />
+                        
+                                </label>
+                        
+                                <label class="upload-btn">
+                        
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                        
+                                        <path d="M9 18V5l12-2v13"></path>
+                        
+                                        <circle cx="6" cy="18" r="3">
+                                        </circle>
+                        
+                                        <circle cx="18" cy="16" r="3">
+                                        </circle>
+                        
+                                    </svg>
+                        
+                                    <input hidden type="file" accept="audio/*" 
+                                    (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
+                        
+                                </label>
+                        
+                                <button class="btn-danger" (click)="deleteAnswer(q, ai)">
+                                    Xóa bỏ
+                                </button>
+                        
+                            </div>
+                        
+                        </div>
+
+                        <button class="btn-add-answer" (click)="addAnswer(q)">
+
+                            + Add Answer
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div *ngIf="quiz.parts?.length">
+
+            <div class="parts-wrapper">
+
+                <div class="part-preview-wrapper" *ngFor="let part of quiz.parts"> 
+                    <div class="part-card">
+
+                    <div *ngIf="!part.isDelete">
+
+                        <div class="part-header">
+
+                            <div class="part-title">
+
+                                <input type="number" [(ngModel)]="part.partNumber" />
+
+                                <input [(ngModel)]="part.partName" placeholder="Part name" />
+
+                            </div>
+
+                            <button class="btn-danger" (click)="deletePart(part)">
+
+                                Delete Part
+
+                            </button>
+
+                        </div>
+
+                        <textarea [(ngModel)]="part.instruction" placeholder="Instruction...">
+                        </textarea>
+
+                        <div *ngIf="part.mode === 'question'">
+
+                            <div class="question-card" *ngFor="let q of part.questions; let i = index">
+
+                                <div *ngIf="!q.isDelete">
+
+                                    <div class="question-header question-inline-header">
+
+                                        <h4>
+                                            Câu {{ i + 1 }}
+                                        </h4>
+                                        <div class="question-inline-content">
+                                        
+                                            <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
+                                            </textarea>
+                                        
+                                            <div *ngIf="q.imageUrl" class="media-preview small">
+                                        
+                                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
+                                        
+                                                <button class="remove-media" (click)="q.imageUrl = null">
+                                                    ×
+                                                </button>
+                                        
+                                            </div>
+                                        
+                                            <div *ngIf="q.audioUrl" class="media-preview small">
+                                        
+                                                <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                                </audio>
+                                        
+                                                <button class="remove-media" (click)="q.audioUrl = null">
+                                                    ×
+                                                </button>
+                                        
+                                            </div>
+                                        
+                                        </div>
+
+                                        <div class="question-toolbar question-toolbar-full">
+
+                                            <div class="media-tools">
+
+                                                <label class="upload-btn">
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2">
+
+                                                        <rect x="3" y="3" width="18" height="18" rx="2">
+                                                        </rect>
+
+                                                        <circle cx="8.5" cy="8.5" r="1.5">
+                                                        </circle>
+
+                                                        <path d="M21 15l-5-5L5 21">
+                                                        </path>
+
+                                                    </svg>
+
+                                                    <input hidden type="file" accept="image/*"
+                                                        (change)="q.audioUrl = null; handleMediaUpload($event, q)" />
+
+                                                </label>
+
+                                                <label class="upload-btn">
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2">
+
+                                                        <path d="M9 18V5l12-2v13">
+                                                        </path>
+
+                                                        <circle cx="6" cy="18" r="3">
+                                                        </circle>
+
+                                                        <circle cx="18" cy="16" r="3">
+                                                        </circle>
+
+                                                    </svg>
+
+                                                       
+
+                                                    <input hidden type="file" accept="audio/*"
+                                                        (change)="q.imageUrl = null; handleMediaUpload($event, q)" />
+
+                                                </label>
+
+                                            </div>
+
+                                            <button class="btn-danger" (click)="deleteQuestion(q, part.questions)">
+
+                                                Delete
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="score-box">
+
+                                        <label>
+                                            Score
+                                        </label>
+
+                                        <input type="number" [(ngModel)]="q.score" />
+
+                                    </div>
+
+                                    <div class="answers-box">
+
+                                        <div class="answer-item" *ngFor="let a of q.answers; let ai = index">
+                                        
+                                            <div *ngIf="!a.isDelete" class="answer-row">
+                                        
+                                                <input type="radio" [name]="'quiz-answer-' + getQuestionIndex(q)" [checked]="a.isCorrect"
+                                                    (change)="selectCorrectAnswer(q, a)" />
+                                        
+                                                <input *ngIf="!a.imageUrl && !a.audioUrl" class="answer-text-input" [(ngModel)]="a.answerText"
+                                                    placeholder="Answer..." />
+                                        
+                                                <div *ngIf="a.imageUrl" class="media-preview small">
+                                                
+                                                    <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
+                                                
+                                                    <button class="remove-media" (click)="a.imageUrl = null">
+                                                        ×
+                                                    </button>
+                                                
+                                                </div>
+                                                
+                                                <div *ngIf="a.audioUrl" class="media-preview small">
+                                                
+                                                    <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                                    </audio>
+                                                
+                                                    <button class="remove-media" (click)="a.audioUrl = null">
+                                                        ×
+                                                    </button>
+                                                
+                                                </div>
+                                            
+                                        
+                                                <label class="upload-btn">
+                                        
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2">
+                                        
+                                                        <rect x="3" y="3" width="18" height="18" rx="2">
+                                                        </rect>
+                                        
+                                                        <circle cx="8.5" cy="8.5" r="1.5">
+                                                        </circle>
+                                        
+                                                        <path d="M21 15l-5-5L5 21"></path>
+                                        
+                                                    </svg>
+                                        
+                                                    <input hidden type="file" accept="image/*" (change)="a.audioUrl = null; handleMediaUpload($event, a)" />
+                                        
+                                                </label>
+                                        
+                                                <label class="upload-btn">
+                                        
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2">
+                                        
+                                                        <path d="M9 18V5l12-2v13"></path>
+                                        
+                                                        <circle cx="6" cy="18" r="3">
+                                                        </circle>
+                                        
+                                                        <circle cx="18" cy="16" r="3">
+                                                        </circle>
+                                        
+                                                    </svg>
+                                        
+                                                    <input hidden type="file" accept="audio/*" 
+                                                    (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
+                                        
+                                                </label>
+                                        
+                                                <button class="btn-danger" (click)="deleteAnswer(q, ai)">
+                                                    Xóa bỏ
+                                                </button>
+                                        
+                                            </div>
+                                        
+                                        </div>
+                                        
+                                        <button class="btn-add-answer" (click)="addAnswer(q)">
+
+                                            + Add Answer
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div *ngIf="part.mode === 'passage'">
+
+                            <div class="passage-card" *ngFor="let psg of part.passages">
+
+                                <div *ngIf="!psg.isDelete">
+                                    <div class="passage-content-box">
+                                    
+                                        <textarea *ngIf="!psg.imageUrl && !psg.audioUrl" [(ngModel)]="psg.content"
+                                            placeholder="Nhập đoạn hội thoại, email, đoạn văn...">
+                                        </textarea>
+                                    
+                                        <div *ngIf="psg.imageUrl" class="media-preview passage-preview">
+                                    
+                                            <img class="preview-image" [src]="'http://localhost:5108/images/' + psg.imageUrl" />
+                                    
+                                            <button class="remove-media" (click)="psg.imageUrl = null">
+                                                ×
+                                            </button>
+                                    
+                                        </div>
+                                    
+                                        <div *ngIf="psg.audioUrl" class="media-preview passage-preview">
+                                    
+                                            <audio controls [src]="'http://localhost:5108/audios/' + psg.audioUrl">
+                                            </audio>
+                                    
+                                            <button class="remove-media" (click)="psg.audioUrl = null">
+                                                ×
+                                            </button>
+                                    
+                                        </div>
+                                    
+                                    </div>
+
+                                    <div class="question-toolbar passage-toolbar">
+                                    
+                                        <div class="media-tools">
+                                    
+                                            <label class="upload-btn">
+                                    
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                    
+                                                    <rect x="3" y="3" width="18" height="18" rx="2">
+                                                    </rect>
+                                    
+                                                    <circle cx="8.5" cy="8.5" r="1.5">
+                                                    </circle>
+                                    
+                                                    <path d="M21 15l-5-5L5 21"></path>
+                                    
+                                                </svg>
+                                    
+                                                <input hidden type="file" accept="image/*"
+                                                 (change)="psg.audioUrl = null; psg.content = ''; handleMediaUpload($event, psg)" />
+                                    
+                                            </label>
+                                    
+                                            <label class="upload-btn">
+                                    
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                    
+                                                    <path d="M9 18V5l12-2v13"></path>
+                                    
+                                                    <circle cx="6" cy="18" r="3">
+                                                    </circle>
+                                    
+                                                    <circle cx="18" cy="16" r="3">
+                                                    </circle>
+                                    
+                                                </svg>
+                                    
+                                                <input hidden type="file" accept="audio/*" 
+                                                (change)="psg.imageUrl = null; psg.content = ''; handleMediaUpload($event, psg)" />
+                                    
+                                            </label>
+                                    
+                                        </div>
+                                    
+                                        <button class="btn-danger" (click)="deletePassage(psg, part)">
+                                            Delete
+                                        </button>
+                                    
+                                    </div>
+
+                                    <div class="question-card" *ngFor="let q of psg.questions; let i = index">
+
+                                        <div *ngIf="!q.isDelete">
+
+                                            <div class="question-header question-inline-header">
+
+                                                <h4>
+                                                    Câu {{ i + 1 }}
+                                                </h4>
+                                                <div class="question-inline-content">
+                                                
+                                                    <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
+                                                    </textarea>
+                                                
+                                                    <div *ngIf="q.imageUrl" class="media-preview small">
+                                                
+                                                        <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
+                                                
+                                                        <button class="remove-media" (click)="q.imageUrl = null">
+                                                            ×
+                                                        </button>
+                                                
+                                                    </div>
+                                                
+                                                    <div *ngIf="q.audioUrl" class="media-preview small">
+                                                
+                                                        <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                                        </audio>
+                                                
+                                                        <button class="remove-media" (click)="q.audioUrl = null">
+                                                            ×
+                                                        </button>
+                                                
+                                                    </div>
+                                                
+                                                </div>
+                                                <div class="question-toolbar question-toolbar-full">
+                                                
+                                                    <div class="media-tools">
+                                                
+                                                        <label class="upload-btn">
+                                                
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2">
+                                                
+                                                                <rect x="3" y="3" width="18" height="18" rx="2">
+                                                                </rect>
+                                                
+                                                                <circle cx="8.5" cy="8.5" r="1.5">
+                                                                </circle>
+                                                
+                                                                <path d="M21 15l-5-5L5 21"></path>
+                                                
+                                                            </svg>
+                                                
+                                                            <input hidden type="file" accept="image/*" (change)="q.audioUrl = null; handleMediaUpload($event, q)" />
+                                                
+                                                        </label>
+                                                
+                                                        <label class="upload-btn">
+                                                
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2">
+                                                
+                                                                <path d="M9 18V5l12-2v13"></path>
+                                                
+                                                                <circle cx="6" cy="18" r="3">
+                                                                </circle>
+                                                
+                                                                <circle cx="18" cy="16" r="3">
+                                                                </circle>
+                                                
+                                                            </svg>
+                                                
+                                                            <input hidden type="file" accept="audio/*" (change)="q.imageUrl = null; handleMediaUpload($event, q)" />
+                                                
+                                                        </label>
+                                                
+                                                    </div>
+                                                
+                                                    <button class="btn-danger" (click)="deleteQuestion(q, psg.questions)">
+                                                        Delete
+                                                    </button>
+                                                
+                                                </div>
+
+                                            </div>
+
+                                            <div class="score-box">
+
+                                                <label>
+                                                    Score
+                                                </label>
+
+                                                <input type="number" [(ngModel)]="q.score" />
+
+                                            </div>
+
+                                            <div class="answers-box">
+
+                                                <div class="answer-item" *ngFor="let a of q.answers; let ai = index">
+                                                
+                                                    <div *ngIf="!a.isDelete" class="answer-row">
+                                                    
+                                                        <input type="radio" [name]="'quiz-answer-' + getQuestionIndex(q)" [checked]="a.isCorrect" (change)="selectCorrectAnswer(q, a)" />
+                                                
+                                                        <input *ngIf="!a.imageUrl && !a.audioUrl" class="answer-text-input" [(ngModel)]="a.answerText"
+                                                            placeholder="Answer..." />
+                                                
+                                                        <div *ngIf="a.imageUrl" class="media-preview small">
+                                                
+                                                            <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
+                                                
+                                                        </div>
+                                                
+                                                        <div *ngIf="a.audioUrl" class="media-preview small">
+                                                
+                                                            <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                                            </audio>
+                                                
+                                                        </div>
+                                                
+                                                        <label class="upload-btn">
+                                                
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2">
+                                                
+                                                                <rect x="3" y="3" width="18" height="18" rx="2">
+                                                                </rect>
+                                                
+                                                                <circle cx="8.5" cy="8.5" r="1.5">
+                                                                </circle>
+                                                
+                                                                <path d="M21 15l-5-5L5 21"></path>
+                                                
+                                                            </svg>
+                                                
+                                                            <input hidden type="file" accept="image/*" (change)="a.audioUrl = null; handleMediaUpload($event, a)" />
+                                                
+                                                        </label>
+                                                
+                                                        <label class="upload-btn">
+                                                
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2">
+                                                
+                                                                <path d="M9 18V5l12-2v13"></path>
+                                                
+                                                                <circle cx="6" cy="18" r="3">
+                                                                </circle>
+                                                
+                                                                <circle cx="18" cy="16" r="3">
+                                                                </circle>
+                                                
+                                                            </svg>
+                                                
+                                                            <input hidden type="file" accept="audio/*"
+                                                             (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
+                                                
+                                                        </label>
+                                                
+                                                        <button class="btn-danger" (click)="deleteAnswer(q, ai)">
+                                                            Xóa bỏ
+                                                        </button>
+                                                
+                                                    </div>
+                                                
+                                                </div>
+
+                                                <button class="btn-add-answer" (click)="addAnswer(q)">
+
+                                                    + Add Answer
+
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <button class="btn-add" (click)="addQuestionToPassage(psg, part.partId)">
+
+                                        + Add Question
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="part-actions">
+
+                            <ng-container *ngIf="!part.mode">
+
+                                <button class="btn-add" (click)="addQuestionToPart(part)">
+
+                                    + Question
+
+                                </button>
+
+                                <button class="btn-add" (click)="addPassage(part)">
+
+                                    + Passage
+
+                                </button>
+
+                            </ng-container>
+
+                            <ng-container *ngIf="part.mode === 'question'">
+
+                                <button class="btn-add" (click)="addQuestionToPart(part)">
+
+                                    + Add Question
+
+                                </button>
+
+                            </ng-container>
+
+                            <ng-container *ngIf="part.mode === 'passage'">
+
+                                <button class="btn-add" (click)="addPassage(part)">
+
+                                    + Add Passage
+
+                                </button>
+
+                            </ng-container>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            </div>
+
+        </div>
+
+        <div class="top-actions">
+
+            <ng-container *ngIf="!quiz.quizMode">
+
+                <button class="btn-add" (click)="addQuestionToQuiz()">
+
+                    + Question
+
+                </button>
+
+                <button class="btn-add" (click)="addPart()">
+
+                    + Part
+
+                </button>
+
+            </ng-container>
+
+            <ng-container *ngIf="quiz.quizMode === 'question'">
+
+                <button class="btn-add" (click)="addQuestionToQuiz()">
+
+                    + Add Question
+
+                </button>
+
+            </ng-container>
+
+            <ng-container *ngIf="quiz.quizMode === 'part'">
+
+                <button class="btn-add" (click)="addPart()">
+
+                    + Add Part
+
+                </button>
+
+            </ng-container>
+
+        </div>
+
+        <div class="quiz-footer">
+
+            <button class="btn-save" (click)="saveQuiz()">
+
+                Save Quiz
+
+            </button>
+
+            <button *ngIf="quiz.quizId" class="btn-danger" (click)="deleteQuiz()">
+
+                Delete Quiz
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

@@ -7,11 +7,12 @@ import { Router, RouterLink } from '@angular/router';
 import { CourseDTO } from '../../../../models/course.model';
 import { LevelDTO } from '../../../../models/level.model';
 import { BaseService } from '../../../../services/base.service';
+import { QuizComponent } from '../quiz/test.component';
 
 @Component({
   selector: 'app-course',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, QuizComponent],
   templateUrl: './course.component.html',
   styleUrls: ['./course.component.css'],
 })
@@ -19,11 +20,12 @@ export class CourseComponent implements OnInit {
   levelId: number = 0;
   courses: CourseDTO[] = [];
   level: LevelDTO | null = null;
-
+  showLevelQuiz = false;
+  
   constructor(
     private route: ActivatedRoute,
     private learningService: LearningService,
-    private baseService: BaseService
+    private baseService: BaseService,
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +81,10 @@ export class CourseComponent implements OnInit {
     }
 
     this.learningService.saveCourse(this.courses).subscribe({
-      next: () => alert('Success!'),
+      next: () => {
+        alert('Success!');
+        this.loadCourses();
+      },
       error: (err) => this.baseService.handleError(err, 'Error saving course'),
     });
   }

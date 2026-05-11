@@ -1,58 +1,187 @@
-<div class="progress-container">
+<div *ngIf="!selectedUnit" class="progress-container">
 
-    <h2>My Learning Progress</h2>
+    <h2>
+        My Learning Progress
+    </h2>
 
-    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="loading">
 
-    <div *ngFor="let level of levels" 
-         class="level-card" 
+        Loading...
+
+    </div>
+
+    <div *ngFor="let level of levels"
+         class="level-card"
          [ngClass]="getLevelState(level)">
 
         <div class="level-header">
+
             <span class="icon">
+
                 <ng-container [ngSwitch]="getLevelState(level)">
+
                     <span *ngSwitchCase="'done'">✔</span>
+
                     <span *ngSwitchCase="'current'">▶</span>
+
                     <span *ngSwitchDefault>🔒</span>
+
                 </ng-container>
+
             </span>
 
-            <h3>{{ level.levelName }}</h3>
+            <h3>
+
+                {{ level.levelName }}
+
+            </h3>
+
         </div>
 
-        <div *ngFor="let course of level.courses" 
-             class="course-item" 
+        <div *ngFor="let course of level.courses"
+             class="course-item"
              [ngClass]="getCourseState(course)">
 
             <div class="course-header">
+
                 <span class="icon">
+
                     <ng-container [ngSwitch]="getCourseState(course)">
+
                         <span *ngSwitchCase="'done'">✔</span>
+
                         <span *ngSwitchCase="'current'">▶</span>
+
                         <span *ngSwitchDefault>🔒</span>
+
                     </ng-container>
+
                 </span>
 
                 <span class="course-title">
+
                     {{ course.courseName }}
+
                 </span>
+
             </div>
 
             <div *ngFor="let unit of course.units"
                  class="unit-item"
                  [ngClass]="getunitState(unit)"
-                 (click)="openunit(unit)">
+                 (click)="openUnit(unit)">
 
                 <span class="icon">
+
                     <ng-container [ngSwitch]="getunitState(unit)">
+
                         <span *ngSwitchCase="'done'">✔</span>
+
                         <span *ngSwitchCase="'current'">▶</span>
+
                         <span *ngSwitchDefault>🔒</span>
+
                     </ng-container>
+
                 </span>
 
                 {{ unit.unitName }}
+
             </div>
+
+            <div *ngIf="getCourseState(course) === 'current'"
+                 class="course-quiz-bottom">
+
+                <button class="quiz-btn"
+                        (click)="openCourseQuiz(course); $event.stopPropagation()">
+
+                    Skip Course Test
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div *ngIf="getLevelState(level) === 'current'"
+             class="level-quiz-bottom">
+
+            <button class="quiz-btn"
+                    (click)="openLevelQuiz(level); $event.stopPropagation()">
+
+                Skip Level Test
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div *ngIf="selectedUnit" class="progress-container">
+
+    <div class="lesson-page">
+
+        <button class="back-btn"
+                (click)="selectedUnit = null">
+
+            ← Back
+
+        </button>
+
+        <div class="unit-info">
+
+            <h1>
+
+                {{ selectedUnit.unitName }}
+
+            </h1>
+
+            <div class="objective">
+
+                <strong>
+                    Objective:
+                </strong>
+
+                {{ selectedUnit.objective }}
+
+            </div>
+
+            <div class="description">
+
+                <strong>
+                    Description:
+                </strong>
+
+                {{ selectedUnit.description }}
+
+            </div>
+
+        </div>
+
+        <video *ngIf="selectedUnit?.videoUrl"
+               controls>
+
+            <source
+                [src]="'http://localhost:5108/videos/' + selectedUnit.videoUrl"
+                type="video/mp4">
+
+        </video>
+
+        <div class="lesson-actions">
+
+            <button class="quiz-btn start-btn" (click)="router.navigate(['/user/quiz'], {
+                        queryParams: {
+                            unitId: selectedUnit.unitId,
+                            refType: refType,
+                            refId: refId
+                        }
+                    })">
+            
+                Start Test
+            
+            </button>
 
         </div>
 

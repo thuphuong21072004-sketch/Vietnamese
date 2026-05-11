@@ -213,64 +213,7 @@ namespace Backend.Controllers
 
             return Ok();
         }
-        // User Quiz//
-        /*
-         * hiển thị bài kiểm tra quiz theo Unit
-         * 
-         * thuphuong21072004
-         */
-        [HttpGet("allQuiz")]
-        public async Task<IActionResult> GetQuiz(int UnitId)
-        {
-            return Ok(await _learningService.GetQuizByUnit(UnitId));
-        }
-        /*
-         * save toàn bộ bài kiểm tra
-         * 
-         * thuphuong21072004
-         */
-        [Authorize]
-        [HttpPost("quiz/full")]
-        public async Task<IActionResult> AddFullQuiz(QuizDTO dto)
-        {
-            await _learningService.SaveQuiz(dto);
-            return Ok("Add full quiz success");
-        }
-        /*
-         * xóa quiz
-         * 
-         * thuphuong21072004
-         */
-        [Authorize]
-        [HttpDelete("deleteQuiz")]
-        public async Task<IActionResult> DeleteQuiz(int id)
-        {
-            await _learningService.DeleteQuiz(id);
-            return Ok("Delete success");
-        }
-        /*
-         * nộp bài quiz và chấm điểm
-         * 
-         * thuphuong21072004
-         */
-        [Authorize]
-        [HttpPost("submitQuiz")]
-        public async Task<IActionResult> SubmitQuiz(SubmitQuizDTO dto)
-        {
-            await _learningService.SubmitQuiz(dto.QuizId, dto.AnswerIds);
-            return Ok("Submit quiz success");
-        }
-        /*
-         * lấy điểm bài kiểm tra 
-         * 
-         * thuphuong21072004
-         */
-        [Authorize]
-        [HttpGet("my-quiz-result")]
-        public async Task<IActionResult> GetMyQuizResult(int quizId)
-        {
-            return Ok(await _learningService.GetMyQuizResult(quizId));
-        }
+        
         // user progress
         /*
          * lấy danh sách tất cả khóa học, bài học đã mở khóa
