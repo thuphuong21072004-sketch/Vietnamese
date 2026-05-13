@@ -46,12 +46,37 @@ input, textarea {
     border-radius: 8px;
     margin-bottom: 15px;
 }
-button {
-    padding: 8px 14px;
-    border-radius: 8px;
+button,
+.btn {
+    min-width: 160px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 12px 20px;
     border: none;
+    border-radius: 14px;
+    background: var(--primary);
+    color: white;
     cursor: pointer;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+button:hover,
+.btn:hover {
+    background: #5a2db5;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(124, 108, 255, 0.18);
+}
+
+button:disabled,
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .btn-primary {

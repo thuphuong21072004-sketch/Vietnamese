@@ -48,21 +48,16 @@
             
             </tr>
         
-            <tr class="add-row">
-                <td colspan="5">
-                    <button (click)="addCourse()">
-                        Add new row
-                    </button>
-                </td>
-            </tr>
         </tbody>
     </table>
 
-    <button class="save-btn" (click)="saveCourses()">Save All</button>
-
-    <button class="btn-primary" [disabled]="levelId === 0" (click)="showLevelQuiz = !showLevelQuiz">
-        {{ showLevelQuiz ? 'Hide Level Quiz' : 'Manage Level Quiz' }}
-    </button>
+    <div class="button-row">
+        <button (click)="addCourse()">Add new row</button>
+        <button class="save-btn" (click)="saveCourses()">Save All</button>
+        <button class="btn-primary" [disabled]="levelId === 0" (click)="showLevelQuiz = !showLevelQuiz">
+            {{ showLevelQuiz ? 'Hide Level Quiz' : 'Manage Level Quiz' }}
+        </button>
+    </div>
     
     <app-quiz *ngIf="showLevelQuiz && levelId > 0" [refId]="levelId" [refType]="'LEVEL_JUMP'">
     </app-quiz>

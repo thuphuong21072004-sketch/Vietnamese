@@ -127,7 +127,7 @@ namespace Backend.Services.impl
 
                     var entity = _mapper.Map<Level>(dto);
 
-                    entity.IsActive = true;
+                    entity.IsActive = IsAdmin();
                     entity.OrderIndex = currentMax;
 
                     await _levelRepository.AddLevel(entity);
@@ -152,7 +152,10 @@ namespace Backend.Services.impl
                     {
                         continue;
                     }
-
+                    if (!IsAdmin() && entity.IsActive)
+                    {
+                        throw new UnauthorizedAccessException();
+                    }
                     dto.OrderIndex = entity.OrderIndex;
 
                     _mapper.Map(dto, entity);
@@ -261,7 +264,7 @@ namespace Backend.Services.impl
                     var entity = _mapper.Map<Course>(dto);
 
                     entity.CreatedBy = currentUser;
-                    entity.IsActive = true;
+                    entity.IsActive = IsAdmin();
                     entity.OrderIndex = currentMax;
 
                     await _courseRepository.AddCourse(entity);
@@ -279,6 +282,10 @@ namespace Backend.Services.impl
                 if (entity == null)
                 {
                     continue;
+                }
+                if (!IsAdmin() && entity.IsActive)
+                {
+                    throw new UnauthorizedAccessException();
                 }
 
                 dto.LevelId = entity.LevelId;
@@ -517,7 +524,7 @@ namespace Backend.Services.impl
             {
                 var entity = _mapper.Map<Unit>(dto);
 
-                entity.IsActive = true;
+                entity.IsActive = IsAdmin();
                 entity.CreatedBy = currentUser;
                 entity.CreatedDate = DateTime.Now;
 
@@ -537,7 +544,10 @@ namespace Backend.Services.impl
                 {
                     return;
                 }
-
+                if (!IsAdmin() && entity.IsActive)
+                {
+                    throw new UnauthorizedAccessException();
+                }
                 if (!string.IsNullOrEmpty(entity.VideoUrl)
                     && entity.VideoUrl != dto.VideoUrl)
                 {
@@ -706,23 +716,5 @@ namespace Backend.Services.impl
             await _progressRepository.Save();
         }
 
-        /*
-         * Lấy toàn bộ learning path
-         * O(n)
-         * thuphuong21072004
-         */
-        public async Task<List<LevelDTO>> GetAllLearningPath()
-        {
-            var levels = await _levelRepository
-                .GetQueryable()
-                .AsNoTracking()
-                .Include(x => x.Courses.Where(c => c.IsActive))
-                .ThenInclude(x => x.Units.Where(u => u.IsActive))
-                .Where(x => x.IsActive)
-                .OrderBy(x => x.OrderIndex)
-                .ToListAsync();
-
-            return _mapper.Map<List<LevelDTO>>(levels);
-        }
     }
 }

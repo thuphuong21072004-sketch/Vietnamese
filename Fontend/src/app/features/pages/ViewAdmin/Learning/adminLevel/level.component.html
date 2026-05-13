@@ -35,19 +35,12 @@
                 </td>
             </tr>
 
-            <tr class="add-row">
-                <td colspan="5">
-                    <button (click)="addRow()">
-                         Add new row
-                    </button>
-                </td>
-            </tr>
-
         </tbody>
     </table>
 
-    <button class="save-btn" (click)="saveAll()">
-        Save All
-    </button>
+    <div class="button-row">
+        <button (click)="addRow()">Add new row</button>
+        <button class="save-btn" (click)="saveAll()">Save All</button>
+    </div>
 </div>
     

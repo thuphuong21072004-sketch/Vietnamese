@@ -9,20 +9,23 @@
             </h2>
 
             <p *ngIf="quiz">
-
                 Total Score:
                 <strong>
                     {{ totalScore }}
                 </strong>
-
             </p>
+
+            <div class="header-meta" *ngIf="quiz">
+                <span class="badge">Mode: {{ quiz.quizMode ? (quiz.quizMode === 'question' ? 'Question-only' : 'Part-based') : 'Draft' }}</span>
+                <span class="badge">Questions: {{ quiz.questions?.length ?? 0 }}</span>
+                <span class="badge">Parts: {{ quiz.parts?.length ?? 0 }}</span>
+                <span class="badge" *ngIf="quiz.timeLimit">Timer: {{ quiz.timeLimit }} min</span>
+            </div>
 
         </div>
 
         <button *ngIf="!quiz" class="btn-primary" (click)="addQuiz()">
-
             + Create Quiz
-
         </button>
 
     </div>
@@ -93,6 +96,10 @@
 
             </div>
 
+        </div>
+
+        <div class="hint-box" *ngIf="quiz">
+            <p>Start by adding a question or a part. Use the buttons below to build your quiz step by step and keep each answer clear.</p>
         </div>
 
         <div *ngIf="quiz.questions?.length && quiz.parts?.length === 0">
@@ -511,7 +518,7 @@
                                                 </label>
                                         
                                                 <button class="btn-danger" (click)="deleteAnswer(q, ai)">
-                                                    Xóa bỏ
+                                                    Remove
                                                 </button>
                                         
                                             </div>
@@ -540,7 +547,7 @@
                                     <div class="passage-content-box">
                                     
                                         <textarea *ngIf="!psg.imageUrl && !psg.audioUrl" [(ngModel)]="psg.content"
-                                            placeholder="Nhập đoạn hội thoại, email, đoạn văn...">
+                                            placeholder="Enter conversation, email, or passage...">
                                         </textarea>
                                     
                                         <div *ngIf="psg.imageUrl" class="media-preview passage-preview">
@@ -780,7 +787,7 @@
                                                         </label>
                                                 
                                                         <button class="btn-danger" (click)="deleteAnswer(q, ai)">
-                                                            Xóa bỏ
+                                                            Remove
                                                         </button>
                                                 
                                                     </div>

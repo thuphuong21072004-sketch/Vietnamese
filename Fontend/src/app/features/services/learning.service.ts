@@ -85,9 +85,6 @@ export class LearningService {
   }
 
   // USER
-  getLearningPath(): Observable<LevelDTO[]> {
-    return this.http.get<LevelDTO[]>(`${this.apiUrl}/learning-path`);
-  }
   getMyProgress(): Observable<LevelDTO[]> {
     return this.http.get<LevelDTO[]>(
       `${this.apiUrl}/my-progress`,

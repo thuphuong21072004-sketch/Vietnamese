@@ -39,23 +39,42 @@ td input[type="checkbox"] {
 }
 
 button {
-    padding: 6px 12px;
+    min-width: 160px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 12px 20px;
     border: none;
-    border-radius: 6px;
-    background: #7b3fe4;
+    border-radius: 14px;
+    background: var(--primary);
     color: white;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 button:hover {
     background: #5a2db5;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(124, 108, 255, 0.18);
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .delete-btn {
-    margin-left: 10px;
-    background: red;
+    background: var(--danger);
     color: white;
+}
+
+.btn-primary {
+    background: var(--primary);
 }
 
 .add-row td {
@@ -86,4 +105,16 @@ a {
     margin: 5px 0 0;
     font-size: 14px;
     color: #555;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 2px;
+    margin-top: 18px;
+}
+
+.button-row button {
+    min-width: 160px;
 }

@@ -19,7 +19,6 @@ namespace Backend.Services
         Task DeleteUnits(List<int> UnitIds);
 
         Task<List<LevelDTO>> GetMyProgress();
-        Task<List<LevelDTO>> GetAllLearningPath();
-
+        
     }
 }

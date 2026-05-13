@@ -216,16 +216,6 @@ namespace Backend.Controllers
         
         // user progress
         /*
-         * lấy danh sách tất cả khóa học, bài học đã mở khóa
-         * 
-         * thuphuong21072004
-         */
-        [HttpGet("learning-path")]
-        public async Task<IActionResult> GetLearningPath()
-        {
-            return Ok(await _learningService.GetAllLearningPath());
-        }
-        /*
          * lấy tiến độ học tập của user
          * 
          * thuphuong21072004

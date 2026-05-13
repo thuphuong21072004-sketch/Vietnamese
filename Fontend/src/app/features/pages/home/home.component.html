@@ -1,29 +1,154 @@
-<div class="progress-container">
-
-  <h2>Learning Path</h2>
-
-  <div *ngFor="let level of levels" class="level-card">
-
-    <div class="level-header">
-      <h3>{{ level.levelName }}</h3>
+<section class="home-hero">
+  <div class="hero-copy">
+    <span class="hero-tag">Learn Vietnamese the smart way</span>
+    <h1>{{ heroTitle }}</h1>
+    <p class="hero-description">{{ heroDescription }}</p>
+    <div class="hero-actions">
+      <button routerLink="/user/units" class="btn btn-primary">Start learning</button>
+      <button routerLink="/login" class="btn btn-secondary">Login</button>
     </div>
-
-    <div *ngFor="let course of level.courses || []" class="course-item">
-
-      <div class="course-header">
-        <span class="course-title">
-          {{ course.courseName }}
-        </span>
+    <div class="hero-highlights">
+      <div>
+        <strong>{{ levels.length || 0 }}</strong>
+        <span>Levels</span>
       </div>
-
-      <div *ngFor="let unit of course.units || []" class="unit-item">
-
-        {{ unit.unitName }}
-
+      <div>
+        <strong>{{ totalCourses }}</strong>
+        <span>Courses</span>
       </div>
-
+      <div>
+        <strong>{{ totalUnits }}</strong>
+        <span>Units</span>
+      </div>
     </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-panel">
+      <div class="panel-header">
+        <span class="panel-badge">Learning path</span>
+        <p>Core lessons, quizzes and progress tracking in one polished flow.</p>
+      </div>
+      <div class="panel-stats">
+        <div class="stat-box">
+          <span>3</span>
+          <p>Clear paths</p>
+        </div>
+        <div class="stat-box accent">
+          <span>150+</span>
+          <p>Interactive lessons</p>
+        </div>
+        <div class="stat-box">
+          <span>1000+</span>
+          <p>Real examples</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="key-features">
+  <div class="section-title">
+    <p class="eyebrow">Why choose VietPhuong</p>
+    <h2>Designed for learners who want results</h2>
+  </div>
+  <div class="feature-grid">
+    <div *ngFor="let feature of features" class="feature-card">
+      <div class="feature-dot"></div>
+      <h3>{{ feature.title }}</h3>
+      <p>{{ feature.description }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="overview-block">
+  <div class="overview-card">
+    <div>
+      <p class="eyebrow">Course overview</p>
+      <h2>See your learning journey from levels to units</h2>
+      <p>
+        Explore a clean, market-ready experience that makes your Vietnamese study plan easy to follow.
+      </p>
+    </div>
+    <div class="overview-stats">
+      <div class="stat-card">
+        <span>{{ levels.length || 0 }}</span>
+        <p>Levels</p>
+      </div>
+      <div class="stat-card">
+        <span>{{ totalCourses }}</span>
+        <p>Courses</p>
+      </div>
+      <div class="stat-card">
+        <span>{{ totalUnits }}</span>
+        <p>Units</p>
+      </div>
+      <div class="stat-card accent">
+        <span>100+</span>
+        <p>Audio lessons</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="progress-container">
+  <div class="section-heading">
+    <div>
+      <h2>Explore our learning system</h2>
+      <p>Browse your path from levels to units and understand how the curriculum is structured.</p>
+    </div>
   </div>
 
-</div>
+  <div *ngIf="isLoading" class="loading-text">
+    Loading available paths...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-text">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage">
+    <div *ngIf="levels?.length; else emptyPath" class="levels-grid">
+      <div *ngFor="let level of levels" class="level-card">
+        <div class="level-header level-toggle" (click)="toggleLevel(level.levelId)">
+          <div>
+            <h3>{{ level.levelName }}</h3>
+            <p class="level-description">{{ level.description }}</p>
+          </div>
+          <div class="level-summary">
+            <span>{{ level.courses.length || 0 }} courses</span>
+            <span>{{ getUnitsCount(level) }} units</span>
+            <span class="toggle-indicator">{{ isLevelExpanded(level.levelId) ? '−' : '+' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="isLevelExpanded(level.levelId)" class="course-list-wrapper">
+          <div *ngIf="level.courses?.length; else noCourses" class="course-list">
+            <div *ngFor="let course of level.courses" class="course-item">
+              <div class="course-header course-toggle" (click)="toggleCourse(course.courseId)">
+                <div>
+                  <strong>{{ course.courseName }}</strong>
+                  <p>{{ course.description }}</p>
+                </div>
+                <span class="course-info">{{ course.units?.length || 0 }} units</span>
+                <span class="toggle-indicator">{{ isCourseExpanded(course.courseId) ? '−' : '+' }}</span>
+              </div>
+              <div *ngIf="isCourseExpanded(course.courseId) && course.units?.length" class="unit-list">
+                <div *ngFor="let unit of course.units" class="unit-item">{{ unit.unitName }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noCourses>
+          <p class="empty-text">No courses available for this level yet.</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyPath>
+    <p class="empty-text">
+      Hệ thống học đang cập nhật. Vui lòng quay lại sau để xem lộ trình mới nhất.
+    </p>
+  </ng-template>
+</section>

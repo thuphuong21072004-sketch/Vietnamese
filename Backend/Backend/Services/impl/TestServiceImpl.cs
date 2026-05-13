@@ -389,6 +389,13 @@ namespace Backend.Services.impl
             if (existedQuiz != null)
             {
                 quiz = existedQuiz;
+                if (!ValidateAdmin() && quiz.IsActive)
+                {
+                    throw new UnauthorizedAccessException(
+                        "Moderator cannot edit active quiz."
+                    );
+                }
+
                 quiz.QuizName = dto.QuizName;
                 quiz.TimeLimit = dto.TimeLimit;
                 quiz.PassScore = dto.PassScore;
@@ -396,7 +403,10 @@ namespace Backend.Services.impl
             }
             else
             {
-                quiz = new Quiz { RefId = dto.RefId, RefType = dto.RefType, QuizName = dto.QuizName, TimeLimit = dto.TimeLimit, PassScore = dto.PassScore, CreatedDate = DateTime.Now, IsActive = true };
+                quiz = new Quiz {
+                    RefId = dto.RefId, RefType = dto.RefType, QuizName = dto.QuizName, TimeLimit = dto.TimeLimit, PassScore = dto.PassScore, CreatedDate = DateTime.Now,
+                    IsActive = ValidateAdmin()
+                };
                 await _quizRepository.AddQuiz(quiz);
             }
 

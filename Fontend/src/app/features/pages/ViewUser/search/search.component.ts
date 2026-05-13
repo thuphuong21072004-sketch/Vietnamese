@@ -167,7 +167,7 @@ export class SearchComponent implements OnInit {
   playAudio(url: string) {
     if (url) {
       const audio = new Audio(url);
-      audio.play().catch((err) => console.error('Lỗi phát âm thanh:', err));
+      audio.play().catch((err) => console.error('Audio playback failed:', err));
     }
   }
 }
