@@ -1,0 +1,199 @@
+.schedule-page{
+    max-width:1000px;
+
+    margin:40px auto;
+
+    padding:20px;
+}
+
+.schedule-card{
+    background:#fff;
+
+    border-radius:24px;
+
+    padding:24px;
+
+    box-shadow:
+        0 4px 18px rgba(0,0,0,0.06);
+
+    margin-bottom:24px;
+}
+
+.schedule-card h2{
+    margin-bottom:24px;
+
+    font-size:28px;
+
+    font-weight:700;
+}
+
+.form-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:20px;
+}
+
+.form-grid label{
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+}
+
+.form-grid input{
+    width:100%;
+
+    padding:12px;
+
+    border-radius:12px;
+
+    border:1px solid #ddd;
+
+    font-size:15px;
+}
+
+.actions{
+    margin-top:24px;
+
+    display:flex;
+
+    gap:12px;
+}
+
+.actions button{
+    border:none;
+
+    border-radius:12px;
+
+    padding:12px 22px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    background:#58cc02;
+
+    color:#fff;
+}
+
+.cancel-btn{
+    background:#e5e7eb !important;
+
+    color:#111 !important;
+}
+
+.schedule-list{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+}
+
+.schedule-item{
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:20px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,0.05);
+}
+
+.time{
+    font-size:16px;
+
+    font-weight:600;
+
+    margin-bottom:6px;
+}
+
+.status span{
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    font-weight:700;
+
+    font-size:14px;
+}
+
+.status span.booked{
+    background:#fee2e2;
+
+    color:#991b1b;
+}
+
+.item-actions{
+    display:flex;
+
+    gap:10px;
+}
+
+.item-actions button{
+    border:none;
+
+    padding:10px 16px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-weight:600;
+}
+
+.item-actions button:first-child{
+    background:#2563eb;
+
+    color:#fff;
+}
+
+.delete-btn{
+    background:#ef4444 !important;
+
+    color:#fff !important;
+}
+
+button:disabled{
+    opacity:0.5;
+
+    cursor:not-allowed;
+}
+
+@media(max-width:768px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .schedule-item{
+        flex-direction:column;
+
+        align-items:flex-start;
+    }
+
+    .item-actions{
+        width:100%;
+    }
+
+    .item-actions button{
+        flex:1;
+    }
+}

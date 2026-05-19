@@ -1,35 +1,115 @@
-<div class="login-bg">
+<div class="auth-page">
 
-    <div class="circle c1"></div>
-    <div class="circle c2"></div>
-    <div class="circle c3"></div>
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
+    <div class="bg-circle circle-3"></div>
 
-    <div class="login-card">
+    <div class="auth-card">
 
-        <h2>Login Account</h2>
-        <p class="subtitle">
-            Start learning Vietnamese with VietPhuong
-        </p>
+        <div class="auth-left">
 
-        <input type="text" placeholder="Email" [(ngModel)]="email" />
+            <div class="logo-box">
+                VP
+            </div>
 
-        <input type="password" placeholder="Password" [(ngModel)]="password" />
+            <h1>
+                Welcome Back
+            </h1>
 
-        <div class="login-options">
-            <label>
-                <input type="checkbox"> Remember me
-            </label>
+            <p>
+                Continue your Vietnamese learning journey with lessons,
+                quizzes and online classes.
+            </p>
 
-            <a>Forgot password?</a>
+            <div class="feature-list">
+
+                <div class="feature-item">
+                    Interactive Lessons
+                </div>
+
+                <div class="feature-item">
+                    Online Teacher Booking
+                </div>
+
+                <div class="feature-item">
+                    AI Pronunciation Practice
+                </div>
+
+            </div>
+
         </div>
 
-        <button (click)="login()">
-            Login
-        </button>
+        <div class="auth-right">
 
-        <div class="create">
-            Don't have an account?
-            <a routerLink="/register">Create Account</a>
+            <h2>
+                Login
+            </h2>
+
+            <p class="subtitle">
+                Sign in to your account
+            </p>
+
+            <div class="input-group">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    placeholder="Enter your email"
+                    [(ngModel)]="email"
+                />
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    placeholder="Enter your password"
+                    [(ngModel)]="password"
+                />
+
+            </div>
+
+            <div class="login-options">
+
+                <label class="remember">
+
+                    <input type="checkbox">
+
+                    Remember me
+
+                </label>
+
+                <a>
+                    Forgot password?
+                </a>
+
+            </div>
+
+            <button
+                class="login-btn"
+                (click)="login()"
+            >
+                Login Account
+            </button>
+
+            <div class="register-link">
+
+                Don't have an account?
+
+                <a routerLink="/register">
+                    Create Account
+                </a>
+
+            </div>
+
         </div>
 
     </div>

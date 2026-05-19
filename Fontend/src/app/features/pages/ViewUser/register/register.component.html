@@ -1,37 +1,172 @@
-<div class="login-bg">
+<div class="auth-page">
 
-    <div class="circle c1"></div>
-    <div class="circle c2"></div>
-    <div class="circle c3"></div>
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
+    <div class="bg-circle circle-3"></div>
 
-    <div class="login-card">
+    <div class="auth-card">
 
-        <h2>Create Account</h2>
-        <p class="subtitle">
-            Join VietPhuong and start learning Vietnamese today
-        </p>
+        <div class="auth-left">
 
-        <input type="text" placeholder="Full Name" [(ngModel)]="name" />
+            <div class="logo-box">
+                VP
+            </div>
 
-        <input type="text" placeholder="Email" [(ngModel)]="email" />
+            <h1>
+                Start Your Journey
+            </h1>
 
-        <input type="password" placeholder="Password" [(ngModel)]="password" />
+            <p>
+                Create your VietPhuong account and explore Vietnamese lessons,
+                quizzes, online teachers and AI pronunciation practice.
+            </p>
 
-        <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" />
+            <div class="feature-list">
 
-        <div class="login-options">
-            <label>
-                <input type="checkbox" [(ngModel)]="agree"> I agree to terms
-            </label>
+                <div class="feature-item">
+                    Interactive Vietnamese Lessons
+                </div>
+
+                <div class="feature-item">
+                    Online Learning With Teachers
+                </div>
+
+                <div class="feature-item">
+                    Smart Progress Tracking
+                </div>
+
+            </div>
+
         </div>
 
-        <button (click)="register()">
-            Register
-        </button>
+        <div class="auth-right">
 
-        <div class="create">
-            Already have an account?
-            <a routerLink="/login">Login</a>
+            <h2>
+                Register
+            </h2>
+
+            <p class="subtitle">
+                Create your account
+            </p>
+
+            <div class="avatar-section">
+
+                <div class="avatar-preview">
+
+                    <img *ngIf="avatarUrl" [src]="
+                        'http://localhost:5108/uploads/'
+                        + avatarUrl
+                      " />
+                    <div *ngIf="!avatarUrl">
+                        VP
+                    </div>
+
+                </div>
+
+                <label class="upload-btn">
+
+                    Upload Avatar
+
+                    <input type="file" hidden accept="image/*" (change)="onFileSelected($event)" />
+
+                </label>
+
+            </div>
+
+            <div class="input-grid">
+
+                <div class="input-group">
+
+                    <label>
+                        Full Name
+                    </label>
+
+                    <input type="text" placeholder="Enter your name" [(ngModel)]="name" />
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <input type="email" placeholder="Enter your email" [(ngModel)]="email" />
+
+                </div>
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Country
+                </label>
+
+                <input type="text" placeholder="Your country" [(ngModel)]="country" />
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Bio
+                </label>
+
+                <textarea rows="4" placeholder="Tell us about yourself" [(ngModel)]="bio"></textarea>
+
+            </div>
+
+            <div class="input-grid">
+
+                <div class="input-group">
+
+                    <label>
+                        Password
+                    </label>
+
+                    <input type="password" placeholder="Create password" [(ngModel)]="password" />
+
+                </div>
+
+                <div class="input-group">
+
+                    <label>
+                        Confirm Password
+                    </label>
+
+                    <input type="password" placeholder="Confirm password" [(ngModel)]="confirmPassword" />
+
+                </div>
+
+            </div>
+
+            <div class="login-options">
+
+                <label class="remember">
+
+                    <input type="checkbox" [(ngModel)]="agree">
+
+                    I agree to the terms
+
+                </label>
+
+            </div>
+
+            <button class="register-btn" (click)="register()">
+                Create Account
+            </button>
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a routerLink="/login">
+                    Login
+                </a>
+
+            </div>
+
         </div>
 
     </div>

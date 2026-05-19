@@ -15,24 +15,23 @@ namespace Backend.Controllers
         public LevelController(LearningService learningService)
         {
             _learningService = learningService;
-
         }
 
-        // level
         /*
          * lấy danh sách level
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [HttpGet("listLevels")]
         public async Task<IActionResult> GetLevels()
         {
             return Ok(await _learningService.GetLevels());
         }
+
         /*
          * lấy thông tin level theo id
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [HttpGet("getLevelById")]
         public async Task<IActionResult> GetLevelById(int id)
@@ -43,10 +42,11 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
+
         /*
          * lưu level mới
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [Authorize]
         [HttpPost("saveLevel")]
@@ -56,11 +56,10 @@ namespace Backend.Controllers
             return Ok("Save success");
         }
 
-        // course
         /*
          * lấy danh sách course theo level
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [HttpGet("listCourses")]
         public async Task<IActionResult> GetCourses(int levelId)
@@ -68,25 +67,26 @@ namespace Backend.Controllers
             var result = await _learningService.GetCourses(levelId);
             return Ok(result);
         }
+
         /*
          * lấy thông tin course theo id
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [HttpGet("getCourseById")]
         public async Task<IActionResult> GetCourseById(int id)
         {
             var result = await _learningService.GetCourseById(id);
 
-            if (result == null)
-                return NotFound("Course not found");
+            if (result == null) return NotFound("Course not found");
 
             return Ok(result);
         }
+
         /*
          * lưu course mới
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [Authorize]
         [HttpPost("saveCourse")]
@@ -96,11 +96,10 @@ namespace Backend.Controllers
             return Ok("Save success");
         }
 
-        //Unit
         /*
          * lấy danh sách Unit theo course
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [HttpGet("listUnits")]
         public async Task<IActionResult> GetUnits(int courseId)
@@ -108,10 +107,11 @@ namespace Backend.Controllers
             var result = await _learningService.GetUnits(courseId);
             return Ok(result);
         }
+
         /*
          * lấy thông tin Unit theo id
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [HttpGet("getUnitById")]
         public async Task<IActionResult> GetUnitById(int id)
@@ -122,10 +122,11 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
+
         /*
          * lưu Unit mới
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [Authorize]
         [HttpPost("saveUnit")]
@@ -134,10 +135,11 @@ namespace Backend.Controllers
             await _learningService.SaveUnit(dto);
             return Ok("Save success");
         }
+
         /*
          * xóa Unit
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [Authorize]
         [HttpDelete("deleteListUnit")]
@@ -146,19 +148,18 @@ namespace Backend.Controllers
             await _learningService.DeleteUnits(ids);
             return Ok("Delete success");
         }
+
         /*
          * lưu video ,ảnh , audio
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [HttpPost("uploadMedia")]
         public async Task<IActionResult> UploadMedia(IFormFile file)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file");
+            if (file == null || file.Length == 0) return BadRequest("No file");
 
             var extension = Path.GetExtension(file.FileName).ToLower();
-
             string folder;
 
             if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".webp")
@@ -179,7 +180,6 @@ namespace Backend.Controllers
             }
 
             var fileName = Guid.NewGuid().ToString() + extension;
-
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder);
 
             if (!Directory.Exists(folderPath))
@@ -196,10 +196,11 @@ namespace Backend.Controllers
 
             return Ok(new { fileName, folder });
         }
+
         /*
          * xóa video khi không lưu
-         * 
-         * thuphuong21072004
+         * O(1)
+         * (thuphuong21072004)
          */
         [HttpDelete("deleteVideo")]
         public IActionResult DeleteVideo(string fileName)
@@ -213,12 +214,11 @@ namespace Backend.Controllers
 
             return Ok();
         }
-        
-        // user progress
+
         /*
          * lấy tiến độ học tập của user
-         * 
-         * thuphuong21072004
+         * O(n)
+         * (thuphuong21072004)
          */
         [Authorize]
         [HttpGet("my-progress")]
@@ -226,6 +226,5 @@ namespace Backend.Controllers
         {
             return Ok(await _learningService.GetMyProgress());
         }
-           
     }
 }

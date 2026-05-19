@@ -1,71 +1,218 @@
-<div class="admin-container">
+<div class="admin-page">
 
-    <h2>User Management</h2>
+    <div class="admin-card">
 
-    <div class="filter">
-        <input type="text" placeholder="Search email..." [(ngModel)]="email">
+        <div class="header">
 
-        <select [(ngModel)]="status">
-            <option [ngValue]="null">All Status</option>
-            <option [ngValue]="1">Active</option>
-            <option [ngValue]="0">Inactive</option>
-            <option [ngValue]="-1">Banned</option>
-        </select>
+            <div>
+                <h2>
+                    User Management
+                </h2>
 
-        <select [(ngModel)]="roleId">
-            <option [ngValue]="null">All Role</option>
-            <option [ngValue]="1">Admin</option>
-            <option [ngValue]="2">User</option>
-            <option [ngValue]="3">Moderator</option>
-        </select>
+                <p>
+                    Manage all users in the Vietnamese learning system
+                </p>
+            </div>
 
-        <button (click)="search()">Search</button>
-    </div>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>STT</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Role</th>
-                <th>Save</th>
-            </tr>
-        </thead>
+        <div class="filter-section">
 
-        <tbody>
-            <tr *ngFor="let u of users; let i = index">
-                <td>{{ (page - 1) * pageSize + i + 1 }}</td>
-                <td>{{u.name}}</td>
-                <td>{{u.email}}</td>
+            <div class="form-group">
 
-                <td>
-                    <select [(ngModel)]="u.status">
-                        <option [ngValue]="1">Active</option>
-                        <option [ngValue]="0">Inactive</option>
-                    </select>
-                </td>
+                <label>
+                    Search Email
+                </label>
 
-                <td>
-                    <select [(ngModel)]="u.roleId">
-                        <option [ngValue]="1">User</option>
-                        <option [ngValue]="2">Admin</option>
-                        <option [ngValue]="3">Moderator</option>
-                    </select>
-                </td>
+                <input type="text" placeholder="Enter email..." [(ngModel)]="email" />
 
-                <td>
-                    <button (click)="saveUser(u)">Save</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+            </div>
 
-    <div class="pagination">
-        <button (click)="prevPage()">Prev</button>
-        <span>Page {{page}} / {{totalPage}}</span>
-        <button (click)="nextPage()">Next</button>
+            <div class="form-group">
+
+                <label>
+                    Status
+                </label>
+
+                <select [(ngModel)]="status">
+
+                    <option [ngValue]="null">
+                        All
+                    </option>
+
+                    <option [ngValue]="1">
+                        Active
+                    </option>
+
+                    <option [ngValue]="0">
+                        Inactive
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button class="search-btn" (click)="search()">
+                Search
+            </button>
+
+        </div>
+
+        <div class="loading" *ngIf="loading">
+            Loading users...
+        </div>
+
+        <div class="table-wrapper" *ngIf="!loading">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Country
+                        </th>
+
+                        <th>
+                            Bio
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Role
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr *ngFor="
+                            let u of users;
+                            let i = index
+                        ">
+
+                        <td>
+                            {{
+                            (page - 1)
+                            * pageSize
+                            + i + 1
+                            }}
+                        </td>
+
+                        <td>
+                            {{u.name}}
+                        </td>
+
+                        <td class="email">
+                            {{u.email}}
+                        </td>
+
+                        <td>
+                            {{
+                            u.country ||
+                            'N/A'
+                            }}
+                        </td>
+
+                        <td class="bio">
+                            {{
+                            u.bio ||
+                            'No bio'
+                            }}
+                        </td>
+
+                        <td>
+
+                            <select [(ngModel)]="u.status">
+
+                                <option [ngValue]="1">
+                                    Active
+                                </option>
+
+                                <option [ngValue]="0">
+                                    Inactive
+                                </option>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <select [(ngModel)]="u.roleName">
+
+                                <option value="Admin">
+                                    Admin
+                                </option>
+
+                                <option value="User">
+                                    User
+                                </option>
+
+                                <option value="Moderator">
+                                    Moderator
+                                </option>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <button class="save-btn" (click)="saveUser(u)">
+                                Save
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="pagination">
+
+            <button (click)="prevPage()" [disabled]="page <= 1">
+                Prev
+            </button>
+
+            <span>
+                Page {{page}}
+                /
+                {{totalPage}}
+            </span>
+
+            <button (click)="nextPage()" [disabled]="page >= totalPage">
+                Next
+            </button>
+
+        </div>
+
     </div>
 
 </div>

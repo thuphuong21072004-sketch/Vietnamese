@@ -1,7 +1,14 @@
 export interface UserResult {
-  userId: number;
-  email: string;
   name: string;
-  role: string;
+  email: string;
+
+  roleName: string;
+
   status: number;
+
+  country?: string;
+
+  bio?: string;
+
+  avatarUrl?: string;
 }

@@ -1,43 +1,163 @@
-<div class="login-bg">
+<div class="profile-page">
 
-    <div class="circle c1"></div>
-    <div class="circle c2"></div>
-    <div class="circle c3"></div>
+    <div class="profile-card">
 
-    <div class="login-card">
+        <div class="avatar-wrapper">
 
-        <h2>My Profile</h2>
-        <p class="subtitle">
-            Manage your account information
-        </p>
+            <img *ngIf="avatarUrl" [src]="avatarUrl" class="avatar" />
 
-        <div class="profile-info">
-            <p><b>Name:</b> {{name}}</p>
-            <p><b>Email:</b> {{email}}</p>
-            <p><b>Role:</b> {{role}}</p>
+            <div *ngIf="!avatarUrl" class="avatar-empty">
+                No Avatar
+            </div>
+
         </div>
 
-        <hr>
+        <div class="profile-table">
 
-        <h3>Update Information</h3>
+            <div class="profile-row">
+                <span class="label">
+                    Name
+                </span>
 
-        <input type="text" placeholder="New Name" [(ngModel)]="newName" />
-        <input type="text" placeholder="New Email" [(ngModel)]="newEmail" />
+                <span class="value">
+                    {{ name }}
+                </span>
+            </div>
 
-        <button (click)="updateProfile()">
-            Update Profile
-        </button>
+            <div class="profile-row">
+                <span class="label">
+                    Email
+                </span>
 
-        <hr>
+                <span class="value">
+                    {{ email }}
+                </span>
+            </div>
 
-        <h3>Change Password</h3>
+            <div class="profile-row">
+                <span class="label">
+                    Role
+                </span>
 
-        <input type="password" placeholder="Old Password" [(ngModel)]="oldPassword" />
-        <input type="password" placeholder="New Password" [(ngModel)]="newPassword" />
+                <span class="value role">
+                    {{ roleName }}
+                </span>
+            </div>
 
-        <button (click)="changePassword()">
-            Change Password
-        </button>
+            <div class="profile-row">
+                <span class="label">
+                    Status
+                </span>
+
+                <span class="value">
+                    {{ status }}
+                </span>
+            </div>
+
+            <div class="profile-row">
+                <span class="label">
+                    Country
+                </span>
+
+                <span class="value">
+                    {{ country || 'N/A' }}
+                </span>
+            </div>
+
+            <div class="profile-row bio-row">
+                <span class="label">
+                    Bio
+                </span>
+
+                <span class="value">
+                    {{ bio || 'No bio yet' }}
+                </span>
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <h3>
+                Update Information
+            </h3>
+
+            <div class="form-group">
+                <label>
+                    Full Name
+                </label>
+
+                <input type="text" [(ngModel)]="newName" />
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Email
+                </label>
+
+                <input type="text" [(ngModel)]="newEmail" />
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Country
+                </label>
+
+                <input type="text" [(ngModel)]="newCountry" />
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Bio
+                </label>
+
+                <textarea rows="4" [(ngModel)]="newBio"></textarea>
+            </div>
+
+            <div class="form-group">
+            
+                <label>
+                    Avatar
+                </label>
+            
+                <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+            
+            </div>
+
+            <button class="primary-btn" (click)="updateProfile()">
+                Update Profile
+            </button>
+
+        </div>
+
+        <div class="section">
+
+            <h3>
+                Change Password
+            </h3>
+
+            <div class="form-group">
+                <label>
+                    Old Password
+                </label>
+
+                <input type="password" [(ngModel)]="oldPassword" />
+            </div>
+
+            <div class="form-group">
+                <label>
+                    New Password
+                </label>
+
+                <input type="password" [(ngModel)]="newPassword" />
+            </div>
+
+            <button class="primary-btn" (click)="changePassword()">
+                Change Password
+            </button>
+
+        </div>
 
     </div>
+
 </div>

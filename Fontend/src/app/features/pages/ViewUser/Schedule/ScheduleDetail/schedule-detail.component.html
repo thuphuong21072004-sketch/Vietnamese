@@ -1,0 +1,238 @@
+<div *ngIf="loading" class="loading">
+
+    Loading schedule...
+
+</div>
+
+<div *ngIf="
+        !loading
+        &&
+        schedule
+    " class="detail-page">
+
+    <button class="back-btn" (click)="back()">
+
+        ← Back
+
+    </button>
+
+    <div class="teacher-card">
+
+        <img *ngIf="
+                getTeacherAvatar()
+            " [src]="
+                getTeacherAvatar()
+            " class="teacher-avatar">
+
+        <div *ngIf="
+                !getTeacherAvatar()
+            " class="teacher-avatar placeholder">
+
+            {{
+            getTeacherName()
+            .charAt(0)
+            }}
+
+        </div>
+
+        <div class="teacher-info">
+
+            <h1>
+
+                {{
+                getTeacherName()
+                }}
+
+            </h1>
+
+            <p class="specialty">
+
+                {{
+                getSpecialty()
+                }}
+
+            </p>
+
+            <div class="rating">
+
+                ⭐
+                {{
+                getRating()
+                }}
+
+                ·
+
+                {{
+                getTotalReviews()
+                }}
+                reviews
+
+            </div>
+
+            <div class="price">
+
+                $
+                {{
+                getPricePerHour()
+                }}/hour
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div *ngIf="
+            schedule.teacherProfile
+                ?.description
+        " class="description-card">
+
+        <h2>
+
+            About Teacher
+
+        </h2>
+
+        <p>
+
+            {{
+            schedule.teacherProfile
+            ?.description
+            }}
+
+        </p>
+
+    </div>
+
+    <div *ngIf="
+            schedule.teacherProfile
+                ?.introVideoUrl
+        " class="video-card">
+
+        <h2>
+
+            Introduction Video
+
+        </h2>
+
+        <video controls>
+
+            <source [src]="
+                    'http://localhost:5108/uploads/'
+                    +
+                    schedule.teacherProfile
+                        ?.introVideoUrl
+                " type="video/mp4">
+
+        </video>
+
+    </div>
+
+    <div class="schedule-card">
+
+        <h2>
+
+            Schedule Information
+
+        </h2>
+
+        <div class="time-row">
+
+            <span>
+
+                Date
+
+            </span>
+
+            <strong>
+
+                {{
+                schedule.startTime
+                | date:'dd/MM/yyyy'
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="time-row">
+
+            <span>
+
+                Start Time
+
+            </span>
+
+            <strong>
+
+                {{
+                schedule.startTime
+                | date:'HH:mm'
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="time-row">
+
+            <span>
+
+                End Time
+
+            </span>
+
+            <strong>
+
+                {{
+                schedule.endTime
+                | date:'HH:mm'
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="time-row">
+
+            <span>
+
+                Status
+
+            </span>
+
+            <strong [class.booked]="
+                    schedule.isBooked
+                ">
+
+                {{
+                schedule.isBooked
+                ? 'Booked'
+                : 'Available'
+                }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+    <button class="book-btn" [disabled]="
+            schedule.isBooked
+            ||
+            bookingLoading
+        " (click)="bookSchedule()">
+
+        {{
+        bookingLoading
+        ? 'Booking...'
+        : (
+        schedule.isBooked
+        ? 'Already Booked'
+        : 'Book Schedule'
+        )
+        }}
+
+    </button>
+
+</div>

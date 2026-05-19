@@ -8,7 +8,7 @@ namespace Backend.Models
         public string YoutubeId { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
 
-        public int CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
         public int Status { get; set; }
 
         public ICollection<Transcript>? Transcripts { get; set; }

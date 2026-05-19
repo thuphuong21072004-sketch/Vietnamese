@@ -1,0 +1,116 @@
+<div class="payment-page">
+
+    <button class="back-btn" (click)="back()">
+
+        ← Back
+
+    </button>
+
+    <div class="payment-card">
+
+        <h1>
+
+            Payment
+
+        </h1>
+
+        <p class="booking-id">
+
+            Booking ID:
+            #{{ bookingId }}
+
+        </p>
+
+        <div *ngIf="payment" class="payment-status">
+
+            <span>
+
+                Payment Status
+
+            </span>
+
+            <strong class="status-badge" [ngClass]="
+                    getStatusClass(
+                        payment.status
+                    )
+                ">
+
+                {{
+                getStatusText(
+                payment.status
+                )
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="payment-info">
+
+            <div class="info-row">
+
+                <span>
+
+                    Payment Method
+
+                </span>
+
+                <strong>
+
+                    VNPAY
+
+                </strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>
+
+                    Amount
+
+                </span>
+
+                <strong class="amount">
+
+                    $20
+
+                </strong>
+
+            </div>
+
+        </div>
+
+        <button *ngIf="!payment" class="pay-btn" [disabled]="loading" (click)="pay()">
+
+            {{
+            loading
+            ? 'Processing...'
+            : 'Pay Now'
+            }}
+
+        </button>
+
+        <button *ngIf="
+                payment
+                &&
+                payment.status === 0
+            " class="failed-btn" [disabled]="loading" (click)="paymentFailed()">
+
+            Mark Failed
+
+        </button>
+
+        <button *ngIf="
+                payment
+                &&
+                payment.status === 1
+            " class="success-btn" (click)="goBooking()">
+
+            Back To Booking
+
+        </button>
+
+    </div>
+
+</div>

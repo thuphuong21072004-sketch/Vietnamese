@@ -13,8 +13,11 @@ namespace Backend.Models
         public int Status { get; set; }
 
         public Role? Role { get; set; }
-
+        public string? Country { get; set; }
+        public string? Bio { get; set; }
+        public string? AvatarUrl { get; set; }
         public ICollection<UserQuiz>? UserQuizzes { get; set; }
         public ICollection<UserProgress>? UserProgresses { get; set; }
+        public TeacherProfile? TeacherProfile { get; set; }
     }
 }

@@ -1,0 +1,271 @@
+<div class="teacher-detail-page">
+
+    <!-- loading -->
+
+    <div *ngIf="loading" class="loading">
+
+        Loading teacher detail...
+
+    </div>
+
+    <!-- detail -->
+
+    <div *ngIf="
+            !loading
+            &&
+            teacher
+        " class="teacher-detail-card">
+
+        <!-- back -->
+
+        <button class="back-btn" (click)="backToList()">
+
+            Back To List
+
+        </button>
+
+        <!-- header -->
+
+        <div class="teacher-header">
+
+            <img *ngIf="
+                    teacher.user?.avatarUrl
+                " [src]="getImageUrl(
+                    teacher.user?.avatarUrl
+                )" class="teacher-avatar">
+
+            <div *ngIf="
+                    !teacher.user?.avatarUrl
+                " class="
+                    teacher-avatar
+                    placeholder
+                ">
+
+                {{
+                teacher.user?.name
+                ?.charAt(0)
+                || 'T'
+                }}
+
+            </div>
+
+            <!-- info -->
+
+            <div class="teacher-info">
+
+                <h1>
+
+                    {{
+                    teacher.user?.name
+                    }}
+
+                </h1>
+
+                <p class="specialty">
+
+                    {{
+                    teacher.specialty
+                    }}
+
+                </p>
+
+                <div class="
+                        status-badge
+                    " [ngClass]="
+                        getStatusClass(
+                            teacher.status
+                        )
+                    ">
+
+                    {{
+                    getStatusText(
+                    teacher.status
+                    )
+                    }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- body -->
+
+        <div class="detail-grid">
+
+            <!-- personal -->
+
+            <div class="detail-card">
+
+                <h2>
+                    Personal Information
+                </h2>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Email:
+                    </strong>
+
+                    {{
+                    teacher.user?.email
+                    }}
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Country:
+                    </strong>
+
+                    {{
+                    teacher.user?.country
+                    }}
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Bio:
+                    </strong>
+
+                    {{
+                    teacher.user?.bio
+                    }}
+
+                </div>
+
+            </div>
+
+            <!-- teacher -->
+
+            <div class="detail-card">
+
+                <h2>
+                    Teacher Information
+                </h2>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Specialty:
+                    </strong>
+
+                    {{
+                    teacher.specialty
+                    }}
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Experience:
+                    </strong>
+
+                    {{
+                    teacher.experienceYears
+                    }}
+                    years
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Price:
+                    </strong>
+
+                    ${{
+                    teacher.pricePerHour
+                    }}/hour
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Rating:
+                    </strong>
+
+                    ⭐
+                    {{
+                    teacher.ratingAverage
+                    }}
+
+                </div>
+
+                <div class="detail-item">
+
+                    <strong>
+                        Reviews:
+                    </strong>
+
+                    {{
+                    teacher.totalReviews
+                    }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- description -->
+
+        <div class="detail-card">
+
+            <h2>
+                Description
+            </h2>
+
+            <p class="description">
+
+                {{
+                teacher.description
+                }}
+
+            </p>
+
+        </div>
+
+        <!-- intro video -->
+
+        <div *ngIf="
+                teacher.introVideoUrl
+            " class="detail-card">
+
+            <h2>
+                Introduction Video
+            </h2>
+
+            <video [src]="
+                    teacher.introVideoUrl
+                " controls class="intro-video">
+            </video>
+
+        </div>
+
+        <!-- admin actions -->
+
+        <div *ngIf="canReview()" class="admin-actions">
+
+            <button class="approve-btn" (click)="approveTeacher()">
+
+                Approve
+
+            </button>
+
+            <button class="reject-btn" (click)="rejectTeacher()">
+
+                Reject
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

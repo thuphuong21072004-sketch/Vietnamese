@@ -108,40 +108,50 @@
 
                 <div *ngIf="!q.isDelete">
 
-                    <div class="question-header question-inline-header">
-
-                        <h4>
+                    <div class="question-header-inline">
+                    
+                        <h4 class="question-number">
                             Câu {{ i + 1 }}
                         </h4>
+                    
                         <div class="question-inline-content">
                         
                             <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
                             </textarea>
                         
-                            <div *ngIf="q.imageUrl" class="media-preview small">
+                            <div *ngIf="q.imageUrl" class="media-preview-inline">
                         
-                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
+                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" alt="Question image" />
                         
                                 <button class="remove-media" (click)="q.imageUrl = null">
+                        
                                     ×
+                        
                                 </button>
                         
                             </div>
                         
-                            <div *ngIf="q.audioUrl" class="media-preview small">
+                            <div *ngIf="q.audioUrl" class="media-preview-inline">
                         
-                                <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                <audio controls>
+                        
+                                    <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
+                        
                                 </audio>
                         
                                 <button class="remove-media" (click)="q.audioUrl = null">
+                        
                                     ×
+                        
                                 </button>
                         
                             </div>
                         
                         </div>
 
-                        <div class="question-toolbar question-toolbar-full">
+                        </div>
+
+<div class="question-toolbar-inline">
 
                             <div class="media-tools">
 
@@ -223,8 +233,7 @@
                         
                                 <div *ngIf="a.imageUrl" class="media-preview small">
                                 
-                                    <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
-                                
+                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
                                     <button class="remove-media" (click)="a.imageUrl = null">
                                         ×
                                     </button>
@@ -233,7 +242,10 @@
                                 
                                 <div *ngIf="a.audioUrl" class="media-preview small">
                                 
-                                    <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                    <audio controls>
+                                    
+                                        <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
+                                    
                                     </audio>
                                 
                                     <button class="remove-media" (click)="a.audioUrl = null">
@@ -339,11 +351,12 @@
 
                                 <div *ngIf="!q.isDelete">
 
-                                    <div class="question-header question-inline-header">
-
-                                        <h4>
+                                    <div class="question-header-inline">
+                                    
+                                        <h4 class="question-number">
                                             Câu {{ i + 1 }}
                                         </h4>
+                                    
                                         <div class="question-inline-content">
                                         
                                             <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
@@ -351,8 +364,8 @@
                                         
                                             <div *ngIf="q.imageUrl" class="media-preview small">
                                         
-                                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
-                                        
+                                                <img class="preview-image" *ngIf="q.imageUrl" [src]="'http://localhost:5108/images/' + q.imageUrl"
+                                                    alt="Question image" />
                                                 <button class="remove-media" (click)="q.imageUrl = null">
                                                     ×
                                                 </button>
@@ -361,7 +374,10 @@
                                         
                                             <div *ngIf="q.audioUrl" class="media-preview small">
                                         
-                                                <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                                <audio controls>
+                                                
+                                                    <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
+                                                
                                                 </audio>
                                         
                                                 <button class="remove-media" (click)="q.audioUrl = null">
@@ -372,7 +388,9 @@
                                         
                                         </div>
 
-                                        <div class="question-toolbar question-toolbar-full">
+                                        </div>
+
+<div class="question-toolbar-inline">
 
                                             <div class="media-tools">
 
@@ -458,8 +476,7 @@
                                         
                                                 <div *ngIf="a.imageUrl" class="media-preview small">
                                                 
-                                                    <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
-                                                
+                                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
                                                     <button class="remove-media" (click)="a.imageUrl = null">
                                                         ×
                                                     </button>
@@ -468,7 +485,10 @@
                                                 
                                                 <div *ngIf="a.audioUrl" class="media-preview small">
                                                 
-                                                    <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                                    <audio controls>
+                                                    
+                                                        <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
+                                                    
                                                     </audio>
                                                 
                                                     <button class="remove-media" (click)="a.audioUrl = null">
@@ -552,8 +572,8 @@
                                     
                                         <div *ngIf="psg.imageUrl" class="media-preview passage-preview">
                                     
-                                            <img class="preview-image" [src]="'http://localhost:5108/images/' + psg.imageUrl" />
-                                    
+                                            <img class="preview-image" *ngIf="psg.imageUrl" [src]="'http://localhost:5108/images/' + psg.imageUrl"
+                                                alt="Passage image" />
                                             <button class="remove-media" (click)="psg.imageUrl = null">
                                                 ×
                                             </button>
@@ -562,7 +582,10 @@
                                     
                                         <div *ngIf="psg.audioUrl" class="media-preview passage-preview">
                                     
-                                            <audio controls [src]="'http://localhost:5108/audios/' + psg.audioUrl">
+                                            <audio controls>
+                                            
+                                                <source [src]="'http://localhost:5108/audios/' + psg.audioUrl" type="audio/mpeg" />
+                                            
                                             </audio>
                                     
                                             <button class="remove-media" (click)="psg.audioUrl = null">
@@ -629,39 +652,49 @@
 
                                         <div *ngIf="!q.isDelete">
 
-                                            <div class="question-header question-inline-header">
-
-                                                <h4>
+                                            <div class="question-header-inline">
+                                            
+                                                <h4 class="question-number">
                                                     Câu {{ i + 1 }}
                                                 </h4>
+                                            
                                                 <div class="question-inline-content">
                                                 
                                                     <textarea *ngIf="!q.imageUrl && !q.audioUrl" [(ngModel)]="q.questionText" placeholder="Enter question...">
                                                     </textarea>
                                                 
-                                                    <div *ngIf="q.imageUrl" class="media-preview small">
+                                                    <div *ngIf="q.imageUrl" class="media-preview-inline">
                                                 
-                                                        <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" />
+                                                        <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" alt="Question image" />
                                                 
                                                         <button class="remove-media" (click)="q.imageUrl = null">
+                                                
                                                             ×
+                                                
                                                         </button>
                                                 
                                                     </div>
                                                 
-                                                    <div *ngIf="q.audioUrl" class="media-preview small">
+                                                    <div *ngIf="q.audioUrl" class="media-preview-inline">
                                                 
-                                                        <audio controls [src]="'http://localhost:5108/audios/' + q.audioUrl">
+                                                        <audio controls>
+                                                
+                                                            <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
+                                                
                                                         </audio>
                                                 
                                                         <button class="remove-media" (click)="q.audioUrl = null">
+                                                
                                                             ×
+                                                
                                                         </button>
                                                 
                                                     </div>
                                                 
                                                 </div>
-                                                <div class="question-toolbar question-toolbar-full">
+                                                </div>
+
+<div class="question-toolbar-inline">
                                                 
                                                     <div class="media-tools">
                                                 
@@ -736,13 +769,15 @@
                                                 
                                                         <div *ngIf="a.imageUrl" class="media-preview small">
                                                 
-                                                            <img class="answer-image" [src]="'http://localhost:5108/images/' + a.imageUrl" />
-                                                
+                                                            <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
                                                         </div>
                                                 
                                                         <div *ngIf="a.audioUrl" class="media-preview small">
                                                 
-                                                            <audio controls [src]="'http://localhost:5108/audios/' + a.audioUrl">
+                                                            <audio controls>
+                                                            
+                                                                <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
+                                                            
                                                             </audio>
                                                 
                                                         </div>
@@ -863,8 +898,7 @@
                 </div>
 
             </div>
-            </div>
-
+           
         </div>
 
         <div class="top-actions">
@@ -920,9 +954,5 @@
                 Delete Quiz
 
             </button>
-
-        </div>
-
-    </div>
 
 </div>

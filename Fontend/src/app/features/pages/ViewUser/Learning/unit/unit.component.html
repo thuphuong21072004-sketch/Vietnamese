@@ -1,119 +1,127 @@
-<div *ngIf="!selectedUnit" class="progress-container">
+<div *ngIf="!selectedUnit" class="duo-container">
 
-    <h2>
-        My Learning Progress
-    </h2>
+    <div class="duo-header">
 
-    <div *ngIf="loading">
+        <h1>
+            {{ currentLevel?.levelName }}
+        </h1>
 
-        Loading...
+        <p>
+            {{ currentLevel?.description }}
+        </p>
 
     </div>
 
-    <div *ngFor="let level of levels"
-         class="level-card"
-         [ngClass]="getLevelState(level)">
+    <div *ngIf="loading" class="loading">
 
-        <div class="level-header">
+        Loading your progress...
 
-            <span class="icon">
+    </div>
 
-                <ng-container [ngSwitch]="getLevelState(level)">
+    <ng-container *ngFor="
+            let course of currentLevel?.courses;
+            let cIndex = index
+        ">
 
-                    <span *ngSwitchCase="'done'">✔</span>
+        <div class="duo-course">
 
-                    <span *ngSwitchCase="'current'">▶</span>
+            <div class="duo-course-sticky">
+            
+                {{ course.courseName }}
+            
+            </div>
 
-                    <span *ngSwitchDefault>🔒</span>
+            <div class="duo-path">
+
+                <ng-container *ngFor="
+                        let unit of course.units;
+                        let i = index
+                    ">
+
+                    <div #unitNode class="duo-node-wrapper" [ngClass]="{
+                            'left': i % 2 === 0,
+                            'right': i % 2 !== 0
+                        }">
+
+                        <button class="duo-node" [ngClass]="getunitState(unit)" (click)="openUnit(unit)">
+
+                            <span *ngIf="
+                                    getunitState(unit)
+                                    === 'done'
+                                ">
+
+                                ✓
+
+                            </span>
+
+                            <span *ngIf="
+                                    getunitState(unit)
+                                    === 'current'
+                                ">
+
+                                ▶
+
+                            </span>
+
+                            <span *ngIf="
+                                    getunitState(unit)
+                                    === 'locked'
+                                ">
+
+                                🔒
+
+                            </span>
+
+                        </button>
+
+                        <div class="duo-label">
+
+                            {{ unit.unitName }}
+
+                        </div>
+
+                    </div>
 
                 </ng-container>
 
-            </span>
+                <div *ngIf="
+                        cIndex !==
+                        currentLevel?.courses.length - 1
+                    " class="duo-node-wrapper center">
 
-            <h3>
+                    <button class="duo-node course-test" [disabled]="
+                            getCourseState(course)
+                            === 'locked'
+                        " (click)="openCourseQuiz(course)">
 
-                {{ level.levelName }}
+                        ★
 
-            </h3>
+                    </button>
 
-        </div>
+                    <div class="duo-label">
 
-        <div *ngFor="let course of level.courses"
-             class="course-item"
-             [ngClass]="getCourseState(course)">
+                        Skip Course Test
 
-            <div class="course-header">
+                    </div>
 
-                <span class="icon">
-
-                    <ng-container [ngSwitch]="getCourseState(course)">
-
-                        <span *ngSwitchCase="'done'">✔</span>
-
-                        <span *ngSwitchCase="'current'">▶</span>
-
-                        <span *ngSwitchDefault>🔒</span>
-
-                    </ng-container>
-
-                </span>
-
-                <span class="course-title">
-
-                    {{ course.courseName }}
-
-                </span>
-
-            </div>
-
-            <div *ngFor="let unit of course.units"
-                 class="unit-item"
-                 [ngClass]="getunitState(unit)"
-                 (click)="openUnit(unit)">
-
-                <span class="icon">
-
-                    <ng-container [ngSwitch]="getunitState(unit)">
-
-                        <span *ngSwitchCase="'done'">✔</span>
-
-                        <span *ngSwitchCase="'current'">▶</span>
-
-                        <span *ngSwitchDefault>🔒</span>
-
-                    </ng-container>
-
-                </span>
-
-                {{ unit.unitName }}
-
-            </div>
-
-            <div *ngIf="getCourseState(course) === 'current'"
-                 class="course-quiz-bottom">
-
-                <button class="quiz-btn"
-                        (click)="openCourseQuiz(course); $event.stopPropagation()">
-
-                    Skip Course Test
-
-                </button>
+                </div>
 
             </div>
 
         </div>
 
-        <div *ngIf="getLevelState(level) === 'current'"
-             class="level-quiz-bottom">
+    </ng-container>
 
-            <button class="quiz-btn"
-                    (click)="openLevelQuiz(level); $event.stopPropagation()">
+    <div class="level-test-section">
 
-                Skip Level Test
+        <button class="level-test-btn" [disabled]="
+                getLevelState(currentLevel)
+                === 'locked'
+            " (click)="openLevelQuiz(currentLevel)">
 
-            </button>
+            🏆 Skip Level Test
 
-        </div>
+        </button>
 
     </div>
 
@@ -123,8 +131,7 @@
 
     <div class="lesson-page">
 
-        <button class="back-btn"
-                (click)="selectedUnit = null">
+        <button class="back-btn" (click)="selectedUnit = null">
 
             ← Back
 
@@ -132,55 +139,79 @@
 
         <div class="unit-info">
 
+            <p class="eyebrow">
+
+                Current lesson
+
+            </p>
+
             <h1>
 
                 {{ selectedUnit.unitName }}
 
             </h1>
 
-            <div class="objective">
+            <div class="info-grid">
 
-                <strong>
-                    Objective:
-                </strong>
+                <div class="objective">
 
-                {{ selectedUnit.objective }}
+                    <strong>
 
-            </div>
+                        Objective
 
-            <div class="description">
+                    </strong>
 
-                <strong>
-                    Description:
-                </strong>
+                    <span>
 
-                {{ selectedUnit.description }}
+                        {{ selectedUnit.objective }}
+
+                    </span>
+
+                </div>
+
+                <div class="description">
+
+                    <strong>
+
+                        Description
+
+                    </strong>
+
+                    <span>
+
+                        {{ selectedUnit.description }}
+
+                    </span>
+
+                </div>
 
             </div>
 
         </div>
 
-        <video *ngIf="selectedUnit?.videoUrl"
-               controls>
+        <video *ngIf="selectedUnit?.videoUrl" controls>
 
-            <source
-                [src]="'http://localhost:5108/videos/' + selectedUnit.videoUrl"
-                type="video/mp4">
+            <source [src]="
+                    'http://localhost:5108/videos/'
+                    + selectedUnit.videoUrl
+                " type="video/mp4">
 
         </video>
 
         <div class="lesson-actions">
 
-            <button class="quiz-btn start-btn" (click)="router.navigate(['/user/quiz'], {
+            <button class="quiz-btn start-btn" (click)="router.navigate(
+                    ['/user/quiz'],
+                    {
                         queryParams: {
                             unitId: selectedUnit.unitId,
                             refType: refType,
                             refId: refId
                         }
                     })">
-            
+
                 Start Test
-            
+
             </button>
 
         </div>

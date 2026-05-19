@@ -1,35 +1,33 @@
 <div class="main-container">
     <div class="content-center">
+        <div class="search-hero">
+            <p class="eyebrow">Pronunciation search</p>
+            <h1>Hear Vietnamese in real clips</h1>
+            <p>Search a word, watch native speech, and review the meaning in one place.</p>
+        </div>
 
         <div class="search-wrapper">
             <div class="search-row">
-                <input type="text" [(ngModel)]="keyword" (keyup.enter)="onSearchClick()"
-                    placeholder="Enter Vietnamese word..." />
+                <input type="text" [(ngModel)]="keyword" (keyup.enter)="onSearchClick()" placeholder="Enter a Vietnamese word..." />
                 <button (click)="onSearchClick()">Search</button>
             </div>
         </div>
 
         <div *ngIf="hasSearched" class="title">
-            How would you say " <span class="highlight">"{{ searchkeyword }}"</span> "in Vietnamese?
+            Results for <span class="highlight">"{{ searchkeyword }}"</span>
         </div>
 
         <div *ngIf="!hasSearched" class="intro-section">
-            <p class="intro-text">
-                Speak Vietnamese with confidence with VietPhuong.
-                Learn how native speakers pronounce difficult sounds through real video clips.
-                Experience Vietnamese as it’s truly spoken — not just dictionary audio.
-            </p>
-
             <div class="examples">
-                Examples:
-                <span class="example-word">xin chào</span>,
-                <span class="example-word">gia đình</span>,
-                <span class="example-word">ngôi nhà</span>
+                Try:
+                <button type="button" class="example-word" (click)="keyword='xin chào'; onSearchClick()">xin chào</button>
+                <button type="button" class="example-word" (click)="keyword='gia đình'; onSearchClick()">gia đình</button>
+                <button type="button" class="example-word" (click)="keyword='ngôi nhà'; onSearchClick()">ngôi nhà</button>
             </div>
         </div>
 
         <div *ngIf="noResult" class="no-result">
-            No videos found for "<span class="highlight">{{keyword}}</span>"
+            No videos found for <span class="highlight">"{{ keyword }}"</span>
         </div>
 
         <div class="video-container" *ngIf="videoId">
@@ -37,80 +35,40 @@
         </div>
 
         <div class="video-controls" *ngIf="videoId">
-            <button (click)="previousVideo()">⏮</button>
-            <button (click)="back5()">⏪</button>
-            <button (click)="replay()">🔁</button>
-            <button (click)="pause()">{{ isPlaying ? '⏸' : '▶' }}</button>
-            <button (click)="forward5()">⏩</button>
-            <button (click)="nextVideo()">⏭</button>
+            <button title="Previous video" aria-label="Previous video" (click)="previousVideo()">&#9198;</button>
+            <button title="Back 5 seconds" aria-label="Back 5 seconds" (click)="back5()">&#9194;</button>
+            <button title="Replay word" aria-label="Replay word" (click)="replay()">&#8635;</button>
+            <button title="Play or pause" aria-label="Play or pause" (click)="pause()">
+                <span *ngIf="isPlaying">&#9208;</span>
+                <span *ngIf="!isPlaying">&#9654;</span>
+            </button>
+            <button title="Forward 5 seconds" aria-label="Forward 5 seconds" (click)="forward5()">&#9193;</button>
+            <button title="Next video" aria-label="Next video" (click)="nextVideo()">&#9197;</button>
         </div>
 
         <div class="dictionary-container" *ngIf="dictionaryData">
-        
             <div class="dict-header">
-        
-                <h2>
-                    {{ dictionaryData.word }}
-                </h2>
-        
-                <div class="dict-sub">
-                    Vietnamese → English
-                </div>
-        
+                <h2>{{ dictionaryData.word }}</h2>
+                <div class="dict-sub">Vietnamese to English</div>
             </div>
-        
-            <div *ngFor="
-              let group of dictionaryData.meanings
-            " class="meaning-group">
-        
-                <div class="word-type">
-        
-                    {{ group[0] }}
-        
-                </div>
-        
-                <div *ngFor="let sense of group[2]" class="sense-box">
-        
-                    <div class="english-word">
-        
-                        {{ sense[0] }}
-        
-                    </div>
-        
-                    <div class="similar-word">
-        
-                        <span>Similar:</span>
-        
-                        {{ sense[1].join(', ') }}
-        
-                    </div>
-        
-                </div>
-        
-            </div>
-        
-            <div *ngIf="
-              dictionaryData.examples &&
-              dictionaryData.examples.length > 0
-            " class="example-box">
-        
-                <div class="example-title">
-        
-                    Example Sentences
-        
-                </div>
-        
-                <div *ngFor="
-                let ex of dictionaryData.examples
-              " class="example-item">
-        
-                    <div [innerHTML]="ex[0]"></div>
-        
-                </div>
-        
-            </div>
-        
-        </div>
 
+            <div *ngFor="let group of dictionaryData.meanings" class="meaning-group">
+                <div class="word-type">{{ group[0] }}</div>
+                <div *ngFor="let sense of group[2]" class="sense-box">
+                    <div class="english-word">{{ sense[0] }}</div>
+                    <div class="similar-word">
+                        <span>Similar:</span>
+                        {{ sense[1].join(', ') }}
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="dictionaryData.examples && dictionaryData.examples.length > 0" class="example-box">
+                <div class="example-title">Example Sentences</div>
+                <div *ngFor="let ex of dictionaryData.examples" class="example-item">
+                    <div [innerHTML]="ex[0]"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

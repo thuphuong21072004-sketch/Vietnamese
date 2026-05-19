@@ -6,107 +6,172 @@ from youtube_transcript_api import YouTubeTranscriptApi
 app = Flask(__name__)
 
 
-def get_youtube_title(video_id):
-    url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()['title']
-    except Exception as e:
-        print("Title error:", e)
-
-    return video_id
-
-
-def insert_video(video_id, created_by):
-
-    conn = pyodbc.connect(
+def get_connection():
+    return pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
         "SERVER=localhost;"
         "DATABASE=vietnamese;"
         "Trusted_Connection=yes;"
     )
 
-    cursor = conn.cursor()
-    title = get_youtube_title(video_id)
+
+def get_youtube_title(video_id):
+    url = (
+        f"https://www.youtube.com/oembed?"
+        f"url=https://www.youtube.com/watch?v={video_id}&format=json"
+    )
 
     try:
-        transcript = YouTubeTranscriptApi().fetch(video_id, languages=['vi'])
+        response = requests.get(url, timeout=10)
+
+        if response.status_code == 200:
+            return response.json().get("title", video_id)
+
+    except Exception as e:
+        print("Title error:", e)
+
+    return video_id
+
+
+def get_transcript(video_id):
+
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(
+            video_id,
+            languages=['vi']
+        )
+
+        return transcript
+
     except Exception as e:
         print("Transcript error:", e)
-        transcript = []
+        return []
 
-    cursor.execute("""
-    IF NOT EXISTS (SELECT 1 FROM Videos WHERE YoutubeId = ?)
-    BEGIN
-        INSERT INTO Videos (YoutubeId, Title, CreatedBy)
-        VALUES (?, ?, ?)
-    END
-    """, (video_id, video_id, title, created_by))
 
-    conn.commit()
+def insert_video(video_id, created_by):
 
-    cursor.execute(
-        "SELECT VideoId FROM Videos WHERE YoutubeId = ?",
-        (video_id,)
-    )
+    conn = get_connection()
+    cursor = conn.cursor()
 
-    row = cursor.fetchone()
+    try:
 
-    if not row:
-        cursor.close()
-        conn.close()
-        return "Video not found"
+        title = get_youtube_title(video_id)
 
-    db_video_id = row[0]
-
-    cursor.execute(
-        "DELETE FROM Transcripts WHERE VideoId = ?",
-        (db_video_id,)
-    )
-
-    conn.commit()
-
-    data = []
-
-    for line in transcript:
-        data.append((
-            db_video_id,
-            line.text,
-            float(line.start)
+        cursor.execute("""
+            IF NOT EXISTS (
+                SELECT 1
+                FROM Videos
+                WHERE YoutubeId = ?
+            )
+            BEGIN
+                INSERT INTO Videos (
+                    YoutubeId,
+                    Title,
+                    CreatedBy,
+                    Status
+                )
+                VALUES (?, ?, ?, 1)
+            END
+        """, (
+            video_id,
+            video_id,
+            title,
+            created_by
         ))
-
-    if len(data) > 0:
-        cursor.fast_executemany = True
-
-        cursor.executemany("""
-            INSERT INTO Transcripts (VideoId, Sentence, StartTime)
-            VALUES (?, ?, ?)
-        """, data)
 
         conn.commit()
 
-    cursor.close()
-    conn.close()
+        cursor.execute("""
+            SELECT VideoId
+            FROM Videos
+            WHERE YoutubeId = ?
+        """, (video_id,))
 
-    return title
+        row = cursor.fetchone()
+
+        if not row:
+            return None
+
+        db_video_id = row[0]
+
+        cursor.execute("""
+            DELETE FROM Transcripts
+            WHERE VideoId = ?
+        """, (db_video_id,))
+
+        conn.commit()
+
+        transcript = get_transcript(video_id)
+
+        data = []
+
+        for line in transcript:
+
+            text = line.get("text", "").strip()
+
+            if text == "":
+                continue
+
+            data.append((
+                db_video_id,
+                text,
+                float(line.get("start", 0))
+            ))
+
+        if len(data) > 0:
+
+            cursor.fast_executemany = True
+
+            cursor.executemany("""
+                INSERT INTO Transcripts (
+                    VideoId,
+                    Sentence,
+                    StartTime
+                )
+                VALUES (?, ?, ?)
+            """, data)
+
+            conn.commit()
+
+        return title
+
+    except Exception as e:
+
+        conn.rollback()
+        raise e
+
+    finally:
+
+        cursor.close()
+        conn.close()
+
 
 @app.route('/crawl', methods=['POST'])
 def crawl():
 
     try:
+
         data = request.get_json()
 
         print("Request:", data)
 
         if not data:
-            return jsonify({"error": "No JSON received"}), 400
+            return jsonify({
+                "error": "No JSON received"
+            }), 400
 
         video_id = data.get('youtubeId')
         created_by = data.get('createdBy')
 
-        if not video_id or not created_by:
-            return jsonify({"error": "Missing youtubeId or createdBy"}), 400
+        if not video_id:
+            return jsonify({
+                "error": "youtubeId is required"
+            }), 400
+
+        if created_by is None:
+            return jsonify({
+                "error": "createdBy is required"
+            }), 400
 
         title = insert_video(video_id, created_by)
 
@@ -116,6 +181,7 @@ def crawl():
         })
 
     except Exception as e:
+
         print("ERROR:", e)
 
         return jsonify({
@@ -123,5 +189,10 @@ def crawl():
             "message": str(e)
         }), 500
 
+
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(
+        host='0.0.0.0',
+        port=5001,
+        debug=True
+    )

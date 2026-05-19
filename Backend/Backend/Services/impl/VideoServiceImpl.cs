@@ -34,17 +34,7 @@ namespace Backend.Services.impl
             }
             return false;
         }
-        /*
-         * kiem tra quyen user
-         * 
-         * thuphuong21072004
-         */
-        private bool ValidateUser()
-        {
-            string role = _userContext.GetRole();
-            if (role == common.Constant.Role.User) { return true; }
-            return false;
-        }
+       
         /*
          * kiêm tra cong tac vien
          * 

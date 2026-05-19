@@ -22,8 +22,15 @@ export class LoginComponent {
   ) {}
 
   login() {
+    if (!this.email || !this.password) {
+      alert('Email and password required');
+
+      return;
+    }
+
     const data = {
       email: this.email,
+
       password: this.password,
     };
 
@@ -35,6 +42,7 @@ export class LoginComponent {
           window.location.reload();
         });
       },
+
       error: (err) => {
         this.baseService.handleError(err, 'Login failed');
       },

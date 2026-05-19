@@ -1,0 +1,169 @@
+<div class="booking-page">
+
+    <div class="page-header">
+
+        <h1>
+
+            My Bookings
+
+        </h1>
+
+        <p>
+
+            Your booked online classes
+
+        </p>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading bookings...
+
+    </div>
+
+    <div *ngIf="
+            !loading
+            &&
+            bookings.length === 0
+        " class="empty-state">
+
+        No bookings found
+
+    </div>
+
+    <div class="booking-grid">
+
+        <div *ngFor="
+                let item of bookings
+            " class="booking-card">
+
+            <div class="teacher-top">
+
+                <img *ngIf="
+                        getAvatar(item)
+                    " [src]="
+                        getAvatar(item)
+                    " class="teacher-avatar">
+
+                <div *ngIf="
+                        !getAvatar(item)
+                    " class="teacher-avatar placeholder">
+
+                    {{
+                    getTeacherName(item)
+                    .charAt(0)
+                    }}
+
+                </div>
+
+                <div class="teacher-info">
+
+                    <h2>
+
+                        {{
+                        getTeacherName(item)
+                        }}
+
+                    </h2>
+
+                    <span class="status-badge" [ngClass]="
+                            getStatusClass(
+                                item.status
+                            )
+                        ">
+
+                        {{
+                        getStatusText(
+                        item.status
+                        )
+                        }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="booking-body">
+
+                <div class="info-row">
+
+                    <span>
+
+                        Date
+
+                    </span>
+
+                    <strong>
+
+                        {{
+                        item.startTime
+                        | date:'dd/MM/yyyy'
+                        }}
+
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+
+                        Time
+
+                    </span>
+
+                    <strong>
+
+                        {{
+                        item.startTime
+                        | date:'HH:mm'
+                        }}
+
+                        -
+
+                        {{
+                        item.endTime
+                        | date:'HH:mm'
+                        }}
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <div class="booking-actions">
+
+                <button class="detail-btn" (click)="
+                        openDetail(
+                            item.bookingId
+                        )
+                    ">
+
+                    View Detail
+
+                </button>
+
+                <button *ngIf="
+                        item.status !== 2
+                        &&
+                        item.status !== 3
+                    " class="cancel-btn" (click)="
+                        cancelBooking(
+                            item.bookingId
+                        )
+                    ">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

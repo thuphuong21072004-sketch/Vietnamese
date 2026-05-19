@@ -530,19 +530,52 @@
 
             <div class="result-summary">
             
-                <div>
-                    Correct answers:
-                    {{ correctCount }}
+                <div class="summary-card correct-card">
+            
+                    <div class="summary-number">
+            
+                        {{ correctCount }}
+            
+                    </div>
+            
+                    <div class="summary-label">
+            
+                        Correct
+            
+                    </div>
+            
                 </div>
             
-                <div>
-                    Wrong answers:
-                    {{ wrongCount }}
+                <div class="summary-card wrong-card">
+            
+                    <div class="summary-number">
+            
+                        {{ wrongCount }}
+            
+                    </div>
+            
+                    <div class="summary-label">
+            
+                        Wrong
+            
+                    </div>
+            
                 </div>
             
-                <div>
-                    Unanswered:
-                    {{ unansweredCount }}
+                <div class="summary-card unanswered-card">
+            
+                    <div class="summary-number">
+            
+                        {{ unansweredCount }}
+            
+                    </div>
+            
+                    <div class="summary-label">
+            
+                        Unanswered
+            
+                    </div>
+            
                 </div>
             
             </div>

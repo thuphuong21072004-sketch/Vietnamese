@@ -220,5 +220,22 @@ namespace Backend.Repository.impl
 
             await Task.CompletedTask;
         }
+        public async Task<bool>
+    ExistsProgress(
+        int userId,
+        string refType,
+        int refId
+    )
+        {
+            return await _context
+                .UserProgress
+                .AnyAsync(x =>
+                    x.UserId == userId
+                    &&
+                    x.RefType == refType
+                    &&
+                    x.RefId == refId
+                );
+        }
     }
 }

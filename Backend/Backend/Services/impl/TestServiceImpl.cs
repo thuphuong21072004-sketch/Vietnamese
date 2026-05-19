@@ -4,6 +4,7 @@ using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
 using Microsoft.EntityFrameworkCore;
+using Backend.Services.Interfaces;
 
 namespace Backend.Services.impl
 {
@@ -23,7 +24,8 @@ namespace Backend.Services.impl
         private readonly LevelRepository _levelRepository;
         private readonly CourseRepository _courseRepository;
         private readonly UnitRepository _unitRepository;
-
+        private readonly UserRepository _userRepository;
+        private readonly NotificationService _notificationService;
         public TestServiceImpl(
             UserContextUtil userContext,
             QuizRepository quizRepository,
@@ -38,7 +40,9 @@ namespace Backend.Services.impl
             ProgressRepository progressRepository,
             LevelRepository levelRepository,
             CourseRepository courseRepository,
-            UnitRepository unitRepository)
+            UnitRepository unitRepository,
+            UserRepository userRepository,
+            NotificationService notificationService)
         {
             _userContext = userContext;
             _quizRepository = quizRepository;
@@ -54,6 +58,8 @@ namespace Backend.Services.impl
             _levelRepository = levelRepository;
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
+            _userRepository = userRepository;
+            _notificationService = notificationService;
         }
 
         /* kiểm tra admin
@@ -82,7 +88,9 @@ namespace Backend.Services.impl
          */
         public async Task UnlockNextLevel(int UnitId)
         {
-            int userId = _userContext.GetUserId();
+            var email= _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
             string refTypeLevel = common.Constant.RefType.Level;
             string refTypeCourse = common.Constant.RefType.Course;
             string refTypeUnit =
@@ -212,7 +220,8 @@ namespace Backend.Services.impl
         public async Task UnlockNextCourse(int UnitId)
         {
             string refTypeCourse = common.Constant.RefType.Course;
-            int userId = _userContext.GetUserId();
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             string refTypeUnit =
     common.Constant.RefType.Unit;
 
@@ -313,7 +322,8 @@ namespace Backend.Services.impl
          */
         public async Task UnlockNextUnit(int UnitId)
         {
-            int userId = _userContext.GetUserId();
+            var email= _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             string refTypeUnit = common.Constant.RefType.Unit;
 
             var Unit = await _unitRepository.GetUnitById(UnitId);
@@ -581,8 +591,8 @@ namespace Backend.Services.impl
          */
         public async Task SubmitQuiz(int quizId, List<int> answerIds)
         {
-            int userId = _userContext.GetUserId();
-
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             var quiz = await _quizRepository.GetQuizById(quizId);
 
             var questions = await _questionRepository.GetQuestionsByQuiz(quizId);
@@ -677,6 +687,7 @@ namespace Backend.Services.impl
 
             if (!isPassed)
             {
+
                 return;
             }
 
@@ -805,7 +816,7 @@ namespace Backend.Services.impl
                         levelProgress.CompletedDate =
                             DateTime.Now;
 
-                        
+
                     }
                 }
 
@@ -893,18 +904,35 @@ namespace Backend.Services.impl
 
                         if (unitProgress == null)
                         {
-                            await _progressRepository
-                                .AddUserProgress(
-                                    new UserProgress
-                                    {
-                                        UserId = userId,
-                                        RefType =
-                                            common.Constant.RefType.Unit,
-                                        RefId = firstUnit.UnitId,
-                                        AssignedDate = DateTime.Now,
-                                        Status = false
-                                    }
-                                );
+                            bool exists =
+                                await _progressRepository
+                                    .ExistsProgress(
+                                        userId,
+                                        common.Constant.RefType.Unit,
+                                        firstUnit.UnitId
+                                    );
+
+                            if (!exists)
+                            {
+                                await _progressRepository
+                                    .AddUserProgress(
+                                        new UserProgress
+                                        {
+                                            UserId = userId,
+
+                                            RefType =
+                                                common.Constant.RefType.Unit,
+
+                                            RefId =
+                                                firstUnit.UnitId,
+
+                                            AssignedDate =
+                                                DateTime.Now,
+
+                                            Status = false
+                                        }
+                                    );
+                            }
                         }
                     }
                 }
@@ -932,20 +960,40 @@ namespace Backend.Services.impl
                             unit.UnitId,
                             common.Constant.RefType.Unit
                         );
-                
+
                 if (currentUnitProgress == null)
                 {
-                    await _progressRepository.AddUserProgress(
-                        new UserProgress
-                        {
-                            UserId = userId,
-                            RefType = common.Constant.RefType.Unit,
-                            RefId = unit.UnitId,
-                            AssignedDate = DateTime.Now,
-                            CompletedDate = DateTime.Now,
-                            Status = true
-                        }
-                    );
+                    bool exists =
+                        await _progressRepository
+                            .ExistsProgress(
+                                userId,
+                                common.Constant.RefType.Unit,
+                                unit.UnitId
+                            );
+
+                    if (!exists)
+                    {
+                        await _progressRepository
+                            .AddUserProgress(
+                                new UserProgress
+                                {
+                                    UserId = userId,
+
+                                    RefType =
+                                        common.Constant.RefType.Unit,
+
+                                    RefId = unit.UnitId,
+
+                                    AssignedDate =
+                                        DateTime.Now,
+
+                                    CompletedDate =
+                                        DateTime.Now,
+
+                                    Status = true
+                                }
+                            );
+                    }
                 }
                 else
                 {
@@ -980,18 +1028,35 @@ namespace Backend.Services.impl
 
                     if (nextUnitProgress == null)
                     {
-                        await _progressRepository
-                            .AddUserProgress(
-                                new UserProgress
-                                {
-                                    UserId = userId,
-                                    RefType =
-                                        common.Constant.RefType.Unit,
-                                    RefId = nextUnit.UnitId,
-                                    AssignedDate = DateTime.Now,
-                                    Status = false
-                                }
-                            );
+                        bool exists =
+                            await _progressRepository
+                                .ExistsProgress(
+                                    userId,
+                                    common.Constant.RefType.Unit,
+                                    nextUnit.UnitId
+                                );
+
+                        if (!exists)
+                        {
+                            await _progressRepository
+                                .AddUserProgress(
+                                    new UserProgress
+                                    {
+                                        UserId = userId,
+
+                                        RefType =
+                                            common.Constant.RefType.Unit,
+
+                                        RefId =
+                                            nextUnit.UnitId,
+
+                                        AssignedDate =
+                                            DateTime.Now,
+
+                                        Status = false
+                                    }
+                                );
+                        }
                     }
 
                     await _progressRepository.Save();
@@ -1084,18 +1149,35 @@ namespace Backend.Services.impl
 
                         if (firstUnitProgress == null)
                         {
-                            await _progressRepository
-                                .AddUserProgress(
-                                    new UserProgress
-                                    {
-                                        UserId = userId,
-                                        RefType =
-                                            common.Constant.RefType.Unit,
-                                        RefId = firstUnit.UnitId,
-                                        AssignedDate = DateTime.Now,
-                                        Status = false
-                                    }
-                                );
+                            bool exists =
+                                await _progressRepository
+                                    .ExistsProgress(
+                                        userId,
+                                        common.Constant.RefType.Unit,
+                                        firstUnit.UnitId
+                                    );
+
+                            if (!exists)
+                            {
+                                await _progressRepository
+                                    .AddUserProgress(
+                                        new UserProgress
+                                        {
+                                            UserId = userId,
+
+                                            RefType =
+                                                common.Constant.RefType.Unit,
+
+                                            RefId =
+                                                firstUnit.UnitId,
+
+                                            AssignedDate =
+                                                DateTime.Now,
+
+                                            Status = false
+                                        }
+                                    );
+                            }
                         }
                     }
                 }
@@ -1159,22 +1241,58 @@ namespace Backend.Services.impl
                 foreach (var unit in units)
                 {
                     var unitProgress =
-                        await _progressRepository.GetUserUnitByUnitId(
-                            userId,
-                            unit.UnitId,
-                            common.Constant.RefType.Unit
-                        );
+                        await _progressRepository
+                            .GetUserUnitByUnitId(
+                                userId,
+                                unit.UnitId,
+                                common.Constant.RefType.Unit
+                            );
 
-                    if (unitProgress != null)
+                    if (unitProgress == null)
+                    {
+                        bool exists =
+                            await _progressRepository
+                                .ExistsProgress(
+                                    userId,
+                                    common.Constant.RefType.Unit,
+                                    unit.UnitId
+                                );
+
+                        if (!exists)
+                        {
+                            await _progressRepository
+                                .AddUserProgress(
+                                    new UserProgress
+                                    {
+                                        UserId = userId,
+
+                                        RefType =
+                                            common.Constant.RefType.Unit,
+
+                                        RefId = unit.UnitId,
+
+                                        AssignedDate =
+                                            DateTime.Now,
+
+                                        CompletedDate =
+                                            DateTime.Now,
+
+                                        Status = true
+                                    }
+                                );
+                        }
+                    }
+                    else
                     {
                         unitProgress.Status = true;
 
                         unitProgress.CompletedDate =
                             DateTime.Now;
 
-                        await _progressRepository.UpdateUserProgress(
-                            unitProgress
-                        );
+                        await _progressRepository
+                            .UpdateUserProgress(
+                                unitProgress
+                            );
                     }
                 }
 
@@ -1185,7 +1303,6 @@ namespace Backend.Services.impl
                     ))
                     .OrderBy(x => x.OrderIndex)
                     .FirstOrDefault(x => x.OrderIndex > course.OrderIndex);
-
                 if (nextCourse != null)
                 {
                     var existedCourse =
@@ -1198,24 +1315,35 @@ namespace Backend.Services.impl
 
                     if (existedCourse == null)
                     {
-                        await _progressRepository.AddUserProgress(
-                            new UserProgress
-                            {
-                                UserId = userId,
-                                RefType =
-                                    common.Constant.RefType.Course,
-                                RefId = nextCourse.CourseId,
-                                AssignedDate = DateTime.Now,
-                                Status = false
-                            }
-                        );
+                        await _progressRepository
+                            .AddUserProgress(
+                                new UserProgress
+                                {
+                                    UserId = userId,
+
+                                    RefType =
+                                        common.Constant.RefType.Course,
+
+                                    RefId =
+                                        nextCourse.CourseId,
+
+                                    AssignedDate =
+                                        DateTime.Now,
+
+                                    Status = false
+                                }
+                            );
                     }
 
+                    /*
+                     * chỉ unlock unit đầu tiên
+                     */
                     var firstUnit =
-                        (await _unitRepository.GetAllUnits(
-                            nextCourse.CourseId,
-                            true
-                        ))
+                        (await _unitRepository
+                            .GetAllUnits(
+                                nextCourse.CourseId,
+                                true
+                            ))
                         .OrderBy(x => x.OrderIndex)
                         .FirstOrDefault();
 
@@ -1231,20 +1359,39 @@ namespace Backend.Services.impl
 
                         if (existedUnit == null)
                         {
-                            await _progressRepository.AddUserProgress(
-                                new UserProgress
-                                {
-                                    UserId = userId,
-                                    RefType =
+                            bool exists =
+                                await _progressRepository
+                                    .ExistsProgress(
+                                        userId,
                                         common.Constant.RefType.Unit,
-                                    RefId = firstUnit.UnitId,
-                                    AssignedDate = DateTime.Now,
-                                    Status = false
-                                }
-                            );
+                                        firstUnit.UnitId
+                                    );
+
+                            if (!exists)
+                            {
+                                await _progressRepository
+                                    .AddUserProgress(
+                                        new UserProgress
+                                        {
+                                            UserId = userId,
+
+                                            RefType =
+                                                common.Constant.RefType.Unit,
+
+                                            RefId =
+                                                firstUnit.UnitId,
+
+                                            AssignedDate =
+                                                DateTime.Now,
+
+                                            Status = false
+                                        }
+                                    );
+                            }
                         }
                     }
                 }
+
                 await _progressRepository.Save();
 
                 return;
@@ -1275,7 +1422,7 @@ namespace Backend.Services.impl
                     currentLevelProgress.Status = true;
 
                     currentLevelProgress.CompletedDate = DateTime.Now;
-                    await _progressRepository.UpdateUserProgress(currentLevelProgress );
+                    await _progressRepository.UpdateUserProgress(currentLevelProgress);
 
                 }
 
@@ -1419,17 +1566,35 @@ namespace Backend.Services.impl
 
                             if (existedUnit == null)
                             {
-                                await _progressRepository.AddUserProgress(
-                                    new UserProgress
-                                    {
-                                        UserId = userId,
-                                        RefType =
+                                bool exists =
+                                    await _progressRepository
+                                        .ExistsProgress(
+                                            userId,
                                             common.Constant.RefType.Unit,
-                                        RefId = firstUnit.UnitId,
-                                        AssignedDate = DateTime.Now,
-                                        Status = false
-                                    }
-                                );
+                                            firstUnit.UnitId
+                                        );
+
+                                if (!exists)
+                                {
+                                    await _progressRepository
+                                        .AddUserProgress(
+                                            new UserProgress
+                                            {
+                                                UserId = userId,
+
+                                                RefType =
+                                                    common.Constant.RefType.Unit,
+
+                                                RefId =
+                                                    firstUnit.UnitId,
+
+                                                AssignedDate =
+                                                    DateTime.Now,
+
+                                                Status = false
+                                            }
+                                        );
+                                }
                             }
                         }
                     }
@@ -1446,8 +1611,10 @@ namespace Backend.Services.impl
          */
         public async Task<UserQuizDTO?> GetMyQuizResult(int quizId)
         {
-            int currentUserId = _userContext.GetUserId();
-            var result = await _userQuizRepository.GetUserQuiz(currentUserId, quizId);
+            var email= _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+            
+            var result = await _userQuizRepository.GetUserQuiz(userId, quizId);
             if (result == null) return null;
             return _mapper.Map<UserQuizDTO>(result);
         }
@@ -1458,8 +1625,10 @@ namespace Backend.Services.impl
          */
         public async Task<List<UserAnswerDTO>> GetUserAnswerRaw(int quizId)
         {
-            int currentUserId = _userContext.GetUserId();
-            return await _userAnswerRepository.GetUserAnswers(currentUserId, quizId);
+            var email=_userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+            
+            return await _userAnswerRepository.GetUserAnswers(userId, quizId);
         }
 
         /* lấy danh sách bài kiểm tra vượt cấp

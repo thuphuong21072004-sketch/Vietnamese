@@ -1,0 +1,140 @@
+<div *ngIf="loading" class="loading">
+
+    Loading booking...
+
+</div>
+
+<div *ngIf="
+        !loading
+        &&
+        booking
+    " class="booking-detail-page">
+
+    <button class="back-btn" (click)="back()">
+
+        ← Back
+
+    </button>
+
+    <div class="top-card">
+
+        <img *ngIf="
+                getAvatar()
+            " [src]="
+                getAvatar()
+            " class="teacher-avatar">
+
+        <div class="teacher-info">
+
+            <h1>
+
+                {{
+                getTeacherName()
+                }}
+
+            </h1>
+
+            <span class="status-badge" [ngClass]="
+                    getStatusClass(
+                        booking.status
+                    )
+                ">
+
+                {{
+                getStatusText(
+                booking.status
+                )
+                }}
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="booking-info">
+
+        <div class="info-row">
+
+            <span>
+
+                Date
+
+            </span>
+
+            <strong>
+
+                {{
+                booking.startTime
+                | date:'dd/MM/yyyy'
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="info-row">
+
+            <span>
+
+                Time
+
+            </span>
+
+            <strong>
+
+                {{
+                booking.startTime
+                | date:'HH:mm'
+                }}
+
+                -
+
+                {{
+                booking.endTime
+                | date:'HH:mm'
+                }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <button *ngIf="
+                booking.status === 0
+            " class="pay-btn" (click)="goPayment()">
+
+            Go To Payment
+
+        </button>
+
+        <button *ngIf="
+                booking.status === 1
+            " class="room-btn" (click)="joinRoom()">
+
+            Join Room
+
+        </button>
+
+        <button *ngIf="
+                booking.status !== 2
+                &&
+                booking.status !== 3
+            " class="cancel-btn" [disabled]="
+                cancelLoading
+            " (click)="cancelBooking()">
+
+            {{
+            cancelLoading
+            ? 'Cancelling...'
+            : 'Cancel Booking'
+            }}
+
+        </button>
+
+    </div>
+
+</div>

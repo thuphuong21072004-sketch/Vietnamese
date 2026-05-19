@@ -15,64 +15,28 @@ namespace Backend.Common
 
         private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-        /* * Lấy UserId từ Token
-         * thuphuong21072004 
-         */
-        public int GetUserId()
-        {
-            // Kiểm tra cả hai loại claim phổ biến để tránh lỗi null
-            var id = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                     ?? User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
-            return id == null ? 0 : int.Parse(id);
-        }
-
         /*
          * Lấy Email của người dùng
          */
         public string GetEmail()
         {
-            return User?.FindFirst(ClaimTypes.Email)?.Value
-                   ?? User?.FindFirst(JwtRegisteredClaimNames.Email)?.Value ?? "";
+            return _httpContextAccessor
+                .HttpContext?
+                .User
+                .FindFirst(
+                    ClaimTypes.Email
+                )?.Value
+                ?? throw new Exception(
+                    "Email not found"
+                );
         }
-
         /*
-         * Lấy Tên hiển thị
-         */
-        public string GetName()
-        {
-            return User?.FindFirst(ClaimTypes.Name)?.Value ?? "";
-        }
-
-        /* * Lấy RoleName (Admin hoặc User)
-         * Hàm này sẽ trả về giá trị bạn đã gán ở JwtService: userData.RoleName
+         * quyền
          */
         public string GetRole()
         {
             return User?.FindFirst(ClaimTypes.Role)?.Value ?? "";
         }
-
-        /*
-         * Kiểm tra nhanh xem có phải Admin không
-         * 
-         */
-        public bool IsAdmin()
-        {
-            return GetRole().Equals(common.Constant.Role.Admin, StringComparison.OrdinalIgnoreCase);
-        }
-        /*
-         * kiểm tra có phải User không
-         */
-        public bool IsUsser()
-        {
-            return GetRole().Equals(common.Constant.Role.User, StringComparison.OrdinalIgnoreCase);
-        }
-        /*
-         * kiểm tra có phải moderator không
-         */
-        public bool IsModerator()
-        {
-            return GetRole().Equals(common.Constant.Role.Moderator, StringComparison.OrdinalIgnoreCase);
-        }
+        
     }
 }

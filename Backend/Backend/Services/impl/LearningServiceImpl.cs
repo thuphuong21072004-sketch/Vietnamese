@@ -14,6 +14,7 @@ namespace Backend.Services.impl
         private readonly UnitRepository _unitRepository;
         private readonly UserContextUtil _userContext;
         private readonly ProgressRepository _progressRepository;
+        private readonly UserRepository _userRepository;
         private readonly IMapper _mapper;
 
         public LearningServiceImpl(
@@ -21,6 +22,7 @@ namespace Backend.Services.impl
             CourseRepository courseRepository,
             UnitRepository unitRepository,
             UserContextUtil userContext,
+            UserRepository userRepository,
             IMapper mapper,
             ProgressRepository progressRepository)
         {
@@ -30,6 +32,7 @@ namespace Backend.Services.impl
             _userContext = userContext;
             _mapper = mapper;
             _progressRepository = progressRepository;
+            _userRepository = userRepository;
         }
 
         /*
@@ -174,7 +177,8 @@ namespace Backend.Services.impl
          */
         public async Task<List<CourseDTO>> GetCourses(int levelId)
         {
-            var userId = _userContext.GetUserId();
+            var email= _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
             var courses = await _courseRepository
     .GetAllCourses(levelId, null);
@@ -231,7 +235,7 @@ namespace Backend.Services.impl
                 return;
             }
 
-            var currentUser = _userContext.GetName();
+            var email = _userContext.GetEmail();
 
             var deleteIds = list
                 .Where(x => x.IsDelete && x.CourseId > 0)
@@ -263,7 +267,7 @@ namespace Backend.Services.impl
 
                     var entity = _mapper.Map<Course>(dto);
 
-                    entity.CreatedBy = currentUser;
+                    entity.CreatedBy = email;
                     entity.IsActive = IsAdmin();
                     entity.OrderIndex = currentMax;
 
@@ -306,8 +310,8 @@ namespace Backend.Services.impl
          */
         public async Task<List<UnitDTO>> GetUnits(int courseId)
         {
-            var userId = _userContext.GetUserId();
-
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             var units = await _unitRepository
     .GetAllUnits(courseId, null);
 
@@ -347,161 +351,6 @@ namespace Backend.Services.impl
         }
 
         /*
-         * Lấy tiến trình học tập
-         * O(n)
-         * thuphuong21072004m
-         */
-        
-        public async Task<List<LevelDTO>> GetMyProgress()
-        {
-            var userId = _userContext.GetUserId();
-
-            string refTypeLevel =
-                common.Constant.RefType.Level;
-
-            string refTypeCourse =
-                common.Constant.RefType.Course;
-
-            string refTypeUnit =
-                common.Constant.RefType.Unit;
-
-            await UnlockFirstUnit(userId);
-
-            var currentLevel =
-                await _progressRepository.GetCurrentProgress(
-                    userId,
-                    refTypeLevel);
-
-            var currentCourse =
-                await _progressRepository.GetCurrentProgress(
-                    userId,
-                    refTypeCourse);
-
-            var levels =
-                await _levelRepository.GetAllLevels(true)
-                ?? new List<Level>();
-
-            var result = new List<LevelDTO>();
-
-            var userLevels =
-                await _progressRepository.GetUserLevels(
-                    userId,
-                    refTypeLevel);
-
-            var userLevelDict = userLevels
-                .ToDictionary(x => x.RefId);
-
-            List<Course> currentCourses =
-                currentLevel == null
-                    ? new List<Course>()
-                    : await _courseRepository.GetAllCourses(
-                        currentLevel.RefId,
-                        true);
-
-            var userCourses =
-                currentLevel == null
-                    ? new List<UserProgress>()
-                    : await _progressRepository.GetUserCourses(
-                        userId,
-                        currentLevel.RefId,
-                        refTypeCourse);
-
-            var userCourseDict = userCourses
-                .ToDictionary(x => x.RefId);
-
-            List<Unit> currentUnits =
-                currentCourse == null
-                    ? new List<Unit>()
-                    : await _unitRepository.GetAllUnits(
-                        currentCourse.RefId,
-                        true);
-
-            var userUnits =
-                currentCourse == null
-                    ? new List<UserProgress>()
-                    : await _progressRepository.GetUserUnits(
-                        userId,
-                        currentCourse.RefId,
-                        refTypeUnit);
-
-            var userUnitDict = userUnits
-                .ToDictionary(x => x.RefId);
-
-            foreach (var level in levels
-                         .OrderBy(x => x.OrderIndex))
-            {
-                userLevelDict.TryGetValue(
-                    level.LevelId,
-                    out var levelProgress);
-
-                var levelDTO = new LevelDTO
-                {
-                    LevelId = level.LevelId,
-                    LevelName = level.LevelName,
-                    Description = level.Description,
-                    OrderIndex = level.OrderIndex,
-                    IsActive = level.IsActive,
-                    Status = levelProgress?.Status,
-                    Courses = new List<CourseDTO>()
-                };
-
-                if (currentLevel != null
-                    && level.LevelId == currentLevel.RefId)
-                {
-                    foreach (var course in currentCourses
-                                 .OrderBy(x => x.OrderIndex))
-                    {
-                        userCourseDict.TryGetValue(
-                            course.CourseId,
-                            out var courseProgress);
-
-                        var courseDTO = new CourseDTO
-                        {
-                            CourseId = course.CourseId,
-                            LevelId = course.LevelId,
-                            CourseName = course.CourseName,
-                            Description = course.Description,
-                            OrderIndex = course.OrderIndex,
-                            IsActive = course.IsActive,
-                            Status = courseProgress?.Status,
-                            Units = new List<UnitDTO>()
-                        };
-
-                        if (currentCourse != null
-                            && course.CourseId == currentCourse.RefId)
-                        {
-                            foreach (var unit in currentUnits
-                                         .OrderBy(x => x.OrderIndex))
-                            {
-                                userUnitDict.TryGetValue(
-                                    unit.UnitId,
-                                    out var unitProgress);
-
-                                var unitDTO = new UnitDTO
-                                {
-                                    UnitId = unit.UnitId,
-                                    CourseId = unit.CourseId,
-                                    UnitName = unit.UnitName,
-                                    VideoUrl = unit.VideoUrl,
-                                    Duration = unit.Duration,
-                                    OrderIndex = unit.OrderIndex,
-                                    Status = unitProgress?.Status
-                                };
-
-                                courseDTO.Units.Add(unitDTO);
-                            }
-                        }
-
-                        levelDTO.Courses.Add(courseDTO);
-                    }
-                }
-
-                result.Add(levelDTO);
-            }
-
-            return result;
-        }
-        /*
  * Lưu unit
  * O(1)
  * thuphuong21072004
@@ -518,7 +367,7 @@ namespace Backend.Services.impl
                 return;
             }
 
-            var currentUser = _userContext.GetName();
+            var currentUser = _userContext.GetEmail();
 
             if (dto.UnitId == 0)
             {
@@ -715,6 +564,50 @@ namespace Backend.Services.impl
 
             await _progressRepository.Save();
         }
+        /*
+        * Lấy tiến trình học tập
+        * O(n)
+        * thuphuong21072004m
+        */
 
+        public async Task<object> GetMyProgress()
+        {
+            var email = _userContext.GetEmail();
+
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))!.Value;
+
+            await UnlockFirstUnit(userId);
+
+            var currentLevel =
+                await _progressRepository.GetCurrentProgress(
+                    userId,
+                    common.Constant.RefType.Level);
+
+            if (currentLevel == null)
+            {
+                return null;
+            }
+
+            var level =
+                await _levelRepository.GetLevelById(
+                    currentLevel.RefId);
+
+            var courses =
+                await GetCourses(level.LevelId);
+
+            foreach (var course in courses)
+            {
+                course.Units =
+                    await GetUnits(course.CourseId);
+            }
+
+            return new
+            {
+                Level = level,
+                Courses = courses
+            };
+        }
     }
 }

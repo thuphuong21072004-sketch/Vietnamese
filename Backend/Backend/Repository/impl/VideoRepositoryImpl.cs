@@ -36,7 +36,7 @@ namespace Backend.Repository.impl
                 new
                 {
                     youtubeId,
-                    createdBy = _userContext.GetUserId()
+                    createdBy = _userContext.GetEmail()
                 });
         }
 

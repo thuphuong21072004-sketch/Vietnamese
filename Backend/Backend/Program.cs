@@ -1,14 +1,16 @@
-﻿using Backend.Data;
+﻿using Backend.Common;
+using Backend.Data;
+using Backend.Mapper;
+using Backend.Repositories;
 using Backend.Repository;
 using Backend.Repository.impl;
 using Backend.Services;
 using Backend.Services.impl;
-using Microsoft.EntityFrameworkCore;
+using Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Backend.Common;
-using Backend.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +86,60 @@ builder.Services.AddScoped<AnswerRepository, AnswerRepositoryImpl>();
 builder.Services.AddScoped<UserAnswerRepository, UserAnswerRepositoryImpl>();
 
 builder.Services.AddScoped<UserQuizRepository, UserQuizRepositoryImpl>();
+builder.Services.AddScoped<
+    NotificationRepository,
+    NotificationRepositoryImpl>();
+
+builder.Services.AddScoped<
+    NotificationService,
+    NotificationServiceImpl>();
+builder.Services.AddScoped<
+    TeacherProfileRepository,
+    TeacherProfileRepositoryImpl>();
+
+builder.Services.AddScoped<
+    TeacherProfileService,
+    TeacherProfileServiceImpl>();
+builder.Services.AddScoped<
+    TeacherAvailabilityRepository,
+    TeacherAvailabilityRepositoryImpl>();
+
+builder.Services.AddScoped<
+    TeacherAvailabilityService,
+    TeacherAvailabilityServiceImpl>();
+builder.Services.AddScoped<
+    BookingRepository,
+    BookingRepositoryImpl>();
+
+builder.Services.AddScoped<
+    BookingService,
+    BookingServiceImpl>();
+builder.Services.AddScoped<
+    PaymentRepository,
+    PaymentRepositoryImpl>();
+
+builder.Services.AddScoped<
+    PaymentService,
+    PaymentServiceImpl>();
+builder.Services.AddScoped<
+    VideoRoomRepository,
+    VideoRoomRepositoryImpl>();
+
+builder.Services.AddScoped<
+    VideoRoomService,
+    VideoRoomServiceImpl>();
+builder.Services.AddScoped<
+    ReviewRepository,
+    ReviewRepositoryImpl>();
+
+builder.Services.AddScoped<
+    ReviewService,
+    ReviewServiceImpl>();
+builder.Services.AddScoped<
+    RoleRepository,
+    RoleRepositoryImpl
+>();
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();

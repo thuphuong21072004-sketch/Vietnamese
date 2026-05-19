@@ -33,6 +33,18 @@ namespace Backend.Data
         
         public DbSet<UserAnswer> UserAnswer { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<TeacherProfile> TeacherProfiles { get; set; }
+
+        public DbSet<TeacherAvailability> TeacherAvailabilities { get; set; }
+
+        public DbSet<Booking> Bookings { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
+
+        public DbSet<Review> Reviews { get; set; }
+
+        public DbSet<VideoRoom> VideoRooms { get; set; }
 
         /* * Cấu hình các ràng buộc Cascade Delete 
          * thuphuong21072004 
@@ -176,7 +188,20 @@ namespace Backend.Data
                     "GETDATE()");
 
             modelBuilder.Entity<PlacementTest>()
-                .HasKey(x => x.PlacementId);
+    .HasKey(x => x.PlacementId);
+
+            modelBuilder.Entity<TeacherAvailability>()
+                .HasKey(x => x.AvailabilityId);
+
+            modelBuilder.Entity<TeacherAvailability>()
+                .HasIndex(x => new
+                {
+                    x.TeacherId,
+                    x.StartTime,
+                    x.EndTime
+                });
+            modelBuilder.Entity<VideoRoom>()
+    .HasKey(x => x.RoomId);
         }
 
     }

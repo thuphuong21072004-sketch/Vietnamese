@@ -18,7 +18,8 @@ namespace Backend.Services
         Task SaveUnit(UnitDTO dto);
         Task DeleteUnits(List<int> UnitIds);
 
-        Task<List<LevelDTO>> GetMyProgress();
-        
+        Task<object> GetMyProgress();
+
+
     }
 }

@@ -1,0 +1,89 @@
+<div *ngIf="loading" class="loading">
+
+    Loading room...
+
+</div>
+
+<div *ngIf="!loading" class="room-page">
+
+    <button class="back-btn" (click)="back()">
+
+        ← Back
+
+    </button>
+
+    <div class="room-card">
+
+        <h1>
+
+            Online Class Room
+
+        </h1>
+
+        <p>
+
+            Booking ID:
+            #{{ bookingId }}
+
+        </p>
+
+        <div *ngIf="room" class="room-info">
+
+            <div class="info-row">
+
+                <span>
+
+                    Room Code
+
+                </span>
+
+                <strong>
+
+                    {{
+                    room.roomCode
+                    }}
+
+                </strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>
+
+                    Expired At
+
+                </span>
+
+                <strong>
+
+                    {{
+                    room.expiredAt
+                    | date:'dd/MM/yyyy HH:mm'
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+        <button *ngIf="!room" class="create-btn" [disabled]="creating" (click)="createRoom()">
+
+            {{
+            creating
+            ? 'Creating...'
+            : 'Create Room'
+            }}
+
+        </button>
+
+        <button *ngIf="room" class="join-btn" (click)="joinRoom()">
+
+            Join Room
+
+        </button>
+
+    </div>
+
+</div>

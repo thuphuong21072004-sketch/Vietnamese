@@ -1,29 +1,68 @@
 <div class="admin-container">
     <div class="admin-card">
         <div class="card-header">
-            <h2>{{ unitId > 0 ? 'Edit Unit' : 'Add New Unit' }}</h2>
+            <div>
+                <p class="eyebrow">Learning content</p>
+                <h2>{{ unitId > 0 ? 'Edit Unit' : 'Add New Unit' }}</h2>
+            </div>
+            <span class="status-pill" [class.inactive]="!unit.isActive">
+                {{ unit.isActive ? 'Active' : 'Inactive' }}
+            </span>
         </div>
         <div class="card-body">
-            <div class="upload-zone" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()"
+            <label class="upload-zone" [class.is-dragging]="isDragging" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()"
                 (drop)="onDrop($event)">
                 <div class="upload-content">
+                    <span class="upload-icon">+</span>
+                    <strong>Upload unit video</strong>
+                    <small>Drag and drop a video here, or click to browse</small>
                     <input type="file" (change)="onFileSelect($event)" accept="video/*">
                 </div>
-            </div>
+            </label>
             <div class="video-preview" *ngIf="videoFullUrl">
+                <div class="section-title">
+                    <span>Video preview</span>
+                    <small *ngIf="unit.duration">{{ unit.duration }}s</small>
+                </div>
                 <video [src]="videoFullUrl" controls (loadedmetadata)="onVideoLoaded($event)"></video>
             </div>
             <div class="form-grid">
-                <input [(ngModel)]="unit.unitName" placeholder="Unit title">
-                <textarea [(ngModel)]="unit.description" placeholder="Description"></textarea>
-                <textarea [(ngModel)]="unit.objective" placeholder="Objective"></textarea>
+                <div class="field full">
+                    <label>Unit title</label>
+                    <input [(ngModel)]="unit.unitName" placeholder="Enter unit title">
+                </div>
+                <div class="field">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="unit.description" placeholder="Short description"></textarea>
+                </div>
+                <div class="field">
+                    <label>Objective</label>
+                    <textarea [(ngModel)]="unit.objective" placeholder="Learning objective"></textarea>
+                </div>
+                <div class="active-box full">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="unit.isActive">
+                        <span>
+                            <strong>Publish this unit</strong>
+                            <small>Students can access this lesson when it is active.</small>
+                        </span>
+                    </label>
+                </div>
             </div>
-            <button class="btn-primary" (click)="save()">Save Unit</button>
+            <div class="actions">
+                <button class="btn-primary" (click)="save()">Save Unit</button>
+            </div>
         </div>
     </div>
-    <button *ngIf="unitId > 0" class="btn-primary" (click)="showQuiz = !showQuiz">
-        {{ showQuiz ? 'Hide Quiz' : 'Manage Quiz' }}
-    </button>
+    <div class="quiz-panel" *ngIf="unitId > 0">
+        <div>
+            <p class="eyebrow">Assessment</p>
+            <h3>Unit quiz</h3>
+        </div>
+        <button class="btn-secondary" (click)="showQuiz = !showQuiz">
+            {{ showQuiz ? 'Hide Quiz' : 'Manage Quiz' }}
+        </button>
+    </div>
     
     <app-quiz *ngIf="unitId > 0 && showQuiz" [refId]="unitId" [refType]="'UNIT'">
     </app-quiz>

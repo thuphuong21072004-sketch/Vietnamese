@@ -1,0 +1,129 @@
+<div class="review-page">
+
+    <button class="back-btn" (click)="back()">
+
+        ← Back
+
+    </button>
+
+    <div class="review-card">
+
+        <h1>
+
+            Teacher Review
+
+        </h1>
+
+        <p>
+
+            Booking ID:
+            #{{ bookingId }}
+
+        </p>
+
+        <div *ngIf="reviewed && review" class="reviewed-box">
+
+            <h2>
+
+                Your Review
+
+            </h2>
+
+            <div class="rating">
+
+                ⭐ {{ review.rating }}/5
+
+            </div>
+
+            <p class="comment">
+
+                {{ review.comment }}
+
+            </p>
+
+            <div class="created-date">
+
+                {{
+                review.createdDate
+                | date:'dd/MM/yyyy HH:mm'
+                }}
+
+            </div>
+
+        </div>
+
+        <div *ngIf="!reviewed">
+
+            <div class="form-group">
+
+                <label>
+
+                    Rating
+
+                </label>
+
+                <select [(ngModel)]="rating">
+
+                    <option value="1">
+
+                        1 Star
+
+                    </option>
+
+                    <option value="2">
+
+                        2 Stars
+
+                    </option>
+
+                    <option value="3">
+
+                        3 Stars
+
+                    </option>
+
+                    <option value="4">
+
+                        4 Stars
+
+                    </option>
+
+                    <option value="5">
+
+                        5 Stars
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Comment
+
+                </label>
+
+                <textarea rows="5" [(ngModel)]="comment">
+
+                </textarea>
+
+            </div>
+
+            <button class="submit-btn" [disabled]="loading" (click)="submit()">
+
+                {{
+                loading
+                ? 'Submitting...'
+                : 'Submit Review'
+                }}
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

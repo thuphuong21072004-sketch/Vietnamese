@@ -21,6 +21,10 @@ namespace Backend.Repository
         Task<UserProgress?> GetUserProgress(int userId, string refType, int refId);
         Task<List<UserProgress>> GetUserLevels(int userId, string refType );
         Task UpdateUserProgress(UserProgress progress);
-
+        Task<bool> ExistsProgress(
+    int userId,
+    string refType,
+    int refId
+);
     }
 }

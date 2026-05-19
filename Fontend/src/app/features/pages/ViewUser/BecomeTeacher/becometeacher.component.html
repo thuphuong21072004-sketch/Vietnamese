@@ -1,0 +1,335 @@
+<div class="teacher-page">
+
+    <div class="teacher-header">
+
+        <div class="teacher-header-content">
+
+            <p class="eyebrow">
+                Teacher Dashboard
+            </p>
+
+            <h1>
+
+                {{
+                hasProfile
+                ? 'Edit Teacher Profile'
+                : 'Become a Teacher'
+                }}
+
+            </h1>
+
+            <p>
+                Create your Vietnamese teaching profile and connect with students.
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- status -->
+
+    <div *ngIf="hasProfile" class="status-alert">
+
+        <strong>
+            Status:
+        </strong>
+
+        {{ getStatusText(profile.status) }}
+
+    </div>
+
+    <!-- rejected -->
+
+    <div *ngIf="profile.status === 3" class="reject-box">
+
+        Your profile was rejected.
+        Please update your information and submit again.
+
+    </div>
+
+    <!-- pending -->
+
+    <div *ngIf="profile.status === 1" class="pending-box">
+
+        Your profile is waiting for admin review.
+
+    </div>
+
+    <!-- approved -->
+
+    <div *ngIf="profile.status === 2" class="approved-box">
+
+        Your profile has been approved.
+
+    </div>
+
+    <div class="teacher-card">
+
+        <div class="form-grid">
+
+            <!-- specialty -->
+
+            <div class="form-group">
+
+                <label>
+                    Specialty
+                </label>
+
+                <input type="text" [(ngModel)]="profile.specialty" placeholder="Pronunciation, Grammar..."
+                    [disabled]="!canEdit()">
+
+            </div>
+
+            <!-- experience -->
+
+            <div class="form-group">
+
+                <label>
+                    Experience Years
+                </label>
+
+                <input type="number" [(ngModel)]="profile.experienceYears" [disabled]="!canEdit()">
+
+            </div>
+
+            <!-- price -->
+
+            <div class="form-group">
+
+                <label>
+                    Price Per Hour
+                </label>
+
+                <input type="number" [(ngModel)]="profile.pricePerHour" [disabled]="!canEdit()">
+
+            </div>
+
+            <!-- rating -->
+
+            <div class="form-group">
+
+                <label>
+                    Rating Average
+                </label>
+
+                <input type="number" [value]="profile.ratingAverage" disabled>
+
+            </div>
+
+            <!-- reviews -->
+
+            <div class="form-group">
+
+                <label>
+                    Total Reviews
+                </label>
+
+                <input type="number" [value]="profile.totalReviews" disabled>
+
+            </div>
+
+            <!-- status -->
+
+            <div class="form-group">
+
+                <label>
+                    Status
+                </label>
+
+                <input type="text" [value]="getStatusText(profile.status)" disabled>
+
+            </div>
+
+            <!-- upload -->
+
+            <div class="form-group full">
+
+                <label>
+                    Teacher Files
+                </label>
+
+                <input type="file" multiple accept="
+                        image/*,
+                        video/*,
+                        .pdf,
+                        .doc,
+                        .docx
+                    " (change)="onTeacherFilesChange($event)" [disabled]="!canEdit()">
+
+            </div>
+
+            <!-- avatar preview -->
+
+            <div *ngIf="profile.avatarUrl" class="file-preview">
+
+                <h4>
+                    Avatar
+                </h4>
+
+                <img [src]="profile.avatarUrl" class="preview-image">
+
+            </div>
+
+            <!-- video preview -->
+
+            <div *ngIf="profile.introVideoUrl" class="file-preview">
+
+                <h4>
+                    Introduction Video
+                </h4>
+
+                <video [src]="profile.introVideoUrl" controls class="preview-video">
+                </video>
+
+            </div>
+
+            <!-- cv -->
+
+            <div *ngIf="profile.cvUrl" class="file-preview">
+
+                <h4>
+                    CV File
+                </h4>
+
+                <a [href]="profile.cvUrl" target="_blank" class="file-link">
+
+                    View CV
+
+                </a>
+
+            </div>
+
+            <!-- description -->
+
+            <div class="form-group full">
+
+                <label>
+                    Description
+                </label>
+
+                <textarea rows="6" [(ngModel)]="profile.description" placeholder="
+                        Tell students about your teaching experience...
+                    " [disabled]="!canEdit()">
+                </textarea>
+
+            </div>
+
+        </div>
+
+        <!-- buttons -->
+
+        <div class="button-group">
+
+            <!-- save -->
+
+            <button class="save-btn" *ngIf="
+                    profile.status !== 2
+                " [disabled]="loading" (click)="saveProfile()">
+
+                {{
+                loading
+                ? 'Saving...'
+                : hasProfile
+                ? 'Update Profile'
+                : 'Create Profile'
+                }}
+
+            </button>
+
+            <!-- submit -->
+
+            <button class="submit-btn" *ngIf="canSubmit()" [disabled]="loading" (click)="submitProfile()">
+
+                Submit For Review
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- preview -->
+
+    <div *ngIf="hasProfile" class="preview-card">
+
+        <div class="preview-top">
+
+            <div class="preview-avatar">
+
+                {{
+                profile.specialty
+                ?.charAt(0) || 'T'
+                }}
+
+            </div>
+
+            <div>
+
+                <h2>
+
+                    {{ profile.specialty }}
+
+                </h2>
+
+                <span>
+
+                    {{
+                    profile.experienceYears
+                    }}
+                    years experience
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="preview-body">
+
+            <p>
+
+                {{ profile.description }}
+
+            </p>
+
+        </div>
+
+        <div class="preview-footer">
+
+            <div class="preview-badge">
+
+                ${{ profile.pricePerHour }}/hour
+
+            </div>
+
+            <div class="preview-badge approved">
+
+                ⭐ {{ profile.ratingAverage }}
+
+            </div>
+
+            <div class="preview-badge">
+
+                {{ profile.totalReviews }}
+                Reviews
+
+            </div>
+
+            <div class="preview-badge status">
+
+                {{ getStatusText(profile.status) }}
+
+            </div>
+
+        </div>
+
+        <div *ngIf="profile.introVideoUrl" class="video-preview">
+
+            <video [src]="profile.introVideoUrl" controls class="preview-video">
+            </video>
+
+        </div>
+
+    </div>
+
+</div>

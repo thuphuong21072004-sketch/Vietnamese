@@ -1,10 +1,38 @@
 <header class="top-header">
     <div class="header-container">
-        <div class="logo-section">
+        <div class="logo-section" routerLink="/home">
             <img src="logo.png" alt="logo">
             <div class="site-title">
                 <h1>VIETNAMESE LEARNING</h1>
-                <p>Start your Vietnamese journey easily and confidently with VietPhuong's.</p>
+                <p>Start your Vietnamese journey easily and confidently with VietPhuong.</p>
+            </div>
+        </div>
+
+        <div class="account-area">
+            <button class="avatar-btn" (click)="toggleMenu()" aria-label="Account menu">
+                <span *ngIf="isLogin; else guestIcon">{{ userInitial }}</span>
+                <ng-template #guestIcon>
+                    <span class="person-icon"></span>
+                </ng-template>
+            </button>
+
+            <div class="account-dropdown" *ngIf="showAccountMenu">
+                <div class="account-summary" *ngIf="isLogin; else guestSummary">
+                    <strong>{{ name || 'User' }}</strong>
+                    <span>{{ role || 'Member' }}</span>
+                </div>
+
+                <ng-template #guestSummary>
+                    <div class="account-summary">
+                        <strong>Guest</strong>
+                        <span>Please log in to continue</span>
+                    </div>
+                </ng-template>
+
+                <button *ngIf="isLogin" routerLink="/profile" (click)="showAccountMenu = false">Profile</button>
+                <button *ngIf="isLogin" (click)="logout()">Logout</button>
+                <button *ngIf="!isLogin" routerLink="/login" (click)="showAccountMenu = false">Login</button>
+                <button *ngIf="!isLogin" routerLink="user/register" (click)="showAccountMenu = false">Register</button>
             </div>
         </div>
     </div>
@@ -13,88 +41,44 @@
 <div class="main-container">
 
 <aside class="left-menu">
-    <h3>Menu</h3>
-    <p *ngIf="name; else guest">
-        Hello: {{name}}
-    </p>
-    
-    <ng-template #guest>
-        <p>Please log in to continue</p>
-    </ng-template>
-    
-    <ul *ngIf="role == null">
-    <li><button class="menu-btn" routerLink="/home">Home</button></li>
-    <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
+    <div class="menu-heading">
+        <h3>Menu</h3>
+        <p *ngIf="isLogin">Hello, {{ name }}</p>
+        <p *ngIf="!isLogin">Guest access</p>
+    </div>
 
-    <li>
-        <button class="menu-btn" (click)="toggleMenu()">Account Settings</button>
-
-        <ul *ngIf="showAccountMenu">
-            <li><button class="menu-btn" routerLink="/login">Login</button></li>
-            <li><button class="menu-btn" routerLink="user/register">Register</button></li>
-        </ul>
-    </li>
-</ul>
+    <ul *ngIf="!isLogin">
+        <li><button class="menu-btn" routerLink="/home">Home</button></li>
+        <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
+    </ul>
 
     <ul *ngIf="role === 'User'">
         <li><button class="menu-btn" routerLink="/home">Home</button></li>
         <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
         <li><button class="menu-btn" routerLink="/user/units">Courses</button></li>
         <li><button class="menu-btn" routerLink="/user/tests">Practice Tests</button></li>
-        <li><button class="menu-btn" routerLink="/pronunciation">Pronunciation Practice</button></li>
-        <li><button class="menu-btn" routerLink="/classes">Online Classes</button></li>
-        <li><button class="menu-btn" routerLink="/saved">Saved Lessons</button></li>
-        <li>
-        
-            <button class="menu-btn" (click)="toggleMenu()">
-                Account Settings
-            </button>
-        
-            <ul *ngIf="showAccountMenu">
-        
-                <li *ngIf="isLogin">
-                    <button class="menu-btn" routerLink="/profile">Profile</button>
-                </li>
-                
-                <li *ngIf="isLogin">
-                    <button class="menu-btn" (click)="logout()">Logout</button>
-                </li>
-                
-        
-            </ul>
-        
-        </li>
+
+        <li><button class="menu-btn" routerLink="/user/learnOnline">Learn online</button></li>
+        <li><button class="menu-btn" routerLink="/user/speaking">Practice speaking</button></li>
+        <li><button class="menu-btn" routerLink="/user/become-teacher">Register to teach</button></li>
+        <li><button class="menu-btn" routerLink="/user/dashboard">Dashboard</button></li>
     </ul>
 
     <ul *ngIf="role === 'Admin' || role === 'Moderator'">
         <li><button class="menu-btn" routerLink="/home">Home</button></li>
-        <li><button class="menu-btn" routerLink="/dashboard">Dashboard</button></li>
+
         <li><button class="menu-btn" routerLink="admin/users">Manage Users</button></li>
         <li><button class="menu-btn" routerLink="admin/videos">Manage Videos</button></li>
         <li><button class="menu-btn" routerLink="admin/levels">Manage Lessons</button></li>
         <li><button class="menu-btn" routerLink="admin/placements">Manage Tests</button></li>
-        <li>
-        
-            <button class="menu-btn" (click)="toggleMenu()">
-                Account Settings
-            </button>
-        
-            <ul *ngIf="showAccountMenu">
-        
-                <li *ngIf="isLogin">
-                    <button class="menu-btn" routerLink="/profile">Profile</button>
-                </li>
-        
-                <li *ngIf="isLogin">
-                    <button class="menu-btn" (click)="logout()">Logout</button>
-                </li>
-        
-            </ul>
-        
-        </li>
+
+
+        <li><button class="menu-btn" routerLink="/admin/teachers">Teacher Applications</button></li>
+        <li><button class="menu-btn" routerLink="/admin/schedule">Manage Schedule</button></li> 
+        <li><button class="menu-btn" routerLink="/admin/classrooms">My Classrooms</button></li>
+        <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>
     </ul>
 </aside>
-
 
 <div class="content">
     <router-outlet></router-outlet>
@@ -106,7 +90,7 @@
     <div class="footer-container">
         <div class="footer-left">
             <h3>VIETNAMESE LEARNING</h3>
-            <p>Graduation Thesis – Faculty of Information Technology</p>
+            <p>Graduation Thesis - Faculty of Information Technology</p>
             <p>University of Transport and Communications</p>
             <p>Supervisor: PhD. Pham Dinh Phong</p>
         </div>

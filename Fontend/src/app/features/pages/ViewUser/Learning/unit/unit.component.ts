@@ -1,20 +1,26 @@
 import { Component, OnInit } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
-
+import { ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { LearningService } from '../../../../services/learning.service';
-
-import { LevelDTO } from '../../../../models/level.model';
 
 @Component({
   selector: 'app-unit',
+
   standalone: true,
+
   imports: [CommonModule],
+
   templateUrl: './unit.component.html',
+
   styleUrls: ['./unit.component.css'],
 })
 export class MyProgressComponent implements OnInit {
-  levels: LevelDTO[] = [];
+  currentLevel: any = null;
+  @ViewChildren('unitNode')
+  unitNodes!: QueryList<ElementRef>;
 
   loading = true;
 
@@ -36,14 +42,26 @@ export class MyProgressComponent implements OnInit {
   }
 
   loadProgress() {
+    this.loading = true;
+
     this.learningService.getMyProgress().subscribe({
-      next: (res) => {
-        this.levels = res;
+      next: (res: any) => {
+        console.log(res);
+
+        this.currentLevel = {
+          ...res.level,
+          courses: res.courses || [],
+        };
 
         this.loading = false;
+        setTimeout(() => {
+          this.scrollToCurrentUnit();
+        }, 200);
       },
 
-      error: () => {
+      error: (err) => {
+        console.error(err);
+
         alert('Failed to load progress');
 
         this.loading = false;
@@ -88,7 +106,7 @@ export class MyProgressComponent implements OnInit {
       return 'locked';
     }
 
-    const states: string[] = course.units.map((l: any) => this.getunitState(l));
+    const states: string[] = course.units.map((u: any) => this.getunitState(u));
 
     if (states.every((s: string) => s === 'done')) {
       return 'done';
@@ -104,14 +122,13 @@ export class MyProgressComponent implements OnInit {
 
     return 'locked';
   }
-
   getLevelState(level: any): string {
-    if (!level.courses || level.courses.length === 0) {
-      if (level.status === true) {
+    if (!level?.courses || level.courses.length === 0) {
+      if (level?.status === true) {
         return 'done';
       }
 
-      if (level.status === false) {
+      if (level?.status === false) {
         return 'current';
       }
 
@@ -157,16 +174,20 @@ export class MyProgressComponent implements OnInit {
     });
   }
 
+  closeLesson() {
+    this.selectedUnit = null;
+  }
   openLevelQuiz(level: any) {
-    if (this.getLevelState(level) !== 'current') {
+    if (!level?.courses?.length) {
       return;
     }
 
     let firstUnit: any = null;
 
-    for (const course of level.courses || []) {
+    for (const course of level.courses) {
       if (course.units && course.units.length > 0) {
         firstUnit = course.units[0];
+
         break;
       }
     }
@@ -185,8 +206,30 @@ export class MyProgressComponent implements OnInit {
       },
     });
   }
+  scrollToCurrentUnit() {
+    const nodes = this.unitNodes?.toArray();
 
-  closeLesson() {
-    this.selectedUnit = null;
+    if (!nodes?.length) {
+      return;
+    }
+
+    let currentIndex = -1;
+
+    this.currentLevel?.courses?.forEach((course: any) => {
+      course.units?.forEach((unit: any) => {
+        currentIndex++;
+
+        if (this.getunitState(unit) === 'current') {
+          const element = nodes[currentIndex]?.nativeElement;
+
+          if (element) {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }
+        }
+      });
+    });
   }
 }

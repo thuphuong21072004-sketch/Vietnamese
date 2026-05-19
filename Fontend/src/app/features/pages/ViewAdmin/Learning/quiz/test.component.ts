@@ -53,8 +53,7 @@ export class QuizComponent implements OnChanges {
 
           if (this.quiz.parts && this.quiz.parts.length > 0) {
             this.quiz.quizMode = 'part';
-          }
-          else if (this.quiz.questions && this.quiz.questions.length > 0) {
+          } else if (this.quiz.questions && this.quiz.questions.length > 0) {
             this.quiz.quizMode = 'question';
           }
 
@@ -309,16 +308,32 @@ export class QuizComponent implements OnChanges {
 
     this.learningService.uploadMedia(formData).subscribe({
       next: (res: any) => {
-        if (res.folder === 'images') {
-          target.imageUrl = res.fileName;
+        console.log('Upload response:', res);
+
+        const fileName = res.fileName || res.filename || res.url || res.data;
+
+        if (!fileName) {
+          console.error('Không có fileName');
+
+          return;
         }
 
-        if (res.folder === 'audios') {
-          target.audioUrl = res.fileName;
+        if (file.type.startsWith('image/')) {
+          target.imageUrl = fileName;
+
+          target.audioUrl = null;
+        } else if (file.type.startsWith('audio/')) {
+          target.audioUrl = fileName;
+
+          target.imageUrl = null;
         }
+
+        console.log('AFTER UPDATE', target);
       },
 
       error: (err) => {
+        console.error(err);
+
         this.baseService.handleError(err, 'Media upload failed');
       },
     });
@@ -370,7 +385,6 @@ export class QuizComponent implements OnChanges {
     });
 
     this.quiz.parts?.forEach((part: any) => {
-      
       part.questions?.forEach((q: any) => {
         if (!q.isDelete) {
           total += q.score || 0;

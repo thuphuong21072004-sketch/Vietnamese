@@ -31,22 +31,39 @@ namespace Backend.Repository.impl
          * O(n)
          * thuphuong21072004
          */
-        public async Task<User> Register(string name, string email, string password)
+        public async Task<User> Register(
+    RegisterDTO dto,
+    string hashedPassword
+)
         {
             var role = await _context.Roles
-                .FirstOrDefaultAsync(r => r.RoleName == "User");
+                .FirstOrDefaultAsync(r =>
+                    r.RoleName == "User"
+                );
 
             if (role == null)
             {
-                throw new Exception("Role 'User' không tồn tại trong Database");
+                throw new Exception(
+                    "Role User not found"
+                );
             }
 
             var user = new User
             {
-                Name = name,
-                Email = email,
-                PasswordHash = password,
+                Name = dto.Name,
+
+                Email = dto.Email,
+
+                PasswordHash = hashedPassword,
+
+                Country = dto.Country,
+
+                Bio = dto.Bio,
+
+                AvatarUrl = dto.AvatarUrl,
+
                 RoleId = role.RoleId,
+
                 Status = 1
             };
 
@@ -62,24 +79,14 @@ namespace Backend.Repository.impl
          * O(n)
          * thuphuong21072004
          */
-        public async Task<User?> GetUserById(int userId)
+        public async Task<User?> GetUserById(int id)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x =>
+                    x.UserId == id
+                );
         }
-
-        /*
-         * Cập nhật thông tin người dùng
-         * O(1)
-         * thuphuong21072004
-         */
-        public async Task Update(User user)
-        {
-            _context.Users.Update(user);
-
-            await Task.CompletedTask;
-        }
-
         /*
          * Lưu thay đổi vào database
          * O(1)
@@ -97,7 +104,9 @@ namespace Backend.Repository.impl
          */
         public async Task<int> CountUsers(string? email, int? status, int? roleId)
         {
-            IQueryable<User> query = _context.Users;
+            IQueryable<User> query =
+    _context.Users
+        .Include(x => x.Role);
 
             if (!string.IsNullOrWhiteSpace(email))
             {
@@ -122,45 +131,43 @@ namespace Backend.Repository.impl
          * O(n)
          * thuphuong21072004
          */
-        public async Task<List<UserDTO>> GetUsers(
-            string? email,
-            int? status,
-            int? roleId,
-            int page,
-            int pageSize)
+        public async Task<List<User>> GetUsers(
+    string? email,
+    int? status,
+    int? roleId,
+    int page,
+    int pageSize)
         {
-            IQueryable<User> query = _context.Users;
+            IQueryable<User> query =
+                _context.Users
+                    .AsNoTracking()
+                    .Include(x => x.Role);
 
             if (!string.IsNullOrWhiteSpace(email))
             {
-                query = query.Where(u => u.Email.Contains(email));
+                query = query.Where(x =>
+                    x.Email.Contains(email));
             }
 
             if (status.HasValue)
             {
-                query = query.Where(u => u.Status == status.Value);
+                query = query.Where(x =>
+                    x.Status == status.Value);
             }
 
             if (roleId.HasValue)
             {
-                query = query.Where(u => u.RoleId == roleId.Value);
+                query = query.Where(x =>
+                    x.RoleId == roleId.Value);
             }
 
             return await query
-                .OrderByDescending(u => u.UserId)
+                .OrderByDescending(x =>
+                    x.UserId)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(u => new UserDTO
-                {
-                    Id = u.UserId,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Status = u.Status,
-                    RoleId = u.RoleId
-                })
                 .ToListAsync();
         }
-
         /*
          * Lấy thông tin người dùng kèm quyền
          * O(n)
@@ -170,18 +177,46 @@ namespace Backend.Repository.impl
         {
             return await (
                 from user in _context.Users
+
                 join role in _context.Roles
-                    on user.RoleId equals role.RoleId
+                on user.RoleId equals role.RoleId
+
                 where user.Email == email
+
                 select new
                 {
                     UserId = user.UserId,
+
                     Name = user.Name,
+
                     Email = user.Email,
-                    PasswordHash = user.PasswordHash,
-                    RoleName = role.RoleName
-                })
+
+                    PasswordHash =
+                        user.PasswordHash,
+
+                    RoleName =
+                        role.RoleName,
+
+                    Status =
+                        user.Status
+                }
+            ).FirstOrDefaultAsync();
+        }
+        
+        public async Task<int?> GetUserIdByEmail(string email)
+        {
+            return await _context.Users
+                .Where(u => u.Email == email)
+                .Select(u => (int?)u.UserId)
                 .FirstOrDefaultAsync();
+        }
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await _context.Users
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x =>
+                    x.Email == email
+                );
         }
     }
 }

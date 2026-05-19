@@ -14,7 +14,6 @@ import { LevelDTO } from '../../models/level.model';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
-
   heroTitle = 'Master Vietnamese with a modern study path';
 
   heroDescription =
@@ -23,15 +22,18 @@ export class HomeComponent implements OnInit {
   features = [
     {
       title: 'Structured learning',
-      description: 'Move confidently from beginner basics to advanced conversation skills.',
+      description:
+        'Move confidently from beginner basics to advanced conversation skills.',
     },
     {
       title: 'Smart practice',
-      description: 'Review vocabulary and grammar with quizzes, videos and speaking exercises.',
+      description:
+        'Review vocabulary and grammar with quizzes, videos and speaking exercises.',
     },
     {
       title: 'Progress visibility',
-      description: 'Track your courses, units, and skills so you always know what to study next.',
+      description:
+        'Track your courses, units, and skills so you always know what to study next.',
     },
   ];
 
@@ -91,10 +93,12 @@ export class HomeComponent implements OnInit {
   }
 
   getUnitsCount(level: LevelDTO): number {
-    return level.courses?.reduce(
-      (sum, course) => sum + (course.units?.length || 0),
-      0,
-    ) || 0;
+    return (
+      level.courses?.reduce(
+        (sum, course) => sum + (course.units?.length || 0),
+        0,
+      ) || 0
+    );
   }
 
   private loadLevels(): void {
@@ -116,20 +120,23 @@ export class HomeComponent implements OnInit {
                 const unitRequests = courses.map((course) =>
                   this.learningService
                     .getUnits(course.courseId)
-                    .pipe(
-                      map((units) => ({ ...course, units })),
-                    ),
+                    .pipe(map((units) => ({ ...course, units }))),
                 );
 
                 return unitRequests.length
                   ? forkJoin(unitRequests)
                   : of([] as CourseDTO[]);
               }),
-              map((coursesWithUnits) => ({ ...level, courses: coursesWithUnits })),
+              map((coursesWithUnits) => ({
+                ...level,
+                courses: coursesWithUnits,
+              })),
             ),
           );
 
-          return levelRequests.length ? forkJoin(levelRequests) : of(this.levels);
+          return levelRequests.length
+            ? forkJoin(levelRequests)
+            : of(this.levels);
         }),
       )
       .subscribe({
@@ -143,5 +150,20 @@ export class HomeComponent implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+  getImageUrl(url: string): string {
+    if (!url) {
+      return '';
+    }
+
+    if (url.startsWith('data:')) {
+      return url;
+    }
+
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    return `http://localhost:5108/uploads/${url}`;
   }
 }

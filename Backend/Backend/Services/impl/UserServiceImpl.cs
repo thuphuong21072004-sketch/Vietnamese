@@ -1,4 +1,5 @@
-﻿using Backend.Common;
+﻿using AutoMapper;
+using Backend.Common;
 using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
@@ -9,15 +10,18 @@ namespace Backend.Services.impl
     public class UserServiceImpl : UserService
     {
         private readonly UserRepository _userrepository;
-
+        private readonly RoleRepository _rolerepository;
         private readonly JwtService _jwtService;
         private readonly UserContextUtil _userContext;
+        private readonly IMapper _mapper;
 
-        public UserServiceImpl(UserRepository userrepository, JwtService jwtService, UserContextUtil userContext)
+        public UserServiceImpl(UserRepository userrepository,RoleRepository roleRepository, JwtService jwtService, UserContextUtil userContext, IMapper mapper)
         {
             _userrepository = userrepository;
+            _rolerepository = roleRepository;
             _jwtService = jwtService;
             _userContext = userContext;
+            _mapper = mapper;
         }
         // validate
         /*
@@ -61,95 +65,198 @@ namespace Backend.Services.impl
          * 08/03/2026
          * thuphuong21072004
          */
-        public async Task<object?> Login(LoginDTO request)
+        public async Task<object?> Login( LoginDTO request)
         {
-            var userData = await _userrepository.GetUserWithRole(request.Email);
+            var userData =
+                await _userrepository
+                    .GetUserWithRole(
+                        request.Email
+                    );
 
-            if (userData == null) return null;
+            if (userData == null)
+            {
+                return null;
+            }
 
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(
-                request.Password,
-                (string)userData.PasswordHash
-            );
+            if (userData.Status != 1)
+            {
+                throw new Exception(
+                    "Account inactive"
+                );
+            }
 
-            if (!isPasswordValid) return null;
+            bool isPasswordValid =
+                BCrypt.Net.BCrypt.Verify(
+                    request.Password,
+                    (string)userData.PasswordHash
+                );
+
+            if (!isPasswordValid)
+            {
+                return null;
+            }
 
             var userDto = new UserDTO
             {
-                Id = userData.UserId,
                 Name = userData.Name,
-                Email = userData.Email
+
+                Email = userData.Email,
+
+                RoleName =
+                    userData.RoleName
             };
 
             return new
             {
-                token = _jwtService.GenerateToken(userDto, (string)userData.RoleName)
+                token =
+                    _jwtService.GenerateToken(
+                        userDto,
+                        (string)userData.RoleName
+                    )
             };
         }
-        /*
-         * ăng ký tài khoản mới và tạo token cho user
-         * 08/03/2026
-         * thuphuong21072004
-         */
         public async Task<object> Register(RegisterDTO request)
         {
-            var email = request.Email.Trim().ToLower();
+            var email =
+                request.Email
+                    .Trim()
+                    .ToLower();
 
-            var isExist = await _userrepository.IsEmailExist(email);
-            if (isExist) throw new Exception("Email already exists");
+            var isExist =
+                await _userrepository
+                    .IsEmailExist(email);
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            if (isExist)
+            {
+                throw new Exception(
+                    "Email already exists"
+                );
+            }
 
-            var user = await _userrepository.Register(
-                request.Name,
-                email,
-                hashedPassword
-            );
+            string hashedPassword =
+                BCrypt.Net.BCrypt
+                    .HashPassword(
+                        request.Password
+                    );
 
-            var userDto = new UserDTO { Id = user.UserId, Email = user.Email, Name = user.Name, RoleId = user.RoleId };
+            request.Email = email;
 
-            return new { token = _jwtService.GenerateToken(userDto, "User") };
+            var user =
+                await _userrepository
+                    .Register(
+                        request,
+                        hashedPassword
+                    );
+
+            var userDto = new UserDTO
+            {
+                Name = user.Name,
+
+                Email = user.Email,
+
+                RoleName =
+                    common.Constant
+                        .Role
+                        .User
+            };
+
+            return new
+            {
+                token =
+                    _jwtService.GenerateToken(
+                        userDto,
+                        common.Constant
+                            .Role
+                            .User
+                    )
+            };
         }
         /*
          * đổi mật khẩu cho user (kiểm tra mật khẩu cũ và validate)
          * 08/03/2026
          * thuphuong21072004
          */
-        public async Task ChangePassword(int userId, ChangePasswordDTO dto)
+        public async Task ChangePassword( ChangePasswordDTO dto)
         {
-            var user = await _userrepository.GetUserById(userId);
-            if (user == null) throw new Exception("User not found");
+            var email =
+                _userContext.GetEmail();
 
-            if (!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.PasswordHash))
-                throw new Exception("The old password is incorrect.");
+            var user =
+                await _userrepository
+                    .GetUserByEmail(email);
 
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            if (user == null)
+            {
+                throw new Exception(
+                    "User not found"
+                );
+            }
 
-            await _userrepository.Update(user);
-            await _userrepository.Save();
+            if (
+                !BCrypt.Net.BCrypt.Verify(
+                    dto.OldPassword,
+                    user.PasswordHash
+                )
+            )
+            {
+                throw new Exception(
+                    "The old password is incorrect."
+                );
+            }
+
+            if (dto.NewPassword.Length < 6)
+            {
+                throw new Exception(
+                    "Password too short"
+                );
+            }
+
+            user.PasswordHash =
+                BCrypt.Net.BCrypt
+                    .HashPassword(
+                        dto.NewPassword
+                    );
+
+            await _userrepository
+                .Save();
         }
         /*
          * cập nhật thông tin cá nhân
          * 
          * thuphuong21072004
          */
-        public async Task UpdateProfile(int userId, UserDTO dto)
+        public async Task UpdateProfile(UserDTO dto)
         {
-            if (string.IsNullOrEmpty(dto.Name) || string.IsNullOrEmpty(dto.Email))
-                throw new Exception("Name and Email cannot be empty");
+            var email = _userContext.GetEmail();
 
-            var user = await _userrepository.GetUserById(userId);
+            var user = await _userrepository
+                .GetUserByEmail(email);
+
             if (user == null)
+            {
                 throw new Exception("User not found");
+            }
 
-            var isExist = await _userrepository.IsEmailExist(dto.Email);
-            if (isExist && user.Email != dto.Email)
-                throw new Exception("Email already exists");
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                user.Name = dto.Name;
+            }
 
-            user.Name = dto.Name;
-            user.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.Country))
+            {
+                user.Country = dto.Country;
+            }
 
-            await _userrepository.Update(user);
+            if (!string.IsNullOrWhiteSpace(dto.Bio))
+            {
+                user.Bio = dto.Bio;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
+            {
+                user.AvatarUrl = dto.AvatarUrl;
+            }
+
             await _userrepository.Save();
         }
         /*
@@ -157,17 +264,54 @@ namespace Backend.Services.impl
          * 
          * thuphuong21072004
          */
-        public async Task<object> GetUsers(string? email, int? status, int? roleId, int page, int pageSize)
+        public async Task<object> GetUsers( string? email, int? status, int? roleId, int page, int pageSize)
         {
-            var users = await _userrepository.GetUsers(email, status, roleId, page, pageSize);
-            var total = await _userrepository.CountUsers(email, status, roleId);
+            var users =
+                await _userrepository
+                    .GetUsers(
+                        email,
+                        status,
+                        roleId,
+                        page,
+                        pageSize
+                    );
+
+            var total =
+                await _userrepository
+                    .CountUsers(
+                        email,
+                        status,
+                        roleId
+                    );
+
+            var data =
+                users.Select(x => new UserDTO
+                {
+                    Name = x.Name,
+
+                    Email = x.Email,
+
+                    Status = x.Status,
+
+                    Country = x.Country,
+
+                    Bio = x.Bio,
+
+                    RoleName =
+                        x.Role != null
+                            ? x.Role.RoleName
+                            : ""
+                }).ToList();
 
             return new
             {
                 total,
+
                 page,
+
                 pageSize,
-                data = users
+
+                data
             };
         }
         /*
@@ -175,12 +319,13 @@ namespace Backend.Services.impl
          * 
          * thuphuong21072004
          */
-        public async Task UpdateUserStatus(int userId, int status)
+        public async Task UpdateUserStatus(string email, int status)
         {
             if (!ValidateAdmin() )
             {
                 throw new UnauthorizedAccessException("You do not have permission to edit the status.");
             }
+            int userId = (await _userrepository.GetUserIdByEmail(email))!.Value;
             var user = await _userrepository.GetUserById(userId);
 
             if (user == null)
@@ -191,7 +336,6 @@ namespace Backend.Services.impl
 
             user.Status = status;
 
-            await _userrepository.Update(user);
             await _userrepository.Save();
         }
         /*
@@ -199,21 +343,60 @@ namespace Backend.Services.impl
          * 
          * thuphuong21072004
          */
-        public async Task UpdateUserRole(int userId, UserDTO dto)
+        public async Task UpdateUserRole(string email, string roleName)
         {
-            if (!ValidateAdmin() )
+            if (!ValidateAdmin())
             {
-                throw new UnauthorizedAccessException("You do not have the authority to change user permissions.");
+                throw new UnauthorizedAccessException(
+                    "You do not have permission"
+                );
             }
-            var user = await _userrepository.GetUserById(userId);
+            int userId = (await _userrepository.GetUserIdByEmail(email))!.Value;
+            var user =
+                await _userrepository
+                    .GetUserById(userId);
 
             if (user == null)
-                throw new Exception("User not found");
-            user.RoleId = dto.RoleId;
+            {
+                throw new Exception(
+                    "User not found"
+                );
+            }
 
-            await _userrepository.Update(user);
-            await _userrepository.Save();
+            var role =
+                await _rolerepository
+                    .GetByName(roleName);
+
+            if (role == null)
+            {
+                throw new Exception(
+                    "Role not found"
+                );
+            }
+
+            user.RoleId = role.RoleId;
+
+            await _userrepository
+                .Save();
         }
-   
+        public async Task<UserDTO?> GetCurrentUser()
+        {
+            var email =
+                _userContext.GetEmail();
+
+            var user =
+                await _userrepository
+                    .GetUserByEmail(email);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return _mapper.Map<
+                UserDTO
+            >(user);
+        }
+
     }
 }

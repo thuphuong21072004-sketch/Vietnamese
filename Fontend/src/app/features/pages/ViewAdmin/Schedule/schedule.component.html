@@ -1,0 +1,135 @@
+<div class="schedule-page">
+
+    <div class="schedule-card">
+
+        <h2>
+
+            Teacher Schedule
+
+        </h2>
+
+        <div class="form-grid">
+
+            <div>
+
+                <label>
+
+                    Start Time
+
+                </label>
+
+                <input type="datetime-local" [(ngModel)]="form.startTime">
+
+            </div>
+
+            <div>
+
+                <label>
+
+                    End Time
+
+                </label>
+
+                <input type="datetime-local" [(ngModel)]="form.endTime">
+
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button (click)="saveSchedule()">
+
+                {{
+                editingId
+                ? 'Update'
+                : 'Create'
+                }}
+
+            </button>
+
+            <button *ngIf="editingId" class="cancel-btn" (click)="resetForm()">
+
+                Cancel
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="schedule-list">
+
+        <div *ngFor="
+                let item of schedules
+            " class="schedule-item">
+
+            <div>
+
+                <div class="time">
+
+                    {{
+                    item.startTime
+                    | date:'HH:mm dd/MM/yyyy'
+                    }}
+
+                </div>
+
+                <div class="time">
+
+                    {{
+                    item.endTime
+                    | date:'HH:mm dd/MM/yyyy'
+                    }}
+
+                </div>
+
+            </div>
+
+            <div class="status">
+
+                <span [class.booked]="
+                        item.isBooked
+                    ">
+
+                    {{
+                    item.isBooked
+                    ? 'Booked'
+                    : 'Available'
+                    }}
+
+                </span>
+
+            </div>
+
+            <div class="item-actions">
+
+                <button [disabled]="
+                        item.isBooked
+                    " (click)="
+                        editSchedule(item)
+                    ">
+
+                    Edit
+
+                </button>
+
+                <button class="delete-btn" [disabled]="
+                        item.isBooked
+                    " (click)="
+                        deleteSchedule(
+                            item.availabilityId
+                        )
+                    ">
+
+                    Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

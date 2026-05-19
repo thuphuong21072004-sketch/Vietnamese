@@ -86,7 +86,8 @@ button:disabled,
 .button-row {
     display: flex;
     flex-wrap: wrap;
-        justify-content: flex-start;
+    justify-content: flex-start;
+}
 
 .button-row button {
     min-width: 160px;

@@ -8,10 +8,7 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>VideoUrl</th>
-                <th>Order</th>
                 <th>Description</th>
-                <th>Objective</th>
                 <th>Created By</th>
                 <th>Created Date</th>
                 <th>Active</th>
@@ -25,10 +22,7 @@
             <tr *ngFor="let unit of units; trackBy: trackById" [ngClass]="{ 'deleted-row': unit.isDelete }">
 
                 <td> {{unit.unitName}}</td>
-                <td>{{unit.videoUrl}}</td>
-                <td>{{unit.orderIndex}}</td>
                 <td>{{unit.description}}</td>
-                <td>{{unit.objective}}</td>
                 <td>{{unit.createdBy}}</td>
                 <td>{{unit.createdDate}}</td>
                 <td>{{unit.isActive}}</td>

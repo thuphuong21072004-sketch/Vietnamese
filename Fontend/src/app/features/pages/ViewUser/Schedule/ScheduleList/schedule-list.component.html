@@ -1,0 +1,190 @@
+<div class="student-schedule-page">
+
+    <div class="top-bar">
+
+        <div>
+
+            <h1>
+
+                Learn Online
+
+            </h1>
+
+            <p>
+
+                Find available schedules from teachers
+
+            </p>
+
+        </div>
+
+        <input type="date" [(ngModel)]="selectedDate" (change)="loadSchedules()">
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading schedules...
+
+    </div>
+
+    <div *ngIf="
+            !loading
+            &&
+            schedules.length === 0
+        " class="empty-state">
+
+        No schedules available
+
+    </div>
+
+    <div *ngIf="
+            !loading
+            &&
+            schedules.length > 0
+        " class="schedule-grid">
+
+        <div *ngFor="
+                let item of schedules
+            " class="schedule-card">
+
+            <div class="teacher-top">
+
+                <img *ngIf="
+                        getTeacherAvatar(item)
+                    " [src]="
+                        getTeacherAvatar(item)
+                    " class="teacher-avatar">
+
+                <div *ngIf="
+                        !getTeacherAvatar(item)
+                    " class="teacher-avatar placeholder">
+
+                    {{
+                    getTeacherName(item)
+                    .charAt(0)
+                    }}
+
+                </div>
+
+                <div class="teacher-info">
+
+                    <h2>
+
+                        {{
+                        getTeacherName(item)
+                        }}
+
+                    </h2>
+
+                    <p>
+
+                        {{
+                        getSpecialty(item)
+                        }}
+
+                    </p>
+
+                    <div class="teacher-rating">
+
+                        ⭐
+                        {{
+                        getRating(item)
+                        }}
+
+                        ·
+
+                        {{
+                        getTotalReviews(item)
+                        }}
+                        reviews
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="schedule-body">
+
+                <div class="time-row">
+
+                    <span>
+
+                        Date
+
+                    </span>
+
+                    <strong>
+
+                        {{
+                        item.startTime
+                        | date:'dd/MM/yyyy'
+                        }}
+
+                    </strong>
+
+                </div>
+
+                <div class="time-row">
+
+                    <span>
+
+                        Time
+
+                    </span>
+
+                    <strong>
+
+                        {{
+                        item.startTime
+                        | date:'HH:mm'
+                        }}
+
+                        -
+
+                        {{
+                        item.endTime
+                        | date:'HH:mm'
+                        }}
+
+                    </strong>
+
+                </div>
+
+                <div class="time-row">
+
+                    <span>
+
+                        Price
+
+                    </span>
+
+                    <strong class="price">
+
+                        $
+                        {{
+                        getPricePerHour(item)
+                        }}/hour
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <button class="view-btn" (click)="
+                    openDetail(
+                        item.availabilityId
+                    )
+                ">
+
+                View Detail
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

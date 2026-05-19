@@ -1,0 +1,245 @@
+<div class="admin-teacher-page">
+
+    <div class="admin-header">
+
+        <p class="eyebrow">
+            Admin Dashboard
+        </p>
+
+        <h1>
+            Teacher Profile Management
+        </h1>
+
+        <p>
+            Review and manage teacher applications.
+        </p>
+
+    </div>
+
+    <!-- filter -->
+
+    <div class="filter-bar">
+
+        <button [class.active]="selectedStatus === -1" (click)="setStatusFilter(-1)">
+
+            All
+
+        </button>
+
+        <button [class.active]="selectedStatus === 1" (click)="setStatusFilter(1)">
+
+            Pending
+
+        </button>
+
+        <button [class.active]="selectedStatus === 2" (click)="setStatusFilter(2)">
+
+            Approved
+
+        </button>
+
+        <button [class.active]="selectedStatus === 3" (click)="setStatusFilter(3)">
+
+            Rejected
+
+        </button>
+
+    </div>
+
+    <!-- loading -->
+
+    <div *ngIf="loading" class="loading">
+
+        Loading teacher profiles...
+
+    </div>
+
+    <!-- empty -->
+
+    <div *ngIf="
+            !loading
+            &&
+            teachers.length === 0
+        " class="empty-box">
+
+        No teacher profiles found.
+
+    </div>
+
+    <!-- list -->
+
+    <div *ngIf="
+            !loading
+            &&
+            teachers.length > 0
+        " class="teacher-grid">
+
+        <div *ngFor="
+                let teacher
+                of teachers
+            " class="teacher-card">
+
+            <!-- top -->
+
+            <div class="teacher-top">
+
+                <img *ngIf="
+                        teacher.user?.avatarUrl
+                    " [src]="getImageUrl(
+                        teacher.user?.avatarUrl
+                    )" class="teacher-avatar">
+
+                <div *ngIf="
+                        !teacher.user?.avatarUrl
+                    " class="
+                        teacher-avatar
+                        placeholder
+                    ">
+
+                    {{
+                    teacher.user?.name
+                    ?.charAt(0)
+                    || 'T'
+                    }}
+
+                </div>
+
+                <div class="teacher-info">
+
+                    <h2>
+
+                        {{
+                        teacher.user?.name
+                        }}
+
+                    </h2>
+
+                    <span>
+
+                        {{
+                        teacher.specialty
+                        }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- body -->
+
+            <div class="teacher-body">
+
+                <p>
+
+                    {{
+                    teacher.description
+                    }}
+
+                </p>
+
+            </div>
+
+            <!-- info -->
+
+            <div class="teacher-meta">
+
+                <div class="meta-item">
+
+                    <strong>
+                        Experience:
+                    </strong>
+
+                    {{
+                    teacher.experienceYears
+                    }}
+                    years
+
+                </div>
+
+                <div class="meta-item">
+
+                    <strong>
+                        Country:
+                    </strong>
+
+                    {{
+                    teacher.user?.country
+                    }}
+
+                </div>
+
+                <div class="meta-item">
+
+                    <strong>
+                        Price:
+                    </strong>
+
+                    ${{
+                    teacher.pricePerHour
+                    }}/h
+
+                </div>
+
+            </div>
+
+            <!-- footer -->
+
+            <div class="teacher-footer">
+
+                <div class="teacher-badge">
+
+                    ⭐
+                    {{
+                    teacher.ratingAverage
+                    }}
+
+                </div>
+
+                <div class="teacher-badge">
+
+                    {{
+                    teacher.totalReviews
+                    }}
+                    Reviews
+
+                </div>
+
+                <div class="
+                        teacher-badge
+                        status
+                    " [ngClass]="
+                        getStatusClass(
+                            teacher.status
+                        )
+                    ">
+
+                    {{
+                    getStatusText(
+                    teacher.status
+                    )
+                    }}
+
+                </div>
+
+            </div>
+
+            <!-- actions -->
+
+            <div class="action-group">
+
+                <button class="view-btn" (click)="openTeacherDetail(
+                        teacher.teacherProfileId
+                    )">
+
+                    View Detail
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
