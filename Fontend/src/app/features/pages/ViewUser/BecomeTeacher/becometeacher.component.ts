@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
+import { jwtDecode } from 'jwt-decode';
+
 import { TeacherProfileService } from '../../../services/teacherProfile.service';
 
 @Component({
@@ -54,9 +56,15 @@ export class TeacherProfileComponent implements OnInit {
 
   hasProfile = false;
 
+  userRole: string | null = null;
+
+  isPrivilegedTeacherUser = false;
+
   constructor(private teacherService: TeacherProfileService) {}
 
   ngOnInit(): void {
+    this.userRole = this.getRoleFromToken();
+    this.isPrivilegedTeacherUser = this.userRole === 'Admin' || this.userRole === 'Moderator';
     this.loadProfile();
   }
 
@@ -83,8 +91,8 @@ export class TeacherProfileComponent implements OnInit {
   }
 
   /*
-   * chỉ Draft / Rejected
-   * mới được sửa
+   * only Draft / Rejected
+   * can be edited
    */
   canEdit(): boolean {
     return this.profile.status === 0 || this.profile.status === 3;
@@ -92,7 +100,7 @@ export class TeacherProfileComponent implements OnInit {
 
   /*
    * Draft / Rejected
-   * mới được submit
+   * can be submitted
    */
   canSubmit(): boolean {
     return (
@@ -194,6 +202,34 @@ export class TeacherProfileComponent implements OnInit {
       default:
         return 'Unknown';
     }
+  }
+
+  private getRoleFromToken(): string | null {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload: any = jwtDecode(token);
+      const role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      return this.normalizeRole(role);
+    } catch {
+      return null;
+    }
+  }
+
+  private normalizeRole(value: any): string | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const raw = value.toString().trim().toLowerCase();
+    if (raw === 'admin' || raw === '2') return 'Admin';
+    if (raw === 'moderator' || raw === '3') return 'Moderator';
+    if (raw === 'user' || raw === '1') return 'User';
+
+    return value.toString().trim();
   }
 
   onTeacherFilesChange(event: any) {

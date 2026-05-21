@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
+import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-teacher-list',
 
   standalone: true,
 
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
 
   templateUrl: './teacher-list.component.html',
 
@@ -26,11 +27,31 @@ export class AdminTeacherListComponent implements OnInit {
 
   constructor(
     private teacherService: TeacherProfileService,
-
     private router: Router,
   ) {}
 
   ngOnInit(): void {
+    // guard: only Admin can access this page
+    const token = localStorage.getItem('token');
+    let role = null;
+    if (token) {
+      try {
+        const payload: any = jwtDecode(token as string);
+        role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        const raw = role ? role.toString().trim().toLowerCase() : '';
+        if (raw !== 'admin' && raw !== '2') {
+          this.router.navigate(['/admin/dashboard']);
+          return;
+        }
+      } catch {
+        this.router.navigate(['/admin/dashboard']);
+        return;
+      }
+    } else {
+      this.router.navigate(['/home']);
+      return;
+    }
+
     this.loadTeachers();
   }
 
@@ -124,6 +145,6 @@ export class AdminTeacherListComponent implements OnInit {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.apiBaseUrl}/uploads/${url}`;
   }
 }

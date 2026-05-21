@@ -13,11 +13,13 @@ import { jwtDecode } from 'jwt-decode';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  role: string | null = null; 
+  role: string | null = null;
   userId: number | null = null;
   name: string | null = null;
+  avatarUrl: string | null = null;
   isLogin: boolean = false;
   showAccountMenu = false;
+  adminMode: 'management' | 'teacher' = 'management';
   private lastToken: string | null = null;
 
   constructor(
@@ -52,13 +54,24 @@ export class AppComponent {
   this.name = tokenData.name;
   this.userId = tokenData.userId;
   this.isLogin = true;
+  this.adminMode = this.role === 'Moderator' ? 'teacher' : 'management';
 
   this.api.getCurrentUser().subscribe({
     next: (res: any) => {
       this.userId = res.userId ?? res.id ?? this.userId;
       const apiRole = res.role ?? res.roleName;
+      const oldRole = this.role;
       this.role = apiRole ? this.normalizeRole(apiRole) : (this.role ?? this.normalizeRole(res.roleId));
+      
+      if (this.role === 'Moderator') {
+        this.adminMode = 'teacher';
+      } else if (this.role === 'Admin') {
+        this.adminMode = 'management';
+      }
+      
+      console.log('Role update:', { oldRole, apiRole, normalizedRole: this.role, adminMode: this.adminMode });
       this.name = res.name ?? this.name;
+      this.avatarUrl = res.avatarUrl ? this.resolveAvatarUrl(res.avatarUrl) : null;
       this.isLogin = true;
 
     },
@@ -72,12 +85,26 @@ export class AppComponent {
     this.role = null;
     this.userId = null;
     this.name = null;
+    this.avatarUrl = null;
     this.isLogin = false;
     this.showAccountMenu = false;
+    this.adminMode = 'management';
   }
 
   toggleMenu() {
     this.showAccountMenu = !this.showAccountMenu;
+  }
+
+  setAdminMode(mode: 'management' | 'teacher') {
+    this.adminMode = mode;
+  }
+
+  get isAdmin() {
+    return this.role === 'Admin';
+  }
+
+  get isTeacherPanelVisible() {
+    return this.role === 'Moderator' || this.adminMode === 'teacher';
   }
 
   logout() {
@@ -88,6 +115,10 @@ export class AppComponent {
 
   get userInitial(): string {
     return (this.name || 'U').trim().charAt(0).toUpperCase();
+  }
+
+  get debugInfo(): string {
+    return `Role: ${this.role} | AdminMode: ${this.adminMode} | IsLogin: ${this.isLogin}`;
   }
 
   private getUserFromToken(token: string) {
@@ -113,6 +144,18 @@ export class AppComponent {
     } catch {
       return { role: null, name: null, userId: null };
     }
+  }
+
+  private resolveAvatarUrl(url: string): string {
+    if (!url) {
+      return '';
+    }
+
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    return `http://localhost:5108/uploads/${url}`;
   }
 
   private normalizeRole(value: any): string | null {

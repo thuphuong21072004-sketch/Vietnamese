@@ -54,7 +54,6 @@
 
             public const byte Cancelled = 2;
 
-            public const byte Completed = 3;
         }
         /*
          * trạng thái thanh toán

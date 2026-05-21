@@ -1,12 +1,12 @@
-.main-container{min-height:calc(100vh - 80px);padding:34px 18px;display:flex;justify-content:center}
+.main-container{min-height:calc(100vh - 80px);padding:34px 18px;display:flex;justify-content:center;background:transparent}
 .content-center{width:100%;max-width:1180px;text-align:center}
-.search-hero,.dictionary-container{background:#fff;border:1px solid rgba(124,108,255,.16);border-radius:24px;box-shadow:0 16px 40px rgba(31,41,55,.08)}
-.search-hero{padding:34px 24px;margin-bottom:20px;background:linear-gradient(135deg,#fff,#f3f0ff)}
+.search-hero,.dictionary-container{background:rgba(255,255,255,0.92);border:1px solid rgba(124,108,255,0.18);border-radius:24px;box-shadow:0 22px 60px rgba(99,102,241,.12)}
+.search-hero{padding:34px 24px;margin-bottom:20px;background:rgba(255,255,255,0.95)}
 .eyebrow{margin:0 0 8px;color:var(--primary-dark);font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .search-hero h1{margin:0;color:#111827;font-size:2.4rem;line-height:1.15}
 .search-hero p{margin:12px auto 0;max-width:620px;color:#64748b;line-height:1.7}
 .search-wrapper{max-width:760px;margin:0 auto 24px}
-.search-row{display:flex;gap:10px;padding:8px;background:#fff;border:1px solid #e5e7eb;border-radius:999px;box-shadow:0 12px 30px rgba(15,23,42,.08)}
+.search-row{display:flex;gap:10px;padding:10px;background:rgba(255,255,255,0.98);border:1px solid rgba(124,108,255,0.16);border-radius:999px;box-shadow:0 12px 30px rgba(99,102,241,.12)}
 .search-row input{flex:1;min-height:48px;padding:0 18px;border:0;outline:0;background:transparent;color:#111827}
 .search-row button,.example-word,.video-controls button{border:0;cursor:pointer;font-weight:800;transition:.18s ease}
 .search-row button{min-width:120px;border-radius:999px;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-dark))}
@@ -18,12 +18,12 @@
 .example-word{padding:9px 14px;border-radius:999px;color:var(--primary-dark);background:#ede9fe}
 .no-result{margin:22px 0;color:#64748b;font-weight:700}
 .video-container{display:flex;justify-content:center;margin-top:22px}
-.video-container iframe{width:min(100%,980px);height:540px;border:0;border-radius:18px;box-shadow:0 18px 42px rgba(15,23,42,.2)}
+.video-container iframe{width:min(100%,980px);height:540px;border:1px solid rgba(124,108,255,0.16);border-radius:18px;box-shadow:0 24px 60px rgba(99,102,241,.14)}
 .video-controls{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:18px}
-.video-controls button{width:52px;height:52px;padding:0;border-radius:14px;color:#334155;background:#f1f5f9;font-size:1.25rem;line-height:1}
+.video-controls button{width:52px;height:52px;padding:0;border-radius:14px;color:#334155;background:#eff2ff;font-size:1.25rem;line-height:1}
 .video-controls button:hover{color:#fff;background:var(--primary)}
-.dictionary-container{margin-top:28px;padding:28px;text-align:left}
-.dict-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #eef2f7}
+.dictionary-container{margin-top:28px;padding:28px;text-align:left;background:rgba(255,255,255,0.94);}
+.dict-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(124,108,255,0.14)}
 .dict-header h2{margin:0;color:#111827;font-size:2rem}
 .dict-sub{color:#64748b}
 .meaning-group{margin-bottom:22px}

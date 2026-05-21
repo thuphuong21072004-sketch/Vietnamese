@@ -91,6 +91,7 @@ namespace Backend.Controllers
          * O(n)
          * (thuphuong21072004) 
          */
+        [Authorize]
         [HttpGet("admin")]
         public async Task<IActionResult> GetAllTeachers([FromQuery] int? status)
         {

@@ -25,7 +25,7 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * student xem tất cả lịch trống
+   * student sees all available schedules
    */
   getAvailableSchedules(date?: string): Observable<any[]> {
     let params = new HttpParams();
@@ -40,28 +40,28 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * teacher xem lịch của mình
+   * teacher sees own schedules
    */
   getMySchedules(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/me`, this.getOptions());
   }
 
   /*
-   * xem chi tiết lịch
+   * view schedule detail
    */
   getDetail(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   /*
-   * teacher tạo lịch
+   * teacher creates schedule
    */
   create(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/create`, data, this.getOptions());
   }
 
   /*
-   * teacher sửa lịch
+   * teacher updates schedule
    */
   update(id: number, data: any): Observable<any> {
     return this.http.put(
@@ -72,17 +72,18 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * teacher xoá lịch
+   * teacher deletes schedule
    */
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/delete/${id}`, this.getOptions());
   }
 
   /*
-   * helper lấy avatar teacher
+   * helper get teacher avatar
    */
   getTeacherAvatar(item: any): string {
-    const avatar = item?.teacherProfile?.user?.avatarUrl;
+    const avatar =
+      item?.teacherProfile?.avatarUrl || item?.teacherProfile?.user?.avatarUrl;
 
     if (!avatar) {
       return '';
@@ -96,7 +97,7 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * helper lấy tên teacher
+   * helper get teacher name
    */
   getTeacherName(item: any): string {
     return item?.teacherProfile?.user?.name || 'Teacher';

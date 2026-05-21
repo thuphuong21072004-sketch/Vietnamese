@@ -257,6 +257,7 @@ textarea {
 .btn-save,
 .btn-add,
 .btn-danger,
+.btn-preview,
 .btn-add-answer {
     border: none;
     border-radius: 16px;
@@ -268,7 +269,8 @@ textarea {
 .btn-primary,
 .btn-save,
 .btn-add,
-.btn-danger {
+.btn-danger,
+.btn-preview {
     color: white;
     height: 44px;
     padding: 0 22px;
@@ -292,6 +294,11 @@ textarea {
     background: linear-gradient(to right, #ff4d67, #ff5c74);
     white-space: nowrap;
     flex-shrink: 0;
+}
+
+.btn-preview {
+    background: linear-gradient(to right, #0d9488, #14b8a6);
+    white-space: nowrap;
 }
 
 .btn-add {
@@ -381,6 +388,11 @@ textarea {
     position: relative;
 }
 
+.media-preview.small,
+.media-preview-inline {
+    position: relative;
+}
+
 .media-preview img {
     border-radius: 14px;
     border: 1px solid #e2e8f0;
@@ -398,12 +410,18 @@ textarea {
     color: white;
     cursor: pointer;
     opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     transition: all 0.2s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.media-preview:hover .remove-media {
+.media-preview:hover .remove-media,
+.media-preview-inline:hover .remove-media,
+.media-preview.passage-preview:hover .remove-media {
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .passage-content-box {
@@ -455,6 +473,13 @@ textarea {
     border-radius: 24px;
     background: #f5f7ff;
     border: 1px solid #dde7fb;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .loading-box {

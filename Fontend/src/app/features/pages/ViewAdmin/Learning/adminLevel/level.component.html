@@ -1,6 +1,9 @@
 <div class="level-container">
 
-    <h3>Level Management</h3>
+    <div class="header">
+        <h2>Level Management</h2>
+        <p class="subtitle">Create and manage levels used by courses</p>
+    </div>
 
     <table>
         <thead>
@@ -29,7 +32,7 @@
                     <input type="checkbox" [(ngModel)]="level.isDelete" />
                 </td>
                 <td>
-                    <a [routerLink]="['/admin/courses']" [queryParams]="{ levelId: level.levelId }">
+                    <a [routerLink]="['/admin/courses']" [queryParams]="{ levelId: level.levelId }" (click)="selectLevel(level)">
                         ➡
                     </a>
                 </td>
@@ -39,8 +42,9 @@
     </table>
 
     <div class="button-row">
-        <button (click)="addRow()">Add new row</button>
-        <button class="save-btn" (click)="saveAll()">Save All</button>
+      <button (click)="addRow()">Add new row</button>
+      <button (click)="saveAll()">Save All</button>
     </div>
+
 </div>
     

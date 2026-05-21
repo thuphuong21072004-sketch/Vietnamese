@@ -47,74 +47,36 @@ button {
     white-space: nowrap;
     padding: 12px 20px;
     border: none;
-    border-radius: 14px;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
+    .level-container,
+    .course-container,
+    .unit-container{
+      max-width:1100px;
+      margin:24px auto;
+      padding:18px;
+      color:#0f172a;
+    }
 
-button:hover {
-    background: #5a2db5;
-    transform: translateY(-1px);
-    box-shadow: 0 12px 22px rgba(124, 108, 255, 0.18);
-}
+    :root{
+      --admin-accent1: #7c3aed;
+      --admin-accent2: #6366f1;
+      --muted: #64748b;
+      --danger: #ef4444;
+    }
 
-button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    box-shadow: none;
-}
+    table{ width:100%; border-collapse:separate; border-spacing:0 10px }
+    thead th{ text-align:left; padding:12px 16px; color:var(--admin-accent1); font-weight:700 }
+    tbody tr{ background:linear-gradient(180deg,#fff,#fbfbff); box-shadow:0 6px 18px rgba(99,102,241,0.04); border-radius:10px }
+    td{ padding:12px 16px; border:0; vertical-align:middle }
+    td input{ width:100%; max-width:320px; padding:8px 10px; border-radius:10px; border:1px solid rgba(124,108,255,0.12); background:#fff }
+    td input[type="checkbox"]{ transform:scale(1.15) }
 
-.delete-btn {
-    background: var(--danger);
-    color: white;
-}
+    .course-info{ margin-bottom:16px; padding:12px 14px; background:#f7f6ff; border-left:4px solid var(--admin-accent1); border-radius:10px }
+    .course-info h2{ margin:0; color:var(--admin-accent1) }
+    .course-info p{ margin:6px 0 0; color:var(--muted) }
 
-.btn-primary {
-    background: var(--primary);
-}
+    .button-row{ display:flex; gap:12px; margin-top:16px }
+    .delete-btn{ background:var(--danger); color:#fff; border-radius:12px; padding:0 16px }
+    .btn-primary{ background:linear-gradient(135deg,var(--admin-accent1),var(--admin-accent2)); color:#fff; border-radius:12px; padding:0 16px }
+    .button-row button{ height:44px; border:none; cursor:pointer }
 
-.add-row td {
-    text-align: center;
-}
-
-a {
-    display: block;
-    text-align: center;
-    font-size: 16px;
-    text-decoration: none;
-}
-.course-info {
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    background: #f3f0ff;
-    border-left: 4px solid #7b3fe4;
-    border-radius: 8px;
-}
-
-.course-info h2 {
-    margin: 0;
-    font-size: 18px;
-    color: #5a2db5;
-}
-
-.course-info p {
-    margin: 5px 0 0;
-    font-size: 14px;
-    color: #555;
-}
-
-.button-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 2px;
-    margin-top: 18px;
-}
-
-.button-row button {
-    min-width: 160px;
-}
+    @media(max-width:800px){ .button-row{ flex-direction:column } }

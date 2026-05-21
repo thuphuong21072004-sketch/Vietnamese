@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Router } from '@angular/router';
+import { VideoRoomService } from '../../../services/video-room.service';
 
 import { BookingService } from '../../../services/booking.service';
 
@@ -26,6 +27,7 @@ export class TeacherBookingsComponent implements OnInit {
     public bookingService: BookingService,
 
     private router: Router,
+    private roomService: VideoRoomService,
   ) {}
 
   ngOnInit(): void {
@@ -78,28 +80,51 @@ export class TeacherBookingsComponent implements OnInit {
     });
   }
 
-  completeBooking(id: number) {
-    if (!confirm('Complete this booking?')) {
-      return;
-    }
-
-    this.bookingService.complete(id).subscribe({
-      next: () => {
-        const booking = this.bookings.find((x) => x.bookingId === id);
-
-        if (booking) {
-          booking.status = 3;
+  joinRoom(id: number) {
+    // Try to open existing room; if not present, create then open
+    this.roomService.getByBookingId(id).subscribe({
+      next: (res: any) => {
+        const url = this.getRoomUrlFrom(res);
+        if (url) {
+          window.open(url, '_blank');
+          return;
         }
 
-        alert('Booking completed successfully');
+        // if room returned but no URL, attempt creation
+        this.createAndOpenRoom(id);
       },
-
-      error: (err) => {
-        console.error(err);
-
-        alert(err.error?.message || 'Failed to complete booking');
+      error: (err: any) => {
+        // not found or error -> create then open
+        this.createAndOpenRoom(id);
       },
     });
+  }
+
+  private createAndOpenRoom(id: number) {
+    this.roomService.create(id).subscribe({
+      next: (res: any) => {
+        const url = this.getRoomUrlFrom(res);
+        if (url) {
+          window.open(url, '_blank');
+        } else {
+          alert('Room created but link is unavailable. Open room page to manage.');
+          this.router.navigate(['/room', id]);
+        }
+      },
+      error: (err: any) => {
+        console.error(err);
+        alert(err.error?.message || 'Failed to create/open room');
+      },
+    });
+  }
+
+  private getRoomUrlFrom(room: any): string | null {
+    if (!room) return null;
+    if (room.joinUrl) return room.joinUrl;
+    if (!room.roomCode) return null;
+    if (room.roomCode.startsWith('http')) return room.roomCode;
+    const token = room.token ? `?token=${encodeURIComponent(room.token)}` : '';
+    return `https://meeting.example.com/${room.roomCode}${token}`;
   }
 
   cancelBooking(id: number) {
@@ -132,6 +157,30 @@ export class TeacherBookingsComponent implements OnInit {
 
   getStatusClass(status: number): string {
     return this.bookingService.getStatusClass(status);
+  }
+
+  canJoinRoom(item: any): boolean {
+    if (!item || item.status !== 1) {
+      return false;
+    }
+
+    const now = new Date();
+    const start = new Date(item.startTime);
+    const end = new Date(item.endTime);
+    const openAt = new Date(start.getTime() - 30 * 60 * 1000);
+    const closeAt = new Date(end.getTime() + 15 * 60 * 1000);
+
+    return now >= openAt && now <= closeAt;
+  }
+
+  canComplete(item: any): boolean {
+    if (!item || item.status !== 1) {
+      return false;
+    }
+
+    const now = new Date();
+    const end = new Date(item.endTime);
+    return now >= end;
   }
 
   getStudentName(item: any): string {

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { VideoRoomService } from '../../../services/video-room.service';
 
@@ -28,8 +28,6 @@ export class VideoRoomComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-
-    private router: Router,
 
     private roomService: VideoRoomService,
   ) {}
@@ -65,7 +63,7 @@ export class VideoRoomComponent implements OnInit {
 
         this.creating = false;
 
-        alert('Room created successfully');
+        this.openRoomAfterCreation();
       },
 
       error: (err) => {
@@ -78,12 +76,42 @@ export class VideoRoomComponent implements OnInit {
     });
   }
 
-  joinRoom() {
-    if (!this.room?.roomCode) {
+  openRoomAfterCreation() {
+    const url = this.getRoomUrl();
+
+    if (!url) {
+      alert('Room created, but link is unavailable. Please refresh this page.');
       return;
     }
 
-    window.open(this.room.roomCode, '_blank');
+    window.open(url, '_blank');
+  }
+
+  getRoomUrl(): string | null {
+    if (this.room?.joinUrl) {
+      return this.room.joinUrl;
+    }
+
+    if (!this.room?.roomCode) {
+      return null;
+    }
+
+    if (this.room.roomCode.startsWith('http')) {
+      return this.room.roomCode;
+    }
+
+    const token = this.room.token ? `?token=${encodeURIComponent(this.room.token)}` : '';
+    return `https://meeting.example.com/${this.room.roomCode}${token}`;
+  }
+
+  joinRoom() {
+    const url = this.getRoomUrl();
+    if (!url) {
+      alert('Room is not available yet. Please create it first.');
+      return;
+    }
+
+    window.open(url, '_blank');
   }
 
   back() {

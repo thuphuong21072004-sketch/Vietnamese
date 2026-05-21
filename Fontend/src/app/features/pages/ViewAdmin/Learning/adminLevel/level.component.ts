@@ -1,7 +1,8 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { QuizComponent } from '../quiz/test.component';
 import { LearningService } from '../../../../services/learning.service';
 import { LevelDTO } from '../../../../models/level.model';
 import { BaseService } from '../../../../services/base.service';
@@ -9,11 +10,14 @@ import { BaseService } from '../../../../services/base.service';
 @Component({
   selector: 'app-level',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, QuizComponent],
   templateUrl: './level.component.html',
   styleUrls: ['./level.component.css'],
 })
 export class LevelComponent implements OnInit {
+  showLevelQuiz = false;
+  selectedLevelId = 0;
+
   constructor(
     private learningService: LearningService,
     private baseService: BaseService,
@@ -23,6 +27,11 @@ export class LevelComponent implements OnInit {
 
   levels: LevelDTO[] = [];
 
+  selectLevel(level: LevelDTO) {
+    this.selectedLevelId = level.levelId;
+    this.showLevelQuiz = false;
+  }
+
   ngOnInit(): void {
     this.loadLevels();
   }
@@ -30,6 +39,8 @@ export class LevelComponent implements OnInit {
   loadLevels() {
     this.learningService.getLevels().subscribe((res) => {
       this.levels = res;
+      this.selectedLevelId = res?.length ? res[0].levelId : 0;
+      this.showLevelQuiz = false;
     });
   }
 

@@ -33,11 +33,17 @@ namespace Backend.Services.impl
             var booking = await _bookingRepository.GetById(bookingId);
             if (booking == null)
             {
-                throw new Exception("Booking not found");
+                throw new KeyNotFoundException("Booking not found");
             }
 
             var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+            int? maybeUserId = await _userRepository.GetUserIdByEmail(email);
+            if (maybeUserId == null)
+            {
+                throw new InvalidOperationException("Authenticated user not found");
+            }
+
+            int userId = maybeUserId.Value;
 
             if (booking.StudentId != userId && booking.TeacherId != userId)
             {
@@ -46,36 +52,41 @@ namespace Backend.Services.impl
 
             if (booking.Status != common.Constant.StatusBooking.Booked)
             {
-                throw new Exception("Booking not paid");
+                throw new ArgumentException("Booking not paid");
             }
 
-            if (booking.EndTime <= DateTime.UtcNow)
+            var now = GetNowForComparison(booking.StartTime);
+            if (now < booking.StartTime.AddMinutes(-30))
             {
-                throw new Exception("Class has ended");
+                throw new ArgumentException("Room can only be created 30 minutes before class");
             }
 
-            if (booking.StartTime > DateTime.UtcNow.AddMinutes(30))
+            if (now > booking.EndTime.AddMinutes(15))
             {
-                throw new Exception("Room can only be created 30 minutes before class");
+                throw new ArgumentException("Room can only be created until 15 minutes after class ends");
             }
 
             var exist = await _videoRoomRepository.GetByBookingId(bookingId);
 
-            if (exist != null && exist.ExpiredAt > DateTime.UtcNow)
+            if (exist != null && exist.ExpiredAt > GetNowForComparison(exist.ExpiredAt))
             {
-                return _mapper.Map<VideoRoomDTO>(exist);
+                var existingDto = _mapper.Map<VideoRoomDTO>(exist);
+                existingDto.JoinUrl = $"https://meet.jit.si/{existingDto.RoomCode}?token={existingDto.Token}";
+                return existingDto;
             }
 
             if (exist != null)
             {
                 exist.RoomCode = Guid.NewGuid().ToString();
                 exist.Token = Guid.NewGuid().ToString();
-                exist.ExpiredAt = booking.EndTime;
+                exist.ExpiredAt = booking.EndTime.AddMinutes(15);
 
                 await _videoRoomRepository.Update(exist);
                 await _videoRoomRepository.Save();
 
-                return _mapper.Map<VideoRoomDTO>(exist);
+                var updatedDto = _mapper.Map<VideoRoomDTO>(exist);
+                updatedDto.JoinUrl = $"https://meet.jit.si/{updatedDto.RoomCode}?token={updatedDto.Token}";
+                return updatedDto;
             }
 
             var room = new VideoRoom
@@ -83,13 +94,15 @@ namespace Backend.Services.impl
                 BookingId = bookingId,
                 RoomCode = Guid.NewGuid().ToString(),
                 Token = Guid.NewGuid().ToString(),
-                ExpiredAt = booking.EndTime
+                ExpiredAt = booking.EndTime.AddMinutes(15)
             };
 
             await _videoRoomRepository.Create(room);
             await _videoRoomRepository.Save();
 
-            return _mapper.Map<VideoRoomDTO>(room);
+            var createdDto = _mapper.Map<VideoRoomDTO>(room);
+            createdDto.JoinUrl = $"https://meet.jit.si/{createdDto.RoomCode}?token={createdDto.Token}";
+            return createdDto;
         }
 
         /* 
@@ -108,23 +121,38 @@ namespace Backend.Services.impl
             var booking = await _bookingRepository.GetById(bookingId);
             if (booking == null)
             {
-                throw new Exception("Booking not found");
+                throw new KeyNotFoundException("Booking not found");
             }
 
             var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+            int? maybeUserId = await _userRepository.GetUserIdByEmail(email);
+            if (maybeUserId == null)
+            {
+                throw new InvalidOperationException("Authenticated user not found");
+            }
+
+            int userId = maybeUserId.Value;
 
             if (booking.StudentId != userId && booking.TeacherId != userId)
             {
                 throw new UnauthorizedAccessException("No permission");
             }
 
-            if (room.ExpiredAt <= DateTime.UtcNow)
+            if (room.ExpiredAt <= GetNowForComparison(room.ExpiredAt))
             {
-                throw new Exception("Room expired");
+                throw new ArgumentException("Room expired");
             }
 
-            return _mapper.Map<VideoRoomDTO>(room);
+            var dto = _mapper.Map<VideoRoomDTO>(room);
+            dto.JoinUrl = $"https://meet.jit.si/{dto.RoomCode}?token={dto.Token}";
+            return dto;
+        }
+
+        private DateTime GetNowForComparison(DateTime referenceTime)
+        {
+            return referenceTime.Kind == DateTimeKind.Utc
+                ? DateTime.UtcNow
+                : DateTime.Now;
         }
     }
 }

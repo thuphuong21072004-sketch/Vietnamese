@@ -37,33 +37,28 @@ namespace Backend.Services.impl
 
             if (dto.Rating < 1 || dto.Rating > 5)
             {
-                throw new Exception("Rating must be between 1 and 5");
+                throw new ArgumentException("Rating must be between 1 and 5");
             }
 
             if (string.IsNullOrWhiteSpace(dto.Comment))
             {
-                throw new Exception("Comment is required");
+                throw new ArgumentException("Comment is required");
             }
 
             if (dto.Comment.Length > 1000)
             {
-                throw new Exception("Comment too long");
+                throw new ArgumentException("Comment too long");
             }
 
             var booking = await _bookingRepository.GetById(dto.BookingId);
             if (booking == null)
             {
-                throw new Exception("Booking not found");
+                throw new KeyNotFoundException("Booking not found");
             }
 
             if (booking.StudentId != userId)
             {
                 throw new UnauthorizedAccessException("No permission");
-            }
-
-            if (booking.Status != common.Constant.StatusBooking.Completed)
-            {
-                throw new Exception("Booking not completed");
             }
 
             var exist = await _reviewRepository.GetByBookingId(dto.BookingId);
@@ -107,7 +102,7 @@ namespace Backend.Services.impl
             var teacher = await _teacherRepository.GetByUserId(teacherId);
             if (teacher == null)
             {
-                throw new Exception("Teacher not found");
+                throw new KeyNotFoundException("Teacher not found");
             }
 
             var data = await _reviewRepository.GetByTeacherId(teacherId);

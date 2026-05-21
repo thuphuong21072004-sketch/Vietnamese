@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { BookingService } from '../../../services/booking.service';
 import { ReviewService } from '../../../services/review.service';
 
 @Component({
@@ -32,10 +33,14 @@ export class ReviewComponent implements OnInit {
 
   review: any = null;
 
+  booking: any = null;
+
   constructor(
     private route: ActivatedRoute,
 
     private router: Router,
+
+    private bookingService: BookingService,
 
     private reviewService: ReviewService,
   ) {}
@@ -43,7 +48,20 @@ export class ReviewComponent implements OnInit {
   ngOnInit(): void {
     this.bookingId = Number(this.route.snapshot.paramMap.get('id'));
 
+    this.loadBooking();
     this.loadReview();
+  }
+
+  loadBooking() {
+    this.bookingService.getDetail(this.bookingId).subscribe({
+      next: (res) => {
+        this.booking = res;
+      },
+
+      error: (err) => {
+        console.error(err);
+      },
+    });
   }
 
   loadReview() {
@@ -62,7 +80,26 @@ export class ReviewComponent implements OnInit {
     });
   }
 
+  canReview(): boolean {
+    if (!this.booking) {
+      return false;
+    }
+
+    if (this.booking.status === 3) {
+      return true;
+    }
+
+    const now = new Date();
+    const end = new Date(this.booking.endTime);
+    return now > end;
+  }
+
   submit() {
+    if (!this.canReview()) {
+      alert('You can only review after the class is completed.');
+      return;
+    }
+
     if (!this.comment.trim()) {
       alert('Comment required');
 

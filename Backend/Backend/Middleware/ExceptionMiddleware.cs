@@ -20,9 +20,21 @@ public class ExceptionMiddleware
         {
             await HandleException(context, HttpStatusCode.Forbidden, ex.Message);
         }
-        catch (Exception ex)
+        catch (KeyNotFoundException ex)
+        {
+            await HandleException(context, HttpStatusCode.NotFound, ex.Message);
+        }
+        catch (ArgumentException ex)
         {
             await HandleException(context, HttpStatusCode.BadRequest, ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            await HandleException(context, HttpStatusCode.BadRequest, ex.Message);
+        }
+        catch (Exception)
+        {
+            await HandleException(context, HttpStatusCode.InternalServerError, "An unexpected error occurred.");
         }
     }
 

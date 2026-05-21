@@ -1,5 +1,13 @@
 <div class="lesson-container">
 
+    <div class="exam-sheet-banner" *ngIf="quiz">
+        <div class="exam-title">
+            <div class="school-name">VIETNAMESE LEARNING INSTITUTE</div>
+            <div class="exam-subtitle">Official Assessment Paper</div>
+        </div>
+        
+    </div>
+
     <div class="top-action" *ngIf="
             hasDoneQuiz &&
             !showResult
@@ -100,45 +108,31 @@
                  " class="question-box">
 
                 <div class="question-title">
-                
-                    Câu {{ i + 1 }}
-                
-                    <span class="question-score">
-                        ({{ q.score }} pts)
-                    </span>
-                
-                </div>
-
-                <div class="question-content">
-                    <div *ngIf="q.questionText" class="question-text">
-
+                    <span class="question-label">Question {{ i + 1 }}.</span>
+                    <span *ngIf="q.questionText" class="question-text-inline">
                         {{ q.questionText }}
-
-                    </div>
-
-                    <img *ngIf="
-                            !q.questionText &&
-                            q.imageUrl
-                         " class="question-image" [src]="
-                            'http://localhost:5108/images/' +
-                            q.imageUrl
-                         ">
-
-                    <audio *ngIf="
-                                !q.questionText &&
-                                !q.imageUrl &&
-                                q.audioUrl
-                            " controls class="question-audio" [src]="
+                    </span>
+                    <span *ngIf="q.audioUrl" class="question-audio-inline">
+                        <audio controls class="question-audio" [src]="
                                 'http://localhost:5108/audios/' +
                                 q.audioUrl
                            ">
-
-                    </audio>
-
+                        </audio>
+                    </span>
+                    <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
+                        <img class="question-image-inline-img" [src]="
+                                'http://localhost:5108/images/' +
+                                q.imageUrl
+                           ">
+                    </span>
+                    <span class="question-score">
+                        ({{ q.score }} pts)
+                    </span>
                 </div>
 
+
                 <div *ngFor="
-                        let a of q.answers
+                        let a of q.answers; let ai = index
                      " class="answer-option" [ngClass]="{
                         'correct':
                             showResult &&
@@ -152,7 +146,6 @@
                      }">
 
                     <label class="answer-label">
-
                         <input type="radio" class="answer-radio" [name]="
                                     'q' +
                                     q.questionId
@@ -170,36 +163,20 @@
                                " />
 
                         <div class="answer-content">
-
                             <span *ngIf="a.answerText" class="answer-text">
-
                                 {{ a.answerText }}
-
                             </span>
-
-                            <img *ngIf="
-                                    !a.answerText &&
-                                    a.imageUrl
-                                 " class="answer-image" [src]="
-                                    'http://localhost:5108/images/' +
-                                    a.imageUrl
-                                 ">
-
-                            <audio *ngIf="
-                                        !a.answerText &&
-                                        !a.imageUrl &&
-                                        a.audioUrl
-                                    " controls class="answer-audio" [src]="
-                                        'http://localhost:5108/audios/' +
-                                        a.audioUrl
-                                   ">
-
+                            <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="
+                                            'http://localhost:5108/images/' +
+                                            a.imageUrl
+                                         ">
+                            <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="
+                                                'http://localhost:5108/audios/' +
+                                                a.audioUrl
+                                           ">
                             </audio>
-
                         </div>
-
                     </label>
-
                 </div>
 
             </div>
@@ -243,43 +220,31 @@
 
                         <div class="question-title">
                         
-                            Question
-                            {{
-                            getQuestionIndex(q)
-                            }}
-                        
+                            <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
+
+                            <span *ngIf="q.questionText" class="question-text-inline">
+                                {{ q.questionText }}
+                            </span>
+
+                            <span *ngIf="q.audioUrl" class="question-audio-inline">
+                                <audio controls class="question-audio" [src]="
+                                        'http://localhost:5108/audios/' +
+                                        q.audioUrl
+                                   ">
+                                </audio>
+                            </span>
+
+                            <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
+                                <img class="question-image-inline-img" [src]="
+                                        'http://localhost:5108/images/' +
+                                        q.imageUrl
+                                   ">
+                            </span>
+
                             <span class="question-score">
                                 ({{ q.score }} pts)
                             </span>
                         
-                        </div>
-                        <div class="question-content">
-
-                            <div *ngIf="q.questionText" class="question-text">
-
-                                {{ q.questionText }}
-
-                            </div>
-
-                            <img *ngIf="
-                                    !q.questionText &&
-                                    q.imageUrl
-                                 " class="question-image" [src]="
-                                    'http://localhost:5108/images/' +
-                                    q.imageUrl
-                                 ">
-
-                            <audio *ngIf="
-                                        !q.questionText &&
-                                        !q.imageUrl &&
-                                        q.audioUrl
-                                    " controls class="question-audio" [src]="
-                                        'http://localhost:5108/audios/' +
-                                        q.audioUrl
-                                   ">
-
-                            </audio>
-
                         </div>
 
                         <div *ngFor="
@@ -351,157 +316,131 @@
 
                 </div>
 
-                <div *ngFor="
-                        let psg of part.passages
-                     " class="passage-box">
-
-                    <div class="passage-content">
-
-                        <div *ngIf="psg.content" class="passage-text">
-
-                            {{ psg.content }}
-
-                        </div>
-
-                        <img *ngIf="
-                                !psg.content &&
-                                psg.imageUrl
-                             " class="passage-image" [src]="
-                                'http://localhost:5108/images/' +
-                                psg.imageUrl
-                             ">
-
-                        <audio *ngIf="
-                                    !psg.content &&
-                                    !psg.imageUrl &&
-                                    psg.audioUrl
-                                 " controls class="passage-audio" [src]="
-                                    'http://localhost:5108/audios/' +
-                                    psg.audioUrl
-                               ">
-
-                        </audio>
-
-                    </div>
-
+                <div *ngIf="part.passages?.length">
                     <div *ngFor="
-                            let q of psg.questions
-                         " class="question-box">
-
-                        <div class="question-title">
+                            let psg of part.passages
+                         " class="passage-box">
                         
-                            Question
-                            {{
-                            getQuestionIndex(q)
-                            }}
-                        
-                            <span class="question-score">
-                                ({{ q.score }} pts)
-                            </span>
-                        
-                        </div>
-
-                        <div class="question-content">
-
-                            <div *ngIf="q.questionText" class="question-text">
-
-                                {{ q.questionText }}
-
+                            <div *ngIf="psg.content" class="passage-text">
+                                {{ psg.content }}
                             </div>
-
+                            <div class="passage-content">
                             <img *ngIf="
-                                    !q.questionText &&
-                                    q.imageUrl
-                                 " class="question-image" [src]="
+                                    !psg.content &&
+                                    psg.imageUrl
+                                 " class="passage-image" [src]="
                                     'http://localhost:5108/images/' +
-                                    q.imageUrl
+                                    psg.imageUrl
                                  ">
-
                             <audio *ngIf="
-                                        !q.questionText &&
-                                        !q.imageUrl &&
-                                        q.audioUrl
-                                     " controls class="question-audio" [src]="
+                                        !psg.content &&
+                                        !psg.imageUrl &&
+                                        psg.audioUrl
+                                     " controls class="passage-audio" [src]="
                                         'http://localhost:5108/audios/' +
-                                        q.audioUrl
+                                        psg.audioUrl
                                    ">
-
                             </audio>
-
                         </div>
 
                         <div *ngFor="
-                                let a of q.answers
-                             " class="answer-option" [ngClass]="{
-                                'correct':
-                                    showResult &&
-                                    a.isCorrect,
+                                let q of psg.questions
+                             " class="question-box">
 
-                                'wrong':
-                                    isWrong(q, a),
-
-                                'unanswered':
-                                    isUnanswered(q)
-                             }">
-
-                            <label class="answer-label">
-
-                                <input type="radio" class="answer-radio" [name]="
-                                            'q' +
-                                            q.questionId
-                                       " [disabled]="
-                                            showResult
-                                       " [checked]="
-                                            selectedAnswers[
-                                                q.questionId
-                                            ] === a.answerId
-                                       " (change)="
-                                            selectAnswer(
-                                                q.questionId,
-                                                a.answerId
-                                            )
-                                       " />
-
-                                <div class="answer-content">
-
-                                    <span *ngIf="a.answerText" class="answer-text">
-
-                                        {{ a.answerText }}
-
-                                    </span>
-
-                                    <img *ngIf="
-                                            !a.answerText &&
-                                            a.imageUrl
-                                         " class="answer-image" [src]="
-                                            'http://localhost:5108/images/' +
-                                            a.imageUrl
-                                         ">
-
-                                    <audio *ngIf="
-                                                !a.answerText &&
-                                                !a.imageUrl &&
-                                                a.audioUrl
-                                             " controls class="answer-audio" [src]="
-                                                'http://localhost:5108/audios/' +
-                                                a.audioUrl
-                                           ">
-
+                            <div class="question-title">
+                                <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
+                                <span *ngIf="q.questionText" class="question-text-inline">
+                                    {{ q.questionText }}
+                                </span>
+                                <span *ngIf="q.audioUrl" class="question-audio-inline">
+                                    <audio controls class="question-audio" [src]="
+                                            'http://localhost:5108/audios/' +
+                                            q.audioUrl
+                                       ">
                                     </audio>
+                                </span>
+                                <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
+                                    <img class="question-image-inline-img" [src]="
+                                            'http://localhost:5108/images/' +
+                                            q.imageUrl
+                                       ">
+                                </span>
+                                <span class="question-score">
+                                    ({{ q.score }} pts)
+                                </span>
+                            </div>
 
-                                </div>
 
-                            </label>
+                            <div *ngFor="
+                                    let a of q.answers
+                                 " class="answer-option" [ngClass]="{
+                                    'correct':
+                                        showResult &&
+                                        a.isCorrect,
+
+                                    'wrong':
+                                        isWrong(q, a),
+
+                                    'unanswered':
+                                        isUnanswered(q)
+                                 }">
+
+                                <label class="answer-label">
+
+                                    <input type="radio" class="answer-radio" [name]="
+                                                'q' +
+                                                q.questionId
+                                           " [disabled]="
+                                                showResult
+                                           " [checked]="
+                                                selectedAnswers[
+                                                    q.questionId
+                                                ] === a.answerId
+                                           " (change)="
+                                                selectAnswer(
+                                                    q.questionId,
+                                                    a.answerId
+                                                )
+                                           " />
+
+                                    <div class="answer-content">
+
+                                        <span *ngIf="a.answerText" class="answer-text">
+
+                                            {{ a.answerText }}
+
+                                        </span>
+
+                                        <img *ngIf="
+                                                !a.answerText &&
+                                                a.imageUrl
+                                             " class="answer-image" [src]="
+                                                'http://localhost:5108/images/' +
+                                                a.imageUrl
+                                             ">
+
+                                        <audio *ngIf="
+                                                    !a.answerText &&
+                                                    !a.imageUrl &&
+                                                    a.audioUrl
+                                                 " controls class="answer-audio" [src]="
+                                                    'http://localhost:5108/audios/' +
+                                                    a.audioUrl
+                                               ">
+                                        </audio>
+
+                                    </div>
+
+                                </label>
+
+                            </div>
 
                         </div>
 
                     </div>
-
                 </div>
 
             </div>
-
-        </div>
 
         <button class="submit-btn" *ngIf="!isSubmitted" (click)="submitQuiz()">
 

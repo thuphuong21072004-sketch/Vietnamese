@@ -17,5 +17,7 @@
         public int Status { get; set; }
 
         public DateTime CreatedDate { get; set; }
+
+        public TeacherProfileDTO? TeacherProfile { get; set; }
     }
 }

@@ -146,30 +146,21 @@
 
                 </button>
 
-                <button *ngIf="
-                        item.status === 0
-                    " class="confirm-btn" (click)="
-                        confirmBooking(
+
+                <button *ngIf="canJoinRoom(item)" class="room-btn" (click)="
+                        joinRoom(
                             item.bookingId
                         )
                     ">
 
-                    Confirm
+                    Join Room
 
                 </button>
 
-                <button *ngIf="
-                        item.status === 1
-                    " class="complete-btn" (click)="
-                        completeBooking(
-                            item.bookingId
-                        )
-                    ">
-
-                    Complete
-
+                <button *ngIf="item.status === 1 && !canJoinRoom(item)" class="info-btn" disabled>
+                    Room not open yet or access expired
                 </button>
-
+                
                 <button *ngIf="
                         item.status !== 2
                         &&

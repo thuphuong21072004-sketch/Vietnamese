@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-detail',
@@ -162,6 +163,6 @@ export class TeacherDetailComponent implements OnInit {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.apiBaseUrl}/uploads/${url}`;
   }
 }

@@ -16,8 +16,10 @@ import { AdminTeacherListComponent } from './features/pages/ViewAdmin/AppTeacher
 import { TeacherDetailComponent} from'./features/pages/ViewAdmin/AppTeacher/TeacherDetail/teacher-detail.component';
 import { TeacherScheduleComponent} from'./features/pages/ViewAdmin/Schedule/schedule.component';
 import { TeacherBookingsComponent} from './features/pages/ViewAdmin/MyClass/myclass.component';
+import { DashboardComponent } from './features/pages/ViewAdmin/Dashboard/dashboard.component';
 
 import { MyProgressComponent } from './features/pages/ViewUser/Learning/unit/unit.component';
+import { UserDashboardComponent } from './features/pages/ViewUser/Dashboard/dashboard.component';
 import { QuizLearnComponent } from './features/pages/ViewUser/Learning/quiz/quiz.component';
 import { PlacementUserComponent } from './features/pages/ViewUser/practice/placement.component';
 import { TeacherProfileComponent} from './features/pages/ViewUser/BecomeTeacher/becometeacher.component';
@@ -45,12 +47,14 @@ export const routes: Routes = [
   { path: 'admin/unitDetail', component: UnitDetailComponent },
   { path: 'admin/tests', component: QuizComponent },
   { path: 'admin/placements', component: PlacementComponent },
+  { path: 'admin/dashboard', component: DashboardComponent },
   { path: 'admin/teachers', component: AdminTeacherListComponent },
   { path: 'admin/teachers/:id', component: TeacherDetailComponent },
   { path: 'admin/schedule', component: TeacherScheduleComponent },
   { path: 'admin/classrooms', component: TeacherBookingsComponent },
 
   { path: 'user/units', component: MyProgressComponent },
+  { path: 'user/dashboard', component: UserDashboardComponent },
   { path: 'user/search', component: SearchComponent },
   { path: 'user/register', component: RegisterComponent },
   { path: 'user/quiz', component: QuizLearnComponent },
@@ -59,6 +63,11 @@ export const routes: Routes = [
   { path: 'user/learnOnline', component: TeacherSchedulesComponent },
   { path: 'schedule/:id', component: ScheduleDetailComponent },
   { path: 'booking/:id', component: BookingDetailComponent },
+  { path: 'user/schedule/:id', component: ScheduleDetailComponent },
+  { path: 'user/booking/:id', component: BookingDetailComponent },
+  { path: 'user/review/:id', component: ReviewComponent },
+  { path: 'teacher/schedule', component: TeacherScheduleComponent },
+  { path: 'teacher/bookings', component: TeacherBookingsComponent },
 
   { path: 'my-bookings', component: MyBookingsComponent },
 

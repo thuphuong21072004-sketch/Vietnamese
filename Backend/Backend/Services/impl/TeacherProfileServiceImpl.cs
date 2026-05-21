@@ -29,6 +29,12 @@ namespace Backend.Services.impl
             return role == common.Constant.Role.Admin;
         }
 
+        private bool IsPrivilegedTeacherCandidate()
+        {
+            string role = _userContext.GetRole();
+            return role == common.Constant.Role.Admin || role == common.Constant.Role.Moderator;
+        }
+
         /* 
          * lấy profile giáo viên hiện tại
          * O(1)
@@ -65,7 +71,9 @@ namespace Backend.Services.impl
             teacher.UserId = userId;
             teacher.RatingAverage = 0;
             teacher.TotalReviews = 0;
-            teacher.Status = common.Constant.StatusTeacherProfile.Draft;
+            teacher.Status = IsPrivilegedTeacherCandidate()
+                ? common.Constant.StatusTeacherProfile.Approved
+                : common.Constant.StatusTeacherProfile.Draft;
 
             await _teacherRepository.Create(teacher);
             await _teacherRepository.Save();
@@ -162,9 +170,11 @@ namespace Backend.Services.impl
                 {
                     throw new Exception("User not found");
                 }
-
-                var role = await _roleRepository.GetByName(common.Constant.Role.Moderator);
-                teacher.User.RoleId = role.RoleId;
+                if (teacher.User.Role?.RoleName != common.Constant.Role.Admin)
+                {
+                    var role = await _roleRepository.GetByName(common.Constant.Role.Moderator);
+                    teacher.User.RoleId = role.RoleId;
+                }
             }
 
             await _teacherRepository.Save();
@@ -204,11 +214,14 @@ namespace Backend.Services.impl
                 throw new Exception("Teacher not found");
             }
 
-            if (teacher.Status == common.Constant.StatusTeacherProfile.Draft)
+            if (teacher.Status != common.Constant.StatusTeacherProfile.Approved)
             {
-                if (!ValidateAdmin())
+                var email = _userContext.GetEmail();
+                int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+                if (teacher.UserId != userId && !ValidateAdmin())
                 {
-                    throw new Exception("Admin not approved");
+                    throw new UnauthorizedAccessException("You do not have permission to view this profile");
                 }
             }
 

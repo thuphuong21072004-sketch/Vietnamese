@@ -20,10 +20,23 @@ namespace Backend.Repository.impl
          */
         public async Task<TeacherAvailability?> GetById(int id)
         {
-            return await _context.TeacherAvailabilities
+            var availability = await _context.TeacherAvailabilities
                 .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
                 .Include(x => x.Teacher).ThenInclude(x => x.Role)
                 .FirstOrDefaultAsync(x => x.AvailabilityId == id);
+
+            if (availability == null)
+            {
+                return null;
+            }
+
+            var holdWindow = DateTime.UtcNow.AddMinutes(-15);
+            var hasActiveBooking = await _context.Bookings.AnyAsync(b => b.AvailabilityId == availability.AvailabilityId
+                && b.Status != common.Constant.StatusBooking.Cancelled
+                && (b.Status == common.Constant.StatusBooking.Booked || b.CreatedDate >= holdWindow));
+
+            availability.IsBooked = hasActiveBooking;
+            return availability;
         }
 
         /* 
@@ -79,14 +92,17 @@ namespace Backend.Repository.impl
          */
         public async Task<List<TeacherAvailability>> GetAvailableSchedules(DateOnly? date)
         {
+            var holdWindow = DateTime.UtcNow.AddMinutes(-15);
             var query = _context.TeacherAvailabilities
                 .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
                 .Include(x => x.Teacher).ThenInclude(x => x.Role)
-                .Where(x => !x.IsBooked
-                    && x.StartTime > DateTime.UtcNow
+                .Where(x => x.StartTime > DateTime.UtcNow
                     && x.Teacher != null
                     && x.Teacher.TeacherProfile != null
-                    && x.Teacher.TeacherProfile.Status == common.Constant.StatusTeacherProfile.Approved);
+                    && x.Teacher.TeacherProfile.Status == common.Constant.StatusTeacherProfile.Approved
+                    && !_context.Bookings.Any(b => b.AvailabilityId == x.AvailabilityId
+                        && b.Status != common.Constant.StatusBooking.Cancelled
+                        && (b.Status == common.Constant.StatusBooking.Booked || b.CreatedDate >= holdWindow)));
 
             if (date != null)
             {

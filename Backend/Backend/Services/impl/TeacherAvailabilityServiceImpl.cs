@@ -47,38 +47,38 @@ namespace Backend.Services.impl
             var teacher = await _teacherProfileRepository.GetByUserId(userId);
             if (teacher == null || teacher.Status != common.Constant.StatusTeacherProfile.Approved)
             {
-                throw new Exception("Teacher not approved");
+                throw new InvalidOperationException("Teacher not approved");
             }
 
-            if (dto.StartTime <= DateTime.UtcNow.AddMinutes(15))
+            if (dto.StartTime <= DateTime.UtcNow.AddMinutes(30))
             {
                 throw new Exception("Schedule must be at least 15 minutes later");
             }
 
             if (dto.StartTime >= DateTime.UtcNow.AddDays(7))
             {
-                throw new Exception("Schedule cannot exceed 7 days");
+                throw new InvalidOperationException("Schedule cannot be created more than 30 days in advance.");
             }
 
             if (dto.StartTime >= dto.EndTime)
             {
-                throw new Exception("Invalid time");
+                throw new InvalidOperationException("End time must be after start time.");
             }
 
             if (dto.StartTime.Date != dto.EndTime.Date)
             {
-                throw new Exception("Schedule must be in one day");
+                throw new InvalidOperationException("Schedule must start and end on the same day.");
             }
 
             var duration = dto.EndTime - dto.StartTime;
             if (duration.TotalMinutes < 30)
             {
-                throw new Exception("Minimum duration is 30 minutes");
+                throw new InvalidOperationException("Minimum schedule duration is 30 minutes.");
             }
 
             if (duration.TotalHours > 4)
             {
-                throw new Exception("Maximum duration is 4 hours");
+                throw new InvalidOperationException("Maximum schedule duration is 4 hours.");
             }
 
             bool overlap = await _availabilityRepository.HasOverlapSchedule(userId, dto.StartTime, dto.EndTime);
@@ -160,43 +160,43 @@ namespace Backend.Services.impl
 
             if (availability.IsBooked)
             {
-                throw new Exception("Schedule already booked");
+                throw new InvalidOperationException("Schedule already booked");
             }
 
             if (availability.StartTime <= DateTime.UtcNow)
             {
-                throw new Exception("Cannot edit started schedule");
+                throw new InvalidOperationException("Cannot edit started schedule");
             }
 
-            if (dto.StartTime <= DateTime.UtcNow.AddMinutes(15))
+            if (dto.StartTime <= DateTime.UtcNow.AddMinutes(30))
             {
-                throw new Exception("Schedule must be at least 15 minutes later");
+                throw new InvalidOperationException("Schedule must start at least 30 minutes from now.");
             }
 
-            if (dto.StartTime >= DateTime.UtcNow.AddDays(7))
+            if (dto.StartTime >= DateTime.UtcNow.AddDays(30))
             {
-                throw new Exception("Schedule cannot exceed 7 days");
+                throw new InvalidOperationException("Schedule cannot be created more than 30 days in advance.");
             }
 
             if (dto.StartTime >= dto.EndTime)
             {
-                throw new Exception("Invalid time");
+                throw new InvalidOperationException("End time must be after start time.");
             }
 
             if (dto.StartTime.Date != dto.EndTime.Date)
             {
-                throw new Exception("Schedule must be in one day");
+                throw new InvalidOperationException("Schedule must start and end on the same day.");
             }
 
             var duration = dto.EndTime - dto.StartTime;
             if (duration.TotalMinutes < 30)
             {
-                throw new Exception("Minimum duration is 30 minutes");
+                throw new InvalidOperationException("Minimum schedule duration is 30 minutes.");
             }
 
             if (duration.TotalHours > 4)
             {
-                throw new Exception("Maximum duration is 4 hours");
+                throw new InvalidOperationException("Maximum schedule duration is 4 hours.");
             }
 
             bool overlap = await _availabilityRepository.HasOverlapSchedule(userId, dto.StartTime, dto.EndTime, id);

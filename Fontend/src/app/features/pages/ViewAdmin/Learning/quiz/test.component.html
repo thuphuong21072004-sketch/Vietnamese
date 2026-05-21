@@ -24,9 +24,14 @@
 
         </div>
 
-        <button *ngIf="!quiz" class="btn-primary" (click)="addQuiz()">
-            + Create Quiz
-        </button>
+        <div class="header-actions">
+            <button *ngIf="quiz" class="btn-preview" (click)="previewQuiz()">
+                Preview as Student
+            </button>
+            <button *ngIf="!quiz" class="btn-primary" (click)="addQuiz()">
+                + Create Quiz
+            </button>
+        </div>
 
     </div>
 
@@ -294,7 +299,7 @@
                                 </label>
                         
                                 <button class="btn-danger" (click)="deleteAnswer(q, ai)">
-                                    Xóa bỏ
+                                    Delete
                                 </button>
                         
                             </div>
@@ -770,6 +775,9 @@
                                                         <div *ngIf="a.imageUrl" class="media-preview small">
                                                 
                                                             <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
+                                                            <button class="remove-media" (click)="a.imageUrl = null">
+                                                                ×
+                                                            </button>
                                                         </div>
                                                 
                                                         <div *ngIf="a.audioUrl" class="media-preview small">
@@ -779,7 +787,9 @@
                                                                 <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
                                                             
                                                             </audio>
-                                                
+                                                            <button class="remove-media" (click)="a.audioUrl = null">
+                                                                ×
+                                                            </button>
                                                         </div>
                                                 
                                                         <label class="upload-btn">

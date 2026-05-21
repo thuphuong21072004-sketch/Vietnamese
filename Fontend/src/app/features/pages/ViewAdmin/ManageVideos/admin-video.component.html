@@ -1,6 +1,9 @@
 <div class="container">
 
-    <h2 class="title">Video Management</h2>
+    <div class="header">
+        <h2 class="title">Video Management</h2>
+        <p class="subtitle">Import, review and moderate videos for the platform</p>
+    </div>
 
     <div class="video-player" *ngIf="currentVideoUrl" id="videoPlayer">
         <iframe [src]="currentVideoUrl" frameborder="0" allowfullscreen></iframe>
@@ -16,24 +19,26 @@
         </p>
     </div>
 
-    <div class="box">
-        <input [(ngModel)]="youtubeId" placeholder="Enter Youtube ID to import">
-        <button (click)="importVideo()">Import</button>
-    </div>
+    <div class="controls">
+        <div class="box">
+            <input [(ngModel)]="youtubeId" placeholder="Enter Youtube ID to import" />
+            <button class="btn" (click)="importVideo()">Import</button>
+        </div>
 
-    <div class="box">
-        <input [(ngModel)]="searchYoutubeId" placeholder="Search by Youtube ID">
-        <button (click)="searchVideoById()">Search Video</button>
-        <button (click)="loadVideos(true)">Back</button>
-    </div>
+        <div class="box">
+            <input [(ngModel)]="searchYoutubeId" placeholder="Search by Youtube ID" />
+            <button class="btn" (click)="searchVideoById()">Search</button>
+            <button class="btn" (click)="loadVideos(true)">Back</button>
+        </div>
 
-    <div class="filter">
-        <select [(ngModel)]="status" (change)="loadVideos(true)">
-            <option [ngValue]="null">All</option>
-            <option [ngValue]="0">Pending</option>
-            <option [ngValue]="1">Approved</option>
-            <option [ngValue]="2">Temporarily Locked</option>
-        </select>
+        <div class="filter">
+            <select [(ngModel)]="status" (change)="loadVideos(true)">
+                <option [ngValue]="null">All</option>
+                <option [ngValue]="0">Pending</option>
+                <option [ngValue]="1">Approved</option>
+                <option [ngValue]="2">Temporarily Locked</option>
+            </select>
+        </div>
     </div>
 
     <div class="video-list">

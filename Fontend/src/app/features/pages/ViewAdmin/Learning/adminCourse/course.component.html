@@ -1,5 +1,10 @@
 <div class="course-container">
 
+    <div class="header">
+        <h2>Course Management</h2>
+        <p class="subtitle">Manage courses within the selected level</p>
+    </div>
+
     <div class="level-info" *ngIf="level">
         <h2>{{ level.levelName }}</h2>
         <p>{{ level.description }}</p>
@@ -53,12 +58,12 @@
 
     <div class="button-row">
         <button (click)="addCourse()">Add new row</button>
-        <button class="save-btn" (click)="saveCourses()">Save All</button>
-        <button class="btn-primary" [disabled]="levelId === 0" (click)="showLevelQuiz = !showLevelQuiz">
+        <button (click)="saveCourses()">Save All</button>
+        <button  [disabled]="levelId === 0" (click)="showLevelQuiz = !showLevelQuiz">
             {{ showLevelQuiz ? 'Hide Level Quiz' : 'Manage Level Quiz' }}
         </button>
     </div>
-    
+
     <app-quiz *ngIf="showLevelQuiz && levelId > 0" [refId]="levelId" [refType]="'LEVEL_JUMP'">
     </app-quiz>
 </div>

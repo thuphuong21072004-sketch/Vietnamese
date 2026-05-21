@@ -21,7 +21,7 @@ export class CourseComponent implements OnInit {
   courses: CourseDTO[] = [];
   level: LevelDTO | null = null;
   showLevelQuiz = false;
-  
+
   constructor(
     private route: ActivatedRoute,
     private learningService: LearningService,

@@ -12,5 +12,7 @@
         public string? Token { get; set; }
 
         public DateTime ExpiredAt { get; set; }
+
+        public string JoinUrl { get; set; } = string.Empty;
     }
 }

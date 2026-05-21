@@ -78,6 +78,12 @@ namespace Backend.Mapper
                             ? src.Teacher.Name
                             : ""
                     ))
+                .ForMember(dest => dest.TeacherProfile,
+                    opt => opt.MapFrom(src =>
+                        src.Teacher != null
+                            ? src.Teacher.TeacherProfile
+                            : null
+                    ))
                 .ReverseMap();
 
             CreateMap<Payment, PaymentDTO>().ReverseMap();

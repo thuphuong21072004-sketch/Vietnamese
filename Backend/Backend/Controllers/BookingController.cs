@@ -28,13 +28,9 @@ namespace Backend.Controllers
         [HttpPost("{availabilityId}")]
         public async Task<IActionResult> Create(int availabilityId)
         {
-            await _bookingService.Create(availabilityId);
+            var booking = await _bookingService.Create(availabilityId);
 
-            return Ok(new
-            {
-                success = true,
-                message = "Booking created successfully"
-            });
+            return Ok(booking);
         }
 
         /* 
@@ -80,24 +76,6 @@ namespace Backend.Controllers
         }
 
         /* 
-         * hoàn thành lịch hẹn
-         * O(1)
-         * (thuphuong21072004) 
-         */
-        [Authorize]
-        [HttpPut("{id}/complete")]
-        public async Task<IActionResult> Complete(int id)
-        {
-            await _bookingService.Complete(id);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Booking completed successfully"
-            });
-        }
-
-        /* 
          * chi tiết booking
          * O(1)
          * (thuphuong21072004) 
@@ -107,24 +85,6 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetDetail(int id)
         {
             return Ok(await _bookingService.GetDetail(id));
-        }
-
-        /* 
-         * teacher xác nhận lịch
-         * O(1)
-         * (thuphuong21072004) 
-         */
-        [Authorize]
-        [HttpPut("{id}/confirm")]
-        public async Task<IActionResult> Confirm(int id)
-        {
-            await _bookingService.Confirm(id);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Booking confirmed successfully"
-            });
         }
     }
 }

@@ -21,6 +21,29 @@
 
         </p>
 
+        <div *ngIf="booking" class="booking-summary">
+
+            <div class="info-row">
+
+                <span>Teacher</span>
+
+                <strong>{{ booking.teacherName }}</strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>Schedule</span>
+
+                <strong>
+                    {{ booking.startTime | date:'dd/MM/yyyy HH:mm' }} -
+                    {{ booking.endTime | date:'HH:mm' }}
+                </strong>
+
+            </div>
+
+        </div>
+
         <div *ngIf="reviewed && review" class="reviewed-box">
 
             <h2>
@@ -53,6 +76,10 @@
         </div>
 
         <div *ngIf="!reviewed">
+
+            <div *ngIf="booking && !canReview()" class="info-note">
+                Review is available after the class is completed.
+            </div>
 
             <div class="form-group">
 
@@ -112,7 +139,7 @@
 
             </div>
 
-            <button class="submit-btn" [disabled]="loading" (click)="submit()">
+            <button class="submit-btn" [disabled]="loading || !canReview()" (click)="submit()">
 
                 {{
                 loading

@@ -84,7 +84,7 @@ export class VideoService {
 
     return this.http.put<string>(
       `${this.apiUrl}/updateVideo`,
-      {}, // Body trống
+      {},
       {
         ...this.getOptions(true),
         params,

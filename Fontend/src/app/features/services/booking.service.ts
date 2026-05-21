@@ -25,32 +25,32 @@ export class BookingService {
   }
 
   /*
-   * student tạo booking
+   * student creates booking
    */
   create(availabilityId: number): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/${availabilityId}`,
-      {},
+      null,
       this.getOptions(),
     );
   }
 
   /*
-   * student booking của mình
+   * student own bookings
    */
   getMyBookings(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/me`, this.getOptions());
   }
 
   /*
-   * teacher booking của mình
+   * teacher own bookings
    */
   getTeacherBookings(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/teacher`, this.getOptions());
   }
 
   /*
-   * chi tiết booking
+   * booking details
    */
   getDetail(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`, this.getOptions());
@@ -60,14 +60,14 @@ export class BookingService {
    * teacher confirm booking
    */
   confirm(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/confirm`, {}, this.getOptions());
+    return this.http.put(`${this.apiUrl}/${id}/confirm`, null, this.getOptions());
   }
 
   /*
-   * huỷ booking
+   * cancel booking
    */
   cancel(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/cancel`, {}, this.getOptions());
+    return this.http.put(`${this.apiUrl}/${id}/cancel`, null, this.getOptions());
   }
 
   /*
@@ -76,7 +76,7 @@ export class BookingService {
   complete(id: number): Observable<any> {
     return this.http.put(
       `${this.apiUrl}/${id}/complete`,
-      {},
+      null,
       this.getOptions(),
     );
   }
@@ -130,7 +130,9 @@ export class BookingService {
    */
   getAvatar(booking: any): string {
     const avatar =
-      booking?.teacherProfile?.user?.avatarUrl || booking?.teacher?.avatarUrl;
+      booking?.teacherProfile?.avatarUrl ||
+      booking?.teacherProfile?.user?.avatarUrl ||
+      booking?.teacher?.avatarUrl;
 
     if (!avatar) {
       return '';
@@ -141,6 +143,37 @@ export class BookingService {
     }
 
     return `http://localhost:5108/uploads/${avatar}`;
+  }
+
+  /*
+   * helper booking duration in hours
+   */
+  getDurationHours(booking: any): number {
+    if (!booking?.startTime || !booking?.endTime) {
+      return 0;
+    }
+
+    const start = new Date(booking.startTime);
+    const end = new Date(booking.endTime);
+    const diff = Math.max(0, end.getTime() - start.getTime());
+    return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
+  }
+
+  /*
+   * helper total booking amount
+   */
+  getBookingAmount(booking: any): number {
+    const price = this.getTeacherPrice(booking);
+    const hours = this.getDurationHours(booking);
+
+    return Math.round((price * hours + Number.EPSILON) * 100) / 100;
+  }
+
+  /*
+   * helper teacher hourly price
+   */
+  getTeacherPrice(booking: any): number {
+    return Number(booking?.teacherProfile?.pricePerHour || 0);
   }
 
   /*

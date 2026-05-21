@@ -196,6 +196,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       },
     });
   }
+
   loadResult() {
     if (!this.quiz) {
       return;

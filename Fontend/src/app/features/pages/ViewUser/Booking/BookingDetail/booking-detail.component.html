@@ -52,6 +52,31 @@
 
     </div>
 
+    <div *ngIf="room" class="room-card">
+
+        <h2>Online Class Room</h2>
+
+        <div class="info-row">
+            <span>Room Code</span>
+            <strong>{{ room.roomCode }}</strong>
+        </div>
+
+        <div class="info-row">
+            <span>Expired At</span>
+            <strong>{{ room.expiredAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+        </div>
+
+        <p class="room-note">Room is ready. Click the button below to open the class now.</p>
+
+        <button class="room-btn" (click)="joinRoom()">Join Room</button>
+
+        <div *ngIf="room?.joinUrl" class="room-link">
+            <span>Direct link:</span>
+            <a [href]="room.joinUrl" target="_blank" rel="noopener noreferrer">Open class room</a>
+        </div>
+
+    </div>
+
     <div class="booking-info">
 
         <div class="info-row">
@@ -99,23 +124,71 @@
 
         </div>
 
+        <div *ngIf="booking.teacherProfile" class="info-row">
+
+            <span>
+
+                Price per hour
+
+            </span>
+
+            <strong>
+
+                ${{ booking.teacherProfile?.pricePerHour || 0 }}
+
+            </strong>
+
+        </div>
+
+        <div *ngIf="getAmount() > 0" class="info-row total-row">
+
+            <span>
+
+                Total amount
+
+            </span>
+
+            <strong>
+
+                ${{ getAmount() }}
+
+            </strong>
+
+        </div>
+
     </div>
 
     <div class="actions">
 
-        <button *ngIf="
-                booking.status === 0
-            " class="pay-btn" (click)="goPayment()">
+        <button *ngIf="canPay()" class="pay-btn" (click)="goPayment()">
 
-            Go To Payment
+            Pay Now
 
         </button>
 
-        <button *ngIf="
-                booking.status === 1
-            " class="room-btn" (click)="joinRoom()">
+        <div *ngIf="booking.status === 0 && (!payment || payment.status !== 1)" class="info-note">
 
+            Please complete payment now to confirm your booking.
+
+        </div>
+
+        <div *ngIf="booking.status === 1 && payment?.status === 1 && !canJoinRoom()" class="info-note">
+            {{ getJoinWindowMessage() }}
+        </div>
+
+        <button *ngIf="booking.status === 1 && payment?.status === 1 && canJoinRoom()" class="room-btn" (click)="joinRoom()">
             Join Room
+        </button>
+
+        <div *ngIf="booking.status === 1 && payment?.status !== 1" class="info-note">
+            Complete payment to join the class room.
+        </div>
+
+        <button *ngIf="
+                booking.status === 3
+            " class="review-btn" (click)="writeReview()">
+
+            Write Review
 
         </button>
 

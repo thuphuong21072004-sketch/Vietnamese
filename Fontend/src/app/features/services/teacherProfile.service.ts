@@ -91,7 +91,7 @@ export class TeacherProfileService {
   }
 
   /*
-   * update status tổng quát
+   * cập nhật trạng thái chung
    */
   updateStatus(id: number, status: number): Observable<any> {
     const params = new HttpParams().set('status', status);
@@ -120,9 +120,9 @@ export class TeacherProfileService {
   }
 
   /*
-   * chi tiết giáo viên
+   * teacher detail
    */
   getTeacherDetail(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`, this.getOptions());
   }
 }

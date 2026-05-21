@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Backend.Common;
 using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
@@ -10,13 +11,17 @@ namespace Backend.Services.impl
         private readonly PaymentRepository _paymentRepository;
         private readonly BookingRepository _bookingRepository;
         private readonly TeacherAvailabilityRepository _availabilityRepository;
+        private readonly UserRepository _userRepository;
+        private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
 
-        public PaymentServiceImpl(PaymentRepository paymentRepository, BookingRepository bookingRepository, TeacherAvailabilityRepository availabilityRepository, IMapper mapper)
+        public PaymentServiceImpl(PaymentRepository paymentRepository, BookingRepository bookingRepository, TeacherAvailabilityRepository availabilityRepository, UserRepository userRepository, UserContextUtil userContext, IMapper mapper)
         {
             _paymentRepository = paymentRepository;
             _bookingRepository = bookingRepository;
             _availabilityRepository = availabilityRepository;
+            _userRepository = userRepository;
+            _userContext = userContext;
             _mapper = mapper;
         }
 
@@ -29,24 +34,37 @@ namespace Backend.Services.impl
         {
             if (dto.Amount <= 0)
             {
-                throw new Exception("Invalid amount");
+                throw new ArgumentException("Invalid amount");
             }
 
             var booking = await _bookingRepository.GetById(dto.BookingId);
             if (booking == null)
             {
-                throw new Exception("Booking not found");
+                throw new KeyNotFoundException("Booking not found");
+            }
+
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            if (booking.StudentId != userId)
+            {
+                throw new UnauthorizedAccessException("You do not have permission to pay for this booking");
             }
 
             if (booking.Status == common.Constant.StatusBooking.Cancelled)
             {
-                throw new Exception("Booking cancelled");
+                throw new InvalidOperationException("Booking cancelled");
+            }
+
+            if (booking.Status != common.Constant.StatusBooking.Pending)
+            {
+                throw new InvalidOperationException("Payment can only be created for pending bookings");
             }
 
             var exist = await _paymentRepository.GetByBookingId(dto.BookingId);
             if (exist != null)
             {
-                throw new Exception("Payment already exists");
+                throw new InvalidOperationException("Payment already exists");
             }
 
             var payment = _mapper.Map<Payment>(dto);
@@ -67,7 +85,7 @@ namespace Backend.Services.impl
         {
             if (string.IsNullOrWhiteSpace(transactionCode))
             {
-                throw new Exception("Transaction code required");
+                throw new ArgumentException("Transaction code required");
             }
 
             var payment = await _paymentRepository.GetById(paymentId);
@@ -78,12 +96,12 @@ namespace Backend.Services.impl
 
             if (payment.Status == common.Constant.StatusPayment.Success)
             {
-                throw new Exception("Payment already success");
+                throw new InvalidOperationException("Payment already succeeded");
             }
 
             if (payment.Status == common.Constant.StatusPayment.Failed)
             {
-                throw new Exception("Payment already failed");
+                throw new InvalidOperationException("Payment already failed");
             }
 
             payment.Status = common.Constant.StatusPayment.Success;
@@ -118,17 +136,17 @@ namespace Backend.Services.impl
             var payment = await _paymentRepository.GetById(paymentId);
             if (payment == null)
             {
-                throw new Exception("Payment not found");
+                throw new KeyNotFoundException("Payment not found");
             }
 
             if (payment.Status == common.Constant.StatusPayment.Success)
             {
-                throw new Exception("Payment already success");
+                throw new InvalidOperationException("Payment already succeeded");
             }
 
             if (payment.Status == common.Constant.StatusPayment.Failed)
             {
-                throw new Exception("Payment already failed");
+                throw new InvalidOperationException("Payment already failed");
             }
 
             payment.Status = common.Constant.StatusPayment.Failed;
@@ -162,6 +180,20 @@ namespace Backend.Services.impl
             if (payment == null)
             {
                 return null;
+            }
+
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            var booking = await _bookingRepository.GetById(bookingId);
+            if (booking == null)
+            {
+                throw new KeyNotFoundException("Booking not found");
+            }
+
+            if (booking.StudentId != userId && booking.TeacherId != userId)
+            {
+                throw new UnauthorizedAccessException("You do not have permission to view this payment");
             }
 
             return _mapper.Map<PaymentDTO>(payment);

@@ -26,6 +26,10 @@
 
     </div>
 
+    <div *ngIf="isPrivilegedTeacherUser && !hasProfile" class="info-box">
+        Admin and Moderator teacher profiles are approved automatically upon creation.
+    </div>
+
     <!-- status -->
 
     <div *ngIf="hasProfile" class="status-alert">
@@ -243,90 +247,6 @@
                 Submit For Review
 
             </button>
-
-        </div>
-
-    </div>
-
-    <!-- preview -->
-
-    <div *ngIf="hasProfile" class="preview-card">
-
-        <div class="preview-top">
-
-            <div class="preview-avatar">
-
-                {{
-                profile.specialty
-                ?.charAt(0) || 'T'
-                }}
-
-            </div>
-
-            <div>
-
-                <h2>
-
-                    {{ profile.specialty }}
-
-                </h2>
-
-                <span>
-
-                    {{
-                    profile.experienceYears
-                    }}
-                    years experience
-
-                </span>
-
-            </div>
-
-        </div>
-
-        <div class="preview-body">
-
-            <p>
-
-                {{ profile.description }}
-
-            </p>
-
-        </div>
-
-        <div class="preview-footer">
-
-            <div class="preview-badge">
-
-                ${{ profile.pricePerHour }}/hour
-
-            </div>
-
-            <div class="preview-badge approved">
-
-                ⭐ {{ profile.ratingAverage }}
-
-            </div>
-
-            <div class="preview-badge">
-
-                {{ profile.totalReviews }}
-                Reviews
-
-            </div>
-
-            <div class="preview-badge status">
-
-                {{ getStatusText(profile.status) }}
-
-            </div>
-
-        </div>
-
-        <div *ngIf="profile.introVideoUrl" class="video-preview">
-
-            <video [src]="profile.introVideoUrl" controls class="preview-video">
-            </video>
 
         </div>
 

@@ -40,12 +40,13 @@ namespace Backend.Controllers
         [HttpGet("{bookingId}")]
         public async Task<IActionResult>  GetByBookingId(int bookingId)
         {
-            return Ok(
-                await _videoRoomService
-                    .GetByBookingId(
-                        bookingId
-                    )
-            );
+            var room = await _videoRoomService.GetByBookingId(bookingId);
+            if (room == null)
+            {
+                return NotFound(new { success = false, message = "Video room not found" });
+            }
+
+            return Ok(room);
         }
     }
 }

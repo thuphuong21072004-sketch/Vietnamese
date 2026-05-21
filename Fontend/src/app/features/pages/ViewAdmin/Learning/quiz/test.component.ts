@@ -2,6 +2,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { TestService } from '../../../../services/test.service';
 import { BaseService } from '../../../../services/base.service';
@@ -27,6 +28,7 @@ export class QuizComponent implements OnChanges {
     private testService: TestService,
     private learningService: LearningService,
     private baseService: BaseService,
+    private router: Router,
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -313,7 +315,7 @@ export class QuizComponent implements OnChanges {
         const fileName = res.fileName || res.filename || res.url || res.data;
 
         if (!fileName) {
-          console.error('Không có fileName');
+          console.error('No fileName');
 
           return;
         }
@@ -369,6 +371,26 @@ export class QuizComponent implements OnChanges {
         this.baseService.handleError(err, 'Delete failed');
       },
     });
+  }
+
+  previewQuiz() {
+    if (!this.quiz) {
+      return;
+    }
+
+    const refType = encodeURIComponent(this.quiz.refType || this.refType || 'UNIT');
+    const refId = encodeURIComponent(this.quiz.refId || this.refId || 0);
+    const queryParams = new URLSearchParams();
+    queryParams.set('refType', refType);
+    queryParams.set('refId', refId);
+
+    if (refType === 'UNIT') {
+      const unitId = encodeURIComponent(this.quiz.refId || this.refId || 0);
+      queryParams.set('unitId', unitId);
+    }
+
+    const url = `${window.location.origin}/user/quiz?${queryParams.toString()}`;
+    window.open(url, '_blank');
   }
 
   get totalScore(): number {

@@ -8,5 +8,5 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./dashboard.component.css'],
 })
 export class UserDashboardComponent implements OnInit {
-
+  ngOnInit(): void {}
 }

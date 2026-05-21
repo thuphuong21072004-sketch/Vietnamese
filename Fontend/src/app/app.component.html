@@ -10,7 +10,12 @@
 
         <div class="account-area">
             <button class="avatar-btn" (click)="toggleMenu()" aria-label="Account menu">
-                <span *ngIf="isLogin; else guestIcon">{{ userInitial }}</span>
+                <ng-container *ngIf="avatarUrl; else initialsOrGuest">
+                    <img [src]="avatarUrl" alt="User avatar">
+                </ng-container>
+                <ng-template #initialsOrGuest>
+                    <span *ngIf="isLogin; else guestIcon">{{ userInitial }}</span>
+                </ng-template>
                 <ng-template #guestIcon>
                     <span class="person-icon"></span>
                 </ng-template>
@@ -18,6 +23,9 @@
 
             <div class="account-dropdown" *ngIf="showAccountMenu">
                 <div class="account-summary" *ngIf="isLogin; else guestSummary">
+                    <div class="account-avatar" *ngIf="avatarUrl">
+                        <img [src]="avatarUrl" [alt]="name || 'User'">
+                    </div>
                     <strong>{{ name || 'User' }}</strong>
                     <span>{{ role || 'Member' }}</span>
                 </div>
@@ -41,43 +49,91 @@
 <div class="main-container">
 
 <aside class="left-menu">
-    <div class="menu-heading">
-        <h3>Menu</h3>
-        <p *ngIf="isLogin">Hello, {{ name }}</p>
-        <p *ngIf="!isLogin">Guest access</p>
+    <div class="profile-card">
+        <div class="profile-avatar">
+            <ng-container *ngIf="avatarUrl; else initialsOrGuest">
+                <img [src]="avatarUrl" alt="User avatar">
+            </ng-container>
+            <ng-template #initialsOrGuest>
+                <span *ngIf="isLogin; else guestIcon">{{ userInitial }}</span>
+            </ng-template>
+            <ng-template #guestIcon>
+                <span class="person-icon"></span>
+            </ng-template>
+        </div>
+        <div class="profile-details">
+            <p class="profile-label">Hello</p>
+            <h3>{{ name || 'Guest' }}</h3>
+            <span class="role-chip">{{ role === 'User' ? 'Student' : role === 'Admin' ? 'Administrator' : role || 'Guest' }}</span>
+        </div>
     </div>
 
-    <ul *ngIf="!isLogin">
-        <li><button class="menu-btn" routerLink="/home">Home</button></li>
-        <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
-    </ul>
 
-    <ul *ngIf="role === 'User'">
-        <li><button class="menu-btn" routerLink="/home">Home</button></li>
-        <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
-        <li><button class="menu-btn" routerLink="/user/units">Courses</button></li>
-        <li><button class="menu-btn" routerLink="/user/tests">Practice Tests</button></li>
+    <div class="menu-section" *ngIf="!isLogin">
+        <h4>Discover</h4>
+        <ul>
+            <li><button class="menu-btn" routerLink="/home">Home</button></li>
+            <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
+        </ul>
+    </div>
 
-        <li><button class="menu-btn" routerLink="/user/learnOnline">Learn online</button></li>
-        <li><button class="menu-btn" routerLink="/user/speaking">Practice speaking</button></li>
-        <li><button class="menu-btn" routerLink="/user/become-teacher">Register to teach</button></li>
-        <li><button class="menu-btn" routerLink="/user/dashboard">Dashboard</button></li>
-    </ul>
+    <div class="menu-section" *ngIf="role === 'User'">
+        <h4>Users</h4>
+        <ul>
+            <li><button class="menu-btn" routerLink="/home">Home</button></li>
+            <li><button class="menu-btn" routerLink="/user/dashboard">Dashboard</button></li>
+            <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
+            <li><button class="menu-btn" routerLink="/user/units">Courses</button></li>
+            <li><button class="menu-btn" routerLink="/user/tests">Practice Tests</button></li>
+            <li><button class="menu-btn" routerLink="/user/learnOnline">Learn Online</button></li>
+            <li><button class="menu-btn" routerLink="/my-bookings">My Bookings</button></li>
+            <li><button class="menu-btn" routerLink="/user/speaking">Practice Speaking</button></li>
+            <li><button class="menu-btn teacher-register" routerLink="/user/become-teacher">✨ Become a teacher</button></li>
+        </ul>
+    </div>
 
-    <ul *ngIf="role === 'Admin' || role === 'Moderator'">
-        <li><button class="menu-btn" routerLink="/home">Home</button></li>
+    <div *ngIf="role === 'Admin' || role === 'Moderator'" class="menu-section role-switch">
+        <h4>Mode</h4>
+        <button
+            *ngIf="role === 'Admin'"
+            class="menu-btn"
+            [class.active]="adminMode === 'management'"
+            (click)="setAdminMode('management')"
+        >
+            Admin tools
+        </button>
+        <button
+            class="menu-btn"
+            [class.active]="adminMode === 'teacher'"
+            (click)="setAdminMode('teacher')"
+        >
+            Teacher panel
+        </button>
+    </div>
 
-        <li><button class="menu-btn" routerLink="admin/users">Manage Users</button></li>
-        <li><button class="menu-btn" routerLink="admin/videos">Manage Videos</button></li>
-        <li><button class="menu-btn" routerLink="admin/levels">Manage Lessons</button></li>
-        <li><button class="menu-btn" routerLink="admin/placements">Manage Tests</button></li>
+    <div class="menu-section" *ngIf="role === 'Admin' && adminMode === 'management'">
+        <h4>Management</h4>
+        <ul>
+            <li><button class="menu-btn" routerLink="/home">Home</button></li>
+            <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>
+            <li><button class="menu-btn" routerLink="admin/users">Manage Users</button></li>
+            <li><button class="menu-btn" routerLink="admin/videos">Manage Videos</button></li>
+            <li><button class="menu-btn" routerLink="admin/levels">Manage Lessons</button></li>
+            <li><button class="menu-btn" routerLink="admin/placements">Manage Tests</button></li>
+        </ul>
+    </div>
 
-
-        <li><button class="menu-btn" routerLink="/admin/teachers">Teacher Applications</button></li>
-        <li><button class="menu-btn" routerLink="/admin/schedule">Manage Schedule</button></li> 
-        <li><button class="menu-btn" routerLink="/admin/classrooms">My Classrooms</button></li>
-        <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>
-    </ul>
+    <div class="menu-section" *ngIf="(role === 'Admin' && adminMode === 'teacher') || role === 'Moderator'">
+        <h4>Teaching</h4>
+        <ul>
+            <li><button class="menu-btn" routerLink="/home">Home</button></li>
+            <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>
+            <li *ngIf="role === 'Admin'"><button class="menu-btn" routerLink="/admin/teachers">Teacher Applications</button></li>
+            <li><button class="menu-btn" routerLink="/admin/schedule">Manage Schedule</button></li>
+            <li><button class="menu-btn" routerLink="/admin/classrooms">My Classrooms</button></li>
+            <li><button class="menu-btn" routerLink="/user/become-teacher">Register to Teacher</button></li>
+        </ul>
+    </div>
 </aside>
 
 <div class="content">

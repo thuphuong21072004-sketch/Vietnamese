@@ -1,9 +1,15 @@
 <div class="unit-container">
 
+    <div class="header">
+        <h2>Unit Management</h2>
+        <p class="subtitle">Units inside the selected course</p>
+    </div>
+
     <div class="course-info" *ngIf="course as c">
         <h2>{{ c.courseName }}</h2>
         <p>{{ c.description }}</p>
     </div>
+
     <table>
         <thead>
             <tr>

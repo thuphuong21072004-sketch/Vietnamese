@@ -146,6 +146,34 @@
 
                 </button>
 
+                <button *ngIf="item.status === 0" class="pay-btn" (click)="goPayment(item.bookingId)">
+
+                    Pay Now
+
+                </button>
+
+                <div *ngIf="item.status === 0" class="pending-note">
+
+                    Please complete payment to confirm this booking.
+
+                </div>
+
+                <button *ngIf="canJoinRoom(item)" class="room-btn" (click)="joinRoom(item.bookingId)">
+
+                    Join Room
+
+                </button>
+
+                <button *ngIf="item.status === 1 && !canJoinRoom(item) && !isPastBooking(item)" class="info-btn" disabled>
+                    Room not open yet or access expired
+                </button>
+
+                <button *ngIf="showReviewButton(item)" class="review-btn" (click)="writeReview(item.bookingId)">
+
+                    Review
+
+                </button>
+
                 <button *ngIf="
                         item.status !== 2
                         &&

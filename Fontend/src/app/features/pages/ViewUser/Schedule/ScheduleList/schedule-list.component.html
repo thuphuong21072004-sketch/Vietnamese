@@ -1,190 +1,89 @@
 <div class="student-schedule-page">
+  <div class="top-bar">
+    <div class="page-intro">
+      <p class="eyebrow">Your personal schedule</p>
+      <h1>Find your next class</h1>
+      <p>Explore available teacher schedules, then book and secure your preferred time slot.</p>
+    </div>
 
-    <div class="top-bar">
+    <div class="filter-row">
+      <div class="filter-item">
+        <label>Search</label>
+        <input
+          type="text"
+          placeholder="Teacher, specialty or date"
+          [(ngModel)]="keyword"
+          (input)="searchSchedules()"
+        />
+      </div>
 
-        <div>
+      <div class="filter-item">
+        <label>Date</label>
+        <input type="date" [(ngModel)]="selectedDate" (change)="loadSchedules()" />
+      </div>
+    </div>
+  </div>
 
-            <h1>
+  <div *ngIf="loading" class="loading">Loading schedules...</div>
 
-                Learn Online
+  <div *ngIf="!loading && schedules.length === 0" class="empty-state">
+    No schedules available right now. Please check again later.
+  </div>
 
-            </h1>
+  <div *ngIf="!loading && schedules.length > 0 && visibleSchedules.length === 0" class="empty-state">
+    No schedules match your filter. Try a different keyword or date.
+  </div>
 
-            <p>
+  <div *ngIf="!loading && visibleSchedules.length > 0" class="summary-row">
+    <div>{{ visibleSchedules.length }} schedule{{ visibleSchedules.length === 1 ? '' : 's' }} found</div>
+    <div>{{ schedules.length }} total available</div>
+  </div>
 
-                Find available schedules from teachers
-
-            </p>
-
+  <div *ngIf="!loading && visibleSchedules.length > 0" class="schedule-grid">
+    <div *ngFor="let item of visibleSchedules" class="schedule-card">
+      <div class="teacher-top">
+        <div class="teacher-avatar-wrap">
+          <img *ngIf="getTeacherAvatar(item)" [src]="getTeacherAvatar(item)" class="teacher-avatar" />
+          <div *ngIf="!getTeacherAvatar(item)" class="teacher-avatar placeholder">
+            {{ getTeacherName(item).charAt(0) }}
+          </div>
         </div>
 
-        <input type="date" [(ngModel)]="selectedDate" (change)="loadSchedules()">
-
-    </div>
-
-    <div *ngIf="loading" class="loading">
-
-        Loading schedules...
-
-    </div>
-
-    <div *ngIf="
-            !loading
-            &&
-            schedules.length === 0
-        " class="empty-state">
-
-        No schedules available
-
-    </div>
-
-    <div *ngIf="
-            !loading
-            &&
-            schedules.length > 0
-        " class="schedule-grid">
-
-        <div *ngFor="
-                let item of schedules
-            " class="schedule-card">
-
-            <div class="teacher-top">
-
-                <img *ngIf="
-                        getTeacherAvatar(item)
-                    " [src]="
-                        getTeacherAvatar(item)
-                    " class="teacher-avatar">
-
-                <div *ngIf="
-                        !getTeacherAvatar(item)
-                    " class="teacher-avatar placeholder">
-
-                    {{
-                    getTeacherName(item)
-                    .charAt(0)
-                    }}
-
-                </div>
-
-                <div class="teacher-info">
-
-                    <h2>
-
-                        {{
-                        getTeacherName(item)
-                        }}
-
-                    </h2>
-
-                    <p>
-
-                        {{
-                        getSpecialty(item)
-                        }}
-
-                    </p>
-
-                    <div class="teacher-rating">
-
-                        ⭐
-                        {{
-                        getRating(item)
-                        }}
-
-                        ·
-
-                        {{
-                        getTotalReviews(item)
-                        }}
-                        reviews
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="schedule-body">
-
-                <div class="time-row">
-
-                    <span>
-
-                        Date
-
-                    </span>
-
-                    <strong>
-
-                        {{
-                        item.startTime
-                        | date:'dd/MM/yyyy'
-                        }}
-
-                    </strong>
-
-                </div>
-
-                <div class="time-row">
-
-                    <span>
-
-                        Time
-
-                    </span>
-
-                    <strong>
-
-                        {{
-                        item.startTime
-                        | date:'HH:mm'
-                        }}
-
-                        -
-
-                        {{
-                        item.endTime
-                        | date:'HH:mm'
-                        }}
-
-                    </strong>
-
-                </div>
-
-                <div class="time-row">
-
-                    <span>
-
-                        Price
-
-                    </span>
-
-                    <strong class="price">
-
-                        $
-                        {{
-                        getPricePerHour(item)
-                        }}/hour
-
-                    </strong>
-
-                </div>
-
-            </div>
-
-            <button class="view-btn" (click)="
-                    openDetail(
-                        item.availabilityId
-                    )
-                ">
-
-                View Detail
-
-            </button>
-
+        <div class="teacher-info">
+          <div class="teacher-title">
+            <h2>{{ getTeacherName(item) }}</h2>
+            <span class="status-pill available">Available</span>
+          </div>
+          <p>{{ getSpecialty(item) }}</p>
+          <div class="teacher-rating">
+            <span>⭐ {{ getRating(item) }}</span>
+            <span>·</span>
+            <span>{{ getTotalReviews(item) }} reviews</span>
+          </div>
         </div>
+      </div>
 
+      <div class="schedule-body">
+        <div class="info-block">
+          <span>Date</span>
+          <strong>{{ item.startTime | date:'dd/MM/yyyy' }}</strong>
+        </div>
+        <div class="info-block">
+          <span>Time</span>
+          <strong>{{ item.startTime | date:'HH:mm' }} - {{ item.endTime | date:'HH:mm' }}</strong>
+        </div>
+        <div class="info-block">
+          <span>Rate</span>
+          <strong>${{ getPricePerHour(item) }}/hour</strong>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="view-btn" (click)="openDetail(item.availabilityId)">View detail</button>
+        <button class="book-btn" [disabled]="item.isBooked" (click)="bookSchedule(item)">
+          {{ item.isBooked ? 'Unavailable' : 'Book now' }}
+        </button>
+      </div>
     </div>
-
+  </div>
 </div>
