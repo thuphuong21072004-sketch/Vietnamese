@@ -16,7 +16,7 @@
             </p>
 
             <div class="header-meta" *ngIf="quiz">
-                <span class="badge">Mode: {{ quiz.quizMode ? (quiz.quizMode === 'question' ? 'Question-only' : 'Part-based') : 'Draft' }}</span>
+                <span class="badge">Mode: {{ quiz?.quizMode ? (quiz?.quizMode === 'question' ? 'Question-only' : 'Part-based') : 'Draft' }}</span>
                 <span class="badge">Questions: {{ quiz.questions?.length ?? 0 }}</span>
                 <span class="badge">Parts: {{ quiz.parts?.length ?? 0 }}</span>
                 <span class="badge" *ngIf="quiz.timeLimit">Timer: {{ quiz.timeLimit }} min</span>
@@ -107,7 +107,7 @@
             <p>Start by adding a question or a part. Use the buttons below to build your quiz step by step and keep each answer clear.</p>
         </div>
 
-        <div *ngIf="quiz.questions?.length && quiz.parts?.length === 0">
+        <div *ngIf="quiz && quiz.questions?.length && quiz.parts?.length === 0">
 
             <div class="question-card" *ngFor="let q of quiz.questions; let i = index">
 
@@ -320,7 +320,7 @@
 
         </div>
 
-        <div *ngIf="quiz.parts?.length">
+        <div *ngIf="quiz && quiz.parts?.length">
 
             <div class="parts-wrapper">
 
@@ -913,7 +913,7 @@
 
         <div class="top-actions">
 
-            <ng-container *ngIf="!quiz.quizMode">
+            <ng-container *ngIf="quiz && !quiz.quizMode">
 
                 <button class="btn-add" (click)="addQuestionToQuiz()">
 
@@ -929,7 +929,7 @@
 
             </ng-container>
 
-            <ng-container *ngIf="quiz.quizMode === 'question'">
+            <ng-container *ngIf="quiz && quiz.quizMode === 'question'">
 
                 <button class="btn-add" (click)="addQuestionToQuiz()">
 
@@ -939,7 +939,7 @@
 
             </ng-container>
 
-            <ng-container *ngIf="quiz.quizMode === 'part'">
+            <ng-container *ngIf="quiz && quiz.quizMode === 'part'">
 
                 <button class="btn-add" (click)="addPart()">
 
@@ -959,7 +959,7 @@
 
             </button>
 
-            <button *ngIf="quiz.quizId" class="btn-danger" (click)="deleteQuiz()">
+            <button *ngIf="quiz?.quizId" class="btn-danger" (click)="deleteQuiz()">
 
                 Delete Quiz
 

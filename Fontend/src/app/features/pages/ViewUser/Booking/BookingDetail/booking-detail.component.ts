@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BookingService } from '../../../../services/booking.service';
 import { PaymentService } from '../../../../services/payment.service';
 import { VideoRoomService } from '../../../../services/video-room.service';
+import { ReviewService } from '../../../../services/review.service';
 
 @Component({
   selector: 'app-booking-detail',
@@ -30,6 +31,7 @@ export class BookingDetailComponent implements OnInit {
 
   payment: any = null;
   room: any = null;
+  review: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,6 +42,7 @@ export class BookingDetailComponent implements OnInit {
 
     private paymentService: PaymentService,
     private roomService: VideoRoomService,
+    private reviewService: ReviewService,
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +60,7 @@ export class BookingDetailComponent implements OnInit {
 
         this.loadPayment();
         this.loadRoom();
+        this.loadReview();
         this.loading = false;
       },
 
@@ -184,6 +188,21 @@ export class BookingDetailComponent implements OnInit {
       },
       error: () => {
         this.payment = null;
+      },
+    });
+  }
+
+  loadReview() {
+    this.review = null;
+
+    if (!this.booking?.bookingId) return;
+
+    this.reviewService.getByBookingId(this.booking.bookingId).subscribe({
+      next: (res) => {
+        this.review = res;
+      },
+      error: () => {
+        this.review = null;
       },
     });
   }

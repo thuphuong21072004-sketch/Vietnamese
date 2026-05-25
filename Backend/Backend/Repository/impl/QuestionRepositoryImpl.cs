@@ -69,7 +69,7 @@ namespace Backend.Repository.impl
 
         /* 
          * Lấy danh sách câu hỏi theo QuizId 
-         * O(N) 
+         * O(1) - Single optimized query
          * thuphuong21072004 
          */
         public async Task<List<Question>> GetQuestionsByQuiz(int quizId)
@@ -78,6 +78,7 @@ namespace Backend.Repository.impl
                 .AsNoTracking()
                 .Where(x => x.QuizId == quizId)
                 .Include(x => x.Answers)
+                .OrderBy(x => x.OrderIndex)
                 .ToListAsync();
         }
 

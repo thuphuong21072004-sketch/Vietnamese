@@ -112,19 +112,9 @@
                     <span *ngIf="q.questionText" class="question-text-inline">
                         {{ q.questionText }}
                     </span>
-                    <span *ngIf="q.audioUrl" class="question-audio-inline">
-                        <audio controls class="question-audio" [src]="
-                                'http://localhost:5108/audios/' +
-                                q.audioUrl
-                           ">
-                        </audio>
-                    </span>
-                    <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
-                        <img class="question-image-inline-img" [src]="
-                                'http://localhost:5108/images/' +
-                                q.imageUrl
-                           ">
-                    </span>
+                    <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                    <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
+                        [src]="getAudioUrl(q.audioUrl)"></audio>
                     <span class="question-score">
                         ({{ q.score }} pts)
                     </span>
@@ -166,15 +156,8 @@
                             <span *ngIf="a.answerText" class="answer-text">
                                 {{ a.answerText }}
                             </span>
-                            <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="
-                                            'http://localhost:5108/images/' +
-                                            a.imageUrl
-                                         ">
-                            <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="
-                                                'http://localhost:5108/audios/' +
-                                                a.audioUrl
-                                           ">
-                            </audio>
+                            <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
+                            <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
                         </div>
                     </label>
                 </div>
@@ -221,29 +204,17 @@
                         <div class="question-title">
                         
                             <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
-
                             <span *ngIf="q.questionText" class="question-text-inline">
                                 {{ q.questionText }}
                             </span>
-
-                            <span *ngIf="q.audioUrl" class="question-audio-inline">
-                                <audio controls class="question-audio" [src]="
-                                        'http://localhost:5108/audios/' +
-                                        q.audioUrl
-                                   ">
-                                </audio>
-                            </span>
-
-                            <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
-                                <img class="question-image-inline-img" [src]="
-                                        'http://localhost:5108/images/' +
-                                        q.imageUrl
-                                   ">
-                            </span>
-
+                            <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                            <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
+                                [src]="getAudioUrl(q.audioUrl)"></audio>
                             <span class="question-score">
                                 ({{ q.score }} pts)
                             </span>
+
+                            
                         
                         </div>
 
@@ -290,21 +261,13 @@
                                     <img *ngIf="
                                             !a.answerText &&
                                             a.imageUrl
-                                         " class="answer-image" [src]="
-                                            'http://localhost:5108/images/' +
-                                            a.imageUrl
-                                         ">
+                                         " class="answer-image" [src]="getImageUrl(a.imageUrl)">
 
                                     <audio *ngIf="
                                                 !a.answerText &&
                                                 !a.imageUrl &&
                                                 a.audioUrl
-                                            " controls class="answer-audio" [src]="
-                                                'http://localhost:5108/audios/' +
-                                                a.audioUrl
-                                           ">
-
-                                    </audio>
+                                            " controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
 
                                 </div>
 
@@ -328,19 +291,12 @@
                             <img *ngIf="
                                     !psg.content &&
                                     psg.imageUrl
-                                 " class="passage-image" [src]="
-                                    'http://localhost:5108/images/' +
-                                    psg.imageUrl
-                                 ">
+                                 " class="passage-image" [src]="getImageUrl(psg.imageUrl)">
                             <audio *ngIf="
                                         !psg.content &&
                                         !psg.imageUrl &&
                                         psg.audioUrl
-                                     " controls class="passage-audio" [src]="
-                                        'http://localhost:5108/audios/' +
-                                        psg.audioUrl
-                                   ">
-                            </audio>
+                                     " controls class="passage-audio" [src]="getAudioUrl(psg.audioUrl)"></audio>
                         </div>
 
                         <div *ngFor="
@@ -352,19 +308,9 @@
                                 <span *ngIf="q.questionText" class="question-text-inline">
                                     {{ q.questionText }}
                                 </span>
-                                <span *ngIf="q.audioUrl" class="question-audio-inline">
-                                    <audio controls class="question-audio" [src]="
-                                            'http://localhost:5108/audios/' +
-                                            q.audioUrl
-                                       ">
-                                    </audio>
-                                </span>
-                                <span *ngIf="q.imageUrl && !q.questionText" class="question-image-inline">
-                                    <img class="question-image-inline-img" [src]="
-                                            'http://localhost:5108/images/' +
-                                            q.imageUrl
-                                       ">
-                                </span>
+                                <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                                <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
+                                    [src]="getAudioUrl(q.audioUrl)"></audio>
                                 <span class="question-score">
                                     ({{ q.score }} pts)
                                 </span>
@@ -414,20 +360,13 @@
                                         <img *ngIf="
                                                 !a.answerText &&
                                                 a.imageUrl
-                                             " class="answer-image" [src]="
-                                                'http://localhost:5108/images/' +
-                                                a.imageUrl
-                                             ">
+                                             " class="answer-image" [src]="getImageUrl(a.imageUrl)">
 
-                                        <audio *ngIf="
+                                                    <audio *ngIf="
                                                     !a.answerText &&
                                                     !a.imageUrl &&
                                                     a.audioUrl
-                                                 " controls class="answer-audio" [src]="
-                                                    'http://localhost:5108/audios/' +
-                                                    a.audioUrl
-                                               ">
-                                        </audio>
+                                            " controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
 
                                     </div>
 
@@ -436,11 +375,12 @@
                             </div>
 
                         </div>
-
                     </div>
                 </div>
 
             </div>
+
+        </div>
 
         <button class="submit-btn" *ngIf="!isSubmitted" (click)="submitQuiz()">
 

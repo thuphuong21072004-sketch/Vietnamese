@@ -52,6 +52,34 @@
 
             </div>
 
+            <div class="form-group">
+
+                <label>
+                    Role
+                </label>
+
+                <select [(ngModel)]="roleId">
+
+                    <option [ngValue]="null">
+                        All
+                    </option>
+
+                    <option [ngValue]="1">
+                        User
+                    </option>
+
+                    <option [ngValue]="2">
+                        Admin
+                    </option>
+
+                    <option [ngValue]="3">
+                        Moderator
+                    </option>
+
+                </select>
+
+            </div>
+
             <button class="search-btn" (click)="search()">
                 Search
             </button>

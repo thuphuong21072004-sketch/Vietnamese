@@ -20,6 +20,14 @@ import { VideoRoomService } from '../../../../services/video-room.service';
 })
 export class MyBookingsComponent implements OnInit {
   bookings: any[] = [];
+  filteredBookings: any[] = [];
+  selectedFilter = 'all';
+  filterOptions = [
+    { key: 'all', label: 'All classes' },
+    { key: 'upcoming', label: 'Upcoming' },
+    { key: 'reviewed', label: 'Reviewed' },
+    { key: 'notReviewed', label: 'Not reviewed' },
+  ];
 
   loading = false;
 
@@ -40,6 +48,7 @@ export class MyBookingsComponent implements OnInit {
     this.bookingService.getMyBookings().subscribe({
       next: (res) => {
         this.bookings = res;
+        this.applyFilters();
 
         this.loading = false;
       },
@@ -54,6 +63,57 @@ export class MyBookingsComponent implements OnInit {
 
   openDetail(id: number) {
     this.router.navigate(['/booking', id]);
+  }
+
+  setFilter(filter: string) {
+    this.selectedFilter = filter;
+    this.applyFilters();
+  }
+
+  private applyFilters() {
+    this.filteredBookings = this.bookings
+      .filter((item) => {
+        if (!item) return false;
+
+        switch (this.selectedFilter) {
+          case 'upcoming':
+            return this.isBookingUpcoming(item);
+          case 'reviewed':
+            return this.isBookingReviewed(item);
+          case 'notReviewed':
+            return this.isBookingNotReviewed(item);
+          default:
+            return true;
+        }
+      })
+      .sort((a, b) => this.sortByProximity(a, b));
+  }
+
+  private isBookingUpcoming(item: any): boolean {
+    const startTime = new Date(item.startTime).getTime();
+    return item?.status === 1 && startTime > Date.now();
+  }
+
+  private isBookingReviewed(item: any): boolean {
+    return (
+      item?.status === 3 || !!item?.reviewId || !!item?.hasReview || !!item?.reviewed
+    );
+  }
+
+  private isBookingNotReviewed(item: any): boolean {
+    return item?.status !== 3 && item?.status !== 2 && !this.isBookingReviewed(item);
+  }
+
+  private sortByProximity(a: any, b: any): number {
+    const now = Date.now();
+    const aTime = new Date(a.startTime).getTime();
+    const bTime = new Date(b.startTime).getTime();
+    const aFuture = aTime > now;
+    const bFuture = bTime > now;
+
+    if (aFuture && !bFuture) return -1;
+    if (!aFuture && bFuture) return 1;
+    return aTime - bTime;
   }
 
   cancelBooking(id: number) {

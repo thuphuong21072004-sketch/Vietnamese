@@ -16,6 +16,20 @@
 
     </div>
 
+    <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <div class="filter-buttons">
+            <button
+                *ngFor="let option of filterOptions"
+                type="button"
+                (click)="setFilter(option.key)"
+                [class.active]="selectedFilter === option.key"
+            >
+                {{ option.label }}
+            </button>
+        </div>
+    </div>
+
     <div *ngIf="loading" class="loading">
 
         Loading bookings...
@@ -25,7 +39,7 @@
     <div *ngIf="
             !loading
             &&
-            bookings.length === 0
+            filteredBookings.length === 0
         " class="empty-state">
 
         No bookings found
@@ -35,7 +49,7 @@
     <div class="booking-grid">
 
         <div *ngFor="
-                let item of bookings
+                let item of filteredBookings
             " class="booking-card">
 
             <div class="teacher-top">
@@ -157,9 +171,14 @@
 
                 </button>
 
-                <button *ngIf="item.status === 1 && !canJoinRoom(item)" class="info-btn" disabled>
-                    Room not open yet or access expired
-                </button>
+                <ng-container *ngIf="item.status === 1 && !canJoinRoom(item)">
+                    <button *ngIf="canComplete(item) && isAdmin" class="info-btn" (click)="openDetail(item.bookingId)">
+                        Xem đánh giá
+                    </button>
+                    <button *ngIf="!canComplete(item) || !isAdmin" class="info-btn" disabled>
+                        Room not open yet or access expired
+                    </button>
+                </ng-container>
                 
                 <button *ngIf="
                         item.status !== 2

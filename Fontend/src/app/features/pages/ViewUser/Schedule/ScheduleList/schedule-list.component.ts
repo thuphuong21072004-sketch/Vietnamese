@@ -49,7 +49,10 @@ export class TeacherSchedulesComponent implements OnInit {
 
     this.scheduleService.getAvailableSchedules(this.selectedDate).subscribe({
       next: (res) => {
-        this.schedules = res.filter((item) => !item.isBooked);
+        const now = new Date();
+        this.schedules = res.filter(
+          (item) => !item.isBooked && new Date(item.startTime) > now,
+        );
 
         this.visibleSchedules = [...this.schedules];
 

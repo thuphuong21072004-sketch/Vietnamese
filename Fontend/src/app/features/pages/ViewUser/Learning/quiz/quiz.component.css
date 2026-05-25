@@ -211,6 +211,7 @@
     display: inline-flex;
     align-items: center;
     max-width: 300px;
+    flex-shrink: 0;
 }
 
 .question-audio-inline audio {

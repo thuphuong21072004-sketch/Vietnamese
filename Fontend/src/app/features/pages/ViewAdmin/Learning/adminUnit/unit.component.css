@@ -78,5 +78,6 @@ button {
     .delete-btn{ background:var(--danger); color:#fff; border-radius:12px; padding:0 16px }
     .btn-primary{ background:linear-gradient(135deg,var(--admin-accent1),var(--admin-accent2)); color:#fff; border-radius:12px; padding:0 16px }
     .button-row button{ height:44px; border:none; cursor:pointer }
+}
 
     @media(max-width:800px){ .button-row{ flex-direction:column } }

@@ -16,6 +16,16 @@
 
     </div>
 
+    <div class="filters">
+        <label for="filterSelect">Filter:</label>
+        <select id="filterSelect" (change)="setFilter($any($event.target).value)">
+            <option value="all">All classes</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="notReviewed">Not reviewed</option>
+        </select>
+    </div>
+
     <div *ngIf="loading" class="loading">
 
         Loading bookings...
@@ -34,9 +44,7 @@
 
     <div class="booking-grid">
 
-        <div *ngFor="
-                let item of bookings
-            " class="booking-card">
+        <div *ngFor="let item of filteredBookings" class="booking-card">
 
             <div class="teacher-top">
 

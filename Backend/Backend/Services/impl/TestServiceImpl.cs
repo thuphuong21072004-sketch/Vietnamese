@@ -360,24 +360,88 @@ namespace Backend.Services.impl
 
             var quizDto = _mapper.Map<QuizDTO>(quiz);
             var parts = await _partRepository.GetPartsByQuiz(quiz.QuizId);
+            if (!parts.Any())
+            {
+                quizDto.Parts = new List<PartDTO>();
+                return quizDto;
+            }
+
+            // Load ALL data at once in parallel to avoid N+1 queries
+            var allQuestionsTask = _questionRepository.GetQuestionsByQuiz(quiz.QuizId);
+            var allPassagesTask = _passageRepository.GetPassagesByQuiz(quiz.QuizId);
+            await Task.WhenAll(allQuestionsTask, allPassagesTask);
+
+            var allQuestions = allQuestionsTask.Result;
+            var allPassages = allPassagesTask.Result;
+
+            // Create dictionary for O(1) lookups - group by part/passage
+            var partQuestionsDict = new Dictionary<int, List<Question>>();
+            var passageQuestionsDict = new Dictionary<int, List<Question>>();
+
+            // Separate questions by type and group
+            foreach (var q in allQuestions)
+            {
+                if (!q.PassageId.HasValue && q.PartId.HasValue && q.PartId > 0)
+                {
+                    int partId = q.PartId.Value;
+                    if (!partQuestionsDict.ContainsKey(partId))
+                        partQuestionsDict[partId] = new List<Question>();
+                    partQuestionsDict[partId].Add(q);
+                }
+                else if (q.PassageId.HasValue)
+                {
+                    int passageId = q.PassageId.Value;
+                    if (!passageQuestionsDict.ContainsKey(passageId))
+                        passageQuestionsDict[passageId] = new List<Question>();
+                    passageQuestionsDict[passageId].Add(q);
+                }
+            }
+
+            // Group passages by part
+            var passagesByPartDict = new Dictionary<int, List<Passage>>();
+            foreach (var p in allPassages)
+            {
+                if (!passagesByPartDict.ContainsKey(p.PartId))
+                    passagesByPartDict[p.PartId] = new List<Passage>();
+                passagesByPartDict[p.PartId].Add(p);
+            }
+
+            // Sort passages
+            foreach (var key in passagesByPartDict.Keys)
+            {
+                passagesByPartDict[key] = passagesByPartDict[key].OrderBy(x => x.OrderIndex).ToList();
+            }
+
             quizDto.Parts = new List<PartDTO>();
 
             foreach (var part in parts)
             {
                 var partDto = _mapper.Map<PartDTO>(part);
-                var questions = await _questionRepository.GetQuestionsByPart(part.PartId);
-                partDto.Questions = _mapper.Map<List<QuestionDTO>>(questions);
 
-                var passages = await _passageRepository.GetPassagesByPart(part.PartId);
-                partDto.Passages = new List<PassageDTO>();
+                // O(1) lookup for part questions
+                if (partQuestionsDict.TryGetValue(part.PartId, out var partQuestions))
+                    partDto.Questions = _mapper.Map<List<QuestionDTO>>(partQuestions);
+                else
+                    partDto.Questions = new List<QuestionDTO>();
 
-                foreach (var passage in passages)
+                // O(1) lookup for passages
+                if (passagesByPartDict.TryGetValue(part.PartId, out var partPassages))
                 {
-                    var passageDto = _mapper.Map<PassageDTO>(passage);
-                    var pQuestions = await _questionRepository.GetQuestionsByPassage(passage.PassageId);
-                    passageDto.Questions = _mapper.Map<List<QuestionDTO>>(pQuestions);
-                    partDto.Passages.Add(passageDto);
+                    partDto.Passages = new List<PassageDTO>();
+                    foreach (var passage in partPassages)
+                    {
+                        var passageDto = _mapper.Map<PassageDTO>(passage);
+                        // O(1) lookup for passage questions
+                        if (passageQuestionsDict.TryGetValue(passage.PassageId, out var pQuestions))
+                            passageDto.Questions = _mapper.Map<List<QuestionDTO>>(pQuestions);
+                        else
+                            passageDto.Questions = new List<QuestionDTO>();
+                        partDto.Passages.Add(passageDto);
+                    }
                 }
+                else
+                    partDto.Passages = new List<PassageDTO>();
+
                 quizDto.Parts.Add(partDto);
             }
             return quizDto;

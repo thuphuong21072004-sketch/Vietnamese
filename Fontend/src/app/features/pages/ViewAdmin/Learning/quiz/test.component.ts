@@ -44,7 +44,7 @@ export class QuizComponent implements OnChanges {
       next: (res: any) => {
         this.loading = false;
 
-        if (res) {
+        if (res && res.quizId) {
           this.quiz = res;
 
           this.quiz.questions ??= [];
@@ -86,12 +86,13 @@ export class QuizComponent implements OnChanges {
           });
         } else {
           this.quiz = null;
+          this.baseService.handleError(null, 'Quiz not found or failed to load');
         }
       },
 
       error: (err) => {
         this.loading = false;
-
+        this.quiz = null;
         this.baseService.handleError(err, 'Failed to load quiz');
       },
     });

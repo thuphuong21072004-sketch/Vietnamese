@@ -53,9 +53,9 @@ export class AdminUserComponent {
 
     this.api
       .getUsers(
-        this.email,
-        this.status!,
-        this.roleId!,
+        this.email || undefined,
+        this.status ?? undefined,
+        this.roleId ?? undefined,
         this.page,
         this.pageSize,
       )

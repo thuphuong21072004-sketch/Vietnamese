@@ -29,6 +29,32 @@ namespace Backend.Repository.impl
         }
 
         /* 
+         * Lấy tất cả đoạn văn của một bài kiểm tra 
+         * O(1) - Load all at once instead of N queries
+         * thuphuong21072004 
+         */
+        public async Task<List<Passage>> GetPassagesByQuiz(int quizId)
+        {
+            // First get all PartIds for this quiz
+            var partIds = await _context.Parts
+                .AsNoTracking()
+                .Where(x => x.QuizId == quizId)
+                .Select(x => x.PartId)
+                .ToListAsync();
+
+            if (!partIds.Any())
+                return new List<Passage>();
+
+            // Then get all passages for those parts
+            return await _context.Passages
+                .AsNoTracking()
+                .Where(x => partIds.Contains(x.PartId))
+                .OrderBy(x => x.PartId)
+                .ThenBy(x => x.OrderIndex)
+                .ToListAsync();
+        }
+
+        /* 
          * Thêm mới một đoạn văn 
          * O(1) 
          * thuphuong21072004 

@@ -14,6 +14,8 @@ import { SubmitQuizDTO } from '../../../../models/submit-quiz.model';
 
 import { UnitDTO } from '../../../../models/unit.model';
 
+import { environment } from '../../../../../../environments/environment';
+
 @Component({
   selector: 'app-unit',
   standalone: true,
@@ -127,6 +129,32 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     this.testService.getQuiz(this.refId, this.refType).subscribe({
       next: (quizRes) => {
         this.quiz = quizRes;
+
+        console.log('Quiz loaded for user view', this.quiz);
+        if (this.quiz?.questions) {
+          this.quiz.questions.forEach((q) => {
+            console.log('question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+          });
+        }
+        if (this.quiz?.parts) {
+          this.quiz.parts.forEach((part) => {
+            if (part.questions) {
+              part.questions.forEach((q) => {
+                console.log('part question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+              });
+            }
+            if (part.passages) {
+              part.passages.forEach((psg) => {
+                console.log('passage audio', psg.passageId, psg.audioUrl, this.getAudioUrl(psg.audioUrl));
+                if (psg.questions) {
+                  psg.questions.forEach((q) => {
+                    console.log('passage question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+                  });
+                }
+              });
+            }
+          });
+        }
 
         if (!this.quiz) {
           return;
@@ -384,6 +412,38 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     this.timerText =
       String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
   }
+
+  getMediaUrl(fileName: string | undefined | null, folder: 'audios' | 'images'): string | null {
+    if (!fileName) {
+      return null;
+    }
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/api$/, '');
+    const normalized = fileName.replace(/\\/g, '/').replace(/^\/*/, '');
+
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+      return normalized;
+    }
+
+    if (normalized.startsWith(`${folder}/`) || normalized.startsWith(`/${folder}/`)) {
+      return `${baseUrl}/${normalized.replace(/^\/*/, '')}`;
+    }
+
+    if (normalized.startsWith('audios/') || normalized.startsWith('images/')) {
+      return `${baseUrl}/${normalized}`;
+    }
+
+    return `${baseUrl}/${folder}/${normalized}`;
+  }
+
+  getAudioUrl(fileName: string | undefined | null): string | null {
+    return this.getMediaUrl(fileName, 'audios');
+  }
+
+  getImageUrl(fileName: string | undefined | null): string | null {
+    return this.getMediaUrl(fileName, 'images');
+  }
+
   getAllQuestions(): any[] {
     if (!this.quiz) {
       return [];
@@ -465,7 +525,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       this.hasSubmitted = true;
 
       navigator.sendBeacon(
-        'http://localhost:5108/api/tests/submitQuiz',
+        `${environment.apiBaseUrl}/tests/submitQuiz`,
         new Blob(
           [
             JSON.stringify({

@@ -59,18 +59,35 @@ export class AccountService {
     page: number = 1,
     pageSize: number = 10,
   ) {
-    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
-    return this.http.get(`${this.apiUrl}/users`, { params });
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+    
+    if (email) {
+      params = params.set('email', email);
+    }
+    if (status !== null && status !== undefined) {
+      params = params.set('status', status.toString());
+    }
+    if (roleId !== null && roleId !== undefined) {
+      params = params.set('roleId', roleId.toString());
+    }
+    
+    return this.http.get(`${this.apiUrl}/users`, { params, headers });
   }
 
-  updateUserStatus(userId: number, status: number) {
-    if (!userId) {
-      console.error('userId undefined');
-
+  updateUserStatus(email: string, status: number) {
+    if (!email) {
+      console.error('email undefined');
       return new Observable();
     }
 
-    return this.http.put(`${this.apiUrl}/users/${userId}/status`, null, {
+    return this.http.put(`${this.apiUrl}/users/${email}/status`, null, {
       ...this.getOptions(),
       params: {
         status: status,
@@ -78,14 +95,13 @@ export class AccountService {
     });
   }
 
-  updateUserRole(userId: number, roleName: string) {
-    if (!userId) {
-      console.error('userId undefined');
-
+  updateUserRole(email: string, roleName: string) {
+    if (!email) {
+      console.error('email undefined');
       return new Observable();
     }
 
-    return this.http.put(`${this.apiUrl}/users/${userId}/role`, null, {
+    return this.http.put(`${this.apiUrl}/users/${email}/role`, null, {
       ...this.getOptions(),
       params: {
         roleName: roleName,

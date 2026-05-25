@@ -158,6 +158,22 @@
 
     </div>
 
+    <div *ngIf="review" class="review-card">
+        <h2>Student Review</h2>
+        <div class="info-row">
+            <span>Rating</span>
+            <strong>{{ review.rating }} / 5</strong>
+        </div>
+        <div class="info-row">
+            <span>Comment</span>
+            <strong>{{ review.comment }}</strong>
+        </div>
+        <div class="info-row">
+            <span>By</span>
+            <strong>{{ review.studentName }}</strong>
+        </div>
+    </div>
+
     <div class="actions">
 
         <button *ngIf="canPay()" class="pay-btn" (click)="goPayment()">
