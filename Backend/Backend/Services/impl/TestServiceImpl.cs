@@ -366,13 +366,10 @@ namespace Backend.Services.impl
                 return quizDto;
             }
 
-            // Load ALL data at once in parallel to avoid N+1 queries
-            var allQuestionsTask = _questionRepository.GetQuestionsByQuiz(quiz.QuizId);
-            var allPassagesTask = _passageRepository.GetPassagesByQuiz(quiz.QuizId);
-            await Task.WhenAll(allQuestionsTask, allPassagesTask);
-
-            var allQuestions = allQuestionsTask.Result;
-            var allPassages = allPassagesTask.Result;
+            // Keep these queries sequential because the repositories share the same scoped DbContext.
+            // EF Core does not allow concurrent operations on one DbContext instance.
+            var allQuestions = await _questionRepository.GetQuestionsByQuiz(quiz.QuizId);
+            var allPassages = await _passageRepository.GetPassagesByQuiz(quiz.QuizId);
 
             // Create dictionary for O(1) lookups - group by part/passage
             var partQuestionsDict = new Dictionary<int, List<Question>>();
@@ -418,20 +415,18 @@ namespace Backend.Services.impl
             {
                 var partDto = _mapper.Map<PartDTO>(part);
 
-                // O(1) lookup for part questions
                 if (partQuestionsDict.TryGetValue(part.PartId, out var partQuestions))
                     partDto.Questions = _mapper.Map<List<QuestionDTO>>(partQuestions);
                 else
                     partDto.Questions = new List<QuestionDTO>();
 
-                // O(1) lookup for passages
                 if (passagesByPartDict.TryGetValue(part.PartId, out var partPassages))
                 {
                     partDto.Passages = new List<PassageDTO>();
                     foreach (var passage in partPassages)
                     {
                         var passageDto = _mapper.Map<PassageDTO>(passage);
-                        // O(1) lookup for passage questions
+                        
                         if (passageQuestionsDict.TryGetValue(passage.PassageId, out var pQuestions))
                             passageDto.Questions = _mapper.Map<List<QuestionDTO>>(pQuestions);
                         else
