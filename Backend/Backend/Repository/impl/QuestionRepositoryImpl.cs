@@ -76,9 +76,8 @@ namespace Backend.Repository.impl
         {
             return await _context.Questions
                 .AsNoTracking()
-                .Where(x => x.QuizId == quizId)
                 .Include(x => x.Answers)
-                .OrderBy(x => x.OrderIndex)
+                .Where(x => x.QuizId == quizId)
                 .ToListAsync();
         }
 

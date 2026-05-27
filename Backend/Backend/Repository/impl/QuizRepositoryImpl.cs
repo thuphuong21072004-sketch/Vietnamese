@@ -16,23 +16,16 @@ namespace Backend.Repository.impl
 
         /* 
          * Lấy thông tin bài kiểm tra theo RefId và RefType 
-         * O(N) 
+         * O(1) 
          * thuphuong21072004 
          */
         public async Task<Quiz?> GetQuiz(int refId, string refType)
         {
             return await _context.Quizzes
                 .AsNoTracking()
-                .Include(x => x.Questions)
-                    .ThenInclude(x => x.Answers)
-                .Include(x => x.Parts)
-                    .ThenInclude(x => x.Questions)
-                        .ThenInclude(x => x.Answers)
-                .Include(x => x.Parts)
-                    .ThenInclude(x => x.Passages)
-                        .ThenInclude(x => x.Questions)
-                            .ThenInclude(x => x.Answers)
-                .FirstOrDefaultAsync(x => x.RefId == refId && x.RefType == refType);
+                .FirstOrDefaultAsync(x =>
+                    x.RefId == refId &&
+                    x.RefType == refType);
         }
 
         /* 
@@ -81,16 +74,8 @@ namespace Backend.Repository.impl
         {
             return await _context.Quizzes
                 .AsNoTracking()
-                .Include(x => x.Questions)
-                    .ThenInclude(x => x.Answers)
-                .Include(x => x.Parts)
-                    .ThenInclude(x => x.Questions)
-                        .ThenInclude(x => x.Answers)
-                .Include(x => x.Parts)
-                    .ThenInclude(x => x.Passages)
-                        .ThenInclude(x => x.Questions)
-                            .ThenInclude(x => x.Answers)
-                .FirstOrDefaultAsync(x => x.QuizId == quizId);
+                .FirstOrDefaultAsync(x =>
+                    x.QuizId == quizId);
         }
 
         /* 

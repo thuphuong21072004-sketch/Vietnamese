@@ -350,95 +350,118 @@ namespace Backend.Services.impl
         }
 
         /* lấy bài kiểm tra
-         * O(p+q+p*a)
+         * O(p+q)
          * thuphuong21072004
          */
         public async Task<QuizDTO?> GetQuiz(int refId, string refType)
         {
             var quiz = await _quizRepository.GetQuiz(refId, refType);
-            if (quiz == null) return null;
+
+            if (quiz == null)
+                return null;
 
             var quizDto = _mapper.Map<QuizDTO>(quiz);
-            var parts = await _partRepository.GetPartsByQuiz(quiz.QuizId);
+
+            var parts = await _partRepository
+                .GetPartsByQuiz(quiz.QuizId);
+
+            var allQuestions = await _questionRepository
+                .GetQuestionsByQuiz(quiz.QuizId);
+
+            var allPassages = await _passageRepository
+                .GetPassagesByQuiz(quiz.QuizId);
+
+            // quiz -> questions
+             
+            quizDto.Questions = allQuestions
+                .Where(x =>
+                    !x.PartId.HasValue &&
+                    !x.PassageId.HasValue)
+                .Select(x =>
+                    _mapper.Map<QuestionDTO>(x))
+                .ToList();
+
             if (!parts.Any())
             {
                 quizDto.Parts = new List<PartDTO>();
                 return quizDto;
             }
 
-            // Keep these queries sequential because the repositories share the same scoped DbContext.
-            // EF Core does not allow concurrent operations on one DbContext instance.
-            var allQuestions = await _questionRepository.GetQuestionsByQuiz(quiz.QuizId);
-            var allPassages = await _passageRepository.GetPassagesByQuiz(quiz.QuizId);
+            // part -> questions
+             
+            var partQuestionsDict = allQuestions
+                .Where(x =>
+                    x.PartId.HasValue &&
+                    !x.PassageId.HasValue)
+                .GroupBy(x => x.PartId!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToList()
+                );
 
-            // Create dictionary for O(1) lookups - group by part/passage
-            var partQuestionsDict = new Dictionary<int, List<Question>>();
-            var passageQuestionsDict = new Dictionary<int, List<Question>>();
+            // passage -> questions
+             
+            var passageQuestionsDict = allQuestions
+                .Where(x => x.PassageId.HasValue)
+                .GroupBy(x => x.PassageId!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToList()
+                );
 
-            // Separate questions by type and group
-            foreach (var q in allQuestions)
+            // part -> passages
+             
+            var passagesByPartDict = allPassages
+                .GroupBy(x => x.PartId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(x => x.OrderIndex).ToList()
+                );
+
+            quizDto.Parts = parts.Select(part =>
             {
-                if (!q.PassageId.HasValue && q.PartId.HasValue && q.PartId > 0)
-                {
-                    int partId = q.PartId.Value;
-                    if (!partQuestionsDict.ContainsKey(partId))
-                        partQuestionsDict[partId] = new List<Question>();
-                    partQuestionsDict[partId].Add(q);
-                }
-                else if (q.PassageId.HasValue)
-                {
-                    int passageId = q.PassageId.Value;
-                    if (!passageQuestionsDict.ContainsKey(passageId))
-                        passageQuestionsDict[passageId] = new List<Question>();
-                    passageQuestionsDict[passageId].Add(q);
-                }
-            }
+                var partDto =
+                    _mapper.Map<PartDTO>(part);
 
-            // Group passages by part
-            var passagesByPartDict = new Dictionary<int, List<Passage>>();
-            foreach (var p in allPassages)
-            {
-                if (!passagesByPartDict.ContainsKey(p.PartId))
-                    passagesByPartDict[p.PartId] = new List<Passage>();
-                passagesByPartDict[p.PartId].Add(p);
-            }
+                // questions in part
+                 
+                partDto.Questions =
+                    partQuestionsDict.TryGetValue(
+                        part.PartId,
+                        out var partQuestions)
+                    ? _mapper.Map<List<QuestionDTO>>(partQuestions)
+                    : new List<QuestionDTO>();
 
-            // Sort passages
-            foreach (var key in passagesByPartDict.Keys)
-            {
-                passagesByPartDict[key] = passagesByPartDict[key].OrderBy(x => x.OrderIndex).ToList();
-            }
-
-            quizDto.Parts = new List<PartDTO>();
-
-            foreach (var part in parts)
-            {
-                var partDto = _mapper.Map<PartDTO>(part);
-
-                if (partQuestionsDict.TryGetValue(part.PartId, out var partQuestions))
-                    partDto.Questions = _mapper.Map<List<QuestionDTO>>(partQuestions);
-                else
-                    partDto.Questions = new List<QuestionDTO>();
-
-                if (passagesByPartDict.TryGetValue(part.PartId, out var partPassages))
-                {
-                    partDto.Passages = new List<PassageDTO>();
-                    foreach (var passage in partPassages)
+                // passages in part
+                 
+                partDto.Passages =
+                    passagesByPartDict.TryGetValue(
+                        part.PartId,
+                        out var partPassages)
+                    ? partPassages.Select(passage =>
                     {
-                        var passageDto = _mapper.Map<PassageDTO>(passage);
-                        
-                        if (passageQuestionsDict.TryGetValue(passage.PassageId, out var pQuestions))
-                            passageDto.Questions = _mapper.Map<List<QuestionDTO>>(pQuestions);
-                        else
-                            passageDto.Questions = new List<QuestionDTO>();
-                        partDto.Passages.Add(passageDto);
-                    }
-                }
-                else
-                    partDto.Passages = new List<PassageDTO>();
+                        var passageDto =
+                            _mapper.Map<PassageDTO>(passage);
 
-                quizDto.Parts.Add(partDto);
-            }
+                        
+                         // questions in passage
+                         
+                        passageDto.Questions =
+                            passageQuestionsDict.TryGetValue(
+                                passage.PassageId,
+                                out var pQuestions)
+                            ? _mapper.Map<List<QuestionDTO>>(pQuestions)
+                            : new List<QuestionDTO>();
+
+                        return passageDto;
+
+                    }).ToList()
+                    : new List<PassageDTO>();
+
+                return partDto;
+
+            }).ToList();
+
             return quizDto;
         }
 
@@ -644,6 +667,43 @@ namespace Backend.Services.impl
             await _quizRepository.Save();
         }
 
+
+        private QuizResult CalculateQuizResult(
+    List<Question> questions,
+    List<int> answerIds,
+    decimal? passScore)
+        {
+            decimal totalScore =
+                questions.Sum(x => x.Score);
+
+            var answerSet =
+                answerIds.ToHashSet();
+
+            decimal earnedScore = questions
+                .Where(q =>
+                    q.Answers != null &&
+                    q.Answers.Any(a =>
+                        a.IsCorrect &&
+                        answerSet.Contains(a.AnswerId)))
+                .Sum(q => q.Score);
+
+            decimal finalScore =
+                totalScore == 0
+                    ? 0
+                    : Math.Round(
+                        earnedScore / totalScore * 100,
+                        2);
+
+            return new QuizResult
+            {
+                FinalScore = finalScore,
+
+                IsPassed =
+                    passScore != null &&
+                    finalScore >= passScore
+            };
+        }
+
         /* kiểm tra ,chấm diểm...
          * O(q + a + l + c + u)
          * thuphuong21072004
@@ -656,45 +716,22 @@ namespace Backend.Services.impl
 
             var questions = await _questionRepository.GetQuestionsByQuiz(quizId);
 
-            decimal totalScore = questions.Sum(x => x.Score);
-
-            decimal earnedScore = 0;
-            var answerSet =
-    answerIds.ToHashSet();
-            foreach (var question in questions)
-            {
-                var correctAnswer = question.Answers?.FirstOrDefault(x => x.IsCorrect);
-
-                if (correctAnswer == null)
-                {
-                    continue;
-                }
-
-                if (answerSet.Contains(correctAnswer.AnswerId))
-                {
-                    earnedScore += question.Score;
-                }
-            }
-
-            decimal finalScore =
-                totalScore == 0
-                    ? 0
-                    : Math.Round(earnedScore / totalScore * 100, 2);
-
-            bool isPassed =
-                quiz.PassScore != null &&
-                finalScore >= quiz.PassScore;
+            var result = CalculateQuizResult(
+    questions,
+    answerIds,
+    quiz.PassScore
+);
 
             var userQuiz =
                 await _userQuizRepository.GetUserQuiz(userId, quizId);
 
             if (userQuiz != null)
             {
-                userQuiz.Score = finalScore;
+                userQuiz.Score = result.FinalScore;
 
                 userQuiz.CompletedDate = DateTime.Now;
 
-                userQuiz.IsPassed = isPassed;
+                userQuiz.IsPassed = result.IsPassed;
 
                 await _userAnswerRepository.DeleteByUserQuizId(
                     userQuiz.UserQuizId
@@ -706,9 +743,9 @@ namespace Backend.Services.impl
                 {
                     UserId = userId,
                     QuizId = quizId,
-                    Score = finalScore,
+                    Score = result.FinalScore,
                     CompletedDate = DateTime.Now,
-                    IsPassed = isPassed
+                    IsPassed = result.IsPassed
                 };
 
                 await _userQuizRepository.SaveUserQuiz(userQuiz);
@@ -744,7 +781,7 @@ namespace Backend.Services.impl
 
             await _userAnswerRepository.Save();
 
-            if (!isPassed)
+            if (!result.IsPassed)
             {
 
                 return;
@@ -754,35 +791,35 @@ namespace Backend.Services.impl
             {
                 Level? assignedLevel = null;
 
-                if (finalScore >= 90)
+                if (result.FinalScore >= 90)
                 {
                     assignedLevel =
                         await _levelRepository.GetByName(
                             common.Constant.Level.LevelC2
                         );
                 }
-                else if (finalScore >= 80)
+                else if (result.FinalScore >= 80)
                 {
                     assignedLevel =
                         await _levelRepository.GetByName(
                             common.Constant.Level.LevelC1
                         );
                 }
-                else if (finalScore >= 65)
+                else if (result.FinalScore >= 65)
                 {
                     assignedLevel =
                         await _levelRepository.GetByName(
                             common.Constant.Level.LevelB2
                         );
                 }
-                else if (finalScore >= 50)
+                else if (result.FinalScore >= 50)
                 {
                     assignedLevel =
                         await _levelRepository.GetByName(
                             common.Constant.Level.LevelB1
                         );
                 }
-                else if (finalScore >= 30)
+                else if (result.FinalScore >= 30)
                 {
                     assignedLevel =
                         await _levelRepository.GetByName(
