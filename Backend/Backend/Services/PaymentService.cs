@@ -9,5 +9,6 @@ namespace Backend.Services
         Task Success(int paymentId, string transactionCode);
         Task Failed(int paymentId);
         Task<PaymentDTO?> GetByBooking(int bookingId);
+        Task<string> CreateVNPayUrl(int paymentId);
     }
 }

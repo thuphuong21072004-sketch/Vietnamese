@@ -24,33 +24,59 @@ export class PaymentService {
     };
   }
 
+  /*
+   * create payment
+   */
   create(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/create`, data, this.getOptions());
   }
 
+  /*
+   * payment success
+   */
   success(paymentId: number, transactionCode: string): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/${paymentId}/success?transactionCode=${transactionCode}`,
+      `${this.apiUrl}/${paymentId}/success`,
+
       {},
-      this.getOptions(),
+
+      {
+        ...this.getOptions(),
+
+        params: {
+          transactionCode,
+        },
+      },
     );
   }
 
+  /*
+   * payment failed
+   */
   failed(paymentId: number): Observable<any> {
     return this.http.put(
       `${this.apiUrl}/${paymentId}/failed`,
+
       {},
+
       this.getOptions(),
     );
   }
 
+  /*
+   * payment by booking
+   */
   getByBooking(bookingId: number): Observable<any> {
     return this.http.get(
       `${this.apiUrl}/booking/${bookingId}`,
+
       this.getOptions(),
     );
   }
 
+  /*
+   * payment status text
+   */
   getStatusText(status: number): string {
     switch (status) {
       case 0:
@@ -65,11 +91,17 @@ export class PaymentService {
       case 3:
         return 'Refunded';
 
+      case 4:
+        return 'Expired';
+
       default:
         return 'Unknown';
     }
   }
 
+  /*
+   * payment status class
+   */
   getStatusClass(status: number): string {
     switch (status) {
       case 0:
@@ -84,8 +116,37 @@ export class PaymentService {
       case 3:
         return 'refunded';
 
+      case 4:
+        return 'expired';
+
       default:
         return '';
     }
+  }
+
+  /*
+   * payment method text
+   */
+  getMethodText(method: number): string {
+    switch (method) {
+      case 0:
+        return 'VNPay';
+
+      case 1:
+        return 'Momo';
+
+      case 2:
+        return 'Paypal';
+
+      default:
+        return 'Unknown';
+    }
+  }
+  createVNPayUrl(paymentId: number): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/${paymentId}/vnpay`,
+      {},
+      this.getOptions(),
+    );
   }
 }

@@ -21,11 +21,19 @@ namespace Backend.Repository.impl
         public async Task<Booking?> GetById(int id)
         {
             return await _context.Bookings
-                .Include(x => x.Student).ThenInclude(x => x.Role)
-                .Include(x => x.Teacher).ThenInclude(x => x.Role)
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
+                .Include(x => x.Student)
+                    .ThenInclude(x => x.Role)
+
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.Role)
+
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.TeacherProfile)
+
                 .Include(x => x.Availability)
-                .FirstOrDefaultAsync(x => x.BookingId == id);
+
+                .FirstOrDefaultAsync(
+                    x => x.BookingId == id);
         }
 
         /* 
@@ -33,13 +41,49 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<Booking>> GetByStudentId(int studentId)
+        public async Task<List<Booking>>
+GetByStudentId(
+    int studentId,
+    byte? status,
+    DateOnly? date)
         {
-            return await _context.Bookings
-                .Include(x => x.Student)
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
-                .Where(x => x.StudentId == studentId)
-                .OrderByDescending(x => x.StartTime)
+            var query =
+                _context.Bookings
+
+                    .Include(x => x.Student)
+
+                    .Include(x => x.Instructor)
+                        .ThenInclude(x =>
+                            x.TeacherProfile)
+
+                    .Where(x =>
+
+                        x.StudentId == studentId
+
+                        && x.EndTime >= DateTime.UtcNow);
+
+            /*
+             * status
+             */
+            if (status.HasValue)
+            {
+                query = query.Where(x =>
+                    x.Status == status.Value);
+            }
+
+            /*
+             * date
+             */
+            if (date.HasValue)
+            {
+                query = query.Where(x =>
+
+                    DateOnly.FromDateTime(
+                        x.StartTime) == date.Value);
+            }
+
+            return await query
+                .OrderBy(x => x.StartTime)
                 .ToListAsync();
         }
 
@@ -48,13 +92,43 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<Booking>> GetByTeacherId(int teacherId)
+        public async Task<List<Booking>>
+GetByTeacherId(
+    int instructorId,
+    byte? status,
+    DateOnly? date)
         {
-            return await _context.Bookings
-                .Include(x => x.Student)
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
-                .Where(x => x.TeacherId == teacherId)
-                .OrderByDescending(x => x.StartTime)
+            var query =
+                _context.Bookings
+
+                    .Include(x => x.Student)
+
+                    .Include(x => x.Instructor)
+                        .ThenInclude(x =>
+                            x.TeacherProfile)
+
+                    .Where(x =>
+
+                        x.InstructorId == instructorId
+
+                        && x.EndTime >= DateTime.UtcNow);
+
+            if (status.HasValue)
+            {
+                query = query.Where(x =>
+                    x.Status == status.Value);
+            }
+
+            if (date.HasValue)
+            {
+                query = query.Where(x =>
+
+                    DateOnly.FromDateTime(
+                        x.StartTime) == date.Value);
+            }
+
+            return await query
+                .OrderBy(x => x.StartTime)
                 .ToListAsync();
         }
 
@@ -84,29 +158,93 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<Booking?> GetActiveBookingByAvailabilityId(int availabilityId, DateTime activeSince)
+        public async Task<Booking?>
+GetActiveBookingByAvailabilityId(
+    int availabilityId,
+    DateTime activeSince)
         {
             return await _context.Bookings
-                .FirstOrDefaultAsync(x => x.AvailabilityId == availabilityId
-                    && x.Status != common.Constant.StatusBooking.Cancelled
-                    && (x.Status == common.Constant.StatusBooking.Booked || x.CreatedDate >= activeSince));
-        }
+                .FirstOrDefaultAsync(x =>
 
-        public async Task<List<Booking>> GetPendingBookingsBefore(int availabilityId, DateTime threshold)
+                    x.AvailabilityId == availabilityId
+
+                    &&
+
+                    x.Status !=
+                        common.Constant
+                        .StatusBooking.Cancelled
+
+                    &&
+
+                    (
+                        x.Status ==
+                        common.Constant
+                        .StatusBooking.Confirmed
+
+                        ||
+
+                        x.Status ==
+                        common.Constant
+                        .StatusBooking.InProgress
+
+                        ||
+
+                        x.Status ==
+                        common.Constant
+                        .StatusBooking.Completed
+
+                        ||
+
+                        (
+                            x.Status ==
+                            common.Constant
+                            .StatusBooking.PendingPayment
+
+                            &&
+
+                            x.CreatedDate >=
+                            activeSince
+                        )
+                    ));
+        }
+        public async Task<List<Booking>>
+GetPendingBookingsBefore(
+    int availabilityId,
+    DateTime threshold)
         {
             return await _context.Bookings
-                .Where(x => x.AvailabilityId == availabilityId
-                    && x.Status == common.Constant.StatusBooking.Pending
+                .Where(x =>
+
+                    x.AvailabilityId == availabilityId
+
+                    && x.Status ==
+                        common.Constant
+                        .StatusBooking.PendingPayment
+
                     && x.CreatedDate < threshold)
+
                 .ToListAsync();
         }
-
-        public async Task<bool> HasOverlapBooking(int studentId, DateTime startTime, DateTime endTime)
+        public async Task<bool>
+HasOverlapBooking(
+    int studentId,
+    DateTime startTime,
+    DateTime endTime)
         {
             return await _context.Bookings
-                .AnyAsync(x => x.StudentId == studentId
-                    && x.Status != common.Constant.StatusBooking.Cancelled
-                    && (startTime < x.EndTime && endTime > x.StartTime));
+                .AnyAsync(x =>
+
+                    x.StudentId == studentId
+
+                    && x.Status !=
+                        common.Constant
+                        .StatusBooking.Cancelled
+
+                    && (
+                        startTime < x.EndTime
+                        &&
+                        endTime > x.StartTime
+                    ));
         }
 
         /* 
@@ -117,6 +255,18 @@ namespace Backend.Repository.impl
         public async Task Save()
         {
             await _context.SaveChangesAsync();
+        }
+        public async Task<bool> HasBookingByAvailabilityId(
+    int availabilityId)
+        {
+            return await _context.Bookings
+                .AnyAsync(x =>
+
+                    x.AvailabilityId == availabilityId
+
+                    && x.Status !=
+                        common.Constant
+                        .StatusBooking.Cancelled);
         }
     }
 }

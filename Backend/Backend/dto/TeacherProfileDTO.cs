@@ -19,7 +19,12 @@
         public int TotalReviews { get; set; }
 
         public string? Description { get; set; }
-        public int Status { get; set; }
-        public UserDTO? User { get; set; }
+
+        public byte Status { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+        public string? TeacherName { get; set; }
+        public string? Country { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

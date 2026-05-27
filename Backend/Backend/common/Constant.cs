@@ -48,12 +48,41 @@
          */
         public class StatusBooking
         {
-            public const byte Pending = 0;
+            /*
+             * Chờ thanh toán
+             * Đã giữ chỗ nhưng chưa thanh toán
+             */
+            public const byte PendingPayment = 0;
 
-            public const byte Booked = 1;
+            /*
+             * Đã xác nhận
+             * Thanh toán thành công, chờ đến giờ học
+             */
+            public const byte Confirmed = 1;
 
-            public const byte Cancelled = 2;
+            /*
+             * Đang diễn ra
+             * Buổi học đang diễn ra
+             */
+            public const byte InProgress = 2;
 
+            /*
+             * Đã hoàn thành
+             * Buổi học kết thúc thành công
+             */
+            public const byte Completed = 3;
+
+            /*
+             * Đã hủy
+             * Buổi học bị hủy
+             */
+            public const byte Cancelled = 4;
+
+            /*
+             * Đã hoàn tiền
+             * Học viên đã được hoàn tiền
+             */
+            public const byte Refunded = 5;
         }
         /*
          * trạng thái thanh toán
@@ -70,19 +99,57 @@
 
             public const byte Expired = 4;
         }
+        public class PaymentMethod
+        {
+            public const byte VNPay = 0;
+
+            public const byte Momo = 1;
+
+            public const byte Paypal = 2;
+        }
         /*
          * trạng thái hồ sơ giáo viên
          */
         public class StatusTeacherProfile
         {
-            public const byte Draft = 0;
-            public const byte Pending = 1;
+            public const byte Created = 0;
+
+            public const byte Submitted = 1;
 
             public const byte Approved = 2;
 
             public const byte Rejected = 3;
+            public const byte Banned = 4;
+
         }
-       
+        public class StatusTeacherAvailability
+        {
+            /*
+             * còn trống
+             */
+            public const byte Available = 0;
+
+            /*
+             * đã được đặt
+             */
+            public const byte Booked = 1;
+
+            /*
+             * quá hạn
+             */
+            public const byte Expired = 2;
+        }
+        /*
+         * quyền tham gia phòng học online
+         * 26/05/2026
+         * thuphuong21072004
+         */
+        public class VideoRoomRole
+        {
+            public const string Host = "HOST";
+
+            public const string Student = "STUDENT";
+        }
 
     }
 }

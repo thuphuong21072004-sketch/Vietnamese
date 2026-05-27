@@ -53,63 +53,64 @@
 
             </p>
 
-                <div class="meta-row">
+            <div class="meta-row">
 
-                    <span class="rating">
+                <span class="rating">
 
-                        ⭐
-                        {{
-                        getRating()
-                        }}
-
-                        ·
-
-                        {{
-                        getTotalReviews()
-                        }}
-                        reviews
-
-                    </span>
-
-                    <span class="experience">
-
-                        {{
-                        schedule.teacherProfile?.experienceYears || 0
-                        }} years experience
-
-                    </span>
-
-                </div>
-
-                <div class="price">
-
-                    $
+                    ⭐
                     {{
-                    getPricePerHour()
-                    }}/hour
+                    getRating()
+                    }}
 
-                </div>
+                    ·
 
-                <div *ngIf="schedule.teacherProfile?.cvUrl" class="cv-link">
+                    {{
+                    getTotalReviews()
+                    }}
+                    reviews
 
-                    <a [href]="'http://localhost:5108/uploads/' + schedule.teacherProfile?.cvUrl" target="_blank" rel="noopener noreferrer">
+                </span>
 
-                        View CV
+                <span class="experience">
 
-                    </a>
-        <p>
+                    {{
+                    schedule
+                    ?.instructorProfile
+                    ?.experienceYears || 0
+                    }}
 
-            {{
-            schedule.teacherProfile
-            ?.description
-            }}
+                    years experience
 
-        </p>
+                </span>
+
+            </div>
+
+            <div class="price">
+
+                $
+                {{
+                getPricePerHour()
+                }}/hour
+
+            </div>
+
+            <p class="description">
+
+                {{
+                schedule
+                ?.instructorProfile
+                ?.description
+                }}
+
+            </p>
+
+        </div>
 
     </div>
 
     <div *ngIf="
-            schedule.teacherProfile
+            schedule
+                ?.instructorProfile
                 ?.introVideoUrl
         " class="video-card">
 
@@ -122,9 +123,8 @@
         <video controls>
 
             <source [src]="
-                    'http://localhost:5108/uploads/'
-                    +
-                    schedule.teacherProfile
+                    schedule
+                        ?.instructorProfile
                         ?.introVideoUrl
                 " type="video/mp4">
 
@@ -206,13 +206,15 @@
             </span>
 
             <strong [class.booked]="
-                    schedule.isBooked
+                    schedule.status !== 0
                 ">
 
                 {{
-                schedule.isBooked
+                schedule.status === 0
+                ? 'Available'
+                : schedule.status === 1
                 ? 'Booked'
-                : 'Available'
+                : 'Expired'
                 }}
 
             </strong>
@@ -229,7 +231,10 @@
 
             <strong>
 
-                {{ getDurationHours() }} hours
+                {{
+                getDurationHours()
+                }}
+                hours
 
             </strong>
 
@@ -245,7 +250,10 @@
 
             <strong>
 
-                ${{ getTotalAmount() }}
+                $
+                {{
+                getTotalAmount()
+                }}
 
             </strong>
 
@@ -254,7 +262,7 @@
     </div>
 
     <button class="book-btn" [disabled]="
-            schedule.isBooked
+            schedule.status !== 0
             ||
             bookingLoading
         " (click)="bookSchedule()">
@@ -263,7 +271,7 @@
         bookingLoading
         ? 'Booking...'
         : (
-        schedule.isBooked
+        schedule.status !== 0
         ? 'Already Booked'
         : 'Book Schedule'
         )
@@ -273,53 +281,238 @@
 
     <div class="review-section">
 
-        <h2>Teacher Reviews</h2>
+        <h2>
 
-        <div class="review-summary" *ngIf="!reviewLoading && hasReviews()">
+            Teacher Reviews
+
+        </h2>
+
+        <div class="review-summary" *ngIf="
+                !reviewLoading
+                &&
+                hasReviews()
+            ">
+
             <div>
-                <strong>{{ reviews.length }}</strong> reviews
+
+                <strong>
+
+                    {{
+                    reviews.length
+                    }}
+
+                </strong>
+
+                reviews
+
             </div>
+
             <div>
-                Average rating: <strong>{{ getAverageRating() | number:'1.1-1' }}</strong>
+
+                Average rating:
+
+                <strong>
+
+                    {{
+                    getAverageRating()
+                    | number:'1.1-1'
+                    }}
+
+                </strong>
+
             </div>
+
         </div>
 
         <div *ngIf="reviewLoading" class="info-note">
+
             Loading reviews...
+
         </div>
 
-        <div *ngIf="!reviewLoading && reviewError" class="error-note">
-            {{ reviewError }}
+        <div *ngIf="
+                !reviewLoading
+                &&
+                reviewError
+            " class="error-note">
+
+            {{
+            reviewError
+            }}
+
         </div>
 
-        <div *ngIf="!reviewLoading && !hasReviews() && !reviewError" class="info-note">
-            No reviews available for this teacher yet.
+        <div *ngIf="
+                !reviewLoading
+                &&
+                !hasReviews()
+                &&
+                !reviewError
+            " class="info-note">
+
+            No reviews available
+            for this teacher yet.
+
         </div>
 
-        <div *ngIf="!reviewLoading && hasReviews()" class="review-filters">
-            <button [class.active]="selectedRatingFilter === 0" (click)="setRatingFilter(0)">All</button>
-            <button [class.active]="selectedRatingFilter === 5" (click)="setRatingFilter(5)">5 ★ ({{ getReviewCount(5) }})</button>
-            <button [class.active]="selectedRatingFilter === 4" (click)="setRatingFilter(4)">4 ★ ({{ getReviewCount(4) }})</button>
-            <button [class.active]="selectedRatingFilter === 3" (click)="setRatingFilter(3)">3 ★ ({{ getReviewCount(3) }})</button>
-            <button [class.active]="selectedRatingFilter === 2" (click)="setRatingFilter(2)">2 ★ ({{ getReviewCount(2) }})</button>
-            <button [class.active]="selectedRatingFilter === 1" (click)="setRatingFilter(1)">1 ★ ({{ getReviewCount(1) }})</button>
+        <div *ngIf="
+                !reviewLoading
+                &&
+                hasReviews()
+            " class="review-filters">
+
+            <button [class.active]="
+                    selectedRatingFilter === 0
+                " (click)="
+                    setRatingFilter(0)
+                ">
+
+                All
+
+            </button>
+
+            <button [class.active]="
+                    selectedRatingFilter === 5
+                " (click)="
+                    setRatingFilter(5)
+                ">
+
+                5 ★
+                (
+                {{
+                getReviewCount(5)
+                }}
+                )
+
+            </button>
+
+            <button [class.active]="
+                    selectedRatingFilter === 4
+                " (click)="
+                    setRatingFilter(4)
+                ">
+
+                4 ★
+                (
+                {{
+                getReviewCount(4)
+                }}
+                )
+
+            </button>
+
+            <button [class.active]="
+                    selectedRatingFilter === 3
+                " (click)="
+                    setRatingFilter(3)
+                ">
+
+                3 ★
+                (
+                {{
+                getReviewCount(3)
+                }}
+                )
+
+            </button>
+
+            <button [class.active]="
+                    selectedRatingFilter === 2
+                " (click)="
+                    setRatingFilter(2)
+                ">
+
+                2 ★
+                (
+                {{
+                getReviewCount(2)
+                }}
+                )
+
+            </button>
+
+            <button [class.active]="
+                    selectedRatingFilter === 1
+                " (click)="
+                    setRatingFilter(1)
+                ">
+
+                1 ★
+                (
+                {{
+                getReviewCount(1)
+                }}
+                )
+
+            </button>
+
         </div>
 
-        <div *ngIf="!reviewLoading && filteredReviews.length > 0" class="review-list">
-            <div *ngFor="let review of filteredReviews" class="review-item">
+        <div *ngIf="
+                !reviewLoading
+                &&
+                filteredReviews.length > 0
+            " class="review-list">
+
+            <div *ngFor="
+                    let review
+                    of filteredReviews
+                " class="review-item">
+
                 <div class="review-header">
-                    <span class="rating">{{ review.rating }} ★</span>
-                    <span class="student-name">{{ review.studentName || 'Anonymous' }}</span>
-                    <span class="review-date">{{ review.createdDate | date:'dd/MM/yyyy' }}</span>
+
+                    <span class="rating">
+
+                        {{
+                        review.rating
+                        }}
+                        ★
+
+                    </span>
+
+                    <span class="student-name">
+
+                        {{
+                        review.studentName
+                        || 'Anonymous'
+                        }}
+
+                    </span>
+
+                    <span class="review-date">
+
+                        {{
+                        review.createdDate
+                        | date:'dd/MM/yyyy'
+                        }}
+
+                    </span>
+
                 </div>
+
                 <div class="review-comment">
-                    {{ review.comment }}
+
+                    {{
+                    review.comment
+                    }}
+
                 </div>
+
             </div>
+
         </div>
 
-        <div *ngIf="!reviewLoading && hasReviews() && filteredReviews.length === 0" class="info-note">
-            No reviews found for selected rating.
+        <div *ngIf="
+                !reviewLoading
+                &&
+                hasReviews()
+                &&
+                filteredReviews.length === 0
+            " class="info-note">
+
+            No reviews found
+            for selected rating.
+
         </div>
 
     </div>

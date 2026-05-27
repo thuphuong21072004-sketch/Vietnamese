@@ -1,51 +1,100 @@
 <div class="booking-page">
 
+    <!-- header -->
     <div class="page-header">
 
         <h1>
-
             My Bookings
-
         </h1>
 
         <p>
-
             Your booked online classes
-
         </p>
 
     </div>
 
+    <!-- filters -->
     <div class="filters">
-        <label for="filterSelect">Filter:</label>
-        <select id="filterSelect" (change)="setFilter($any($event.target).value)">
-            <option value="all">All classes</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="notReviewed">Not reviewed</option>
-        </select>
+
+        <!-- date -->
+        <div class="filter-item">
+
+            <label>
+                Date
+            </label>
+
+            <input type="date" [(ngModel)]="selectedDate" (change)="loadBookings()">
+
+        </div>
+
+        <!-- status -->
+        <div class="filter-item">
+
+            <label>
+                Status
+            </label>
+
+            <select [(ngModel)]="selectedStatus" (change)="loadBookings()">
+
+                <option value="">
+                    All
+                </option>
+
+                <option value="0">
+                    Pending Payment
+                </option>
+
+                <option value="1">
+                    Confirmed
+                </option>
+
+                <option value="2">
+                    In Progress
+                </option>
+
+                <option value="3">
+                    Completed
+                </option>
+
+                <option value="4">
+                    Cancelled
+                </option>
+
+                <option value="5">
+                    Refunded
+                </option>
+
+            </select>
+
+        </div>
+
     </div>
 
+    <!-- loading -->
     <div *ngIf="loading" class="loading">
 
         Loading bookings...
 
     </div>
 
+    <!-- empty -->
     <div *ngIf="
-            !loading
-            &&
-            bookings.length === 0
+            !loading &&
+            filteredBookings.length === 0
         " class="empty-state">
 
         No bookings found
 
     </div>
 
+    <!-- booking grid -->
     <div class="booking-grid">
 
-        <div *ngFor="let item of filteredBookings" class="booking-card">
+        <div *ngFor="
+                let item of filteredBookings
+            " class="booking-card">
 
+            <!-- teacher -->
             <div class="teacher-top">
 
                 <img *ngIf="
@@ -93,14 +142,14 @@
 
             </div>
 
+            <!-- booking body -->
             <div class="booking-body">
 
+                <!-- date -->
                 <div class="info-row">
 
                     <span>
-
                         Date
-
                     </span>
 
                     <strong>
@@ -114,12 +163,11 @@
 
                 </div>
 
+                <!-- time -->
                 <div class="info-row">
 
                     <span>
-
                         Time
-
                     </span>
 
                     <strong>
@@ -140,10 +188,49 @@
 
                 </div>
 
+                <!-- duration -->
+                <div class="info-row">
+
+                    <span>
+                        Duration
+                    </span>
+
+                    <strong>
+
+                        {{
+                        getDurationHours(item)
+                        }}
+
+                        hour(s)
+
+                    </strong>
+
+                </div>
+
+                <!-- amount -->
+                <div class="info-row">
+
+                    <span>
+                        Total Amount
+                    </span>
+
+                    <strong class="price">
+
+                        $
+                        {{
+                        getBookingAmount(item)
+                        }}
+
+                    </strong>
+
+                </div>
+
             </div>
 
+            <!-- actions -->
             <div class="booking-actions">
 
+                <!-- detail -->
                 <button class="detail-btn" (click)="
                         openDetail(
                             item.bookingId
@@ -154,38 +241,76 @@
 
                 </button>
 
-                <button *ngIf="item.status === 0" class="pay-btn" (click)="goPayment(item.bookingId)">
+                <!-- pay -->
+                <button *ngIf="
+                        item.status === 0
+                    " class="pay-btn" (click)="
+                        goPayment(
+                            item.bookingId
+                        )
+                    ">
 
                     Pay Now
 
                 </button>
 
-                <div *ngIf="item.status === 0" class="pending-note">
+                <!-- pending -->
+                <div *ngIf="
+                        item.status === 0
+                    " class="pending-note">
 
-                    Please complete payment to confirm this booking.
+                    Please complete payment
+                    within 5 minutes
+                    to confirm booking.
 
                 </div>
 
-                <button *ngIf="canJoinRoom(item)" class="room-btn" (click)="joinRoom(item.bookingId)">
+                <!-- join room -->
+                <button *ngIf="
+                        canJoinRoom(item)
+                    " class="room-btn" (click)="
+                        joinRoom(
+                            item.bookingId
+                        )
+                    ">
 
                     Join Room
 
                 </button>
 
-                <button *ngIf="item.status === 1 && !canJoinRoom(item) && !isPastBooking(item)" class="info-btn" disabled>
-                    Room not open yet or access expired
+                <!-- room unavailable -->
+                <button *ngIf="
+                        (
+                            item.status === 1 ||
+                            item.status === 2
+                        )
+                        &&
+                        !canJoinRoom(item)
+                        &&
+                        !isPastBooking(item)
+                    " class="info-btn" disabled>
+
+                    Room not open yet
+                    or access expired
+
                 </button>
 
-                <button *ngIf="showReviewButton(item)" class="review-btn" (click)="writeReview(item.bookingId)">
+                <!-- review -->
+                <button *ngIf="
+                        showReviewButton(item)
+                    " class="review-btn" (click)="
+                        writeReview(
+                            item.bookingId
+                        )
+                    ">
 
                     Review
 
                 </button>
 
+                <!-- cancel -->
                 <button *ngIf="
-                        item.status !== 2
-                        &&
-                        item.status !== 3
+                        canCancel(item)
                     " class="cancel-btn" (click)="
                         cancelBooking(
                             item.bookingId

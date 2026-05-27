@@ -7,8 +7,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherAvailabilityService } from '../../../../services/teacher-availability.service';
 
 import { BookingService } from '../../../../services/booking.service';
-import { ReviewService } from '../../../../services/review.service';
 
+import { ReviewService } from '../../../../services/review.service';
+import { PaymentService } from '../../../../services/payment.service';
 @Component({
   selector: 'app-schedule-detail',
 
@@ -39,7 +40,7 @@ export class ScheduleDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-
+    private paymentService: PaymentService,
     private router: Router,
 
     public scheduleService: TeacherAvailabilityService,
@@ -58,125 +59,244 @@ export class ScheduleDetailComponent implements OnInit {
   loadDetail(id: number) {
     this.loading = true;
 
-    this.scheduleService.getDetail(id).subscribe({
-      next: (res) => {
-        this.schedule = res;
+    this.scheduleService
+      .getDetail(id)
 
-        this.loadReviews();
-        this.loading = false;
-      },
+      .subscribe({
+        next: (res) => {
+          this.schedule = res;
 
-      error: (err) => {
-        console.error(err);
+          this.loadReviews();
 
-        alert(err.error?.message || 'Failed to load schedule');
+          this.loading = false;
+        },
 
-        this.loading = false;
-      },
-    });
+        error: (err) => {
+          console.error(err);
+
+          alert(err.error?.message || 'Failed to load schedule');
+
+          this.loading = false;
+        },
+      });
   }
 
   bookSchedule() {
-    if (this.schedule?.isBooked) {
+    if (this.schedule?.status !== 0) {
       return;
     }
 
     this.bookingLoading = true;
 
-    this.bookingService.create(this.schedule.availabilityId).subscribe({
-      next: (res) => {
-        this.bookingLoading = false;
+    this.bookingService
+      .create(this.schedule.availabilityId)
 
-        alert('Booking created successfully');
+      .subscribe({
+        next: (bookingRes) => {
+          const start = new Date(this.schedule.startTime);
 
-        this.router.navigate(['/booking', res.bookingId]);
-      },
+          const end = new Date(this.schedule.endTime);
 
-      error: (err) => {
-        console.error(err);
+          const hours =
+            Math.max(0, end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
-        this.bookingLoading = false;
+          const amount =
+            Math.round(
+              ((this.schedule?.instructorProfile?.pricePerHour || 0) * hours +
+                Number.EPSILON) *
+                100,
+            ) / 100;
 
-        alert(err.error?.message || 'Booking failed');
-      },
-    });
+          const body = {
+            bookingId: bookingRes.bookingId,
+
+            amount: amount,
+
+            paymentMethod: 0,
+          };
+
+          this.paymentService
+            .create(body)
+
+            .subscribe({
+              next: (paymentRes) => {
+                this.paymentService
+                  .createVNPayUrl(paymentRes.paymentId)
+
+                  .subscribe({
+                    next: (vnpayRes) => {
+                      window.location.href = vnpayRes.paymentUrl;
+                    },
+
+                    error: (err) => {
+                      console.error(err);
+
+                      this.bookingLoading = false;
+
+                      alert(err.error?.message || 'VNPay failed');
+                    },
+                  });
+              },
+
+              error: (err) => {
+                console.error(err);
+
+                this.bookingLoading = false;
+
+                alert(err.error?.message || 'Create payment failed');
+              },
+            });
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.bookingLoading = false;
+
+          alert(err.error?.message || 'Booking failed');
+        },
+      });
   }
-
   back() {
     history.back();
   }
 
+  /*
+   * teacher name
+   */
   getTeacherName(): string {
-    return this.scheduleService.getTeacherName(this.schedule);
+    return this.schedule?.instructor?.name || 'Teacher';
   }
 
+  /*
+   * teacher avatar
+   */
   getTeacherAvatar(): string {
-    return this.scheduleService.getTeacherAvatar(this.schedule);
+    const avatar = this.schedule?.instructor?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
   }
 
+  /*
+   * specialty
+   */
   getSpecialty(): string {
-    return this.scheduleService.getSpecialty(this.schedule);
+    return this.schedule?.instructorProfile?.specialty || '';
   }
 
+  /*
+   * price
+   */
   getPricePerHour(): number {
-    return this.scheduleService.getPricePerHour(this.schedule);
+    return this.schedule?.instructorProfile?.pricePerHour || 0;
   }
 
+  /*
+   * rating
+   */
   getRating(): number {
-    return this.scheduleService.getRating(this.schedule);
+    return this.schedule?.instructorProfile?.ratingAverage || 0;
   }
 
+  /*
+   * total reviews
+   */
   getTotalReviews(): number {
-    return this.scheduleService.getTotalReviews(this.schedule);
+    return this.schedule?.instructorProfile?.totalReviews || 0;
   }
 
+  /*
+   * duration
+   */
   getDurationHours(): number {
     if (!this.schedule?.startTime || !this.schedule?.endTime) {
       return 0;
     }
 
     const start = new Date(this.schedule.startTime);
+
     const end = new Date(this.schedule.endTime);
+
     const diff = Math.max(0, end.getTime() - start.getTime());
 
     return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
   }
 
+  /*
+   * total amount
+   */
   getTotalAmount(): number {
-    return Math.round((this.getPricePerHour() * this.getDurationHours() + Number.EPSILON) * 100) / 100;
+    return (
+      Math.round(
+        (this.getPricePerHour() * this.getDurationHours() + Number.EPSILON) *
+          100,
+      ) / 100
+    );
   }
 
+  /*
+   * load reviews
+   */
   loadReviews() {
     this.reviews = [];
+
     this.filteredReviews = [];
+
     this.reviewError = '';
 
-    const teacherId = this.schedule?.teacherId;
+    const teacherId = this.schedule?.instructorId;
+
     if (!teacherId) {
       this.reviewError = 'No teacher ID available.';
+
       return;
     }
 
     this.reviewLoading = true;
-    this.reviewService.getByTeacherId(teacherId).subscribe({
-      next: (res) => {
-        this.reviews = res || [];
-        this.applyReviewFilter();
-        this.reviewLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.reviewError = err.error?.message || 'Failed to load teacher reviews.';
-        this.reviewLoading = false;
-      },
-    });
+
+    this.reviewService
+      .getByTeacherId(teacherId)
+
+      .subscribe({
+        next: (res) => {
+          this.reviews = res || [];
+
+          this.applyReviewFilter();
+
+          this.reviewLoading = false;
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.reviewError =
+            err.error?.message || 'Failed to load teacher reviews.';
+
+          this.reviewLoading = false;
+        },
+      });
   }
 
+  /*
+   * rating filter
+   */
   setRatingFilter(rating: number) {
     this.selectedRatingFilter = rating;
+
     this.applyReviewFilter();
   }
 
+  /*
+   * apply review filter
+   */
   applyReviewFilter() {
     if (this.selectedRatingFilter <= 0) {
       this.filteredReviews = [...this.reviews];
@@ -187,19 +307,33 @@ export class ScheduleDetailComponent implements OnInit {
     }
   }
 
+  /*
+   * review count
+   */
   getReviewCount(rating: number): number {
     return this.reviews.filter((review) => review.rating === rating).length;
   }
 
+  /*
+   * average rating
+   */
   getAverageRating(): number {
     if (!this.reviews.length) {
       return 0;
     }
 
-    const total = this.reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+    const total = this.reviews.reduce(
+      (sum, review) => sum + (review.rating || 0),
+
+      0,
+    );
+
     return total / this.reviews.length;
   }
 
+  /*
+   * has reviews
+   */
   hasReviews(): boolean {
     return this.reviews.length > 0;
   }

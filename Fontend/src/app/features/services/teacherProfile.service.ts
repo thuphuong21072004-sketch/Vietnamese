@@ -23,6 +23,7 @@ export class TeacherProfileService {
 
     return {
       headers,
+
       responseType: (isText ? 'text' : 'json') as 'json',
     };
   }
@@ -48,43 +49,48 @@ export class TeacherProfileService {
     return this.http.put(`${this.apiUrl}/update`, data, this.getOptions());
   }
 
-  
-  submitProfile(teacherProfileId: number): Observable<any> {
-    const params = new HttpParams().set('status', 1);
-
-    return this.http.put(
-      `${this.apiUrl}/update/${teacherProfileId}/status`,
-      {},
-      {
-        ...this.getOptions(),
-        params,
-      },
-    );
+  /*
+   * submit hồ sơ cho admin duyệt
+   */
+  submitProfile(): Observable<any> {
+    return this.http.put(`${this.apiUrl}/submit`, {}, this.getOptions());
   }
 
-  
+  /*
+   * admin duyệt hồ sơ
+   * status = 2
+   */
   approveProfile(teacherProfileId: number): Observable<any> {
     const params = new HttpParams().set('status', 2);
 
     return this.http.put(
       `${this.apiUrl}/update/${teacherProfileId}/status`,
+
       {},
+
       {
         ...this.getOptions(),
+
         params,
       },
     );
   }
 
-  
+  /*
+   * admin từ chối hồ sơ
+   * status = 3
+   */
   rejectProfile(teacherProfileId: number): Observable<any> {
     const params = new HttpParams().set('status', 3);
 
     return this.http.put(
       `${this.apiUrl}/update/${teacherProfileId}/status`,
+
       {},
+
       {
         ...this.getOptions(),
+
         params,
       },
     );
@@ -98,14 +104,20 @@ export class TeacherProfileService {
 
     return this.http.put(
       `${this.apiUrl}/update/${id}/status`,
+
       {},
+
       {
         ...this.getOptions(),
+
         params,
       },
     );
   }
 
+  /*
+   * danh sách teacher cho admin
+   */
   getAllTeachers(status?: number): Observable<any[]> {
     let params = new HttpParams();
 
@@ -113,16 +125,37 @@ export class TeacherProfileService {
       params = params.set('status', status);
     }
 
-    return this.http.get<any[]>(`${this.apiUrl}/admin`, {
-      ...this.getOptions(),
-      params,
-    });
+    return this.http.get<any[]>(
+      `${this.apiUrl}/admin`,
+
+      {
+        ...this.getOptions(),
+
+        params,
+      },
+    );
   }
 
   /*
-   * teacher detail
+   * chi tiết giáo viên
    */
   getTeacherDetail(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`, this.getOptions());
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+
+      this.getOptions(),
+    );
+  }
+  /*
+   * khóa vĩnh viễn giáo viên
+   */
+  banTeacher(teacherProfileId: number): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/ban/${teacherProfileId}`,
+
+      {},
+
+      this.getOptions(),
+    );
   }
 }

@@ -29,12 +29,6 @@ namespace Backend.Services.impl
             return role == common.Constant.Role.Admin;
         }
 
-        private bool IsPrivilegedTeacherCandidate()
-        {
-            string role = _userContext.GetRole();
-            return role == common.Constant.Role.Admin || role == common.Constant.Role.Moderator;
-        }
-
         /* 
          * lấy profile giáo viên hiện tại
          * O(1)
@@ -59,23 +53,35 @@ namespace Backend.Services.impl
         public async Task CreateProfile(TeacherProfileDTO dto)
         {
             var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
-            var teacher = await _teacherRepository.GetByUserId(userId);
+
+            int userId = (await _userRepository
+                .GetUserIdByEmail(email))!.Value;
+
+            var teacher = await _teacherRepository
+                .GetByUserId(userId);
 
             if (teacher != null)
             {
-                throw new Exception("Teacher profile already exists");
+                throw new Exception(
+                    "Teacher profile already exists");
             }
 
             teacher = _mapper.Map<TeacherProfile>(dto);
+
             teacher.UserId = userId;
+
             teacher.RatingAverage = 0;
+
             teacher.TotalReviews = 0;
-            teacher.Status = IsPrivilegedTeacherCandidate()
-                ? common.Constant.StatusTeacherProfile.Approved
-                : common.Constant.StatusTeacherProfile.Draft;
+
+            teacher.Status =
+                common.Constant
+                    .StatusTeacherProfile.Created;
+
+            teacher.CreatedDate = DateTime.Now;
 
             await _teacherRepository.Create(teacher);
+
             await _teacherRepository.Save();
         }
 
@@ -87,120 +93,300 @@ namespace Backend.Services.impl
         public async Task UpdateProfile(TeacherProfileDTO dto)
         {
             var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var teacher = await _teacherRepository.GetByUserId(userId);
+            int userId = (await _userRepository
+                .GetUserIdByEmail(email))!.Value;
+
+            var teacher = await _teacherRepository
+                .GetByUserId(userId);
+
             if (teacher == null)
             {
-                throw new Exception("Teacher profile not found");
+                throw new Exception(
+                    "Teacher profile not found");
             }
 
             if (teacher.UserId != userId)
             {
-                throw new UnauthorizedAccessException("You cannot edit this profile");
+                throw new UnauthorizedAccessException(
+                    "You cannot edit this profile");
             }
 
-            if (teacher.Status != common.Constant.StatusTeacherProfile.Draft && teacher.Status != common.Constant.StatusTeacherProfile.Rejected)
+            /*
+             * tài khoản bị khóa
+             */
+            if (
+                teacher.Status ==
+                common.Constant
+                    .StatusTeacherProfile.Banned
+            )
             {
-                throw new Exception("Only draft or rejected profile can edit");
+                throw new Exception(
+                    "Account has been banned");
             }
 
-            teacher.IntroVideoUrl = dto.IntroVideoUrl;
-            teacher.Specialty = dto.Specialty;
-            teacher.ExperienceYears = dto.ExperienceYears;
-            teacher.PricePerHour = dto.PricePerHour;
-            teacher.Description = dto.Description;
+            /*
+             * hồ sơ đã duyệt
+             */
+            if (
+                teacher.Status ==
+                common.Constant
+                    .StatusTeacherProfile.Approved
+            )
+            {
+                throw new Exception(
+                    "Approved profile cannot edit");
+            }
+
+            teacher.IntroVideoUrl =
+                dto.IntroVideoUrl;
+
+            teacher.Specialty =
+                dto.Specialty;
+
+            teacher.ExperienceYears =
+                dto.ExperienceYears;
+
+            teacher.PricePerHour =
+                dto.PricePerHour;
+
+            teacher.Description =
+                dto.Description;
+
+            if (
+                teacher.Status ==
+                common.Constant
+                    .StatusTeacherProfile.Rejected
+            )
+            {
+                teacher.Status =
+                    common.Constant
+                        .StatusTeacherProfile.Created;
+            }
 
             await _teacherRepository.Save();
         }
+        public async Task SubmitProfile()
+        {
+            var email = _userContext.GetEmail();
 
+            int userId = (await _userRepository
+                .GetUserIdByEmail(email))!.Value;
+
+            var teacher = await _teacherRepository
+                .GetByUserId(userId);
+
+            if (teacher == null)
+            {
+                throw new Exception(
+                    "Teacher profile not found");
+            }
+
+            /*
+             * tài khoản bị khóa
+             */
+            if (
+                teacher.Status ==
+                common.Constant
+                    .StatusTeacherProfile.Banned
+            )
+            {
+                throw new Exception(
+                    "Account has been banned");
+            }
+
+            /*
+             * đã được duyệt
+             */
+            if (
+                teacher.Status ==
+                common.Constant
+                    .StatusTeacherProfile.Approved
+            )
+            {
+                throw new Exception(
+                    "Profile already approved");
+            }
+
+            teacher.Status =
+                common.Constant
+                    .StatusTeacherProfile.Submitted;
+
+            await _teacherRepository.Save();
+        }
         /* 
          * admin duyệt / từ chối hồ sơ
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task UpdateStatus(int id, int status)
+        public async Task UpdateStatus(
+    int id,
+    int status)
         {
-            var teacher = await _teacherRepository.GetById(id);
-            if (teacher == null)
-            {
-                throw new Exception("Teacher profile not found");
-            }
-
-            var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
-
-            if (status == common.Constant.StatusTeacherProfile.Pending)
-            {
-                if (teacher.UserId != userId)
-                {
-                    throw new UnauthorizedAccessException("You cannot submit this profile");
-                }
-
-                if (teacher.Status != common.Constant.StatusTeacherProfile.Draft && teacher.Status != common.Constant.StatusTeacherProfile.Rejected)
-                {
-                    throw new Exception("Only draft or rejected profile can submit");
-                }
-
-                teacher.Status = common.Constant.StatusTeacherProfile.Pending;
-                await _teacherRepository.Save();
-                return;
-            }
-
             if (!ValidateAdmin())
             {
-                throw new UnauthorizedAccessException("You do not have permission");
+                throw new UnauthorizedAccessException(
+                    "You do not have permission");
             }
 
-            if (status != common.Constant.StatusTeacherProfile.Approved && status != common.Constant.StatusTeacherProfile.Rejected)
+            if (
+                status !=
+                common.Constant
+                    .StatusTeacherProfile.Approved
+                &&
+                status !=
+                common.Constant
+                    .StatusTeacherProfile.Rejected
+            )
             {
-                throw new Exception("Invalid status");
+                throw new Exception(
+                    "Invalid status");
             }
 
-            if (teacher.Status != common.Constant.StatusTeacherProfile.Pending)
+            var teacher =
+                await _teacherRepository.GetById(id);
+
+            if (teacher == null)
             {
-                throw new Exception("Only pending profile can review");
+                throw new Exception(
+                    "Teacher profile not found");
+            }
+
+            /*
+             * chỉ hồ sơ đã submit
+             * admin mới duyệt
+             */
+            if (
+                teacher.Status !=
+                common.Constant
+                    .StatusTeacherProfile.Submitted
+            )
+            {
+                throw new Exception(
+                    "Only submitted profile can review");
             }
 
             teacher.Status = (byte)status;
 
-            if (status == common.Constant.StatusTeacherProfile.Approved)
+            /*
+             * approve => cấp quyền teacher
+             */
+            if (
+                status ==
+                common.Constant
+                    .StatusTeacherProfile.Approved
+            )
             {
                 if (teacher.User == null)
                 {
-                    throw new Exception("User not found");
+                    throw new Exception(
+                        "User not found");
                 }
-                if (teacher.User.Role?.RoleName != common.Constant.Role.Admin)
-                {
-                    var role = await _roleRepository.GetByName(common.Constant.Role.Moderator);
-                    teacher.User.RoleId = role.RoleId;
-                }
+
+                var role =
+                    await _roleRepository.GetByName(
+                        common.Constant.Role.Teacher
+                    );
+
+                teacher.User.RoleId =
+                    role.RoleId;
             }
 
             await _teacherRepository.Save();
         }
-
         /* 
          * danh sách giáo viên
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<TeacherProfileDTO>> GetAllTeachers(int? status)
+        public async Task<List<TeacherProfileDTO>>
+    GetAllTeachers(int? status)
         {
             if (!ValidateAdmin())
             {
-                throw new UnauthorizedAccessException("You do not have permission");
+                throw new UnauthorizedAccessException(
+                    "You do not have permission");
             }
 
-            if (status.HasValue && status != common.Constant.StatusTeacherProfile.Pending && status != common.Constant.StatusTeacherProfile.Approved && status != common.Constant.StatusTeacherProfile.Rejected)
+            if (
+                status.HasValue
+                &&
+                status !=
+                    common.Constant
+                        .StatusTeacherProfile.Created
+                &&
+                status !=
+                    common.Constant
+                        .StatusTeacherProfile.Submitted
+                &&
+                status !=
+                    common.Constant
+                        .StatusTeacherProfile.Approved
+                &&
+                status !=
+                    common.Constant
+                        .StatusTeacherProfile.Rejected
+                &&
+                status !=
+                    common.Constant
+                        .StatusTeacherProfile.Banned
+            )
             {
-                throw new Exception("Invalid status");
+                throw new Exception(
+                    "Invalid status");
             }
 
-            var teachers = await _teacherRepository.GetAllForAdmin(status);
-            return _mapper.Map<List<TeacherProfileDTO>>(teachers);
-        }
+            var teachers =
+                await _teacherRepository
+                    .GetAllForAdmin(status);
 
+            return teachers.Select(teacher =>
+                new TeacherProfileDTO
+                {
+                    TeacherProfileId =
+                        teacher.TeacherProfileId,
+
+                    UserId =
+                        teacher.UserId,
+
+                    IntroVideoUrl =
+                        teacher.IntroVideoUrl,
+
+                    Specialty =
+                        teacher.Specialty,
+
+                    ExperienceYears =
+                        teacher.ExperienceYears,
+
+                    PricePerHour =
+                        teacher.PricePerHour,
+
+                    RatingAverage =
+                        teacher.RatingAverage,
+
+                    TotalReviews =
+                        teacher.TotalReviews,
+
+                    Description =
+                        teacher.Description,
+
+                    Status =
+                        teacher.Status,
+
+                    CreatedDate =
+                        teacher.CreatedDate,
+
+                    TeacherName =
+                        teacher.User?.Name,
+
+                    AvatarUrl =
+                        teacher.User?.AvatarUrl,
+
+                    Country =
+                        teacher.User?.Country
+                }
+            ).ToList();
+        }
         /* 
          * chi tiết giáo viên
          * O(1)
@@ -225,7 +411,95 @@ namespace Backend.Services.impl
                 }
             }
 
-            return _mapper.Map<TeacherProfileDTO>(teacher);
+            return new TeacherProfileDTO
+            {
+                TeacherProfileId =
+        teacher.TeacherProfileId,
+
+                UserId =
+        teacher.UserId,
+
+                IntroVideoUrl =
+        teacher.IntroVideoUrl,
+
+                Specialty =
+        teacher.Specialty,
+
+                ExperienceYears =
+        teacher.ExperienceYears,
+
+                PricePerHour =
+        teacher.PricePerHour,
+
+                RatingAverage =
+        teacher.RatingAverage,
+
+                TotalReviews =
+        teacher.TotalReviews,
+
+                Description =
+        teacher.Description,
+
+                Status =
+        teacher.Status,
+
+                CreatedDate =
+        teacher.CreatedDate,
+
+                TeacherName =
+        teacher.User?.Name,
+
+                AvatarUrl =
+        teacher.User?.AvatarUrl,
+
+                Country =
+        teacher.User?.Country
+            };
+        }
+        /*
+ * khóa vĩnh viễn giáo viên
+ * O(1)
+ */
+        /*
+ * khóa vĩnh viễn giáo viên
+ * O(1)
+ */
+        public async Task BanTeacher(int id)
+        {
+            if (!ValidateAdmin())
+            {
+                throw new UnauthorizedAccessException(
+                    "You do not have permission");
+            }
+
+            var teacher =
+                await _teacherRepository.GetById(id);
+
+            if (teacher == null)
+            {
+                throw new Exception(
+                    "Teacher profile not found");
+            }
+
+            if (teacher.User == null)
+            {
+                throw new Exception(
+                    "User not found");
+            }
+
+            /*
+             * khóa hồ sơ giáo viên
+             */
+            teacher.Status =
+                common.Constant
+                    .StatusTeacherProfile.Banned;
+
+            /*
+             * khóa user vĩnh viễn
+             */
+            teacher.User.Status = 0;
+
+            await _teacherRepository.Save();
         }
     }
 }

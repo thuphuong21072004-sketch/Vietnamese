@@ -7,7 +7,10 @@ namespace Backend.Services
 
         Task<List<TeacherAvailabilityDTO>> GetAvailableSchedules( DateOnly? date);
 
-        Task<List<TeacherAvailabilityDTO>> GetMySchedules();
+        Task<List<TeacherAvailabilityDTO>>
+GetMySchedules(
+    byte? status,
+    DateOnly? date);
 
         Task<TeacherAvailabilityDTO> GetDetail(int id);
 

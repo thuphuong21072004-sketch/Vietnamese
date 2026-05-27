@@ -44,6 +44,12 @@
 
         </button>
 
+        <button [class.active]="selectedStatus === 4" (click)="setStatusFilter(4)">
+
+            Banned
+
+        </button>
+
     </div>
 
     <!-- loading -->
@@ -83,21 +89,17 @@
 
             <div class="teacher-top">
 
-                <img *ngIf="
-                        teacher.user?.avatarUrl
-                    " [src]="getImageUrl(
-                        teacher.user?.avatarUrl
+                <img *ngIf="teacher.avatarUrl" [src]="getImageUrl(
+                        teacher.avatarUrl
                     )" class="teacher-avatar">
 
-                <div *ngIf="
-                        !teacher.user?.avatarUrl
-                    " class="
+                <div *ngIf="!teacher.avatarUrl" class="
                         teacher-avatar
                         placeholder
                     ">
 
                     {{
-                    teacher.user?.name
+                    teacher.teacherName
                     ?.charAt(0)
                     || 'T'
                     }}
@@ -109,7 +111,7 @@
                     <h2>
 
                         {{
-                        teacher.user?.name
+                        teacher.teacherName
                         }}
 
                     </h2>
@@ -164,7 +166,7 @@
                     </strong>
 
                     {{
-                    teacher.user?.country
+                    teacher.country
                     }}
 
                 </div>
@@ -235,6 +237,8 @@
                     View Detail
 
                 </button>
+
+                
 
             </div>
 

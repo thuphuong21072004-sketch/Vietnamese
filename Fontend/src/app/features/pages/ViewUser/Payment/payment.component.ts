@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,15 +28,7 @@ export class PaymentComponent implements OnInit {
 
   payment: any = null;
 
-  selectedMethod: 'QR' | 'VNPAY' = 'QR';
-
   loading = false;
-
-  qrData = '';
-
-  qrUrl = '';
-
-  paymentLink = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -51,92 +44,141 @@ export class PaymentComponent implements OnInit {
     this.bookingId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loadBooking();
+
     this.loadPayment();
   }
 
+  /*
+   * load booking detail
+   */
   loadBooking() {
-    this.bookingService.getDetail(this.bookingId).subscribe({
-      next: (res) => {
-        this.booking = res;
-        this.updatePaymentData();
-      },
-      error: (err) => {
-        console.error(err);
-        this.booking = null;
-      },
-    });
+    this.bookingService
+      .getDetail(this.bookingId)
+
+      .subscribe({
+        next: (res) => {
+          this.booking = res;
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.booking = null;
+
+          alert(err.error?.message || 'Failed to load booking');
+        },
+      });
   }
 
+  /*
+   * load payment
+   */
   loadPayment() {
-    this.paymentService.getByBooking(this.bookingId).subscribe({
-      next: (res) => {
-        this.payment = res;
-        if (res?.paymentMethod) {
-          this.selectedMethod = res.paymentMethod === 'QR' ? 'QR' : 'VNPAY';
-        }
-        this.updatePaymentData();
-      },
-      error: () => {
-        this.payment = null;
-      },
-    });
+    this.paymentService
+      .getByBooking(this.bookingId)
+
+      .subscribe({
+        next: (res) => {
+          this.payment = res;
+
+          /*
+           * payment success
+           */
+          if (res && res.status === 1) {
+            this.goClassroom();
+          }
+        },
+
+        error: () => {
+          this.payment = null;
+        },
+      });
   }
 
+  /*
+   * calculate payment amount
+   */
   getAmount(): number {
-    if (!this.booking || !this.booking.teacherProfile) {
+    if (!this.booking) {
       return 0;
     }
 
+    const pricePerHour = Number(
+      this.booking?.instructor?.teacherProfile?.pricePerHour || 0,
+    );
+
     const start = new Date(this.booking.startTime);
+
     const end = new Date(this.booking.endTime);
+
     const durationHours = Math.max(
       0.5,
       (end.getTime() - start.getTime()) / (1000 * 60 * 60),
     );
 
-    return Math.round(this.booking.teacherProfile.pricePerHour * durationHours * 100) / 100;
+    return (
+      Math.round((pricePerHour * durationHours + Number.EPSILON) * 100) / 100
+    );
   }
 
+  /*
+   * booking duration
+   */
   getDuration(): string {
     if (!this.booking) {
       return '-';
     }
 
     const start = new Date(this.booking.startTime);
+
     const end = new Date(this.booking.endTime);
-    const minutes = Math.max(30, Math.round((end.getTime() - start.getTime()) / (1000 * 60)));
-    const hours = Math.floor(minutes / 60);
-    const remaining = minutes % 60;
 
-    return `${hours > 0 ? hours + 'h ' : ''}${remaining}m`;
-  }
+    const totalMinutes = Math.max(
+      30,
+      Math.round((end.getTime() - start.getTime()) / (1000 * 60)),
+    );
 
-  formatCurrency(value: number): string {
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  }
+    const hours = Math.floor(totalMinutes / 60);
 
-  updatePaymentData() {
-    const amount = this.getAmount();
-    this.paymentLink = `https://vnpay.vn/pay?amount=${amount}&bookingId=${this.bookingId}`;
-    this.qrData = `vnpay://pay?amount=${amount}&bookingId=${this.bookingId}&note=VietPhuong`;
-    this.qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(this.qrData)}`;
-  }
+    const minutes = totalMinutes % 60;
 
-  onMethodChanged() {
-    if (this.payment) {
-      this.updatePaymentData();
+    if (hours <= 0) {
+      return `${minutes}m`;
     }
+
+    if (minutes <= 0) {
+      return `${hours}h`;
+    }
+
+    return `${hours}h ${minutes}m`;
   }
 
+  /*
+   * currency format
+   */
+  formatCurrency(value: number): string {
+    return value.toLocaleString('en-US', {
+      style: 'currency',
+
+      currency: 'USD',
+    });
+  }
+
+  /*
+   * pay with VNPay
+   */
   pay() {
     if (!this.booking) {
-      alert('Booking information not loaded yet');
+      alert('Booking not found');
+
       return;
     }
 
     const amount = this.getAmount();
+
     if (amount <= 0) {
-      alert('Cannot proceed with payment: invalid amount');
+      alert('Invalid payment amount');
+
       return;
     }
 
@@ -144,61 +186,90 @@ export class PaymentComponent implements OnInit {
 
     const body = {
       bookingId: this.bookingId,
-      amount,
-      paymentMethod: this.selectedMethod,
+
+      amount: amount,
+
+      paymentMethod: 0,
     };
 
-    this.paymentService.create(body).subscribe({
-      next: (res) => {
-        this.payment = { ...res, status: 0, paymentMethod: this.selectedMethod };
-        this.updatePaymentData();
-        this.loading = false;
-        alert('Payment created. Please scan the QR or use VNPAY to complete payment.');
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-        alert(err.error?.message || 'Payment failed');
-      },
-    });
+    /*
+     * create payment
+     */
+    this.paymentService
+      .create(body)
+
+      .subscribe({
+        next: (res) => {
+          this.payment = res;
+
+          /*
+           * create VNPay url
+           */
+          this.paymentService
+            .createVNPayUrl(res.paymentId)
+
+            .subscribe({
+              next: (vnpayRes) => {
+                /*
+                 * redirect VNPay
+                 */
+                window.location.href = vnpayRes.paymentUrl;
+              },
+
+              error: (err) => {
+                console.error(err);
+
+                this.loading = false;
+
+                console.log(err);
+
+                alert(JSON.stringify(err.error));
+              },
+            });
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.loading = false;
+
+          alert(err.error?.message || 'Create payment failed');
+        },
+      });
   }
 
-  confirmPayment() {
-    if (!this.payment) {
-      return;
-    }
-
-    this.loading = true;
-    const transactionCode = `${this.selectedMethod}_${Date.now()}`;
-
-    this.paymentService.success(this.payment.paymentId, transactionCode).subscribe({
-      next: () => {
-        this.loading = false;
-        this.payment.status = 1;
-        this.payment.transactionCode = transactionCode;
-        alert('Payment confirmed successfully.');
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-        alert(err.error?.message || 'Payment confirmation failed');
-      },
-    });
-  }
-
-  back() {
-    history.back();
-  }
-
+  /*
+   * helper payment status
+   */
   getStatusText(status: number): string {
     return this.paymentService.getStatusText(status);
   }
 
+  /*
+   * helper payment css class
+   */
   getStatusClass(status: number): string {
     return this.paymentService.getStatusClass(status);
   }
 
+  /*
+   * back
+   */
+  back() {
+    history.back();
+  }
+
+  /*
+   * go booking detail
+   */
   goBooking() {
     this.router.navigate(['/booking', this.bookingId]);
+  }
+
+  /*
+   * go classroom
+   */
+  goClassroom() {
+    this.router.navigate(['/video-room', this.bookingId]);
   }
 }

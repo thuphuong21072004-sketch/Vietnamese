@@ -2,18 +2,20 @@ import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
+import { FormsModule } from '@angular/forms';
+
 import { Router } from '@angular/router';
+
 import { VideoRoomService } from '../../../services/video-room.service';
 
 import { BookingService } from '../../../services/booking.service';
-import { AccountService } from '../../../services/account.service';
 
 @Component({
   selector: 'app-teacher-bookings',
 
   standalone: true,
 
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
 
   templateUrl: './myclass.component.html',
 
@@ -21,201 +23,122 @@ import { AccountService } from '../../../services/account.service';
 })
 export class TeacherBookingsComponent implements OnInit {
   bookings: any[] = [];
+
   filteredBookings: any[] = [];
-  selectedFilter = 'all';
-  filterOptions = [
-    { key: 'all', label: 'All classes' },
-    { key: 'upcoming', label: 'Upcoming' },
-    { key: 'reviewed', label: 'Reviewed' },
-    { key: 'notReviewed', label: 'Not reviewed' },
-  ];
 
   loading = false;
-  isAdmin: boolean = false;
+
+  selectedDate = '';
+
+  selectedStatus = '';
 
   constructor(
     public bookingService: BookingService,
 
     private router: Router,
+
     private roomService: VideoRoomService,
-    private accountService: AccountService,
   ) {}
 
   ngOnInit(): void {
-    this.loadCurrentUser();
     this.loadBookings();
-  }
-
-  loadCurrentUser() {
-    this.accountService.getCurrentUser().subscribe({
-      next: (res: any) => {
-        const role = res?.role ?? res?.roleName ?? res?.roleId;
-        this.isAdmin = (role === 'Admin' || role === 'admin' || role === 2 || role === '2');
-      },
-      error: () => (this.isAdmin = false),
-    });
   }
 
   loadBookings() {
     this.loading = true;
 
-    this.bookingService.getTeacherBookings().subscribe({
-      next: (res) => {
-        this.bookings = res;
-        this.applyFilters();
+    const status =
+      this.selectedStatus !== '' ? Number(this.selectedStatus) : undefined;
 
-        this.loading = false;
-      },
+    this.bookingService
+      .getTeacherBookings(status, this.selectedDate)
 
-      error: (err) => {
-        console.error(err);
+      .subscribe({
+        next: (res) => {
+          this.bookings = res || [];
 
-        this.loading = false;
-      },
-    });
-  }
+          this.filteredBookings = [...this.bookings];
 
-  setFilter(filter: string) {
-    this.selectedFilter = filter;
-    this.applyFilters();
-  }
+          this.loading = false;
+        },
 
-  private applyFilters() {
-    this.filteredBookings = this.bookings
-      .filter((item) => {
-        if (!item) {
-          return false;
-        }
+        error: (err) => {
+          console.error(err);
 
-        switch (this.selectedFilter) {
-          case 'upcoming':
-            return this.isBookingUpcoming(item);
-
-          case 'reviewed':
-            return this.isBookingReviewed(item);
-
-          case 'notReviewed':
-            return this.isBookingNotReviewed(item);
-
-          default:
-            return true;
-        }
-      })
-      .sort((a, b) => this.sortByProximity(a, b));
-  }
-
-  private isBookingUpcoming(item: any): boolean {
-    const startTime = new Date(item.startTime).getTime();
-    return item?.status === 1 && startTime > Date.now();
-  }
-
-  private isBookingReviewed(item: any): boolean {
-    return (
-      item?.status === 3 ||
-      !!item?.reviewId ||
-      !!item?.hasReview ||
-      !!item?.reviewed
-    );
-  }
-
-  private isBookingNotReviewed(item: any): boolean {
-    return (
-      item?.status !== 3 &&
-      item?.status !== 2 &&
-      !this.isBookingReviewed(item)
-    );
-  }
-
-  private sortByProximity(a: any, b: any): number {
-    const now = Date.now();
-    const aTime = new Date(a.startTime).getTime();
-    const bTime = new Date(b.startTime).getTime();
-    const aFuture = aTime > now;
-    const bFuture = bTime > now;
-
-    if (aFuture && !bFuture) {
-      return -1;
-    }
-
-    if (!aFuture && bFuture) {
-      return 1;
-    }
-
-    return aTime - bTime;
+          this.loading = false;
+        },
+      });
   }
 
   openDetail(id: number) {
-    this.router.navigate(['/booking', id]);
-  }
-
-  confirmBooking(id: number) {
-    if (!confirm('Confirm this booking?')) {
-      return;
-    }
-
-    this.bookingService.confirm(id).subscribe({
-      next: () => {
-        const booking = this.bookings.find((x) => x.bookingId === id);
-
-        if (booking) {
-          booking.status = 1;
-        }
-
-        alert('Booking confirmed successfully');
-      },
-
-      error: (err) => {
-        console.error(err);
-
-        alert(err.error?.message || 'Failed to confirm booking');
-      },
-    });
+    this.router.navigate(['/admin/bookings', id]);
   }
 
   joinRoom(id: number) {
-    // Try to open existing room; if not present, create then open
-    this.roomService.getByBookingId(id).subscribe({
-      next: (res: any) => {
-        const url = this.getRoomUrlFrom(res);
-        if (url) {
-          window.open(url, '_blank');
-          return;
-        }
+    this.roomService
+      .getByBookingId(id)
 
-        // if room returned but no URL, attempt creation
-        this.createAndOpenRoom(id);
-      },
-      error: (err: any) => {
-        // not found or error -> create then open
-        this.createAndOpenRoom(id);
-      },
-    });
+      .subscribe({
+        next: (res: any) => {
+          const url = this.getRoomUrlFrom(res);
+
+          if (url) {
+            window.open(url, '_blank');
+
+            return;
+          }
+
+          this.createAndOpenRoom(id);
+        },
+
+        error: () => {
+          this.createAndOpenRoom(id);
+        },
+      });
   }
 
   private createAndOpenRoom(id: number) {
-    this.roomService.create(id).subscribe({
-      next: (res: any) => {
-        const url = this.getRoomUrlFrom(res);
-        if (url) {
-          window.open(url, '_blank');
-        } else {
-          alert('Room created but link is unavailable. Open room page to manage.');
-          this.router.navigate(['/room', id]);
-        }
-      },
-      error: (err: any) => {
-        console.error(err);
-        alert(err.error?.message || 'Failed to create/open room');
-      },
-    });
+    this.roomService
+      .create(id)
+
+      .subscribe({
+        next: (res: any) => {
+          const url = this.getRoomUrlFrom(res);
+
+          if (url) {
+            window.open(url, '_blank');
+          } else {
+            alert('Room created but no link found');
+          }
+        },
+
+        error: (err: any) => {
+          console.error(err);
+
+          alert(err.error?.message || 'Failed to open room');
+        },
+      });
   }
 
   private getRoomUrlFrom(room: any): string | null {
-    if (!room) return null;
-    if (room.joinUrl) return room.joinUrl;
-    if (!room.roomCode) return null;
-    if (room.roomCode.startsWith('http')) return room.roomCode;
+    if (!room) {
+      return null;
+    }
+
+    if (room.joinUrl) {
+      return room.joinUrl;
+    }
+
+    if (!room.roomCode) {
+      return null;
+    }
+
+    if (room.roomCode.startsWith('http')) {
+      return room.roomCode;
+    }
+
     const token = room.token ? `?token=${encodeURIComponent(room.token)}` : '';
+
     return `https://meeting.example.com/${room.roomCode}${token}`;
   }
 
@@ -224,23 +147,28 @@ export class TeacherBookingsComponent implements OnInit {
       return;
     }
 
-    this.bookingService.cancel(id).subscribe({
-      next: () => {
-        const booking = this.bookings.find((x) => x.bookingId === id);
+    this.bookingService
+      .cancel(id)
 
-        if (booking) {
-          booking.status = 2;
-        }
+      .subscribe({
+        next: () => {
+          const booking = this.bookings.find((x) => x.bookingId === id);
 
-        alert('Booking cancelled successfully');
-      },
+          if (booking) {
+            booking.status = 4;
+          }
 
-      error: (err) => {
-        console.error(err);
+          this.loadBookings();
 
-        alert(err.error?.message || 'Failed to cancel booking');
-      },
-    });
+          alert('Booking cancelled successfully');
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          alert(err.error?.message || 'Failed to cancel booking');
+        },
+      });
   }
 
   getStatusText(status: number): string {
@@ -251,28 +179,51 @@ export class TeacherBookingsComponent implements OnInit {
     return this.bookingService.getStatusClass(status);
   }
 
+  /*
+   * can join room
+   */
   canJoinRoom(item: any): boolean {
-    if (!item || item.status !== 1) {
+    if (!item || item.status !== 2) {
       return false;
     }
 
     const now = new Date();
+
     const start = new Date(item.startTime);
+
     const end = new Date(item.endTime);
+
     const openAt = new Date(start.getTime() - 30 * 60 * 1000);
+
     const closeAt = new Date(end.getTime() + 15 * 60 * 1000);
 
     return now >= openAt && now <= closeAt;
   }
 
-  canComplete(item: any): boolean {
+  /*
+   * waiting room
+   */
+  isWaitingRoom(item: any): boolean {
     if (!item || item.status !== 1) {
       return false;
     }
 
     const now = new Date();
-    const end = new Date(item.endTime);
-    return now >= end;
+
+    const start = new Date(item.startTime);
+
+    return now < start;
+  }
+
+  /*
+   * can view review
+   */
+  canViewReview(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+
+    return item.status === 3;
   }
 
   getStudentName(item: any): string {
@@ -281,5 +232,57 @@ export class TeacherBookingsComponent implements OnInit {
 
   getAvatar(item: any): string {
     return this.bookingService.getAvatar(item);
+  }
+
+  getBookingAmount(item: any): number {
+    return this.bookingService.getBookingAmount(item);
+  }
+
+  getDurationHours(item: any): number {
+    return this.bookingService.getDurationHours(item);
+  }
+
+  /*
+   * class ended
+   */
+  isPastBooking(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+
+    const now = new Date();
+
+    const end = new Date(item.endTime);
+
+    return now > end;
+  }
+
+  /*
+   * can cancel
+   */
+  canCancel(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+
+    /*
+     * pending payment
+     */
+    if (item.status === 0) {
+      return true;
+    }
+
+    /*
+     * confirmed
+     */
+    if (item.status === 1) {
+      const now = new Date();
+
+      const start = new Date(item.startTime);
+
+      return now < start;
+    }
+
+    return false;
   }
 }

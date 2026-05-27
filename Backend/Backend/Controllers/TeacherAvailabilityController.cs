@@ -40,15 +40,21 @@ namespace Backend.Controllers
         }
 
         /* 
-         * teacher xem lịch của mình
+         * xem lịch cá nhân
          * O(n)
          * (thuphuong21072004) 
          */
         [Authorize]
         [HttpGet("me")]
-        public async Task<IActionResult> GetMySchedules()
+        public async Task<IActionResult> GetMySchedules(
+    [FromQuery] byte? status,
+    [FromQuery] DateOnly? date)
         {
-            return Ok(await _availabilityService.GetMySchedules());
+            return Ok(
+                await _availabilityService
+                    .GetMySchedules(
+                        status,
+                        date));
         }
 
         /* 

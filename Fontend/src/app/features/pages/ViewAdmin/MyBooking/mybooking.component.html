@@ -1,0 +1,373 @@
+<div class="detail-page">
+
+    <!-- header -->
+    <div class="top-header">
+
+        <button class="back-btn" (click)="back()">
+
+            ← Back
+
+        </button>
+
+        <div class="header-content">
+
+            <p class="eyebrow">
+                Teaching Session
+            </p>
+
+            <h1>
+                Booking Detail
+            </h1>
+
+            <p>
+                Manage your online
+                teaching class and
+                student session
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- loading -->
+    <div *ngIf="loading" class="loading">
+
+        Loading booking...
+
+    </div>
+
+    <!-- content -->
+    <div *ngIf="
+            !loading &&
+            booking
+        " class="content-grid">
+
+        <!-- left -->
+        <div class="main-content">
+
+            <!-- student -->
+            <div class="student-card">
+
+                <div class="student-top">
+
+                    <img *ngIf="
+                            getAvatar()
+                        " [src]="
+                            getAvatar()
+                        " class="student-avatar">
+
+                    <div *ngIf="
+                            !getAvatar()
+                        " class="student-avatar placeholder">
+
+                        {{
+                        getStudentName()
+                        .charAt(0)
+                        }}
+
+                    </div>
+
+                    <div class="student-info">
+
+                        <h2>
+
+                            {{
+                            getStudentName()
+                            }}
+
+                        </h2>
+
+                        <span class="status-badge" [ngClass]="
+                                getStatusClass()
+                            ">
+
+                            {{
+                            getStatusText()
+                            }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- info -->
+                <div class="student-body">
+
+                    <div class="info-row">
+
+                        <span>
+                            Booking ID
+                        </span>
+
+                        <strong>
+
+                            #{{ booking.bookingId }}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span>
+                            Booking Date
+                        </span>
+
+                        <strong>
+
+                            {{
+                            booking.createdDate
+                            | date:'dd/MM/yyyy HH:mm'
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span>
+                            Class Date
+                        </span>
+
+                        <strong>
+
+                            {{
+                            booking.startTime
+                            | date:'dd/MM/yyyy'
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span>
+                            Time
+                        </span>
+
+                        <strong>
+
+                            {{
+                            booking.startTime
+                            | date:'HH:mm'
+                            }}
+
+                            -
+
+                            {{
+                            booking.endTime
+                            | date:'HH:mm'
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="info-row">
+
+                        <span>
+                            Duration
+                        </span>
+
+                        <strong>
+
+                            {{
+                            getDurationHours()
+                            }}
+
+                            hour(s)
+
+                        </strong>
+
+                    </div>
+
+                    <!-- payment -->
+                    <div *ngIf="payment" class="info-row">
+
+                        <span>
+                            Payment Status
+                        </span>
+
+                        <strong>
+
+                            {{
+                            paymentService
+                            .getStatusText(
+                            payment.status
+                            )
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <div *ngIf="payment" class="info-row">
+
+                        <span>
+                            Payment Method
+                        </span>
+
+                        <strong>
+
+                            {{
+                            paymentService
+                            .getMethodText(
+                            payment.paymentMethod
+                            )
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <div *ngIf="
+                            payment?.transactionCode
+                        " class="info-row">
+
+                        <span>
+                            Transaction Code
+                        </span>
+
+                        <strong>
+
+                            {{
+                            payment.transactionCode
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                    <!-- total -->
+                    <div class="info-row">
+
+                        <span>
+                            Total Revenue
+                        </span>
+
+                        <strong class="price">
+
+                            $
+                            {{
+                            getBookingAmount()
+                            }}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- actions -->
+            <div *ngIf="
+                    hasActions()
+                " class="session-card">
+
+                <h3>
+                    Session Actions
+                </h3>
+
+                <div class="action-list">
+
+                    <!-- join -->
+                    <button *ngIf="
+                            canJoinRoom()
+                        " class="room-btn" (click)="joinRoom()">
+
+                        Join Room
+
+                    </button>
+
+                    <!-- waiting -->
+                    <button *ngIf="
+                            isWaitingRoom()
+                        " class="disabled-btn" disabled>
+
+                        Waiting for class time
+
+                    </button>
+
+                    <!-- cancel -->
+                    <button *ngIf="
+                            canCancel()
+                        " class="cancel-btn" (click)="cancelBooking()">
+
+                        Cancel Booking
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- review -->
+            <div *ngIf="
+                    hasReview()
+                " class="review-card">
+
+                <h3>
+                    Student Review
+                </h3>
+
+                <div class="review-header">
+
+                    <span class="rating">
+
+                        {{
+                        review.rating
+                        }}
+                        ★
+
+                    </span>
+
+                    <span class="review-date">
+
+                        {{
+                        review.createdDate
+                        | date:'dd/MM/yyyy'
+                        }}
+
+                    </span>
+
+                </div>
+
+                <div class="review-comment">
+
+                    {{
+                    review.comment
+                    }}
+
+                </div>
+
+            </div>
+
+            <!-- no review -->
+            <div *ngIf="
+                    hasNoReview()
+                " class="review-card">
+
+                <h3>
+                    Student Review
+                </h3>
+
+                <div class="review-comment">
+
+                    Student has not reviewed
+                    this class yet.
+
+                </div>
+
+            </div>
+
+        </div>
+
+        
+
+    </div>
+
+</div>

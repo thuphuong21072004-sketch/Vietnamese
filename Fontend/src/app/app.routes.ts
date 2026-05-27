@@ -17,6 +17,7 @@ import { TeacherDetailComponent} from'./features/pages/ViewAdmin/AppTeacher/Teac
 import { TeacherScheduleComponent} from'./features/pages/ViewAdmin/Schedule/schedule.component';
 import { TeacherBookingsComponent} from './features/pages/ViewAdmin/MyClass/myclass.component';
 import { DashboardComponent } from './features/pages/ViewAdmin/Dashboard/dashboard.component';
+import { TeacherBookingDetailComponent } from './features/pages/ViewAdmin/MyBooking/mybooking.component';
 
 import { MyProgressComponent } from './features/pages/ViewUser/Learning/unit/unit.component';
 import { UserDashboardComponent } from './features/pages/ViewUser/Dashboard/dashboard.component';
@@ -52,6 +53,7 @@ export const routes: Routes = [
   { path: 'admin/teachers/:id', component: TeacherDetailComponent },
   { path: 'admin/schedule', component: TeacherScheduleComponent },
   { path: 'admin/classrooms', component: TeacherBookingsComponent },
+  { path: 'admin/bookings/:id', component: TeacherBookingDetailComponent },
 
   { path: 'user/units', component: MyProgressComponent },
   { path: 'user/dashboard', component: UserDashboardComponent },

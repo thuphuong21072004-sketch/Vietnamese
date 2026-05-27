@@ -38,15 +38,41 @@ export class BookingService {
   /*
    * student own bookings
    */
-  getMyBookings(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/me`, this.getOptions());
+  getMyBookings(status?: number, date?: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (status !== undefined && status !== null) {
+      params = params.set('status', status.toString());
+    }
+
+    if (date) {
+      params = params.set('date', date);
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/me`, {
+      ...this.getOptions(),
+      params,
+    });
   }
 
   /*
    * teacher own bookings
    */
-  getTeacherBookings(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/teacher`, this.getOptions());
+  getTeacherBookings(status?: number, date?: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (status !== undefined && status !== null) {
+      params = params.set('status', status.toString());
+    }
+
+    if (date) {
+      params = params.set('date', date);
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/teacher`, {
+      ...this.getOptions(),
+      params,
+    });
   }
 
   /*
@@ -57,25 +83,11 @@ export class BookingService {
   }
 
   /*
-   * teacher confirm booking
-   */
-  confirm(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/confirm`, null, this.getOptions());
-  }
-
-  /*
    * cancel booking
    */
   cancel(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/cancel`, null, this.getOptions());
-  }
-
-  /*
-   * complete booking
-   */
-  complete(id: number): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/${id}/complete`,
+      `${this.apiUrl}/${id}/cancel`,
       null,
       this.getOptions(),
     );
@@ -87,16 +99,22 @@ export class BookingService {
   getStatusText(status: number): string {
     switch (status) {
       case 0:
-        return 'Pending';
+        return 'Pending Payment';
 
       case 1:
-        return 'Booked';
+        return 'Confirmed';
 
       case 2:
-        return 'Cancelled';
+        return 'In Progress';
 
       case 3:
         return 'Completed';
+
+      case 4:
+        return 'Cancelled';
+
+      case 5:
+        return 'Refunded';
 
       default:
         return 'Unknown';
@@ -112,13 +130,19 @@ export class BookingService {
         return 'pending';
 
       case 1:
-        return 'booked';
+        return 'confirmed';
 
       case 2:
-        return 'cancelled';
+        return 'progress';
 
       case 3:
         return 'completed';
+
+      case 4:
+        return 'cancelled';
+
+      case 5:
+        return 'refunded';
 
       default:
         return '';
@@ -130,9 +154,8 @@ export class BookingService {
    */
   getAvatar(booking: any): string {
     const avatar =
-      booking?.teacherProfile?.avatarUrl ||
-      booking?.teacherProfile?.user?.avatarUrl ||
-      booking?.teacher?.avatarUrl;
+      booking?.instructorProfile?.user?.avatarUrl ||
+      booking?.instructor?.avatarUrl;
 
     if (!avatar) {
       return '';
@@ -146,7 +169,7 @@ export class BookingService {
   }
 
   /*
-   * helper booking duration in hours
+   * helper booking duration
    */
   getDurationHours(booking: any): number {
     if (!booking?.startTime || !booking?.endTime) {
@@ -154,26 +177,35 @@ export class BookingService {
     }
 
     const start = new Date(booking.startTime);
+
     const end = new Date(booking.endTime);
+
     const diff = Math.max(0, end.getTime() - start.getTime());
+
     return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
   }
 
   /*
-   * helper total booking amount
+   * helper total amount
    */
   getBookingAmount(booking: any): number {
     const price = this.getTeacherPrice(booking);
+
     const hours = this.getDurationHours(booking);
 
     return Math.round((price * hours + Number.EPSILON) * 100) / 100;
   }
 
   /*
-   * helper teacher hourly price
+   * helper teacher price
    */
   getTeacherPrice(booking: any): number {
-    return Number(booking?.teacherProfile?.pricePerHour || 0);
+    return Number(
+      booking?.instructorProfile?.pricePerHour ||
+        booking?.instructor?.teacherProfile?.pricePerHour ||
+        booking?.teacherProfile?.pricePerHour ||
+        0,
+    );
   }
 
   /*
@@ -181,7 +213,9 @@ export class BookingService {
    */
   getTeacherName(booking: any): string {
     return (
-      booking?.teacherName || booking?.teacherProfile?.user?.name || 'Teacher'
+      booking?.instructorProfile?.user?.name ||
+      booking?.instructor?.name ||
+      'Teacher'
     );
   }
 
@@ -189,6 +223,6 @@ export class BookingService {
    * helper student name
    */
   getStudentName(booking: any): string {
-    return booking?.studentName || booking?.student?.name || 'Student';
+    return booking?.student?.name || 'Student';
   }
 }

@@ -20,7 +20,25 @@ namespace Backend.Repository.impl
          */
         public async Task<Payment?> GetById(int id)
         {
-            return await _context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
+            return await _context.Payments
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Student)
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Instructor)
+
+                        .ThenInclude(x => x.TeacherProfile)
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Availability)
+
+                .FirstOrDefaultAsync(
+                    x => x.PaymentId == id
+                );
         }
 
         /* 
@@ -28,9 +46,28 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<Payment?> GetByBookingId(int bookingId)
+        public async Task<Payment?> GetByBookingId(
+    int bookingId)
         {
-            return await _context.Payments.FirstOrDefaultAsync(x => x.BookingId == bookingId);
+            return await _context.Payments
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Student)
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Instructor)
+
+                        .ThenInclude(x => x.TeacherProfile)
+
+                .Include(x => x.Booking)
+
+                    .ThenInclude(x => x.Availability)
+
+                .FirstOrDefaultAsync(
+                    x => x.BookingId == bookingId
+                );
         }
 
         /* 
@@ -50,7 +87,6 @@ namespace Backend.Repository.impl
          */
         public async Task Update(Payment payment)
         {
-            _context.Payments.Update(payment);
             await Task.CompletedTask;
         }
 

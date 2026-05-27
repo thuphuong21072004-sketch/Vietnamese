@@ -11,69 +11,124 @@ namespace Backend.Controllers
     {
         private readonly PaymentService _paymentService;
 
-        public PaymentController(PaymentService paymentService)
+        public PaymentController(
+            PaymentService paymentService)
         {
-            _paymentService = paymentService;
+            _paymentService =
+                paymentService;
         }
 
-        /* 
-         * tạo payment
-         * O(1)
-         * (thuphuong21072004) 
+        /*
+         * create payment
          */
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] PaymentDTO dto)
+        public async Task<IActionResult>
+        Create(
+            [FromBody] PaymentDTO dto)
         {
-            return Ok(await _paymentService.Create(dto));
+            var payment =
+                await _paymentService
+                    .Create(dto);
+
+            return Ok(payment);
         }
 
-        /* 
-         * payment success callback
-         * O(1)
-         * (thuphuong21072004) 
+        /*
+         * create vnpay url
          */
         [Authorize]
-        [HttpPut("{paymentId}/success")]
-        public async Task<IActionResult> Success(int paymentId, [FromQuery] string transactionCode)
+        [HttpPost("{paymentId}/vnpay")]
+        public async Task<IActionResult> VNPay(int paymentId)
         {
-            await _paymentService.Success(paymentId, transactionCode);
-
-            return Ok(new
+            try
             {
-                success = true,
-                message = "Payment success"
-            });
+                var url =
+                    await _paymentService
+                        .CreateVNPayUrl(
+                            paymentId);
+
+                return Ok(new
+                {
+                    success = true,
+                    paymentUrl = url
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    detail = ex.ToString()
+                });
+            }
         }
 
-        /* 
-         * payment failed
-         * O(1)
-         * (thuphuong21072004) 
+        /*
+         * vnpay callback
          */
-        [Authorize]
-        [HttpPut("{paymentId}/failed")]
-        public async Task<IActionResult> Failed(int paymentId)
+        [AllowAnonymous]
+        [HttpGet("vnpay-return")]
+        public async Task<IActionResult>
+        VNPayReturn()
         {
-            await _paymentService.Failed(paymentId);
+            var responseCode =
+                Request.Query["vnp_ResponseCode"]
+                    .ToString();
 
-            return Ok(new
+            var txnRef =
+                Request.Query["vnp_TxnRef"]
+                    .ToString();
+
+            var transactionNo =
+                Request.Query["vnp_TransactionNo"]
+                    .ToString();
+
+            /*
+             * payment id
+             */
+            int paymentId =
+                int.Parse(txnRef);
+
+            /*
+             * success
+             */
+            if (responseCode == "00")
             {
-                success = true,
-                message = "Payment failed"
-            });
+                await _paymentService
+                    .Success(
+                        paymentId,
+                        transactionNo);
+
+                /*
+                 * redirect frontend
+                 */
+                return Redirect(
+    "http://localhost:4200/my-bookings");
+            }
+
+            /*
+             * failed
+             */
+            await _paymentService
+                .Failed(paymentId);
+
+            return Redirect(
+    "http://localhost:4200/my-bookings");
         }
 
-        /* 
-         * payment theo booking
-         * O(1)
-         * (thuphuong21072004) 
+        /*
+         * payment by booking
          */
         [Authorize]
         [HttpGet("booking/{bookingId}")]
-        public async Task<IActionResult> GetByBooking(int bookingId)
+        public async Task<IActionResult>
+        GetByBooking(int bookingId)
         {
-            return Ok(await _paymentService.GetByBooking(bookingId));
+            return Ok(
+                await _paymentService
+                    .GetByBooking(
+                        bookingId));
         }
     }
 }

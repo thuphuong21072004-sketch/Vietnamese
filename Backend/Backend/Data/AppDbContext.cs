@@ -194,15 +194,132 @@ namespace Backend.Data
                 .HasKey(x => x.AvailabilityId);
 
             modelBuilder.Entity<TeacherAvailability>()
-                .HasIndex(x => new
-                {
-                    x.TeacherId,
-                    x.StartTime,
-                    x.EndTime
-                });
+    .HasIndex(x => new
+    {
+        x.InstructorId,
+        x.StartTime,
+        x.EndTime
+    });
             modelBuilder.Entity<VideoRoom>()
     .HasKey(x => x.RoomId);
+
+            /*
+ * teacher profile
+ */
+            modelBuilder.Entity<TeacherProfile>()
+                .HasOne(x => x.User)
+                .WithOne(x => x.TeacherProfile)
+                .HasForeignKey<TeacherProfile>(
+                    x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * teacher availability
+             */
+            modelBuilder.Entity<TeacherAvailability>()
+                .HasOne(x => x.Instructor)
+                .WithMany()
+                .HasForeignKey(x => x.InstructorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * booking - student
+             */
+            modelBuilder.Entity<Booking>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * booking - instructor
+             */
+            modelBuilder.Entity<Booking>()
+                .HasOne(x => x.Instructor)
+                .WithMany()
+                .HasForeignKey(x => x.InstructorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * booking - availability
+             */
+            modelBuilder.Entity<Booking>()
+                .HasOne(x => x.Availability)
+                .WithMany()
+                .HasForeignKey(x => x.AvailabilityId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * payment
+             */
+            modelBuilder.Entity<Payment>()
+                .HasOne(x => x.Booking)
+                .WithOne(x => x.Payment)
+                .HasForeignKey<Payment>(
+                    x => x.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * review - booking
+             */
+            modelBuilder.Entity<Review>()
+                .HasOne(x => x.Booking)
+                .WithOne(x => x.Review)
+                .HasForeignKey<Review>(
+                    x => x.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * review - student
+             */
+            modelBuilder.Entity<Review>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * review - instructor
+             */
+            modelBuilder.Entity<Review>()
+                .HasOne(x => x.Instructor)
+                .WithMany()
+                .HasForeignKey(x => x.InstructorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * video room
+             */
+            modelBuilder.Entity<VideoRoom>()
+                .HasOne(x => x.Booking)
+                .WithOne(x => x.VideoRoom)
+                .HasForeignKey<VideoRoom>(
+                    x => x.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * unique booking payment
+             */
+            modelBuilder.Entity<Payment>()
+                .HasIndex(x => x.BookingId)
+                .IsUnique();
+
+            /*
+             * unique booking review
+             */
+            modelBuilder.Entity<Review>()
+                .HasIndex(x => x.BookingId)
+                .IsUnique();
+
+            /*
+             * unique booking video room
+             */
+            modelBuilder.Entity<VideoRoom>()
+                .HasIndex(x => x.BookingId)
+                .IsUnique();
         }
+
+
 
     }
 }

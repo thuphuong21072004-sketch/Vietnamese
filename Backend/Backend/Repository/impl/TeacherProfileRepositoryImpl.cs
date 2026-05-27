@@ -71,16 +71,17 @@ namespace Backend.Repository.impl
          */
         public async Task<List<TeacherProfile>> GetAllForAdmin(int? status)
         {
-            IQueryable<TeacherProfile> query = _context.TeacherProfiles.Include(x => x.User);
-
-            query = query.Where(x => x.Status != common.Constant.StatusTeacherProfile.Draft);
+            IQueryable<TeacherProfile> query = _context.TeacherProfiles
+                .Include(x => x.User);
 
             if (status.HasValue)
             {
-                query = query.Where(x => x.Status == status);
+                query = query.Where(x => x.Status == status.Value);
             }
 
-            return await query.OrderByDescending(x => x.TeacherProfileId).ToListAsync();
+            return await query
+                .OrderByDescending(x => x.TeacherProfileId)
+                .ToListAsync();
         }
 
         /* 

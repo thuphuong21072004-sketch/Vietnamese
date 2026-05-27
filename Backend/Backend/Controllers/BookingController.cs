@@ -40,9 +40,15 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpGet("me")]
-        public async Task<IActionResult> GetMyBookings()
+        public async Task<IActionResult> GetMyBookings(
+    [FromQuery] byte? status,
+    [FromQuery] DateOnly? date)
         {
-            return Ok(await _bookingService.GetMyBookings());
+            return Ok(
+                await _bookingService
+                    .GetMyBookings(
+                        status,
+                        date));
         }
 
         /* 
@@ -52,9 +58,16 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpGet("teacher")]
-        public async Task<IActionResult> GetTeacherBookings()
+        public async Task<IActionResult>
+GetTeacherBookings(
+    [FromQuery] byte? status,
+    [FromQuery] DateOnly? date)
         {
-            return Ok(await _bookingService.GetTeacherBookings());
+            return Ok(
+                await _bookingService
+                    .GetTeacherBookings(
+                        status,
+                        date));
         }
 
         /* 

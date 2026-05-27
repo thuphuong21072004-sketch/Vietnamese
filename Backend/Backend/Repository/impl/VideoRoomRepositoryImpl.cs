@@ -20,7 +20,12 @@ namespace Backend.Repository.impl
          */
         public async Task<VideoRoom?> GetById(int id)
         {
-            return await _context.VideoRooms.FirstOrDefaultAsync(x => x.RoomId == id);
+            return await _context.VideoRooms
+
+                .Include(x => x.Booking)
+
+                .FirstOrDefaultAsync(
+                    x => x.RoomId == id);
         }
 
         /* 
@@ -28,9 +33,15 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoom?> GetByBookingId(int bookingId)
+        public async Task<VideoRoom?> GetByBookingId(
+    int bookingId)
         {
-            return await _context.VideoRooms.FirstOrDefaultAsync(x => x.BookingId == bookingId);
+            return await _context.VideoRooms
+
+                .Include(x => x.Booking)
+
+                .FirstOrDefaultAsync(
+                    x => x.BookingId == bookingId);
         }
 
         /* 
@@ -50,7 +61,6 @@ namespace Backend.Repository.impl
          */
         public async Task Update(VideoRoom room)
         {
-            _context.VideoRooms.Update(room);
             await Task.CompletedTask;
         }
 

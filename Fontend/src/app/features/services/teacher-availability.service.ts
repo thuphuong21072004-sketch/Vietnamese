@@ -25,7 +25,7 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * student sees all available schedules
+   * student xem lịch trống
    */
   getAvailableSchedules(date?: string): Observable<any[]> {
     let params = new HttpParams();
@@ -34,34 +34,45 @@ export class TeacherAvailabilityService {
       params = params.set('date', date);
     }
 
-    return this.http.get<any[]>(`${this.apiUrl}/available`, {
+    return this.http.get<any[]>(`${this.apiUrl}/available`, { params });
+  }
+
+  /*
+   * teacher xem lịch của mình
+   */
+  getMySchedules(status?: number, date?: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (status !== undefined && status !== null) {
+      params = params.set('status', status.toString());
+    }
+
+    if (date) {
+      params = params.set('date', date);
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/me`, {
+      ...this.getOptions(),
       params,
     });
   }
 
   /*
-   * teacher sees own schedules
-   */
-  getMySchedules(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/me`, this.getOptions());
-  }
-
-  /*
-   * view schedule detail
+   * chi tiết lịch
    */
   getDetail(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   /*
-   * teacher creates schedule
+   * tạo lịch
    */
   create(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/create`, data, this.getOptions());
   }
 
   /*
-   * teacher updates schedule
+   * cập nhật lịch
    */
   update(id: number, data: any): Observable<any> {
     return this.http.put(
@@ -72,18 +83,19 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * teacher deletes schedule
+   * xoá lịch
    */
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/delete/${id}`, this.getOptions());
   }
 
   /*
-   * helper get teacher avatar
+   * avatar teacher
    */
   getTeacherAvatar(item: any): string {
     const avatar =
-      item?.teacherProfile?.avatarUrl || item?.teacherProfile?.user?.avatarUrl;
+      item?.instructorProfile?.avatarUrl ||
+      item?.instructorProfile?.user?.avatarUrl;
 
     if (!avatar) {
       return '';
@@ -97,37 +109,37 @@ export class TeacherAvailabilityService {
   }
 
   /*
-   * helper get teacher name
+   * tên teacher
    */
   getTeacherName(item: any): string {
-    return item?.teacherProfile?.user?.name || 'Teacher';
+    return item?.instructor?.name || 'Teacher';
   }
 
   /*
-   * helper specialty
+   * chuyên môn
    */
   getSpecialty(item: any): string {
-    return item?.teacherProfile?.specialty || '';
+    return item?.instructorProfile?.specialty || '';
   }
 
   /*
-   * helper price
+   * giá dạy
    */
   getPricePerHour(item: any): number {
-    return item?.teacherProfile?.pricePerHour || 0;
+    return item?.instructorProfile?.pricePerHour || 0;
   }
 
   /*
-   * helper rating
+   * rating
    */
   getRating(item: any): number {
-    return item?.teacherProfile?.ratingAverage || 0;
+    return item?.instructorProfile?.ratingAverage || 0;
   }
 
   /*
-   * helper reviews
+   * số review
    */
   getTotalReviews(item: any): number {
-    return item?.teacherProfile?.totalReviews || 0;
+    return item?.instructorProfile?.totalReviews || 0;
   }
 }

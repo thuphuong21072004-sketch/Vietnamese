@@ -3,42 +3,80 @@
     <div class="page-header">
 
         <h1>
-
             Teaching Bookings
-
         </h1>
 
         <p>
-
-            Manage your teaching schedules
-
+            Manage your classes and students
         </p>
 
     </div>
 
-    <div class="filter-bar">
-        <span class="filter-label">Filter:</span>
-        <div class="filter-buttons">
-            <button
-                *ngFor="let option of filterOptions"
-                type="button"
-                (click)="setFilter(option.key)"
-                [class.active]="selectedFilter === option.key"
-            >
-                {{ option.label }}
-            </button>
+    <!-- filters -->
+    <div class="filters">
+
+        <div class="filter-item">
+
+            <label>
+                Date
+            </label>
+
+            <input type="date" [(ngModel)]="selectedDate" (change)="loadBookings()">
+
         </div>
+
+        <div class="filter-item">
+
+            <label>
+                Status
+            </label>
+
+            <select [(ngModel)]="selectedStatus" (change)="loadBookings()">
+
+                <option value="">
+                    All
+                </option>
+
+                <option value="0">
+                    Pending Payment
+                </option>
+
+                <option value="1">
+                    Confirmed
+                </option>
+
+                <option value="2">
+                    In Progress
+                </option>
+
+                <option value="3">
+                    Completed
+                </option>
+
+                <option value="4">
+                    Cancelled
+                </option>
+
+                <option value="5">
+                    Refunded
+                </option>
+
+            </select>
+
+        </div>
+
     </div>
 
+    <!-- loading -->
     <div *ngIf="loading" class="loading">
 
         Loading bookings...
 
     </div>
 
+    <!-- empty -->
     <div *ngIf="
-            !loading
-            &&
+            !loading &&
             filteredBookings.length === 0
         " class="empty-state">
 
@@ -46,12 +84,14 @@
 
     </div>
 
+    <!-- cards -->
     <div class="booking-grid">
 
         <div *ngFor="
                 let item of filteredBookings
             " class="booking-card">
 
+            <!-- student -->
             <div class="teacher-top">
 
                 <img *ngIf="
@@ -99,14 +139,13 @@
 
             </div>
 
+            <!-- body -->
             <div class="booking-body">
 
                 <div class="info-row">
 
                     <span>
-
                         Date
-
                     </span>
 
                     <strong>
@@ -123,9 +162,7 @@
                 <div class="info-row">
 
                     <span>
-
                         Time
-
                     </span>
 
                     <strong>
@@ -146,10 +183,51 @@
 
                 </div>
 
+                <div class="info-row">
+
+                    <span>
+                        Duration
+                    </span>
+
+                    <strong>
+
+                        {{
+                        getDurationHours(
+                        item
+                        )
+                        }}
+
+                        hours
+
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Revenue
+                    </span>
+
+                    <strong class="price">
+
+                        $
+                        {{
+                        getBookingAmount(
+                        item
+                        )
+                        }}
+
+                    </strong>
+
+                </div>
+
             </div>
 
+            <!-- actions -->
             <div class="booking-actions">
 
+                <!-- detail -->
                 <button class="detail-btn" (click)="
                         openDetail(
                             item.bookingId
@@ -160,8 +238,12 @@
 
                 </button>
 
-
-                <button *ngIf="canJoinRoom(item)" class="room-btn" (click)="
+                <!-- join room -->
+                <button *ngIf="
+                        canJoinRoom(
+                            item
+                        )
+                    " class="room-btn" (click)="
                         joinRoom(
                             item.bookingId
                         )
@@ -171,19 +253,37 @@
 
                 </button>
 
-                <ng-container *ngIf="item.status === 1 && !canJoinRoom(item)">
-                    <button *ngIf="canComplete(item) && isAdmin" class="info-btn" (click)="openDetail(item.bookingId)">
-                        Xem đánh giá
-                    </button>
-                    <button *ngIf="!canComplete(item) || !isAdmin" class="info-btn" disabled>
-                        Room not open yet or access expired
-                    </button>
-                </ng-container>
-                
+                <!-- waiting -->
                 <button *ngIf="
-                        item.status !== 2
-                        &&
-                        item.status !== 3
+                        isWaitingRoom(
+                            item
+                        )
+                    " class="info-btn" disabled>
+
+                    Waiting for class time
+
+                </button>
+
+                <!-- completed -->
+                <button *ngIf="
+                        canViewReview(
+                            item
+                        )
+                    " class="review-btn" (click)="
+                        openDetail(
+                            item.bookingId
+                        )
+                    ">
+
+                    View Review
+
+                </button>
+
+                <!-- cancel -->
+                <button *ngIf="
+                        canCancel(
+                            item
+                        )
                     " class="cancel-btn" (click)="
                         cancelBooking(
                             item.bookingId

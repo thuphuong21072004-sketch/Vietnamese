@@ -14,13 +14,20 @@
 
         public decimal PricePerHour { get; set; }
 
-        public decimal RatingAverage { get; set; }
+        public decimal RatingAverage { get; set; } = 0;
 
-        public int TotalReviews { get; set; }
+        public int TotalReviews { get; set; } = 0;
 
         public string? Description { get; set; }
-        public byte Status { get; set; }
+
+        public byte Status { get; set; } = 0;
+
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+
 
         public User? User { get; set; }
+
     }
 }

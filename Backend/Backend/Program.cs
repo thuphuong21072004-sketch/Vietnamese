@@ -140,7 +140,15 @@ builder.Services.AddScoped<
     RoleRepositoryImpl
 >();
 
+builder.Services.AddScoped<TextToSpeechService, GttsTextToSpeechService>();
+
+builder.Services.Configure<VNPayConfig>(
+    builder.Configuration.GetSection("VNPay"));
+
+builder.Services.AddScoped<VNPayService>();
 var app = builder.Build();
+builder.Services
+    .AddHttpContextAccessor();
 
 app.UseMiddleware<ExceptionMiddleware>();
 

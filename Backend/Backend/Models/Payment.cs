@@ -8,13 +8,17 @@
 
         public decimal Amount { get; set; }
 
-        public string? PaymentMethod { get; set; }
+        public byte PaymentMethod { get; set; }
 
         public string? TransactionCode { get; set; }
 
-        public byte Status { get; set; }
+        public byte Status { get; set; } = 0;
 
         public DateTime? PaidAt { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+
 
         public Booking? Booking { get; set; }
     }

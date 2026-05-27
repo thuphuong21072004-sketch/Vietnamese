@@ -133,22 +133,42 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
         console.log('Quiz loaded for user view', this.quiz);
         if (this.quiz?.questions) {
           this.quiz.questions.forEach((q) => {
-            console.log('question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+            console.log(
+              'question audio',
+              q.questionId,
+              q.audioUrl,
+              this.getAudioUrl(q.audioUrl),
+            );
           });
         }
         if (this.quiz?.parts) {
           this.quiz.parts.forEach((part) => {
             if (part.questions) {
               part.questions.forEach((q) => {
-                console.log('part question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+                console.log(
+                  'part question audio',
+                  q.questionId,
+                  q.audioUrl,
+                  this.getAudioUrl(q.audioUrl),
+                );
               });
             }
             if (part.passages) {
               part.passages.forEach((psg) => {
-                console.log('passage audio', psg.passageId, psg.audioUrl, this.getAudioUrl(psg.audioUrl));
+                console.log(
+                  'passage audio',
+                  psg.passageId,
+                  psg.audioUrl,
+                  this.getAudioUrl(psg.audioUrl),
+                );
                 if (psg.questions) {
                   psg.questions.forEach((q) => {
-                    console.log('passage question audio', q.questionId, q.audioUrl, this.getAudioUrl(q.audioUrl));
+                    console.log(
+                      'passage question audio',
+                      q.questionId,
+                      q.audioUrl,
+                      this.getAudioUrl(q.audioUrl),
+                    );
                   });
                 }
               });
@@ -413,7 +433,10 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
   }
 
-  getMediaUrl(fileName: string | undefined | null, folder: 'audios' | 'images'): string | null {
+  getMediaUrl(
+    fileName: string | undefined | null,
+    folder: 'audios' | 'images',
+  ): string | null {
     if (!fileName) {
       return null;
     }
@@ -425,7 +448,10 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       return normalized;
     }
 
-    if (normalized.startsWith(`${folder}/`) || normalized.startsWith(`/${folder}/`)) {
+    if (
+      normalized.startsWith(`${folder}/`) ||
+      normalized.startsWith(`/${folder}/`)
+    ) {
       return `${baseUrl}/${normalized.replace(/^\/*/, '')}`;
     }
 
@@ -506,12 +532,6 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
   }
 
   goBackCourse() {
-    if (this.refType === 'PLACEMENT') {
-      this.router.navigate(['/user/tests']);
-
-      return;
-    }
-
     this.router.navigate(['/user/units']);
   }
   ngOnDestroy(): void {

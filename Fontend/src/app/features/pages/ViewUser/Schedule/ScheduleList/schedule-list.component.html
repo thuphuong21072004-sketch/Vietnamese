@@ -1,87 +1,213 @@
 <div class="student-schedule-page">
   <div class="top-bar">
     <div class="page-intro">
-      <p class="eyebrow">Your personal schedule</p>
-      <h1>Find your next class</h1>
-      <p>Explore available teacher schedules, then book and secure your preferred time slot.</p>
+      <p class="eyebrow">
+        Your personal schedule
+      </p>
+
+      <h1>
+        Find your next class
+      </h1>
+
+      <p>
+        Explore available teacher
+        schedules, then book and
+        secure your preferred time
+        slot.
+      </p>
     </div>
 
     <div class="filter-row">
       <div class="filter-item">
-        <label>Search</label>
-        <input
-          type="text"
-          placeholder="Teacher, specialty or date"
-          [(ngModel)]="keyword"
-          (input)="searchSchedules()"
-        />
+        <label>
+          Search
+        </label>
+
+        <input type="text" placeholder="Teacher, specialty or date" [(ngModel)]="keyword" (input)="searchSchedules()" />
       </div>
 
       <div class="filter-item">
-        <label>Date</label>
+        <label>
+          Date
+        </label>
+
         <input type="date" [(ngModel)]="selectedDate" (change)="loadSchedules()" />
       </div>
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading">Loading schedules...</div>
-
-  <div *ngIf="!loading && schedules.length === 0" class="empty-state">
-    No schedules available right now. Please check again later.
+  <!-- loading -->
+  <div *ngIf="loading" class="loading">
+    Loading schedules...
   </div>
 
-  <div *ngIf="!loading && schedules.length > 0 && visibleSchedules.length === 0" class="empty-state">
-    No schedules match your filter. Try a different keyword or date.
+  <!-- empty -->
+  <div *ngIf="
+      !loading &&
+      schedules.length === 0
+    " class="empty-state">
+    No schedules available right
+    now. Please check again later.
   </div>
 
-  <div *ngIf="!loading && visibleSchedules.length > 0" class="summary-row">
-    <div>{{ visibleSchedules.length }} schedule{{ visibleSchedules.length === 1 ? '' : 's' }} found</div>
-    <div>{{ schedules.length }} total available</div>
+  <!-- search empty -->
+  <div *ngIf="
+      !loading &&
+      schedules.length > 0 &&
+      visibleSchedules.length === 0
+    " class="empty-state">
+    No schedules match your
+    filter. Try a different
+    keyword or date.
   </div>
 
-  <div *ngIf="!loading && visibleSchedules.length > 0" class="schedule-grid">
-    <div *ngFor="let item of visibleSchedules" class="schedule-card">
+  <!-- summary -->
+  <div *ngIf="
+      !loading &&
+      visibleSchedules.length > 0
+    " class="summary-row">
+    <div>
+      {{ visibleSchedules.length }}
+      schedule{{
+      visibleSchedules.length ===
+      1
+      ? ''
+      : 's'
+      }}
+      found
+    </div>
+
+    <div>
+      {{ schedules.length }}
+      total available
+    </div>
+  </div>
+
+  <!-- schedules -->
+  <div *ngIf="
+      !loading &&
+      visibleSchedules.length > 0
+    " class="schedule-grid">
+    <div *ngFor="
+        let item of visibleSchedules
+      " class="schedule-card">
+      <!-- teacher -->
       <div class="teacher-top">
         <div class="teacher-avatar-wrap">
-          <img *ngIf="getTeacherAvatar(item)" [src]="getTeacherAvatar(item)" class="teacher-avatar" />
-          <div *ngIf="!getTeacherAvatar(item)" class="teacher-avatar placeholder">
-            {{ getTeacherName(item).charAt(0) }}
+          <img *ngIf="
+              getTeacherAvatar(item)
+            " [src]="
+              getTeacherAvatar(item)
+            " class="teacher-avatar" />
+
+          <div *ngIf="
+              !getTeacherAvatar(item)
+            " class="teacher-avatar placeholder">
+            {{
+            getTeacherName(item)
+            .charAt(0)
+            }}
           </div>
         </div>
 
         <div class="teacher-info">
           <div class="teacher-title">
-            <h2>{{ getTeacherName(item) }}</h2>
-            <span class="status-pill available">Available</span>
+            <h2>
+              {{
+              getTeacherName(item)
+              }}
+            </h2>
+
+            <span class="status-pill available">
+              Available
+            </span>
           </div>
-          <p>{{ getSpecialty(item) }}</p>
+
+          <p>
+            {{
+            getSpecialty(item)
+            }}
+          </p>
+
           <div class="teacher-rating">
-            <span>⭐ {{ getRating(item) }}</span>
+            <span>
+              ⭐
+              {{
+              getRating(item)
+              }}
+            </span>
+
             <span>·</span>
-            <span>{{ getTotalReviews(item) }} reviews</span>
+
+            <span>
+              {{
+              getTotalReviews(item)
+              }}
+              reviews
+            </span>
           </div>
         </div>
       </div>
 
+      <!-- body -->
       <div class="schedule-body">
         <div class="info-block">
           <span>Date</span>
-          <strong>{{ item.startTime | date:'dd/MM/yyyy' }}</strong>
+
+          <strong>
+            {{
+            item.startTime
+            | date:
+            'dd/MM/yyyy'
+            }}
+          </strong>
         </div>
+
         <div class="info-block">
           <span>Time</span>
-          <strong>{{ item.startTime | date:'HH:mm' }} - {{ item.endTime | date:'HH:mm' }}</strong>
+
+          <strong>
+            {{
+            item.startTime
+            | date:'HH:mm'
+            }}
+            -
+            {{
+            item.endTime
+            | date:'HH:mm'
+            }}
+          </strong>
         </div>
+
         <div class="info-block">
           <span>Rate</span>
-          <strong>${{ getPricePerHour(item) }}/hour</strong>
+
+          <strong>
+            ${{
+            getPricePerHour(item)
+            }}/hour
+          </strong>
         </div>
       </div>
 
+      <!-- actions -->
       <div class="card-actions">
-        <button class="view-btn" (click)="openDetail(item.availabilityId)">View detail</button>
-        <button class="book-btn" [disabled]="item.isBooked" (click)="bookSchedule(item)">
-          {{ item.isBooked ? 'Unavailable' : 'Book now' }}
+        <button class="view-btn" (click)="
+            openDetail(
+              item.availabilityId
+            )
+          ">
+          View detail
+        </button>
+
+        <button class="book-btn" [disabled]="item.isBooked" (click)="
+            bookSchedule(item)
+          ">
+          {{
+          item.isBooked
+          ? 'Unavailable'
+          : 'Book now'
+          }}
         </button>
       </div>
     </div>

@@ -10,5 +10,7 @@ namespace Backend.Services
         Task UpdateStatus(int id, int status);
         Task<List<TeacherProfileDTO>> GetAllTeachers(int? status);
         Task<TeacherProfileDTO?>GetDetail(int id);
+        Task SubmitProfile();
+        Task BanTeacher(int id);
     }
 }

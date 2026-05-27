@@ -15,7 +15,11 @@ namespace Backend.Repository
         Task Delete(TeacherAvailability availability);
 
         Task<List<TeacherAvailability>> GetAvailableSchedules( DateOnly? date);
-        Task<List<TeacherAvailability>> GetTeacherSchedules(int teacherId);
+        Task<List<TeacherAvailability>>
+GetTeacherSchedules(
+    int instructorId,
+    byte? status,
+    DateOnly? date);
 
         Task<bool> Exists(int id);
         Task Save();

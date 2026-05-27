@@ -8,12 +8,15 @@
 
         public decimal Amount { get; set; }
 
-        public string? PaymentMethod { get; set; }
+        public int PaymentMethod { get; set; }
 
         public string? TransactionCode { get; set; }
 
+        
         public int Status { get; set; }
 
         public DateTime? PaidAt { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

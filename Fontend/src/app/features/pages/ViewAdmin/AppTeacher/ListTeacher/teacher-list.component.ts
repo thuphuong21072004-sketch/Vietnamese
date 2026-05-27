@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
+
 import { jwtDecode } from 'jwt-decode';
+
 import { environment } from '../../../../../../environments/environment';
 
 @Component({
@@ -31,24 +33,35 @@ export class AdminTeacherListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // guard: only Admin can access this page
     const token = localStorage.getItem('token');
+
     let role = null;
+
     if (token) {
       try {
         const payload: any = jwtDecode(token as string);
-        role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+        role =
+          payload.role ||
+          payload[
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+          ];
+
         const raw = role ? role.toString().trim().toLowerCase() : '';
+
         if (raw !== 'admin' && raw !== '2') {
           this.router.navigate(['/admin/dashboard']);
+
           return;
         }
       } catch {
         this.router.navigate(['/admin/dashboard']);
+
         return;
       }
     } else {
       this.router.navigate(['/home']);
+
       return;
     }
 
@@ -101,6 +114,33 @@ export class AdminTeacherListComponent implements OnInit {
     this.router.navigate(['/admin/teachers', teacherProfileId]);
   }
 
+  /*
+   * khóa giáo viên
+   */
+  banTeacher(id: number) {
+    const confirmBan = confirm(
+      'Bạn có chắc muốn khóa vĩnh viễn giáo viên này?',
+    );
+
+    if (!confirmBan) {
+      return;
+    }
+
+    this.teacherService.banTeacher(id).subscribe({
+      next: () => {
+        alert('Khóa giáo viên thành công');
+
+        this.loadTeachers();
+      },
+
+      error: (err) => {
+        console.log(err);
+
+        alert('Có lỗi xảy ra');
+      },
+    });
+  }
+
   getStatusText(status: number): string {
     switch (status) {
       case 1:
@@ -111,6 +151,9 @@ export class AdminTeacherListComponent implements OnInit {
 
       case 3:
         return 'Rejected';
+
+      case 4:
+        return 'Banned';
 
       default:
         return 'Unknown';
@@ -128,10 +171,14 @@ export class AdminTeacherListComponent implements OnInit {
       case 3:
         return 'rejected';
 
+      case 4:
+        return 'banned';
+
       default:
         return '';
     }
   }
+
   getImageUrl(url: string): string {
     if (!url) {
       return '';

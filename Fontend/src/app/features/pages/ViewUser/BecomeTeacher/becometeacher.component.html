@@ -26,10 +26,6 @@
 
     </div>
 
-    <div *ngIf="isPrivilegedTeacherUser && !hasProfile" class="info-box">
-        Admin and Moderator teacher profiles are approved automatically upon creation.
-    </div>
-
     <!-- status -->
 
     <div *ngIf="hasProfile" class="status-alert">
@@ -42,18 +38,9 @@
 
     </div>
 
-    <!-- rejected -->
-
-    <div *ngIf="profile.status === 3" class="reject-box">
-
-        Your profile was rejected.
-        Please update your information and submit again.
-
-    </div>
-
     <!-- pending -->
 
-    <div *ngIf="profile.status === 1" class="pending-box">
+    <div *ngIf="profile.status === 0" class="pending-box">
 
         Your profile is waiting for admin review.
 
@@ -61,9 +48,18 @@
 
     <!-- approved -->
 
-    <div *ngIf="profile.status === 2" class="approved-box">
+    <div *ngIf="profile.status === 1" class="approved-box">
 
         Your profile has been approved.
+
+    </div>
+
+    <!-- rejected -->
+
+    <div *ngIf="profile.status === 2" class="reject-box">
+
+        Your profile was rejected.
+        Please update your information and wait for review again.
 
     </div>
 
@@ -223,13 +219,11 @@
         <!-- buttons -->
 
         <div class="button-group">
-
-            <!-- save -->
-
-            <button class="save-btn" *ngIf="
-                    profile.status !== 2
-                " [disabled]="loading" (click)="saveProfile()">
-
+        
+            <!-- create/update -->
+        
+            <button class="save-btn" *ngIf="profile.status !== 1" [disabled]="loading" (click)="saveProfile()">
+        
                 {{
                 loading
                 ? 'Saving...'
@@ -237,17 +231,18 @@
                 ? 'Update Profile'
                 : 'Create Profile'
                 }}
-
+        
             </button>
-
-            <!-- submit -->
-
-            <button class="submit-btn" *ngIf="canSubmit()" [disabled]="loading" (click)="submitProfile()">
-
-                Submit For Review
-
+        
+            <!-- submit for review -->
+        
+            <button class="submit-btn" *ngIf="hasProfile && profile.status !== 1" [disabled]="loading"
+                (click)="submitForReview()">
+        
+                Submit CV For Review
+        
             </button>
-
+        
         </div>
 
     </div>

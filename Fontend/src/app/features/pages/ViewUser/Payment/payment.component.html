@@ -1,114 +1,239 @@
 <div class="payment-page">
-  <button class="back-btn" (click)="back()">← Back</button>
+  <button class="back-btn" (click)="back()">
+    ← Back
+  </button>
 
   <div class="payment-grid">
+    <!-- LEFT -->
     <section class="panel summary-panel">
       <div class="panel-card header-card">
         <div class="header-top">
           <div>
-            <p class="eyebrow">Payment</p>
-            <h1>Payment details</h1>
+            <p class="eyebrow">
+              Payment
+            </p>
+
+            <h1>
+              Payment details
+            </h1>
           </div>
-          <span class="status-chip" [ngClass]="payment ? getStatusClass(payment.status) : 'pending'">
-            {{ payment ? getStatusText(payment.status) : 'Unpaid' }}
+
+          <span class="status-chip" [ngClass]="
+              payment
+                ? getStatusClass(
+                    payment.status
+                  )
+                : 'pending'
+            ">
+            {{
+            payment
+            ? getStatusText(
+            payment.status
+            )
+            : 'Unpaid'
+            }}
           </span>
         </div>
+
         <p class="panel-copy">
-          Scan QR or choose VNPAY for quick payment. After transferring, click confirm to complete the booking.
+          Complete your payment
+          securely to access the
+          online classroom.
         </p>
       </div>
 
+      <!-- booking -->
       <div class="panel-card detail-card" *ngIf="booking">
-        <h2>Booking information</h2>
+        <h2>
+          Booking information
+        </h2>
+
         <div class="summary-grid">
           <div class="summary-item">
-            <span>Booking ID</span>
-            <strong>#{{ bookingId }}</strong>
+            <span>
+              Booking ID
+            </span>
+
+            <strong>
+              #{{ bookingId }}
+            </strong>
           </div>
+
           <div class="summary-item">
-            <span>Teacher</span>
-            <strong>{{ booking.teacherName }}</strong>
+            <span>
+              Teacher
+            </span>
+
+            <strong>
+              {{
+              booking
+              .instructor
+              ?.name ||
+              'Teacher'
+              }}
+            </strong>
           </div>
+
           <div class="summary-item">
-            <span>Schedule</span>
-            <strong>{{ booking.startTime | date:'dd/MM/yyyy HH:mm' }} — {{ booking.endTime | date:'HH:mm' }}</strong>
+            <span>
+              Schedule
+            </span>
+
+            <strong>
+              {{
+              booking.startTime
+              | date:
+              'dd/MM/yyyy HH:mm'
+              }}
+
+              -
+
+              {{
+              booking.endTime
+              | date:
+              'HH:mm'
+              }}
+            </strong>
           </div>
+
           <div class="summary-item">
-            <span>Price per hour</span>
-            <strong>{{ formatCurrency(booking.teacherProfile?.pricePerHour || 0) }}/hour</strong>
+            <span>
+              Price per hour
+            </span>
+
+            <strong>
+              {{
+              formatCurrency(
+              booking
+              .instructor
+              ?.teacherProfile
+              ?.pricePerHour ||
+              0
+              )
+              }}/hour
+            </strong>
           </div>
+
           <div class="summary-item full-width">
-            <span>Total amount</span>
-            <strong class="total-value">{{ formatCurrency(getAmount()) }}</strong>
+            <span>
+              Duration
+            </span>
+
+            <strong>
+              {{
+              getDuration()
+              }}
+            </strong>
           </div>
+
           <div class="summary-item full-width">
-            <span>Duration</span>
-            <strong>{{ getDuration() }}</strong>
+            <span>
+              Total amount
+            </span>
+
+            <strong class="total-value">
+              {{
+              formatCurrency(
+              getAmount()
+              )
+              }}
+            </strong>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- RIGHT -->
     <section class="panel action-panel">
       <div class="panel-card payment-card">
-        <h2>Choose payment method</h2>
-        <div class="payment-methods">
-          <label class="method-card" [class.active]="selectedMethod === 'QR'">
-            <input type="radio" name="paymentMethod" value="QR" [(ngModel)]="selectedMethod" (ngModelChange)="onMethodChanged()" />
-            <div>
-              <strong>QR Scan</strong>
-              <p>Scan this code with your bank app or VNPAY.</p>
-            </div>
-          </label>
+        <h2>
+          VNPay Payment
+        </h2>
 
-          <label class="method-card" [class.active]="selectedMethod === 'VNPAY'">
-            <input type="radio" name="paymentMethod" value="VNPAY" [(ngModel)]="selectedMethod" (ngModelChange)="onMethodChanged()" />
-            <div>
-              <strong>VNPAY</strong>
-              <p>Open VNPAY and fill payment details automatically.</p>
-            </div>
-          </label>
-        </div>
-
+        <!-- amount -->
         <div class="amount-panel">
-          <span>Amount to pay</span>
-          <strong>{{ formatCurrency(getAmount()) }}</strong>
+          <span>
+            Amount to pay
+          </span>
+
+          <strong>
+            {{
+            formatCurrency(
+            getAmount()
+            )
+            }}
+          </strong>
         </div>
 
-        <div class="payment-steps" *ngIf="selectedMethod === 'QR'">
-          <div class="qr-panel">
-            <p class="qr-title">Payment QR code</p>
-            <div class="qr-image" *ngIf="qrUrl; else emptyQr">
-              <img [src]="qrUrl" alt="QR code" />
-            </div>
-            <ng-template #emptyQr>
-              <div class="qr-placeholder">QR</div>
-            </ng-template>
-            <p class="qr-note">Open your bank or VNPAY app and scan this code to transfer the amount.</p>
+        <!-- unpaid -->
+        <div class="payment-info" *ngIf="!payment">
+          <div class="gateway-box">
+            <h3>
+              Ready for payment
+            </h3>
+
+            <p>
+              Click the button
+              below to continue
+              to VNPay secure
+              payment gateway.
+            </p>
           </div>
 
-          <div class="qr-details">
-            <span>QR content</span>
-            <textarea readonly [value]="qrData"></textarea>
+          <div class="action-group">
+            <button class="btn btn-primary" [disabled]="loading" (click)="pay()">
+              {{
+              loading
+              ? 'Processing...'
+              : 'Pay now'
+              }}
+            </button>
           </div>
         </div>
 
-        <div class="payment-steps" *ngIf="selectedMethod === 'VNPAY'">
-          <p class="vn-note">Click Pay to create a VNPAY transaction. If the app does not open automatically, use the details below to pay manually.</p>
-          <div class="vn-data">
-            <div><span>Payment link</span><strong>{{ paymentLink }}</strong></div>
+        <!-- success -->
+        <div class="success-box" *ngIf="
+            payment &&
+            payment.status === 1
+          ">
+          <div class="success-icon">
+            ✓
           </div>
-        </div>
 
-        <div class="action-group">
-          <button class="btn btn-primary" *ngIf="!payment" [disabled]="loading" (click)="pay()">
-            {{ loading ? 'Creating...' : 'Create payment' }}
+          <h3>
+            Payment successful
+          </h3>
+
+          <p>
+            Redirecting to
+            classroom...
+          </p>
+
+          <button class="btn btn-success" (click)="goClassroom()">
+            Join classroom
           </button>
-          <button class="btn btn-secondary" *ngIf="payment && payment.status === 0" [disabled]="loading" (click)="confirmPayment()">
-            {{ loading ? 'Confirming...' : 'Confirm payment' }}
-          </button>
-          <button class="btn btn-ghost" *ngIf="payment && payment.status === 1" (click)="goBooking()">
-            Back to Booking
+        </div>
+
+        <!-- failed -->
+        <div class="failed-box" *ngIf="
+            payment &&
+            payment.status === 2
+          ">
+          <div class="failed-icon">
+            ✕
+          </div>
+
+          <h3>
+            Payment failed
+          </h3>
+
+          <p>
+            Your payment was not
+            completed.
+          </p>
+
+          <button class="btn btn-danger" (click)="pay()">
+            Try again
           </button>
         </div>
       </div>

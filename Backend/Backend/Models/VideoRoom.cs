@@ -12,9 +12,17 @@ namespace Backend.Models
         public string RoomCode { get; set; }
             = string.Empty;
 
-        public string? Token { get; set; }
+        public string? HostToken { get; set; }
+
+        public string? StudentToken { get; set; }
+
+        public string? StartUrl { get; set; }
 
         public DateTime ExpiredAt { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+
 
         public Booking? Booking { get; set; }
     }

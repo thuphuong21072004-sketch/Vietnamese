@@ -20,7 +20,16 @@ namespace Backend.Repository.impl
          */
         public async Task<Review?> GetById(int id)
         {
-            return await _context.Reviews.FirstOrDefaultAsync(x => x.ReviewId == id);
+            return await _context.Reviews
+
+                .Include(x => x.Student)
+
+                .Include(x => x.Instructor)
+
+                .Include(x => x.Booking)
+
+                .FirstOrDefaultAsync(
+                    x => x.ReviewId == id);
         }
 
         /* 
@@ -28,9 +37,19 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<Review?> GetByBookingId(int bookingId)
+        public async Task<Review?> GetByBookingId(
+     int bookingId)
         {
-            return await _context.Reviews.Include(x => x.Student).Include(x => x.Teacher).FirstOrDefaultAsync(x => x.BookingId == bookingId);
+            return await _context.Reviews
+
+                .Include(x => x.Student)
+
+                .Include(x => x.Instructor)
+
+                .Include(x => x.Booking)
+
+                .FirstOrDefaultAsync(
+                    x => x.BookingId == bookingId);
         }
 
         /* 
@@ -38,11 +57,26 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<Review>> GetByTeacherId(int teacherId)
+        public async Task<List<Review>>
+GetByTeacherId(int instructorId)
         {
-            return await _context.Reviews.Include(x => x.Student).Include(x => x.Teacher).Where(x => x.TeacherId == teacherId).OrderByDescending(x => x.CreatedDate).ToListAsync();
-        }
+            return await _context.Reviews
 
+                .Include(x => x.Student)
+
+                .Include(x => x.Instructor)
+
+                .Include(x => x.Booking)
+
+                .Where(x =>
+                    x.InstructorId ==
+                    instructorId)
+
+                .OrderByDescending(
+                    x => x.CreatedDate)
+
+                .ToListAsync();
+        }
         /* 
          * tạo mới đánh giá
          * O(1)

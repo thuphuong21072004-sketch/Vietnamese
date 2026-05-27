@@ -1,135 +1,223 @@
-<div class="schedule-page">
+<div class="teacher-schedule-page">
+    <!-- header -->
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">
+                Teacher dashboard
+            </p>
 
-    <div class="schedule-card">
+            <h1>
+                Manage Your Schedule
+            </h1>
 
-        <h2>
-
-            Teacher Schedule
-
-        </h2>
-
-        <div class="form-grid">
-
-            <div>
-
-                <label>
-
-                    Start Time
-
-                </label>
-
-                <input type="datetime-local" [(ngModel)]="form.startTime">
-
-            </div>
-
-            <div>
-
-                <label>
-
-                    End Time
-
-                </label>
-
-                <input type="datetime-local" [(ngModel)]="form.endTime">
-
-            </div>
-
+            <p class="sub-text">
+                Create, edit and organize
+                your teaching availability.
+            </p>
         </div>
-
-        <div class="actions">
-
-            <button (click)="saveSchedule()">
-
-                {{
-                editingId
-                ? 'Update'
-                : 'Create'
-                }}
-
-            </button>
-
-            <button *ngIf="editingId" class="cancel-btn" (click)="resetForm()">
-
-                Cancel
-
-            </button>
-
-        </div>
-
     </div>
 
-    <div class="schedule-list">
+    <!-- form -->
+    <div class="schedule-form-card">
+        <div class="card-header">
+            <h2>
+                {{
+                editingId
+                ? 'Update Schedule'
+                : 'Create New Schedule'
+                }}
+            </h2>
+        </div>
 
+        <div class="form-grid">
+            <div class="form-item">
+                <label>
+                    Start Time
+                </label>
+
+                <input type="datetime-local" [(ngModel)]="form.startTime" />
+            </div>
+
+            <div class="form-item">
+                <label>
+                    End Time
+                </label>
+
+                <input type="datetime-local" [(ngModel)]="form.endTime" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="primary-btn" (click)="saveSchedule()">
+                {{
+                editingId
+                ? 'Update Schedule'
+                : 'Create Schedule'
+                }}
+            </button>
+
+            <button *ngIf="editingId" class="secondary-btn" (click)="resetForm()">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- filters -->
+    <div class="filter-card">
+        <div class="filter-item">
+            <label>
+                Filter by Date
+            </label>
+
+            <input type="date" [(ngModel)]="selectedDate" (change)="loadSchedules()" />
+        </div>
+
+        <div class="filter-item">
+            <label>
+                Status
+            </label>
+
+            <select [(ngModel)]="selectedStatus" (change)="loadSchedules()">
+                <option value="">
+                    All
+                </option>
+
+                <option value="0">
+                    Available
+                </option>
+
+                <option value="1">
+                    Booked
+                </option>
+
+                <option value="2">
+                    Expired
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <!-- loading -->
+    <div *ngIf="loading" class="loading-state">
+        Loading schedules...
+    </div>
+
+    <!-- empty -->
+    <div *ngIf="
+      !loading &&
+      schedules.length === 0
+    " class="empty-state">
+        No schedules found.
+    </div>
+
+    <!-- summary -->
+    <div *ngIf="
+      !loading &&
+      schedules.length > 0
+    " class="summary-row">
+        <div>
+            Total schedules:
+            <strong>
+                {{ schedules.length }}
+            </strong>
+        </div>
+    </div>
+
+    <!-- list -->
+    <div *ngIf="
+      !loading &&
+      schedules.length > 0
+    " class="schedule-grid">
         <div *ngFor="
-                let item of schedules
-            " class="schedule-item">
+        let item of schedules
+      " class="schedule-card">
+            <div class="schedule-top">
+                <div>
+                    <div class="schedule-date">
+                        {{
+                        item.startTime
+                        | date:
+                        'dd/MM/yyyy'
+                        }}
+                    </div>
 
-            <div>
-
-                <div class="time">
-
-                    {{
-                    item.startTime
-                    | date:'HH:mm dd/MM/yyyy'
-                    }}
-
+                    <div class="schedule-time">
+                        {{
+                        item.startTime
+                        | date:'HH:mm'
+                        }}
+                        -
+                        {{
+                        item.endTime
+                        | date:'HH:mm'
+                        }}
+                    </div>
                 </div>
 
-                <div class="time">
-
+                <div class="status-badge" [class.booked]="
+            item.status === 1
+          " [class.expired]="
+            item.status === 2
+          ">
                     {{
-                    item.endTime
-                    | date:'HH:mm dd/MM/yyyy'
-                    }}
-
-                </div>
-
-            </div>
-
-            <div class="status">
-
-                <span [class.booked]="
-                        item.isBooked
-                    ">
-
-                    {{
-                    item.isBooked
+                    item.status === 0
+                    ? 'Available'
+                    : item.status === 1
                     ? 'Booked'
-                    : 'Available'
+                    : 'Expired'
                     }}
-
-                </span>
-
+                </div>
             </div>
 
-            <div class="item-actions">
+            <div class="schedule-body">
+                <div class="info-row">
+                    <span>
+                        Start
+                    </span>
 
-                <button [disabled]="
-                        item.isBooked
-                    " (click)="
-                        editSchedule(item)
-                    ">
+                    <strong>
+                        {{
+                        item.startTime
+                        | date:
+                        'HH:mm dd/MM/yyyy'
+                        }}
+                    </strong>
+                </div>
 
+                <div class="info-row">
+                    <span>
+                        End
+                    </span>
+
+                    <strong>
+                        {{
+                        item.endTime
+                        | date:
+                        'HH:mm dd/MM/yyyy'
+                        }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <button class="edit-btn" [disabled]="
+            item.status !== 0
+          " (click)="
+            editSchedule(item)
+          ">
                     Edit
-
                 </button>
 
                 <button class="delete-btn" [disabled]="
-                        item.isBooked
-                    " (click)="
-                        deleteSchedule(
-                            item.availabilityId
-                        )
-                    ">
-
+            item.status !== 0
+          " (click)="
+            deleteSchedule(
+              item.availabilityId
+            )
+          ">
                     Delete
-
                 </button>
-
             </div>
-
         </div>
-
     </div>
-
 </div>

@@ -10,6 +10,8 @@ import { BookingService } from '../../../../services/booking.service';
 
 import { TeacherAvailabilityService } from '../../../../services/teacher-availability.service';
 
+import { PaymentService } from '../../../../services/payment.service';
+
 @Component({
   selector: 'app-teacher-schedules',
 
@@ -37,6 +39,8 @@ export class TeacherSchedulesComponent implements OnInit {
 
     private bookingService: BookingService,
 
+    private paymentService: PaymentService,
+
     private router: Router,
   ) {}
 
@@ -44,44 +48,57 @@ export class TeacherSchedulesComponent implements OnInit {
     this.loadSchedules();
   }
 
+  /*
+   * load schedules
+   */
   loadSchedules() {
     this.loading = true;
 
-    this.scheduleService.getAvailableSchedules(this.selectedDate).subscribe({
-      next: (res) => {
-        const now = new Date();
-        this.schedules = res.filter(
-          (item) => !item.isBooked && new Date(item.startTime) > now,
-        );
+    this.scheduleService
+      .getAvailableSchedules(this.selectedDate)
 
-        this.visibleSchedules = [...this.schedules];
+      .subscribe({
+        next: (res) => {
+          const now = new Date();
 
-        if (this.keyword.trim()) {
-          this.searchSchedules();
-        }
+          this.schedules = (res || []).filter(
+            (item) => item.status === 0 && new Date(item.startTime) > now,
+          );
 
-        this.loading = false;
-      },
+          this.visibleSchedules = [...this.schedules];
 
-      error: (err) => {
-        console.error(err);
+          if (this.keyword.trim()) {
+            this.searchSchedules();
+          }
 
-        this.loading = false;
-      },
-    });
+          this.loading = false;
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          this.loading = false;
+        },
+      });
   }
 
+  /*
+   * search
+   */
   searchSchedules() {
     const search = this.keyword.trim().toLowerCase();
 
     if (!search) {
       this.visibleSchedules = [...this.schedules];
+
       return;
     }
 
     this.visibleSchedules = this.schedules.filter((item) => {
-      const name = this.scheduleService.getTeacherName(item).toLowerCase();
-      const specialty = this.scheduleService.getSpecialty(item).toLowerCase();
+      const name = this.getTeacherName(item).toLowerCase();
+
+      const specialty = this.getSpecialty(item).toLowerCase();
+
       const date = item.startTime
         ? new Date(item.startTime).toLocaleDateString().toLowerCase()
         : '';
@@ -94,49 +111,125 @@ export class TeacherSchedulesComponent implements OnInit {
     });
   }
 
+  /*
+   * detail
+   */
   openDetail(id: number) {
     this.router.navigate(['/schedule', id]);
   }
 
+
   bookSchedule(item: any) {
-    if (item.isBooked) {
+    if (item.status !== 0) {
       return;
     }
 
-    this.bookingService.create(item.availabilityId).subscribe({
-      next: (res) => {
-        alert('Booking created successfully');
+    
+    this.bookingService
+      .create(item.availabilityId)
 
-        this.router.navigate(['/payment', res.bookingId]);
-      },
-      error: (err) => {
-        console.error(err);
+      .subscribe({
+        next: (bookingRes) => {
+          
+          const start = new Date(item.startTime);
 
-        alert(err.error?.message || 'Booking failed');
-      },
-    });
+          const end = new Date(item.endTime);
+
+          const hours =
+            Math.max(0, end.getTime() - start.getTime()) / (1000 * 60 * 60);
+
+          const amount =
+            Math.round(
+              ((item?.instructorProfile?.pricePerHour || 0) * hours +
+                Number.EPSILON) *
+                100,
+            ) / 100;
+
+          const body = {
+            bookingId: bookingRes.bookingId,
+
+            amount: amount,
+
+            paymentMethod: 0,
+          };
+
+          this.paymentService
+            .create(body)
+
+            .subscribe({
+              next: (paymentRes) => {
+                
+                this.paymentService
+                  .createVNPayUrl(paymentRes.paymentId)
+
+                  .subscribe({
+                    next: (vnpayRes) => {
+                      
+                      window.location.href = vnpayRes.paymentUrl;
+                    },
+
+                    error: (err) => {
+                      console.error(err);
+
+                      alert(err.error?.message || 'VNPay failed');
+                    },
+                  });
+              },
+
+              error: (err) => {
+                console.error(err);
+
+                alert(err.error?.message || 'Create payment failed');
+              },
+            });
+        },
+
+        error: (err) => {
+          console.error(err);
+
+          alert(err.error?.message || 'Booking failed');
+        },
+      });
   }
 
+  /*
+   * teacher name
+   */
   getTeacherName(item: any): string {
     return this.scheduleService.getTeacherName(item);
   }
 
+  /*
+   * avatar
+   */
   getTeacherAvatar(item: any): string {
     return this.scheduleService.getTeacherAvatar(item);
   }
 
+  /*
+   * specialty
+   */
   getSpecialty(item: any): string {
     return this.scheduleService.getSpecialty(item);
   }
 
+  /*
+   * price
+   */
   getPricePerHour(item: any): number {
     return this.scheduleService.getPricePerHour(item);
   }
 
+  /*
+   * rating
+   */
   getRating(item: any): number {
     return this.scheduleService.getRating(item);
   }
 
+  /*
+   * reviews
+   */
   getTotalReviews(item: any): number {
     return this.scheduleService.getTotalReviews(item);
   }

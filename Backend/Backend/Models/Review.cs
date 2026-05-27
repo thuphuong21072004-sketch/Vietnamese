@@ -8,18 +8,22 @@
 
         public int StudentId { get; set; }
 
-        public int TeacherId { get; set; }
+        public int InstructorId { get; set; }
 
         public int Rating { get; set; }
 
         public string? Comment { get; set; }
 
-        public DateTime CreatedDate { get; set; }
+        public string? Reply { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+
 
         public Booking? Booking { get; set; }
 
         public User? Student { get; set; }
 
-        public User? Teacher { get; set; }
+        public User? Instructor { get; set; }
     }
 }

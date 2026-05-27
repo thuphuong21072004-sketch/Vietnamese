@@ -15,5 +15,12 @@
         public string? Bio { get; set; }
 
         public string? AvatarUrl { get; set; }
+
+        public TeacherProfileDTO?
+            TeacherProfile
+        {
+            get;
+            set;
+        }
     }
 }

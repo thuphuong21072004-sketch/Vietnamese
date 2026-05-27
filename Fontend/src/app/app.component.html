@@ -84,7 +84,11 @@
             <li><button class="menu-btn" routerLink="/user/dashboard">Dashboard</button></li>
             <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
             <li><button class="menu-btn" routerLink="/user/units">Courses</button></li>
-            <li><button class="menu-btn" routerLink="/user/tests">Practice Tests</button></li>
+            <li>
+                <button class="menu-btn" (click)="openRandomPlacement()">
+                    Practice Tests
+                </button>
+            </li>
             <li><button class="menu-btn" routerLink="/user/learnOnline">Learn Online</button></li>
             <li><button class="menu-btn" routerLink="/my-bookings">My Bookings</button></li>
             <li><button class="menu-btn" routerLink="/user/speaking">Practice Speaking</button></li>
@@ -92,7 +96,7 @@
         </ul>
     </div>
 
-    <div *ngIf="role === 'Admin' || role === 'Moderator'" class="menu-section role-switch">
+    <div *ngIf="role === 'Admin'" class="menu-section role-switch">
         <h4>Mode</h4>
         <button
             *ngIf="role === 'Admin'"
@@ -111,8 +115,7 @@
         </button>
     </div>
 
-    <div class="menu-section" *ngIf="role === 'Admin' && adminMode === 'management'">
-        <h4>Management</h4>
+    <div class="menu-section" *ngIf="(role === 'Admin' && adminMode === 'management') || role === 'Moderator'">
         <ul>
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>
@@ -123,8 +126,10 @@
         </ul>
     </div>
 
-    <div class="menu-section" *ngIf="(role === 'Admin' && adminMode === 'teacher') || role === 'Moderator'">
-        <h4>Teaching</h4>
+    <div class="menu-section" *ngIf="
+            (role === 'Admin' && adminMode === 'teacher') ||
+            role === 'Teacher'
+        ">
         <ul>
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="/admin/dashboard">Dashboard</button></li>

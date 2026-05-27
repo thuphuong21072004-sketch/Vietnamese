@@ -18,25 +18,20 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<TeacherAvailability?> GetById(int id)
+        public async Task<TeacherAvailability?>
+    GetById(int id)
         {
-            var availability = await _context.TeacherAvailabilities
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
-                .Include(x => x.Teacher).ThenInclude(x => x.Role)
-                .FirstOrDefaultAsync(x => x.AvailabilityId == id);
+            return await _context
+                .TeacherAvailabilities
 
-            if (availability == null)
-            {
-                return null;
-            }
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.TeacherProfile)
 
-            var holdWindow = DateTime.UtcNow.AddMinutes(-15);
-            var hasActiveBooking = await _context.Bookings.AnyAsync(b => b.AvailabilityId == availability.AvailabilityId
-                && b.Status != common.Constant.StatusBooking.Cancelled
-                && (b.Status == common.Constant.StatusBooking.Booked || b.CreatedDate >= holdWindow));
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.Role)
 
-            availability.IsBooked = hasActiveBooking;
-            return availability;
+                .FirstOrDefaultAsync(x =>
+                    x.AvailabilityId == id);
         }
 
         /* 
@@ -44,13 +39,21 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<bool> HasOverlapSchedule(int teacherId, DateTime start, DateTime end, int? excludeId = null)
+        public async Task<bool> HasOverlapSchedule(
+    int instructorId,
+    DateTime start,
+    DateTime end,
+    int? excludeId = null)
         {
-            return await _context.TeacherAvailabilities
-                .AnyAsync(x => x.TeacherId == teacherId
+            return await _context
+                .TeacherAvailabilities
+                .AnyAsync(x =>
+                    x.InstructorId == instructorId
                     && x.EndTime > DateTime.UtcNow
-                    && (excludeId == null || x.AvailabilityId != excludeId)
-                    && (start < x.EndTime && end > x.StartTime));
+                    && (excludeId == null
+                        || x.AvailabilityId != excludeId)
+                    && (start < x.EndTime
+                        && end > x.StartTime));
         }
 
         /* 
@@ -90,26 +93,36 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<TeacherAvailability>> GetAvailableSchedules(DateOnly? date)
+        public async Task<List<TeacherAvailability>>
+GetAvailableSchedules(DateOnly? date)
         {
-            var holdWindow = DateTime.UtcNow.AddMinutes(-15);
             var query = _context.TeacherAvailabilities
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
-                .Include(x => x.Teacher).ThenInclude(x => x.Role)
-                .Where(x => x.StartTime > DateTime.UtcNow
-                    && x.Teacher != null
-                    && x.Teacher.TeacherProfile != null
-                    && x.Teacher.TeacherProfile.Status == common.Constant.StatusTeacherProfile.Approved
-                    && !_context.Bookings.Any(b => b.AvailabilityId == x.AvailabilityId
-                        && b.Status != common.Constant.StatusBooking.Cancelled
-                        && (b.Status == common.Constant.StatusBooking.Booked || b.CreatedDate >= holdWindow)));
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.TeacherProfile)
+                
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.Role)
+                .Where(x =>
+                    x.StartTime > DateTime.UtcNow
+                    && x.Status ==
+                        common.Constant
+                        .StatusTeacherAvailability.Available
+                    && x.Instructor != null
+                    && x.Instructor.TeacherProfile != null
+                    && x.Instructor.TeacherProfile.Status ==
+                        common.Constant
+                        .StatusTeacherProfile.Approved);
 
             if (date != null)
             {
-                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date);
+                query = query.Where(x =>
+                    DateOnly.FromDateTime(
+                        x.StartTime) == date);
             }
 
-            return await query.OrderBy(x => x.StartTime).ToListAsync();
+            return await query
+                .OrderBy(x => x.StartTime)
+                .ToListAsync();
         }
 
         /* 
@@ -117,16 +130,51 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<TeacherAvailability>> GetTeacherSchedules(int teacherId)
+        public async Task<List<TeacherAvailability>>
+GetTeacherSchedules(
+    int instructorId,
+    byte? status,
+    DateOnly? date)
         {
-            return await _context.TeacherAvailabilities
-                .Include(x => x.Teacher).ThenInclude(x => x.TeacherProfile)
-                .Include(x => x.Teacher).ThenInclude(x => x.Role)
-                .Where(x => x.TeacherId == teacherId && x.EndTime > DateTime.UtcNow)
+            var query =
+                _context.TeacherAvailabilities
+
+                    .Include(x => x.Instructor)
+                        .ThenInclude(x => x.TeacherProfile)
+                    
+                    .Include(x => x.Instructor)
+                        .ThenInclude(x => x.Role)
+
+                    .Where(x =>
+
+                        x.InstructorId == instructorId
+
+                        && x.EndTime >= DateTime.UtcNow);
+
+            /*
+             * lọc status
+             */
+            if (status.HasValue)
+            {
+                query = query.Where(x =>
+                    x.Status == status.Value);
+            }
+
+            /*
+             * lọc ngày
+             */
+            if (date.HasValue)
+            {
+                query = query.Where(x =>
+
+                    DateOnly.FromDateTime(
+                        x.StartTime) == date.Value);
+            }
+
+            return await query
                 .OrderBy(x => x.StartTime)
                 .ToListAsync();
         }
-
         /* 
          * kiểm tra lịch trống có tồn tại hay không
          * O(1)

@@ -45,7 +45,7 @@ export class TeacherProfileComponent implements OnInit {
 
     /*
      * 0 = Draft
-     * 1 = Pending
+     * 1 = Submitted
      * 2 = Approved
      * 3 = Rejected
      */
@@ -64,7 +64,10 @@ export class TeacherProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.userRole = this.getRoleFromToken();
-    this.isPrivilegedTeacherUser = this.userRole === 'Admin' || this.userRole === 'Moderator';
+
+    this.isPrivilegedTeacherUser =
+      this.userRole === 'Admin' || this.userRole === 'Moderator';
+
     this.loadProfile();
   }
 
@@ -91,22 +94,10 @@ export class TeacherProfileComponent implements OnInit {
   }
 
   /*
-   * only Draft / Rejected
-   * can be edited
+   * approved không cho edit
    */
   canEdit(): boolean {
-    return this.profile.status === 0 || this.profile.status === 3;
-  }
-
-  /*
-   * Draft / Rejected
-   * can be submitted
-   */
-  canSubmit(): boolean {
-    return (
-      this.hasProfile &&
-      (this.profile.status === 0 || this.profile.status === 3)
-    );
+    return this.profile.status !== 2;
   }
 
   saveProfile() {
@@ -159,20 +150,20 @@ export class TeacherProfileComponent implements OnInit {
     });
   }
 
-  submitProfile() {
-    if (!confirm('Submit teacher profile for review?')) {
-      return;
-    }
-
+  /*
+   * submit hồ sơ
+   * cho admin duyệt
+   */
+  submitForReview() {
     this.loading = true;
 
-    this.teacherService.submitProfile(this.profile.teacherProfileId).subscribe({
+    this.teacherService.submitProfile().subscribe({
       next: () => {
-        this.profile.status = 1;
-
-        alert('Teacher profile submitted successfully');
+        alert('Submitted to admin successfully');
 
         this.loading = false;
+
+        this.loadProfile();
       },
 
       error: (err) => {
@@ -206,13 +197,18 @@ export class TeacherProfileComponent implements OnInit {
 
   private getRoleFromToken(): string | null {
     const token = localStorage.getItem('token');
+
     if (!token) {
       return null;
     }
 
     try {
       const payload: any = jwtDecode(token);
-      const role = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+      const role =
+        payload.role ||
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
       return this.normalizeRole(role);
     } catch {
       return null;
@@ -225,9 +221,22 @@ export class TeacherProfileComponent implements OnInit {
     }
 
     const raw = value.toString().trim().toLowerCase();
-    if (raw === 'admin' || raw === '2') return 'Admin';
-    if (raw === 'moderator' || raw === '3') return 'Moderator';
-    if (raw === 'user' || raw === '1') return 'User';
+
+    if (raw === 'admin' || raw === '2') {
+      return 'Admin';
+    }
+
+    if (raw === 'moderator' || raw === '3') {
+      return 'Moderator';
+    }
+
+    if (raw === 'teacher' || raw === '4') {
+      return 'Teacher';
+    }
+
+    if (raw === 'user' || raw === '1') {
+      return 'User';
+    }
 
     return value.toString().trim();
   }
@@ -257,7 +266,7 @@ export class TeacherProfileComponent implements OnInit {
         } else {
 
         /*
-         * cv file
+         * cv
          */
           this.profile.cvUrl = reader.result;
         }

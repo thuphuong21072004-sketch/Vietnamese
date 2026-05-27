@@ -28,80 +28,205 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoomDTO> Create(int bookingId)
+        public async Task<VideoRoomDTO>
+Create(int bookingId)
         {
-            var booking = await _bookingRepository.GetById(bookingId);
+            /*
+             * tìm booking
+             */
+            var booking =
+                await _bookingRepository
+                    .GetById(bookingId);
+
             if (booking == null)
             {
-                throw new KeyNotFoundException("Booking not found");
+                throw new KeyNotFoundException(
+                    "Booking not found");
             }
 
+            /*
+             * user hiện tại
+             */
             var email = _userContext.GetEmail();
-            int? maybeUserId = await _userRepository.GetUserIdByEmail(email);
+
+            int? maybeUserId =
+                await _userRepository
+                    .GetUserIdByEmail(email);
+
             if (maybeUserId == null)
             {
-                throw new InvalidOperationException("Authenticated user not found");
+                throw new InvalidOperationException(
+                    "Authenticated user not found");
             }
 
             int userId = maybeUserId.Value;
 
-            if (booking.StudentId != userId && booking.TeacherId != userId)
+            /*
+             * chỉ student hoặc instructor
+             * mới được tạo room
+             */
+            if (booking.StudentId != userId
+                && booking.InstructorId != userId)
             {
-                throw new UnauthorizedAccessException("No permission");
+                throw new UnauthorizedAccessException(
+                    "No permission");
             }
 
-            if (booking.Status != common.Constant.StatusBooking.Booked)
+            /*
+             * booking phải paid
+             * hoặc đang học
+             */
+            if (
+    booking.Status !=
+    common.Constant
+    .StatusBooking.Confirmed
+
+    &&
+
+    booking.Status !=
+    common.Constant
+    .StatusBooking.InProgress
+)
             {
-                throw new ArgumentException("Booking not paid");
+                throw new ArgumentException(
+                    "Booking is not active");
             }
 
-            var now = GetNowForComparison(booking.StartTime);
-            if (now < booking.StartTime.AddMinutes(-30))
+            /*
+             * chỉ tạo room
+             * trước giờ học 30 phút
+             */
+            var now =
+                GetNowForComparison(
+                    booking.StartTime);
+
+            if (now <
+                booking.StartTime
+                    .AddMinutes(-30))
             {
-                throw new ArgumentException("Room can only be created 30 minutes before class");
+                throw new ArgumentException(
+                    "Room can only be created 30 minutes before class");
             }
 
-            if (now > booking.EndTime.AddMinutes(15))
+            /*
+             * chỉ tồn tại tới
+             * 15 phút sau giờ học
+             */
+            if (now >
+                booking.EndTime
+                    .AddMinutes(15))
             {
-                throw new ArgumentException("Room can only be created until 15 minutes after class ends");
+                throw new ArgumentException(
+                    "Room can only be created until 15 minutes after class ends");
             }
 
-            var exist = await _videoRoomRepository.GetByBookingId(bookingId);
+            /*
+             * kiểm tra room tồn tại
+             */
+            var exist =
+                await _videoRoomRepository
+                    .GetByBookingId(
+                        bookingId);
 
-            if (exist != null && exist.ExpiredAt > GetNowForComparison(exist.ExpiredAt))
+            /*
+             * room còn hạn
+             */
+            if (exist != null
+                && exist.ExpiredAt >
+                GetNowForComparison(
+                    exist.ExpiredAt))
             {
-                var existingDto = _mapper.Map<VideoRoomDTO>(exist);
-                existingDto.JoinUrl = $"https://meet.jit.si/{existingDto.RoomCode}?token={existingDto.Token}";
+                var existingDto =
+                    _mapper.Map<VideoRoomDTO>(
+                        exist);
+
+                existingDto.JoinUrl =
+                    $"https://meet.jit.si/{existingDto.RoomCode}";
+
                 return existingDto;
             }
 
+
+            /*
+             * room hết hạn
+             * tạo token mới
+             */
             if (exist != null)
             {
-                exist.RoomCode = Guid.NewGuid().ToString();
-                exist.Token = Guid.NewGuid().ToString();
-                exist.ExpiredAt = booking.EndTime.AddMinutes(15);
+                exist.RoomCode =
+                    Guid.NewGuid().ToString();
 
-                await _videoRoomRepository.Update(exist);
-                await _videoRoomRepository.Save();
+                exist.HostToken =
+                    Guid.NewGuid().ToString();
 
-                var updatedDto = _mapper.Map<VideoRoomDTO>(exist);
-                updatedDto.JoinUrl = $"https://meet.jit.si/{updatedDto.RoomCode}?token={updatedDto.Token}";
+                exist.StudentToken =
+                    Guid.NewGuid().ToString();
+
+                exist.StartUrl =
+                    $"https://meet.jit.si/{exist.RoomCode}";
+
+                exist.ExpiredAt =
+                    booking.EndTime
+                        .AddMinutes(15);
+
+                await _videoRoomRepository
+                    .Update(exist);
+
+                await _videoRoomRepository
+                    .Save();
+
+                var updatedDto =
+                    _mapper.Map<VideoRoomDTO>(
+                        exist);
+
+                updatedDto.JoinUrl =
+                    $"https://meet.jit.si/{updatedDto.RoomCode}";
+
                 return updatedDto;
             }
+
+            /*
+             * tạo room mới
+             */
+            var roomCode =
+                Guid.NewGuid().ToString();
 
             var room = new VideoRoom
             {
                 BookingId = bookingId,
-                RoomCode = Guid.NewGuid().ToString(),
-                Token = Guid.NewGuid().ToString(),
-                ExpiredAt = booking.EndTime.AddMinutes(15)
+
+                RoomCode = roomCode,
+
+                HostToken =
+                    Guid.NewGuid().ToString(),
+
+                StudentToken =
+                    Guid.NewGuid().ToString(),
+
+                StartUrl =
+                    $"https://meet.jit.si/{roomCode}",
+
+                ExpiredAt =
+                    booking.EndTime
+                        .AddMinutes(15),
+
+                CreatedDate =
+                    DateTime.UtcNow
             };
 
-            await _videoRoomRepository.Create(room);
-            await _videoRoomRepository.Save();
+            await _videoRoomRepository
+                .Create(room);
 
-            var createdDto = _mapper.Map<VideoRoomDTO>(room);
-            createdDto.JoinUrl = $"https://meet.jit.si/{createdDto.RoomCode}?token={createdDto.Token}";
+            await _videoRoomRepository
+                .Save();
+
+            var createdDto =
+                _mapper.Map<VideoRoomDTO>(
+                    room);
+
+            createdDto.JoinUrl =
+                $"https://meet.jit.si/{createdDto.RoomCode}";
+
             return createdDto;
         }
 
@@ -110,44 +235,83 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoomDTO?> GetByBookingId(int bookingId)
+        public async Task<VideoRoomDTO?>
+GetByBookingId(int bookingId)
         {
-            var room = await _videoRoomRepository.GetByBookingId(bookingId);
+            /*
+             * tìm room
+             */
+            var room =
+                await _videoRoomRepository
+                    .GetByBookingId(
+                        bookingId);
+
             if (room == null)
             {
                 return null;
             }
 
-            var booking = await _bookingRepository.GetById(bookingId);
+            /*
+             * tìm booking
+             */
+            var booking =
+                await _bookingRepository
+                    .GetById(bookingId);
+
             if (booking == null)
             {
-                throw new KeyNotFoundException("Booking not found");
+                throw new KeyNotFoundException(
+                    "Booking not found");
             }
 
+            /*
+             * user hiện tại
+             */
             var email = _userContext.GetEmail();
-            int? maybeUserId = await _userRepository.GetUserIdByEmail(email);
+
+            int? maybeUserId =
+                await _userRepository
+                    .GetUserIdByEmail(email);
+
             if (maybeUserId == null)
             {
-                throw new InvalidOperationException("Authenticated user not found");
+                throw new InvalidOperationException(
+                    "Authenticated user not found");
             }
 
             int userId = maybeUserId.Value;
 
-            if (booking.StudentId != userId && booking.TeacherId != userId)
+            /*
+             * chỉ student hoặc instructor
+             * mới được xem room
+             */
+            if (booking.StudentId != userId
+                && booking.InstructorId != userId)
             {
-                throw new UnauthorizedAccessException("No permission");
+                throw new UnauthorizedAccessException(
+                    "No permission");
             }
 
-            if (room.ExpiredAt <= GetNowForComparison(room.ExpiredAt))
+            /*
+             * room hết hạn
+             */
+            if (room.ExpiredAt <=
+                GetNowForComparison(
+                    room.ExpiredAt))
             {
-                throw new ArgumentException("Room expired");
+                throw new ArgumentException(
+                    "Room expired");
             }
 
-            var dto = _mapper.Map<VideoRoomDTO>(room);
-            dto.JoinUrl = $"https://meet.jit.si/{dto.RoomCode}?token={dto.Token}";
+            var dto =
+                _mapper.Map<VideoRoomDTO>(
+                    room);
+
+            dto.JoinUrl =
+                $"https://meet.jit.si/{dto.RoomCode}";
+
             return dto;
         }
-
         private DateTime GetNowForComparison(DateTime referenceTime)
         {
             return referenceTime.Kind == DateTimeKind.Utc

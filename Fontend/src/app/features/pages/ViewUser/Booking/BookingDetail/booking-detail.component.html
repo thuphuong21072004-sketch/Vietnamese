@@ -5,24 +5,21 @@
 </div>
 
 <div *ngIf="
-        !loading
-        &&
+        !loading &&
         booking
     " class="booking-detail-page">
 
+    <!-- back -->
     <button class="back-btn" (click)="back()">
 
         ← Back
 
     </button>
 
+    <!-- teacher -->
     <div class="top-card">
 
-        <img *ngIf="
-                getAvatar()
-            " [src]="
-                getAvatar()
-            " class="teacher-avatar">
+        <img *ngIf="getAvatar()" [src]="getAvatar()" class="teacher-avatar">
 
         <div class="teacher-info">
 
@@ -33,6 +30,17 @@
                 }}
 
             </h1>
+
+            <p class="teacher-specialty">
+
+                {{
+                booking
+                ?.instructorProfile
+                ?.specialty ||
+                'Vietnamese Teacher'
+                }}
+
+            </p>
 
             <span class="status-badge" [ngClass]="
                     getStatusClass(
@@ -52,39 +60,129 @@
 
     </div>
 
-    <div *ngIf="room" class="room-card">
+    <!-- room -->
+    <div *ngIf="
+            room &&
+            booking.status === 2
+        " class="room-card">
 
-        <h2>Online Class Room</h2>
-
-        <div class="info-row">
-            <span>Room Code</span>
-            <strong>{{ room.roomCode }}</strong>
-        </div>
-
-        <div class="info-row">
-            <span>Expired At</span>
-            <strong>{{ room.expiredAt | date:'dd/MM/yyyy HH:mm' }}</strong>
-        </div>
-
-        <p class="room-note">Room is ready. Click the button below to open the class now.</p>
-
-        <button class="room-btn" (click)="joinRoom()">Join Room</button>
-
-        <div *ngIf="room?.joinUrl" class="room-link">
-            <span>Direct link:</span>
-            <a [href]="room.joinUrl" target="_blank" rel="noopener noreferrer">Open class room</a>
-        </div>
-
-    </div>
-
-    <div class="booking-info">
+        <h2>
+            Online Class Room
+        </h2>
 
         <div class="info-row">
 
             <span>
+                Room Code
+            </span>
 
-                Date
+            <strong>
+                {{ room.roomCode }}
+            </strong>
 
+        </div>
+
+        <div class="info-row">
+
+            <span>
+                Expired At
+            </span>
+
+            <strong>
+
+                {{
+                room.expiredAt
+                | date:'dd/MM/yyyy HH:mm'
+                }}
+
+            </strong>
+
+        </div>
+
+        <p class="room-note">
+
+            Room is ready.
+            Click the button below
+            to open the class now.
+
+        </p>
+
+        <!-- join -->
+        <button *ngIf="
+                canJoinRoom()
+            " class="room-btn" (click)="joinRoom()">
+
+            Join Room
+
+        </button>
+
+        <!-- waiting -->
+        <div *ngIf="
+                !canJoinRoom()
+            " class="info-note">
+
+            {{
+            getJoinWindowMessage()
+            }}
+
+        </div>
+
+        <div *ngIf="room?.joinUrl" class="room-link">
+
+            <span>
+                Direct link:
+            </span>
+
+            <a [href]="room.joinUrl" target="_blank" rel="noopener noreferrer">
+
+                Open class room
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- booking info -->
+    <div class="booking-info">
+
+        <h2>
+            Booking Information
+        </h2>
+
+        <div class="info-row">
+
+            <span>
+                Booking ID
+            </span>
+
+            <strong>
+                #{{ booking.bookingId }}
+            </strong>
+
+        </div>
+
+        <div class="info-row">
+
+            <span>
+                Booking Date
+            </span>
+
+            <strong>
+
+                {{
+                booking.createdDate
+                | date:'dd/MM/yyyy HH:mm'
+                }}
+
+            </strong>
+
+        </div>
+
+        <div class="info-row">
+
+            <span>
+                Class Date
             </span>
 
             <strong>
@@ -101,9 +199,7 @@
         <div class="info-row">
 
             <span>
-
-                Time
-
+                Class Time
             </span>
 
             <strong>
@@ -124,28 +220,93 @@
 
         </div>
 
-        <div *ngIf="booking.teacherProfile" class="info-row">
+        <!-- duration -->
+        <div class="info-row">
 
             <span>
-
-                Price per hour
-
+                Duration
             </span>
 
             <strong>
 
-                ${{ booking.teacherProfile?.pricePerHour || 0 }}
+                {{
+                bookingService
+                .getDurationHours(
+                booking
+                )
+                }}
+                hour(s)
 
             </strong>
 
         </div>
 
-        <div *ngIf="getAmount() > 0" class="info-row total-row">
+        <!-- payment status -->
+        <div *ngIf="payment" class="info-row">
 
             <span>
+                Payment Status
+            </span>
 
-                Total amount
+            <strong>
 
+                {{
+                paymentService
+                .getStatusText(
+                payment.status
+                )
+                }}
+
+            </strong>
+
+        </div>
+
+        <!-- payment method -->
+        <div *ngIf="payment" class="info-row">
+
+            <span>
+                Payment Method
+            </span>
+
+            <strong>
+
+                {{
+                paymentService
+                .getMethodText(
+                payment.paymentMethod
+                )
+                }}
+
+            </strong>
+
+        </div>
+
+        <!-- transaction -->
+        <div *ngIf="
+                payment?.transactionCode
+            " class="info-row">
+
+            <span>
+                Transaction Code
+            </span>
+
+            <strong>
+
+                {{
+                payment.transactionCode
+                }}
+
+            </strong>
+
+        </div>
+
+        <!-- total -->
+        <div *ngIf="
+                getAmount() > 0
+            " class="info-row total-row">
+
+            <span>
+                Total Amount
             </span>
 
             <strong>
@@ -158,63 +319,112 @@
 
     </div>
 
+    <!-- review -->
     <div *ngIf="review" class="review-card">
-        <h2>Student Review</h2>
+
+        <h2>
+            Student Review
+        </h2>
+
         <div class="info-row">
-            <span>Rating</span>
-            <strong>{{ review.rating }} / 5</strong>
+
+            <span>
+                Rating
+            </span>
+
+            <strong>
+
+                {{
+                review.rating
+                }}
+                / 5
+
+            </strong>
+
         </div>
+
         <div class="info-row">
-            <span>Comment</span>
-            <strong>{{ review.comment }}</strong>
+
+            <span>
+                Comment
+            </span>
+
+            <strong>
+
+                {{
+                review.comment
+                }}
+
+            </strong>
+
         </div>
+
         <div class="info-row">
-            <span>By</span>
-            <strong>{{ review.studentName }}</strong>
+
+            <span>
+                By
+            </span>
+
+            <strong>
+
+                {{
+                review.studentName
+                }}
+
+            </strong>
+
         </div>
+
     </div>
 
+    <!-- actions -->
     <div class="actions">
 
+        <!-- pay -->
         <button *ngIf="canPay()" class="pay-btn" (click)="goPayment()">
 
             Pay Now
 
         </button>
 
-        <div *ngIf="booking.status === 0 && (!payment || payment.status !== 1)" class="info-note">
+        <!-- pending -->
+        <div *ngIf="
+                booking.status === 0 &&
+                (
+                    !payment ||
+                    payment.status !== 1
+                )
+            " class="info-note">
 
-            Please complete payment now to confirm your booking.
+            Please complete payment
+            within 5 minutes to
+            confirm your booking.
 
         </div>
 
-        <div *ngIf="booking.status === 1 && payment?.status === 1 && !canJoinRoom()" class="info-note">
-            {{ getJoinWindowMessage() }}
-        </div>
-
-        <button *ngIf="booking.status === 1 && payment?.status === 1 && canJoinRoom()" class="room-btn" (click)="joinRoom()">
-            Join Room
-        </button>
-
-        <div *ngIf="booking.status === 1 && payment?.status !== 1" class="info-note">
-            Complete payment to join the class room.
-        </div>
-
+        <!-- review -->
         <button *ngIf="
-                booking.status === 3
+                canReview()
             " class="review-btn" (click)="writeReview()">
 
             Write Review
 
         </button>
 
+        <!-- reviewed -->
+        <div *ngIf="
+                isReviewed()
+            " class="info-note">
+
+            You already reviewed
+            this class.
+
+        </div>
+
+        <!-- cancel -->
         <button *ngIf="
-                booking.status !== 2
-                &&
-                booking.status !== 3
-            " class="cancel-btn" [disabled]="
-                cancelLoading
-            " (click)="cancelBooking()">
+                canCancel()
+            " class="cancel-btn" [disabled]="cancelLoading" (click)="cancelBooking()">
 
             {{
             cancelLoading
