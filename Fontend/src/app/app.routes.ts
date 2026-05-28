@@ -31,7 +31,7 @@ import { BookingDetailComponent } from './features/pages/ViewUser/Booking/Bookin
 import { PaymentComponent } from './features/pages/ViewUser/Payment/payment.component';
 import { VideoRoomComponent } from './features/pages/ViewUser/VideoRoom/video-room.component';
 import { ReviewComponent } from './features/pages/ViewUser/ReviewClass/review.component';
-
+import { SpeakComponent } from './features/pages/ViewUser/Speaking/speak.component';
 import { Component } from '@angular/core';
 
 export const routes: Routes = [
@@ -78,4 +78,5 @@ export const routes: Routes = [
   { path: 'room/:id', component: VideoRoomComponent },
 
   { path: 'review/:id', component: ReviewComponent },
+  { path: 'user/speaking', component: SpeakComponent },
 ];

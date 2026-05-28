@@ -73,6 +73,11 @@ namespace Backend.Repository.impl
         {
             IQueryable<TeacherProfile> query = _context.TeacherProfiles
                 .Include(x => x.User);
+            query =
+        query.Where(x =>
+            x.Status !=
+            common.Constant
+                .StatusTeacherProfile.Created);
 
             if (status.HasValue)
             {

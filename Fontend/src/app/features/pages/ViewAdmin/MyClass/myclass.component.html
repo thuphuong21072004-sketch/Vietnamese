@@ -94,21 +94,10 @@
             <!-- student -->
             <div class="teacher-top">
 
-                <img *ngIf="
-                        getAvatar(item)
-                    " [src]="
-                        getAvatar(item)
-                    " class="teacher-avatar">
-
-                <div *ngIf="
-                        !getAvatar(item)
-                    " class="teacher-avatar placeholder">
-
-                    {{
-                    getStudentName(item)
-                    .charAt(0)
-                    }}
-
+                <img *ngIf="item.studentAvatar" [src]="item.studentAvatar" class="teacher-avatar" />
+                
+                <div *ngIf="!item.studentAvatar" class="teacher-avatar placeholder">
+                    {{ getStudentName(item).charAt(0) }}
                 </div>
 
                 <div class="teacher-info">

@@ -1,7 +1,7 @@
 .dashboard-page {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 16px;
 }
 
 .dashboard-header {
@@ -25,16 +25,16 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
 }
 
 .summary-card,
 .quick-links-card {
-  background: radial-gradient(circle at top left, rgba(124, 108, 255, 0.18), rgba(255, 255, 255, 0.95));
+  background: radial-gradient(circle at top left, rgba(124, 108, 255, 0.18), rgba(255, 255, 255, 0.96));
   border: 1px solid rgba(124, 108, 255, 0.14);
-  border-radius: 28px;
-  padding: 26px;
+  border-radius: 22px;
+  padding: 28px;
   box-shadow: 0 24px 80px rgba(99, 102, 241, 0.12);
   transition: transform 0.24s ease, box-shadow 0.24s ease;
 }

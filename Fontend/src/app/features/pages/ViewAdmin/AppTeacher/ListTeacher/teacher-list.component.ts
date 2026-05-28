@@ -144,7 +144,7 @@ export class AdminTeacherListComponent implements OnInit {
   getStatusText(status: number): string {
     switch (status) {
       case 1:
-        return 'Pending';
+        return 'Submitted';
 
       case 2:
         return 'Approved';

@@ -33,7 +33,7 @@ namespace Backend.Data
         
         public DbSet<UserAnswer> UserAnswer { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
+        
         public DbSet<TeacherProfile> TeacherProfiles { get; set; }
 
         public DbSet<TeacherAvailability> TeacherAvailabilities { get; set; }

@@ -20,16 +20,12 @@
 
           <span class="status-chip" [ngClass]="
               payment
-                ? getStatusClass(
-                    payment.status
-                  )
+                ? getStatusClass(payment.status)
                 : 'pending'
             ">
             {{
             payment
-            ? getStatusText(
-            payment.status
-            )
+            ? getStatusText(payment.status)
             : 'Unpaid'
             }}
           </span>
@@ -90,8 +86,7 @@
 
               {{
               booking.endTime
-              | date:
-              'HH:mm'
+              | date:'HH:mm'
               }}
             </strong>
           </div>
@@ -107,8 +102,7 @@
               booking
               .instructor
               ?.teacherProfile
-              ?.pricePerHour ||
-              0
+              ?.pricePerHour || 0
               )
               }}/hour
             </strong>
@@ -165,18 +159,26 @@
           </strong>
         </div>
 
-        <!-- unpaid -->
-        <div class="payment-info" *ngIf="!payment">
+        <!-- unpaid or pending -->
+        <div class="payment-info" *ngIf="
+            !payment ||
+            payment.status === 0
+          ">
           <div class="gateway-box">
             <h3>
-              Ready for payment
+              {{
+              payment
+              ? 'Continue payment'
+              : 'Ready for payment'
+              }}
             </h3>
 
             <p>
-              Click the button
-              below to continue
-              to VNPay secure
-              payment gateway.
+              {{
+              payment
+              ? 'Your payment is still pending. Continue payment through VNPay gateway.'
+              : 'Click the button below to continue to VNPay secure payment gateway.'
+              }}
             </p>
           </div>
 
@@ -185,6 +187,8 @@
               {{
               loading
               ? 'Processing...'
+              : payment
+              ? 'Continue payment'
               : 'Pay now'
               }}
             </button>
@@ -229,11 +233,16 @@
 
           <p>
             Your payment was not
-            completed.
+            completed. You can
+            continue payment again.
           </p>
 
-          <button class="btn btn-danger" (click)="pay()">
-            Try again
+          <button class="btn btn-danger" [disabled]="loading" (click)="pay()">
+            {{
+            loading
+            ? 'Processing...'
+            : 'Try again'
+            }}
           </button>
         </div>
       </div>

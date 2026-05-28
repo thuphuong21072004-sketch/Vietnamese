@@ -1,5 +1,5 @@
 .admin-card {
-    max-width: 1400px;
+    max-width: 1000px;
     margin: 24px auto;
     background: #ffffff;
     border-radius: 24px;
@@ -11,7 +11,7 @@
 }
 
 .card-header {
-    padding: 28px 36px;
+    padding: 18px 22px;
     border-bottom: 1px solid #eef2f7;
     background: linear-gradient(to right, #ffffff, #f8fafc);
     display: flex;
@@ -66,29 +66,29 @@
 }
 
 .card-body {
-    padding: 36px;
+    padding: 18px;
 }
 
 .quiz-info {
-    margin-bottom: 36px;
-    padding-bottom: 28px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
     border-bottom: 2px dashed #e2e8f0;
 }
 
 .row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: 14px;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
 }
 
 .input-group label {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #475569;
 }
@@ -97,9 +97,9 @@ input,
 textarea {
     width: 100%;
     border: 1px solid #dbe2ea;
-    border-radius: 14px;
-    padding: 14px 16px;
-    font-size: 15px;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
     background: #fff;
     transition: all 0.2s ease;
     box-sizing: border-box;
@@ -121,9 +121,9 @@ textarea {
 .passage-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 24px;
-    margin-bottom: 28px;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
     overflow: hidden;
     transition: all 0.25s ease;
 }
@@ -139,8 +139,8 @@ textarea {
     background: linear-gradient(to bottom, #f8fbff, #ffffff);
     border: 2px solid #dbeafe;
     border-radius: 28px;
-    padding: 28px;
-    margin-bottom: 36px;
+    padding: 14px;
+    margin-bottom: 12px;
     overflow: hidden;
 }
 
@@ -149,26 +149,26 @@ textarea {
 .passage-header {
     display: flex;
     align-items: flex-start;
-    gap: 18px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .part-title {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 6px;
 }
 
 .part-title input:first-child {
-    width: 90px;
+    width: 60px;
     text-align: center;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .question-inline-header {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 10px;
     width: 100%;
 }
 
@@ -184,7 +184,7 @@ textarea {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 8px;
     min-width: 0;
     overflow: hidden;
 }
@@ -195,7 +195,7 @@ textarea {
     min-height: 82px;
     max-height: 140px;
     resize: vertical;
-    font-size: 16px;
+    font-size: 13px;
     border-radius: 16px;
 }
 
@@ -229,9 +229,9 @@ textarea {
 }
 
 .upload-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: 1px solid #dbe2ea;
     background: #f8fafc;
     display: flex;
@@ -249,8 +249,8 @@ textarea {
 }
 
 .upload-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
 }
 
 .btn-primary,
@@ -272,9 +272,10 @@ textarea {
 .btn-danger,
 .btn-preview {
     color: white;
-    height: 44px;
-    padding: 0 22px;
-    font-size: 14px;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 12px;
+    border-radius: 10px;
 }
 
 .btn-primary,
@@ -294,6 +295,9 @@ textarea {
     background: linear-gradient(to right, #ff4d67, #ff5c74);
     white-space: nowrap;
     flex-shrink: 0;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
 }
 
 .btn-preview {
@@ -313,28 +317,29 @@ textarea {
     width: auto;
     padding: 0 20px;
     margin-top: 16px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     border-radius: 16px;
 }
 
 .answers-box {
-    margin-top: 24px;
+    margin-top: 16px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 22px;
+    padding: 14px;
+    margin-top: 14px;
+    border-radius: 14px;
     overflow: hidden;
 }
 
 .answer-item {
-    margin-bottom: 18px;
+    margin-bottom: 10px;
 }
 
 .answer-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 6px;
     width: 100%;
     overflow: hidden;
 }
@@ -346,10 +351,11 @@ textarea {
 }
 
 .answer-text-input {
-    width: 420px;
+    width: 280px;
+    height: 38px;
+    font-size: 13px;
     max-width: 100%;
-    height: 48px;
-    border-radius: 12px;
+    border-radius: 10px;
     flex-shrink: 1;
 }
 
@@ -358,8 +364,9 @@ textarea {
 }
 
 .answer-row .media-preview.small img {
-    width: 180px;
-    height: 100px;
+    width: 110px;
+    height: 65px;
+    border-radius: 10px;
     object-fit: cover;
     border-radius: 14px;
     border: 1px solid #dbe2ea;
@@ -367,21 +374,24 @@ textarea {
 
 .answer-row .media-preview.small audio,
 .answer-row audio {
-    width: 320px;
+    width: 240px;
     max-width: 100%;
-    height: 46px;
+    height: 40px;
 }
 
 .score-box {
-    margin: 18px 0;
+    margin: 10px 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
 }
 
 .score-box input {
-    width: 160px;
+    width: 90px;
+    height: 30px;
 }
 
 .media-preview {
@@ -427,14 +437,14 @@ textarea {
 .passage-content-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 22px;
+    padding: 14px;
+    margin-bottom: 14px;
+    border-radius: 14px;
 }
 
 .passage-content-box textarea {
-    min-height: 220px;
-    font-size: 16px;
+    min-height: 120px;
+    font-size: 13px;
     line-height: 1.7;
 }
 
@@ -455,8 +465,8 @@ textarea {
 }
 
 .quiz-footer {
-    margin-top: 40px;
-    padding-top: 28px;
+    margin-top: 18px;
+    padding-top: 16px;
     border-top: 1px solid #e2e8f0;
     display: flex;
     justify-content: center;
@@ -468,9 +478,9 @@ textarea {
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 14px;
-    margin: 24px 0;
+    margin: 14px 0;
     padding: 22px;
-    border-radius: 24px;
+    border-radius: 14px;
     background: #f5f7ff;
     border: 1px solid #dde7fb;
 }
@@ -486,12 +496,12 @@ textarea {
     padding: 80px;
     text-align: center;
     color: #64748b;
-    font-size: 18px;
+    font-size: 14px;
 }
 .time-limit-wrapper{
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:4px;
 }
 
 .timer-toggle{
@@ -571,14 +581,14 @@ textarea {
 }
 .question-header-inline {
     display: flex;
-    align-items: flex-start;
-    gap: 20px;
+    align-items: center;
+    gap: 10px;
     width: 100%;
 }
 
 .question-number {
-    min-width: 120px;
-    font-size: 42px;
+    min-width: 55px;
+    font-size: 12px;
     font-weight: 700;
     color: #1e3a8a;
     margin: 0;
@@ -593,16 +603,19 @@ textarea {
 }
 
 .question-inline-content textarea {
-    width: 100%;
-    min-height: 110px;
+    min-height: 70px;
+    max-height: 100px;
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 12px;
 }
 
 .question-toolbar-inline {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
+    flex-wrap: nowrap;
 }
-
 .media-preview-inline {
     display: flex;
     align-items: center;

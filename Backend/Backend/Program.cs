@@ -1,12 +1,10 @@
 ﻿using Backend.Common;
 using Backend.Data;
 using Backend.Mapper;
-using Backend.Repositories;
 using Backend.Repository;
 using Backend.Repository.impl;
 using Backend.Services;
 using Backend.Services.impl;
-using Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -86,13 +84,7 @@ builder.Services.AddScoped<AnswerRepository, AnswerRepositoryImpl>();
 builder.Services.AddScoped<UserAnswerRepository, UserAnswerRepositoryImpl>();
 
 builder.Services.AddScoped<UserQuizRepository, UserQuizRepositoryImpl>();
-builder.Services.AddScoped<
-    NotificationRepository,
-    NotificationRepositoryImpl>();
 
-builder.Services.AddScoped<
-    NotificationService,
-    NotificationServiceImpl>();
 builder.Services.AddScoped<
     TeacherProfileRepository,
     TeacherProfileRepositoryImpl>();

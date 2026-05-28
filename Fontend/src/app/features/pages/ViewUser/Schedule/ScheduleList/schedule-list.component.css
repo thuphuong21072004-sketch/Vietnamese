@@ -1,131 +1,133 @@
 .student-schedule-page {
-  max-width: 1160px;
-  margin: 36px auto;
-  padding: 0 18px 28px;
+  max-width: 1280px;
+  margin: 24px auto;
+  padding: 0 14px 20px;
 }
 
 .top-bar {
   display: grid;
-  gap: 20px;
-  margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 22px;
 }
 
 .page-intro {
-  padding: 26px 28px;
+  padding: 20px 22px;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(99, 102, 241, 0.16);
-  border-radius: 28px;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
 }
 
 .eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   color: #6366f1;
   text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
 }
 
 .page-intro h1 {
   margin: 0;
-  font-size: clamp(2rem, 2.4vw, 2.8rem);
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
   color: #0f172a;
 }
 
 .page-intro p {
-  margin: 14px 0 0;
-  max-width: 720px;
+  margin: 10px 0 0;
+  max-width: 650px;
   color: #475569;
-  line-height: 1.65;
+  line-height: 1.5;
+  font-size: 0.92rem;
 }
 
 .filter-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 12px;
 }
 
 .filter-item {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filter-item label {
   color: #334155;
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .filter-item input {
   width: 100%;
-  min-height: 48px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.32);
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
   background: #f8fafc;
   color: #0f172a;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
 }
 
 .loading,
 .empty-state {
-  margin-top: 24px;
-  padding: 28px 22px;
+  margin-top: 20px;
+  padding: 22px 18px;
   text-align: center;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
   background: rgba(248, 250, 252, 0.92);
   color: #334155;
-  font-size: 1rem;
+  font-size: 0.92rem;
 }
 
 .summary-row {
-  margin: 16px 0 6px;
+  margin: 10px 0 4px;
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   color: #475569;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
 }
 
 .schedule-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 .schedule-card {
-  padding: 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(99, 102, 241, 0.12);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .schedule-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
 }
 
 .teacher-top {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-start;
 }
 
 .teacher-avatar-wrap {
-  width: 72px;
-  min-width: 72px;
+  width: 58px;
+  min-width: 58px;
   aspect-ratio: 1;
 }
 
 .teacher-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 22px;
+  border-radius: 16px;
   object-fit: cover;
   background: linear-gradient(135deg, #7c3aed, #6366f1);
 }
@@ -135,37 +137,44 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
+}
+
+.teacher-info {
+  flex: 1;
 }
 
 .teacher-info h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.08rem;
   color: #0f172a;
+  line-height: 1.3;
 }
 
 .teacher-info p {
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   color: #475569;
+  font-size: 0.88rem;
 }
 
 .teacher-title {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 999px;
   background: rgba(34, 197, 94, 0.12);
   color: #166534;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .available {
@@ -177,49 +186,52 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #64748b;
-  margin-top: 10px;
-  font-size: 0.95rem;
+  margin-top: 6px;
+  font-size: 0.82rem;
 }
 
 .schedule-body {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .info-block {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 18px;
-  border-radius: 18px;
+  padding: 12px 14px;
+  border-radius: 14px;
   background: #f8fafc;
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .info-block span {
   color: #64748b;
+  font-size: 0.85rem;
 }
 
 .info-block strong {
   color: #0f172a;
+  font-size: 0.88rem;
 }
 
 .card-actions {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .view-btn,
 .book-btn {
   width: 100%;
-  min-height: 52px;
+  min-height: 44px;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  font-size: 0.9rem;
 }
 
 .view-btn {
@@ -243,13 +255,23 @@
   transform: none;
 }
 
+@media (max-width: 1024px) {
+  .schedule-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 860px) {
   .filter-row {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 700px) {
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+
   .teacher-top {
     flex-direction: column;
     align-items: stretch;

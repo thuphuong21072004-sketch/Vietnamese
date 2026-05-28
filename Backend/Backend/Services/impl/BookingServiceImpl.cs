@@ -14,6 +14,7 @@ namespace Backend.Services.impl
         private readonly UserRepository _userRepository;
         private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
+        private readonly PaymentRepository _paymentRepository;
 
         public BookingServiceImpl(
             BookingRepository bookingRepository,
@@ -21,7 +22,8 @@ namespace Backend.Services.impl
             TeacherAvailabilityRepository availabilityRepository,
             TeacherProfileRepository teacherProfileRepository,
             UserContextUtil userContext,
-            IMapper mapper)
+            IMapper mapper,
+            PaymentRepository paymentRepository)
         {
             _bookingRepository =
                 bookingRepository;
@@ -40,6 +42,7 @@ namespace Backend.Services.impl
 
             _mapper =
                 mapper;
+            _paymentRepository = paymentRepository;
         }
 
         /*
@@ -507,12 +510,86 @@ namespace Backend.Services.impl
          * auto update status
          */
 
-        private async Task
-AutoUpdateStatus(
+        private async Task AutoUpdateStatus(
     Booking booking)
         {
             var now = DateTime.Now;
+            
+            if (
+                booking.Status ==
+                common.Constant
+                    .StatusBooking
+                    .PendingPayment
+            )
+            {
+                var payment =
+                    await _paymentRepository
+                        .GetByBookingId(
+                            booking.BookingId);
 
+                if (
+    payment != null
+    &&
+    booking.Status ==
+    common.Constant
+        .StatusBooking
+        .PendingPayment
+    &&
+    (
+        payment.Status ==
+        common.Constant
+            .StatusPayment
+            .Pending
+
+        ||
+
+        payment.Status ==
+        common.Constant
+            .StatusPayment
+            .Failed
+    )
+    &&
+    payment.CreatedDate
+        .AddMinutes(5)
+        <= DateTime.Now
+)
+                {
+                    payment.Status =
+                        common.Constant
+                            .StatusPayment
+                            .Expired;
+
+                    booking.Status =
+                        common.Constant
+                            .StatusBooking
+                            .Cancelled;
+
+                    var availability =
+                        await _availabilityRepository
+                            .GetById(
+                                booking.AvailabilityId);
+
+                    if (availability != null)
+                    {
+                        availability.Status =
+                            common.Constant
+                                .StatusTeacherAvailability
+                                .Available;
+
+                        await _availabilityRepository
+                            .Update(availability);
+                    }
+
+                    await _paymentRepository
+                        .Update(payment);
+
+                    await _bookingRepository
+                        .Update(booking);
+
+                    await _bookingRepository
+                        .Save();
+                }
+            }
             /*
              * confirmed -> in progress
              */

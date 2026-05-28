@@ -1,44 +1,43 @@
-/* Styles for teacher's My Class (teaching bookings) - align with user booking visuals */
 .booking-page {
-  max-width: 1160px;
-  margin: 40px auto;
-  padding: 0 18px;
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 12px;
 }
 
 .page-header {
-  max-width: 960px;
-  margin: 0 auto 18px;
-  padding: 22px 26px;
+  max-width: 900px;
+  margin: 0 auto 14px;
+  padding: 16px 18px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(99, 102, 241, 0.12);
-  border-radius: 20px;
+  border-radius: 16px;
   color: #0f172a;
 }
 
 .booking-grid {
   display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
 }
 
 .booking-card {
-  padding: 20px;
-  border-radius: 20px;
+  padding: 14px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.08);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
 .teacher-top {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .teacher-avatar {
-  width: 64px;
-  height: 64px;
+  width: 50px;
+  height: 50px;
   border-radius: 14px;
   object-fit: cover;
   background: linear-gradient(135deg, #7c3aed, #6366f1);
@@ -49,78 +48,166 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .teacher-info h2 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #0f172a;
 }
 
 .status-badge {
   display: inline-flex;
-  margin-top: 6px;
-  padding: 6px 12px;
+  margin-top: 5px;
+  padding: 5px 10px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
 }
 
-.status-badge.pending { background: rgba(251,191,36,0.12); color:#92400e }
-.status-badge.booked { background: rgba(34,197,94,0.12); color:#166534 }
-.status-badge.completed { background: rgba(59,130,246,0.12); color:#1d4ed8 }
-.status-badge.cancelled { background: rgba(248,113,113,0.12); color:#b91c1c }
+.status-badge.pending {
+  background: rgba(251,191,36,0.12);
+  color: #92400e;
+}
 
-.booking-body { display: grid; gap: 12px; margin-bottom: 14px }
+.status-badge.booked {
+  background: rgba(34,197,94,0.12);
+  color: #166534;
+}
 
-.info-row { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid rgba(15,23,42,0.06); color:#334155 }
-.info-row span { color:#64748b }
-.info-row strong { color:#0f172a }
+.status-badge.completed {
+  background: rgba(59,130,246,0.12);
+  color: #1d4ed8;
+}
 
-.booking-actions { display:grid; gap:10px }
+.status-badge.cancelled {
+  background: rgba(248,113,113,0.12);
+  color: #b91c1c;
+}
 
-.detail-btn, .room-btn, .cancel-btn, .info-btn { width:100%; min-height:46px; border-radius:12px; font-weight:700; cursor:pointer; border:none }
-.detail-btn { background:#eef2ff; color:#4338ca }
-.room-btn { background: linear-gradient(135deg,#10b981,#059669); color:#fff }
-.cancel-btn { background:#fff; color:#334155; border:1px solid rgba(15,23,42,0.06) }
-.info-btn { background:#f8fafc; color:#64748b }
+.booking-body {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
 
-@media (max-width:760px) { .teacher-top { flex-direction:column; align-items:flex-start } }
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(15,23,42,0.06);
+  color: #334155;
+  font-size: 12px;
+}
+
+.info-row span {
+  color: #64748b;
+}
+
+.info-row strong {
+  color: #0f172a;
+}
+
+.booking-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-btn,
+.room-btn,
+.cancel-btn,
+.info-btn {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.detail-btn {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.room-btn {
+  background: linear-gradient(135deg,#10b981,#059669);
+  color: #fff;
+}
+
+.cancel-btn {
+  background: #fff;
+  color: #334155;
+  border: 1px solid rgba(15,23,42,0.06);
+}
+
+.info-btn {
+  background: #f8fafc;
+  color: #64748b;
+}
 
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
-  justify-content: flex-start;
-  margin: 18px 0;
-  padding: 0 6px;
+  margin: 14px 0;
+  padding: 0 4px;
 }
 
 .filter-label {
   font-weight: 700;
   color: #0f172a;
+  font-size: 13px;
 }
 
 .filter-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .filter-buttons button {
   border: 1px solid rgba(99, 102, 241, 0.16);
   background: #fff;
   color: #334155;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 12px;
+  transition: all .2s ease;
 }
 
 .filter-buttons button.active {
   background: #6366f1;
   color: #fff;
   border-color: #6366f1;
+}
+
+@media (max-width: 1000px) {
+  .booking-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width:760px) {
+
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,0 +1,91 @@
+
+<div class="speak-page">
+
+    <div class="background-circle circle-1"></div>
+    <div class="background-circle circle-2"></div>
+
+    <div class="speak-container">
+
+        <div class="top-section">
+
+            <div class="logo-box">
+                <div class="logo-icon">
+                    <i class="fas fa-microphone-alt"></i>
+                </div>
+            </div>
+
+            <h1>Luyện Nói</h1>
+
+            <p class="subtitle">
+                Nhập tiếng Anh hoặc tiếng Việt để dịch nhanh
+            </p>
+
+        </div>
+
+        <div class="translate-card">
+
+            <div class="translate-row">
+
+                <div class="language-box">
+
+                    <div class="language-title">
+                        English
+                    </div>
+
+                    <input type="text" [(ngModel)]="englishText" (keyup.enter)="translateFromEnglish()"
+                        placeholder="Nhập tiếng Anh..." />
+
+                </div>
+
+                <div class="swap-icon">
+                    ⇄
+                </div>
+
+                <div class="language-box">
+
+                    <div class="language-title">
+                        Tiếng Việt
+                    </div>
+
+                    <input type="text" [(ngModel)]="vietnameseText" (keyup.enter)="translateFromVietnamese()"
+                        placeholder="Nhập tiếng Việt..." />
+
+                </div>
+
+            </div>
+
+            <div class="loading-section" *ngIf="isLoading">
+
+                <div class="loader"></div>
+
+                <p>Đang dịch...</p>
+
+            </div>
+
+            <div class="button-group">
+
+                <button class="speak-btn" (click)="speakText(englishText, 'en-US')" [disabled]="!englishText">
+
+                    Nghe Tiếng Anh
+
+                </button>
+
+                <button class="speak-btn" (click)="speakText(vietnameseText, 'vi-VN')" [disabled]="!vietnameseText">
+
+                    Nghe Tiếng Việt
+
+                </button>
+
+                <button class="clear-btn" (click)="clearAll()">
+
+                    Xóa
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

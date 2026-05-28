@@ -4,7 +4,6 @@ using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
 using Microsoft.EntityFrameworkCore;
-using Backend.Services.Interfaces;
 
 namespace Backend.Services.impl
 {
@@ -25,7 +24,6 @@ namespace Backend.Services.impl
         private readonly CourseRepository _courseRepository;
         private readonly UnitRepository _unitRepository;
         private readonly UserRepository _userRepository;
-        private readonly NotificationService _notificationService;
         public TestServiceImpl(
             UserContextUtil userContext,
             QuizRepository quizRepository,
@@ -41,8 +39,7 @@ namespace Backend.Services.impl
             LevelRepository levelRepository,
             CourseRepository courseRepository,
             UnitRepository unitRepository,
-            UserRepository userRepository,
-            NotificationService notificationService)
+            UserRepository userRepository)
         {
             _userContext = userContext;
             _quizRepository = quizRepository;
@@ -59,7 +56,6 @@ namespace Backend.Services.impl
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _userRepository = userRepository;
-            _notificationService = notificationService;
         }
 
         /* kiểm tra admin
@@ -705,7 +701,7 @@ namespace Backend.Services.impl
         }
 
         /* kiểm tra ,chấm diểm...
-         * O(q + a + l + c + u)
+         * O(q + a )
          * thuphuong21072004
          */
         public async Task SubmitQuiz(int quizId, List<int> answerIds)

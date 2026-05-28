@@ -70,7 +70,7 @@
 
 
     <div class="menu-section" *ngIf="!isLogin">
-        <h4>Discover</h4>
+        
         <ul>
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
@@ -78,7 +78,7 @@
     </div>
 
     <div class="menu-section" *ngIf="role === 'User'">
-        <h4>Users</h4>
+       
         <ul>
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="/user/dashboard">Dashboard</button></li>
@@ -97,7 +97,7 @@
     </div>
 
     <div *ngIf="role === 'Admin'" class="menu-section role-switch">
-        <h4>Mode</h4>
+        
         <button
             *ngIf="role === 'Admin'"
             class="menu-btn"

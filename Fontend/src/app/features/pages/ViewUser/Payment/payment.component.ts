@@ -184,6 +184,49 @@ export class PaymentComponent implements OnInit {
 
     this.loading = true;
 
+    /*
+     * payment success
+     */
+    if (this.payment && this.payment.status === 1) {
+      this.goClassroom();
+
+      return;
+    }
+
+    /*
+     * already has payment
+     * pending or failed
+     */
+    if (
+      this.payment &&
+      (this.payment.status === 0 || this.payment.status === 2)
+    ) {
+      this.paymentService
+        .createVNPayUrl(this.payment.paymentId)
+
+        .subscribe({
+          next: (vnpayRes) => {
+            /*
+             * redirect VNPay
+             */
+            window.location.href = vnpayRes.paymentUrl;
+          },
+
+          error: (err) => {
+            console.error(err);
+
+            this.loading = false;
+
+            alert(err.error?.message || 'Create VNPay failed');
+          },
+        });
+
+      return;
+    }
+
+    /*
+     * create new payment
+     */
     const body = {
       bookingId: this.bookingId,
 
@@ -192,9 +235,6 @@ export class PaymentComponent implements OnInit {
       paymentMethod: 0,
     };
 
-    /*
-     * create payment
-     */
     this.paymentService
       .create(body)
 
@@ -221,9 +261,7 @@ export class PaymentComponent implements OnInit {
 
                 this.loading = false;
 
-                console.log(err);
-
-                alert(JSON.stringify(err.error));
+                alert(err.error?.message || 'Create VNPay failed');
               },
             });
         },

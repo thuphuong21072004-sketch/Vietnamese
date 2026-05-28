@@ -179,10 +179,10 @@ export class TeacherProfileComponent implements OnInit {
   getStatusText(status: number): string {
     switch (status) {
       case 0:
-        return 'Draft';
+        return 'Created';
 
       case 1:
-        return 'Pending Review';
+        return 'Submitted ';
 
       case 2:
         return 'Approved';
@@ -191,7 +191,7 @@ export class TeacherProfileComponent implements OnInit {
         return 'Rejected';
 
       default:
-        return 'Unknown';
+        return 'Banned';
     }
   }
 
@@ -252,22 +252,14 @@ export class TeacherProfileComponent implements OnInit {
       const reader = new FileReader();
 
       reader.onload = () => {
-        /*
-         * avatar
-         */
+        
         if (file.type.startsWith('image/')) {
           this.profile.avatarUrl = reader.result;
         } else if (file.type.startsWith('video/')) {
 
-        /*
-         * intro video
-         */
           this.profile.introVideoUrl = reader.result;
         } else {
 
-        /*
-         * cv
-         */
           this.profile.cvUrl = reader.result;
         }
       };

@@ -7,127 +7,125 @@
 }
 
 .teacher-list-page {
-    max-width: 1300px;
+    max-width: 980px;
     margin: auto;
-    padding: 40px 20px 100px;
+    padding: 22px 12px 50px;
 }
 
 .teacher-hero {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 34px;
 }
 
 .teacher-hero .eyebrow {
     display: inline-block;
-    padding: 8px 18px;
+    padding: 5px 13px;
     border-radius: 999px;
     background: rgba(59,130,246,0.12);
     color: #2563eb;
     font-weight: 800;
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-bottom: 18px;
-    font-size: 13px;
+    margin-bottom: 12px;
+    font-size: 11px;
 }
 
 .teacher-hero h1 {
-    font-size: 54px;
+    font-size: 20px;
     font-weight: 900;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
     color: #0f172a;
+    line-height: 1.1;
 }
 
 .teacher-hero p {
-    max-width: 700px;
+    max-width: 620px;
     margin: auto;
     color: #64748b;
-    line-height: 1.8;
-    font-size: 18px;
+    line-height: 1.6;
+    font-size: 14px;
 }
 
 .teacher-grid {
     display: grid;
-    grid-template-columns:
-        repeat(auto-fill, minmax(340px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
 }
 
 .teacher-card {
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(14px);
-    border-radius: 34px;
-    padding: 28px;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    padding: 18px;
     transition: 0.22s;
-    box-shadow:
-        0 24px 60px rgba(15,23,42,0.08);
+    box-shadow: 0 12px 32px rgba(15,23,42,0.06);
 }
 
 .teacher-card:hover {
-    transform: translateY(-8px);
-    box-shadow:
-        0 30px 70px rgba(37,99,235,0.14);
+    transform: translateY(-4px);
+    box-shadow: 0 18px 42px rgba(37,99,235,0.1);
 }
 
 .teacher-top {
     display: flex;
     align-items: center;
-    gap: 18px;
-    margin-bottom: 22px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .teacher-avatar {
-    width: 88px;
-    height: 88px;
+    width: 62px;
+    height: 62px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid white;
-    box-shadow:
-        0 10px 24px rgba(0,0,0,0.12);
+    border: 2px solid white;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
 .teacher-avatar.placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 34px;
+    font-size: 20px;
     font-weight: 900;
-    background:
-        linear-gradient(180deg, #60a5fa, #2563eb);
+    background: linear-gradient(180deg, #60a5fa, #2563eb);
     color: white;
 }
 
 .teacher-info h2 {
-    margin: 0 0 10px;
-    font-size: 26px;
-    font-weight: 900;
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: 800;
     color: #0f172a;
 }
 
 .teacher-info span {
     color: #64748b;
     font-weight: 700;
+    font-size: 12px;
 }
 
 .teacher-body p {
     color: #475569;
-    line-height: 1.8;
-    min-height: 120px;
+    line-height: 1.6;
+    min-height: 82px;
+    font-size: 13px;
 }
 
 .teacher-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .teacher-badge {
-    padding: 10px 16px;
+    padding: 7px 11px;
     border-radius: 999px;
     background: #eff6ff;
     color: #2563eb;
-    font-weight: 800;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 11px;
 }
 
 .teacher-badge.price {
@@ -137,38 +135,34 @@
 
 .view-btn {
     width: 100%;
-    margin-top: 26px;
+    margin-top: 16px;
     border: none;
-    border-radius: 20px;
-    padding: 18px;
-    background:
-        linear-gradient(180deg, #3b82f6, #2563eb);
+    border-radius: 14px;
+    padding: 11px;
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
     color: white;
-    font-size: 16px;
-    font-weight: 900;
+    font-size: 13px;
+    font-weight: 800;
     cursor: pointer;
-    box-shadow:
-        0 12px 0 rgba(37,99,235,0.24),
-        0 18px 32px rgba(37,99,235,0.18);
+    box-shadow: 0 6px 0 rgba(37,99,235,0.18), 0 10px 20px rgba(37,99,235,0.12);
     transition: 0.18s;
 }
 
 .view-btn:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
 .loading {
     text-align: center;
-    margin-top: 80px;
-    font-size: 18px;
+    margin-top: 40px;
+    font-size: 15px;
     color: #64748b;
     font-weight: 700;
 }
 
 @media (max-width: 768px) {
-
     .teacher-hero h1 {
-        font-size: 38px;
+        font-size: 18px;
     }
 
     .teacher-grid {
@@ -176,6 +170,6 @@
     }
 
     .teacher-card {
-        border-radius: 26px;
+        border-radius: 18px;
     }
 }
