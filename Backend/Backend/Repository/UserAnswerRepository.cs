@@ -5,12 +5,9 @@ namespace Backend.Repository
 {
     public interface UserAnswerRepository
     {
-        Task SaveUserAnswer(UserAnswer userAnswer);
-
         Task<List<UserAnswerDTO>> GetUserAnswers(int userId, int quizId);
+        Task SaveUserAnswer(UserAnswer userAnswer);
+        Task DeleteByUserQuizId(int userQuizId);
         Task Save();
-
-        Task DeleteByUserQuizId(
-            int userQuizId);
     }
 }

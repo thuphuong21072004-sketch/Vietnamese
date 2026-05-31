@@ -9,7 +9,6 @@ namespace Backend.Repository
         Task Save();
         Task<Answer?>GetAnswerById(int id);
         Task DeleteAnswers(List<int> ids);
-        Task<List<Answer>> GetAnswersByIds(
-            List<int> ids);
+        Task<List<Answer>> GetAnswersByIds( List<int> ids);
     }
 }

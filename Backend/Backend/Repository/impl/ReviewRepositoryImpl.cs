@@ -57,8 +57,7 @@ namespace Backend.Repository.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<Review>>
-GetByTeacherId(int instructorId)
+        public async Task<List<Review>> GetByTeacherId(int instructorId)
         {
             return await _context.Reviews
 

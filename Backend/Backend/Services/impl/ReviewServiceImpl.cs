@@ -30,20 +30,13 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task Create(
-    ReviewDTO dto)
+        public async Task Create( ReviewDTO dto)
         {
-            /*
-             * user hiện tại
-             */
             var email = _userContext.GetEmail();
 
             int userId = (await _userRepository
                 .GetUserIdByEmail(email))!.Value;
 
-            /*
-             * validate rating
-             */
             if (dto.Rating < 1
                 || dto.Rating > 5)
             {
@@ -51,9 +44,6 @@ namespace Backend.Services.impl
                     "Rating must be between 1 and 5");
             }
 
-            /*
-             * validate comment
-             */
             if (string.IsNullOrWhiteSpace(
                 dto.Comment))
             {
@@ -67,9 +57,6 @@ namespace Backend.Services.impl
                     "Comment too long");
             }
 
-            /*
-             * tìm booking
-             */
             var booking =
                 await _bookingRepository
                     .GetById(dto.BookingId);
@@ -80,18 +67,12 @@ namespace Backend.Services.impl
                     "Booking not found");
             }
 
-            /*
-             * chỉ student mới review
-             */
             if (booking.StudentId != userId)
             {
                 throw new UnauthorizedAccessException(
                     "No permission");
             }
 
-            /*
-             * chỉ review lớp hoàn thành
-             */
             if (booking.Status !=
                 common.Constant
                 .StatusBooking.Completed)
@@ -100,9 +81,6 @@ namespace Backend.Services.impl
                     "Class not completed");
             }
 
-            /*
-             * kiểm tra review tồn tại
-             */
             var exist =
                 await _reviewRepository
                     .GetByBookingId(
@@ -114,9 +92,6 @@ namespace Backend.Services.impl
                     "Already reviewed");
             }
 
-            /*
-             * tạo review
-             */
             var review = new Review
             {
                 BookingId =
@@ -141,9 +116,6 @@ namespace Backend.Services.impl
             await _reviewRepository
                 .Create(review);
 
-            /*
-             * cập nhật rating teacher
-             */
             var teacher =
                 await _teacherRepository
                     .GetByUserId(
@@ -180,12 +152,9 @@ namespace Backend.Services.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<ReviewDTO>>
-GetByTeacherId(int instructorId)
+        public async Task<List<ReviewDTO>> GetByTeacherId(int instructorId)
         {
-            /*
-             * kiểm tra teacher
-             */
+            
             var teacher =
                 await _teacherRepository
                     .GetByUserId(
@@ -197,9 +166,6 @@ GetByTeacherId(int instructorId)
                     "Teacher not found");
             }
 
-            /*
-             * lấy review
-             */
             var data =
                 await _reviewRepository
                     .GetByTeacherId(
@@ -214,12 +180,9 @@ GetByTeacherId(int instructorId)
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<ReviewDTO?>
-GetByBookingId(int bookingId)
+        public async Task<ReviewDTO?> GetByBookingId(int bookingId)
         {
-            /*
-             * tìm review
-             */
+            
             var review =
                 await _reviewRepository
                     .GetByBookingId(
@@ -230,9 +193,6 @@ GetByBookingId(int bookingId)
                 return null;
             }
 
-            /*
-             * tìm booking
-             */
             var booking =
                 await _bookingRepository
                     .GetById(bookingId);
@@ -243,18 +203,11 @@ GetByBookingId(int bookingId)
                     "Booking not found");
             }
 
-            /*
-             * user hiện tại
-             */
             var email = _userContext.GetEmail();
 
             int userId = (await _userRepository
                 .GetUserIdByEmail(email))!.Value;
 
-            /*
-             * chỉ student hoặc instructor
-             * mới được xem review
-             */
             if (booking.StudentId != userId
                 && booking.InstructorId != userId)
             {

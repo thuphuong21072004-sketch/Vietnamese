@@ -6,47 +6,47 @@ namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/video-rooms")]
-    public class VideoRoomController
-        : ControllerBase
+    [Authorize]
+    public class VideoRoomController : ControllerBase
     {
-        private readonly VideoRoomService
-            _videoRoomService;
+        private readonly VideoRoomService _videoRoomService;
 
         public VideoRoomController(
-            VideoRoomService videoRoomService
-        )
+            VideoRoomService videoRoomService)
         {
-            _videoRoomService =
-                videoRoomService;
+            _videoRoomService = videoRoomService;
         }
 
         /*
-         * tạo room video call
+         * tạo phòng học
          */
-        [Authorize]
         [HttpPost("{bookingId}")]
-        public async Task<IActionResult> Create(int bookingId)
+        public async Task<IActionResult> Create(
+            int bookingId)
         {
-            return Ok(
+            var room =
                 await _videoRoomService
-                    .Create(bookingId)
-            );
-        }
-
-        /*
-         * lấy room theo booking
-         */
-        [Authorize]
-        [HttpGet("{bookingId}")]
-        public async Task<IActionResult>  GetByBookingId(int bookingId)
-        {
-            var room = await _videoRoomService.GetByBookingId(bookingId);
-            if (room == null)
-            {
-                return NotFound(new { success = false, message = "Video room not found" });
-            }
+                    .Create(bookingId);
 
             return Ok(room);
+        }
+
+        /*
+         * tham gia phòng học
+         */
+        [HttpGet("join/{bookingId}")]
+        public async Task<IActionResult> JoinRoom(
+            int bookingId)
+        {
+            var joinUrl =
+                await _videoRoomService
+                    .JoinRoom(bookingId);
+
+            return Ok(new
+            {
+                success = true,
+                joinUrl
+            });
         }
     }
 }

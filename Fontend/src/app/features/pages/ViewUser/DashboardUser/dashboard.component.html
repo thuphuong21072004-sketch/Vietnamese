@@ -1,0 +1,156 @@
+
+<div class="dashboard-container">
+
+  <div class="dashboard-header">
+    <h2>Student Dashboard</h2>
+
+    <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" />
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-title">Total Lessons</div>
+      <div class="stat-value">
+        {{ statistics.totalBookings }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Completed Lessons</div>
+      <div class="stat-value">
+        {{ statistics.completedBookings }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Upcoming Lessons</div>
+      <div class="stat-value">
+        {{ statistics.upcomingBookings }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Cancelled Lessons</div>
+      <div class="stat-value">
+        {{ statistics.cancelledBookings }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Total Paid</div>
+      <div class="stat-value money">
+        {{ paymentStatistics.totalPaid | currency:'USD':'symbol':'1.2-2' }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Refunded Amount</div>
+      <div class="stat-value money">
+        {{ paymentStatistics.refundedAmount | currency:'USD':'symbol':'1.2-2' }}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Pending Refund</div>
+      <div class="stat-value money">
+        {{ paymentStatistics.pendingRefundAmount | currency:'USD':'symbol':'1.2-2' }}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="history-section">
+
+    <div class="section-header">
+      <h3>Payment History</h3>
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="payment-table">
+
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Teacher</th>
+            <th>Study Date</th>
+            <th>Duration</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="paymentHistory.length === 0">
+            <td colspan="6" class="empty-row">
+              No payment records found
+            </td>
+          </tr>
+
+          <tr *ngFor="let item of paymentHistory">
+
+            <td>
+              #{{ item.paymentId }}
+            </td>
+
+            <td>
+              {{ item.teacherName }}
+            </td>
+
+            <td>
+              {{ item.studyDate }}
+            </td>
+
+            <td>
+              {{ item.hours }} hrs
+            </td>
+
+            <td>
+              {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
+            </td>
+
+            <td>
+
+              <span class="status success" *ngIf="item.paymentStatus === 1">
+                Paid
+              </span>
+
+              <span class="status refund" *ngIf="item.paymentStatus === 3">
+                Refunded
+              </span>
+
+              <span class="status pending" *ngIf="item.paymentStatus !== 1 && item.paymentStatus !== 3">
+                Other
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="pagination" *ngIf="totalPayments > pageSize">
+
+      <button (click)="previousPage()" [disabled]="page === 1">
+        Previous
+      </button>
+
+      <span>
+        Page {{ page }}
+      </span>
+
+      <button (click)="nextPage()" [disabled]="page * pageSize >= totalPayments">
+        Next
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

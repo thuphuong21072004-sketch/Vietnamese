@@ -60,7 +60,6 @@ namespace Backend.Repository.impl
         {
             if (ids == null || !ids.Any()) return;
 
-            // Truy vấn các IDs cần thiết để xóa phân tầng mà không cần tải toàn bộ Object
             var unitIds = await _context.Units.Where(u => ids.Contains(u.CourseId)).Select(u => u.UnitId).ToListAsync();
             var quizIds = await _context.Quizzes.Where(q => q.RefType == "UNIT" && unitIds.Contains(q.RefId)).Select(q => q.QuizId).ToListAsync();
             var partIds = await _context.Parts.Where(p => quizIds.Contains(p.QuizId)).Select(p => p.PartId).ToListAsync();
@@ -73,7 +72,6 @@ namespace Backend.Repository.impl
 
             var answerIds = await _context.Answers.Where(a => questionIds.Contains(a.QuestionId)).Select(a => a.AnswerId).ToListAsync();
 
-            // Thực hiện xóa trực tiếp tại DB theo thứ tự ngược để tránh lỗi ràng buộc (nếu không có Cascade)
             await _context.UserAnswer.Where(ua => answerIds.Contains(ua.AnswerId)).ExecuteDeleteAsync();
             await _context.UserQuiz.Where(uq => quizIds.Contains(uq.QuizId)).ExecuteDeleteAsync();
             await _context.Answers.Where(a => answerIds.Contains(a.AnswerId)).ExecuteDeleteAsync();

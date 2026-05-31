@@ -41,35 +41,22 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task Create(
-    TeacherAvailabilityDTO dto)
+        public async Task Create( TeacherAvailabilityDTO dto)
         {
-            /*
-             * validate
-             */
             if (dto.StartTime >= dto.EndTime)
             {
                 throw new Exception(
                     "End time must be greater than start time");
             }
 
-            /*
-             * lấy email hiện tại
-             */
             var email =
                 _userContext.GetEmail();
 
-            /*
-             * tìm user id
-             */
             int userId =
                 (await _userRepository
                     .GetUserIdByEmail(email))
                     .Value;
 
-            /*
-             * check teacher profile
-             */
             var teacherProfile =
                 await _teacherProfileRepository
                     .GetByUserId(userId);
@@ -80,9 +67,6 @@ namespace Backend.Services.impl
                     "Teacher profile not found");
             }
 
-            /*
-             * check approved
-             */
             if (teacherProfile.Status !=
                 common.Constant.StatusTeacherProfile.Approved)
             {
@@ -90,9 +74,6 @@ namespace Backend.Services.impl
                     "Teacher profile is not approved");
             }
 
-            /*
-             * tạo lịch
-             */
             var availability =
                 new TeacherAvailability
                 {
@@ -173,9 +154,7 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task Update(
-    int id,
-    TeacherAvailabilityDTO dto)
+        public async Task Update( int id, TeacherAvailabilityDTO dto)
         {
             var email = _userContext.GetEmail();
 
@@ -211,8 +190,7 @@ namespace Backend.Services.impl
                     "You cannot edit this schedule");
             }
 
-            bool hasBooking =
-    await HasBooking(id);
+            bool hasBooking =await HasBooking(id);
 
             if (hasBooking)
             {
@@ -318,10 +296,7 @@ namespace Backend.Services.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<TeacherAvailabilityDTO>>
-GetMySchedules(
-    byte? status,
-    DateOnly? date)
+        public async Task<List<TeacherAvailabilityDTO>> GetMySchedules( byte? status, DateOnly? date)
         {
             var email =
                 _userContext.GetEmail();
@@ -342,8 +317,7 @@ GetMySchedules(
                 List<TeacherAvailabilityDTO>>(data);
         }
 
-        private async Task<bool>
-HasBooking(int availabilityId)
+        private async Task<bool> HasBooking(int availabilityId)
         {
             var booking =
                 await _bookingRepository

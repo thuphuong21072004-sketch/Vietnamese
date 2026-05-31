@@ -180,8 +180,7 @@ namespace Backend.Services.impl
             var email= _userContext.GetEmail();
             int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var courses = await _courseRepository
-    .GetAllCourses(levelId, null);
+            var courses = await _courseRepository.GetAllCourses(levelId, null);
 
             var progresses = await _progressRepository
                 .GetUserCourses(
@@ -312,8 +311,7 @@ namespace Backend.Services.impl
         {
             var email = _userContext.GetEmail();
             int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
-            var units = await _unitRepository
-    .GetAllUnits(courseId, null);
+            var units = await _unitRepository.GetAllUnits(courseId, null);
 
             var progresses = await _progressRepository
                 .GetUserProgress(
@@ -484,9 +482,7 @@ namespace Backend.Services.impl
             var refCourse = common.Constant.RefType.Course;
             var refUnit = common.Constant.RefType.Unit;
 
-            var hasLevel =
-    await _progressRepository
-        .HasUserProgress(userId, refLevel);
+            var hasLevel =await _progressRepository.HasUserProgress(userId, refLevel);
 
             var hasCourse =
                 await _progressRepository

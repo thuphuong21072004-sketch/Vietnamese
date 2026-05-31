@@ -664,39 +664,24 @@ namespace Backend.Services.impl
         }
 
 
-        private QuizResult CalculateQuizResult(
-    List<Question> questions,
-    List<int> answerIds,
-    decimal? passScore)
+        private QuizResult CalculateQuizResult(List<Question> questions, List<int> answerIds, decimal? passScore)
         {
-            decimal totalScore =
-                questions.Sum(x => x.Score);
+            decimal totalScore = questions.Sum(x => x.Score);
 
-            var answerSet =
-                answerIds.ToHashSet();
+            var answerSet = answerIds.ToHashSet();
 
             decimal earnedScore = questions
-                .Where(q =>
-                    q.Answers != null &&
-                    q.Answers.Any(a =>
-                        a.IsCorrect &&
-                        answerSet.Contains(a.AnswerId)))
+                .Where(q => q.Answers != null && q.Answers.Any(a => a.IsCorrect && answerSet.Contains(a.AnswerId)))
                 .Sum(q => q.Score);
 
-            decimal finalScore =
-                totalScore == 0
-                    ? 0
-                    : Math.Round(
-                        earnedScore / totalScore * 100,
-                        2);
+            decimal finalScore = totalScore == 0
+                ? 0
+                : Math.Round(earnedScore / totalScore * 100, 2);
 
             return new QuizResult
             {
                 FinalScore = finalScore,
-
-                IsPassed =
-                    passScore != null &&
-                    finalScore >= passScore
+                IsPassed = passScore != null && finalScore >= passScore
             };
         }
 
@@ -712,11 +697,7 @@ namespace Backend.Services.impl
 
             var questions = await _questionRepository.GetQuestionsByQuiz(quizId);
 
-            var result = CalculateQuizResult(
-    questions,
-    answerIds,
-    quiz.PassScore
-);
+            var result = CalculateQuizResult( questions, answerIds, quiz.PassScore);
 
             var userQuiz =
                 await _userQuizRepository.GetUserQuiz(userId, quizId);
@@ -749,9 +730,7 @@ namespace Backend.Services.impl
 
             await _userQuizRepository.Save();
 
-            var answers =
-    await _answerRepository
-        .GetAnswersByIds(answerIds);
+            var answers = await _answerRepository.GetAnswersByIds(answerIds);
 
             var answerDict = answers
                 .ToDictionary(x => x.AnswerId);
@@ -840,17 +819,9 @@ namespace Backend.Services.impl
                     .OrderBy(x => x.OrderIndex)
                     .ToList();
 
-                var userLevels =
-    await _progressRepository
-        .GetUserLevels(
-            userId,
-            common.Constant.RefType.Level
-        );
+                var userLevels = await _progressRepository.GetUserLevels( userId, common.Constant.RefType.Level );
 
-                var userLevelIds = userLevels
-    .Where(x => x.Status == true)
-    .Select(x => x.RefId)
-    .ToHashSet();
+                var userLevelIds = userLevels.Where(x => x.Status == true).Select(x => x.RefId).ToHashSet();
 
                 int currentMaxOrder = currentLevels
                     .Where(x =>

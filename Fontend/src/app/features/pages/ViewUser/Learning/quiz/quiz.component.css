@@ -1,7 +1,7 @@
 .lesson-container {
     margin: 0 auto;
-    max-width: 920px;
-    padding: 24px 22px 34px;
+    max-width: 1400px;
+    padding: 24px 40px 34px;
     background: transparent;
     border: none;
     border-radius: 0;
@@ -165,8 +165,9 @@
 }
 
 .passage-box {
-    margin: 20px 0 0 18px;
-    padding-bottom: 10px;
+    width: 100%;
+    margin: 24px 0 0 0;
+    padding: 0;
 }
 
 .question-box {
@@ -247,7 +248,8 @@
 }
 
 .passage-content {
-    text-align: center;
+    width: 100%;
+    text-align: justify;
 }
 
 .question-text,
@@ -258,7 +260,15 @@
     color: #1f2937;
     white-space: pre-line;
 }
-
+.passage-text {
+    width: 100%;
+    max-width: 100%;
+    font-size: 16px;
+    line-height: 2;
+    text-align: justify;
+    white-space: normal;
+    color: #1f2937;
+}
 .question-image,
 .answer-image {
     max-width: 240px;

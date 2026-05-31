@@ -94,17 +94,17 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
       this.showQuiz = true;
 
-      if (
-        this.refType === 'UNIT' ||
-        this.refType === 'COURSE_JUMP' ||
-        this.refType === 'LEVEL_JUMP'
-      ) {
+      if (this.refType === 'UNIT') {
         this.loadunit();
 
         return;
       }
 
-      if (this.refType === 'PLACEMENT') {
+      if (
+        this.refType === 'COURSE_JUMP' ||
+        this.refType === 'LEVEL_JUMP' ||
+        this.refType === 'PLACEMENT'
+      ) {
         this.loadQuiz();
 
         return;

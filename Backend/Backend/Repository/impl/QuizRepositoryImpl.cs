@@ -22,7 +22,6 @@ namespace Backend.Repository.impl
         public async Task<Quiz?> GetQuiz(int refId, string refType)
         {
             return await _context.Quizzes
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.RefId == refId &&
                     x.RefType == refType);
@@ -73,7 +72,6 @@ namespace Backend.Repository.impl
         public async Task<Quiz?> GetQuizById(int quizId)
         {
             return await _context.Quizzes
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.QuizId == quizId);
         }

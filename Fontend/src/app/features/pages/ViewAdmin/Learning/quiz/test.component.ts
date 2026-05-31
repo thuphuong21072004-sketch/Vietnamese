@@ -86,7 +86,10 @@ export class QuizComponent implements OnChanges {
           });
         } else {
           this.quiz = null;
-          this.baseService.handleError(null, 'Quiz not found or failed to load');
+          this.baseService.handleError(
+            null,
+            'Quiz not found or failed to load',
+          );
         }
       },
 
@@ -379,18 +382,37 @@ export class QuizComponent implements OnChanges {
       return;
     }
 
-    const refType = encodeURIComponent(this.quiz.refType || this.refType || 'UNIT');
-    const refId = encodeURIComponent(this.quiz.refId || this.refId || 0);
-    const queryParams = new URLSearchParams();
-    queryParams.set('refType', refType);
-    queryParams.set('refId', refId);
+    const refType = this.quiz.refType || this.refType || 'UNIT';
+    const refId = this.quiz.refId || this.refId || 0;
 
-    if (refType === 'UNIT') {
-      const unitId = encodeURIComponent(this.quiz.refId || this.refId || 0);
-      queryParams.set('unitId', unitId);
+    const encodedRefType = encodeURIComponent(refType);
+    const encodedRefId = encodeURIComponent(refId);
+
+    const queryParams = new URLSearchParams();
+
+    queryParams.set('refType', encodedRefType);
+    queryParams.set('refId', encodedRefId);
+
+    switch (refType) {
+      case 'UNIT':
+        queryParams.set('unitId', encodedRefId);
+        break;
+
+      case 'LEVEL_JUMP':
+        queryParams.set('levelId', encodedRefId);
+        break;
+
+      case 'COURSE_JUMP':
+        queryParams.set('courseId', encodedRefId);
+        break;
+
+      case 'PLACEMENT':
+        queryParams.set('placementId', encodedRefId);
+        break;
     }
 
     const url = `${window.location.origin}/user/quiz?${queryParams.toString()}`;
+
     window.open(url, '_blank');
   }
 

@@ -32,38 +32,6 @@ export class PaymentService {
   }
 
   /*
-   * payment success
-   */
-  success(paymentId: number, transactionCode: string): Observable<any> {
-    return this.http.put(
-      `${this.apiUrl}/${paymentId}/success`,
-
-      {},
-
-      {
-        ...this.getOptions(),
-
-        params: {
-          transactionCode,
-        },
-      },
-    );
-  }
-
-  /*
-   * payment failed
-   */
-  failed(paymentId: number): Observable<any> {
-    return this.http.put(
-      `${this.apiUrl}/${paymentId}/failed`,
-
-      {},
-
-      this.getOptions(),
-    );
-  }
-
-  /*
    * payment by booking
    */
   getByBooking(bookingId: number): Observable<any> {
@@ -148,5 +116,123 @@ export class PaymentService {
       {},
       this.getOptions(),
     );
+  }
+
+  /*
+   * student payment statistics
+   */
+  getMyStatistics(month: number, year: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/statistics`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+      },
+    });
+  }
+  /*
+   * student payment history
+   */
+  getMyPayments(
+    month: number,
+    year: number,
+    page: number = 1,
+    pageSize: number = 10,
+  ): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/payments`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+        page,
+        pageSize,
+      },
+    });
+  }
+
+  /*
+   * teacher salary statistics
+   */
+  getMySalaryStatistics(month: number, year: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/teacher/salary-statistics`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+      },
+    });
+  }
+
+  /*
+   * teacher salary history
+   */
+  getMySalaryHistory(
+    month: number,
+    year: number,
+    page: number = 1,
+    pageSize: number = 10,
+  ): Observable<any> {
+    return this.http.get(`${this.apiUrl}/teacher/salary-history`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+        page,
+        pageSize,
+      },
+    });
+  }
+
+  /*
+   * admin finance overview
+   */
+  getAdminFinanceOverview(month: number, year: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/finance-overview`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+      },
+    });
+  }
+
+  /*
+   * admin student finance
+   */
+  getStudentFinanceReport(
+    month: number,
+    year: number,
+    page: number = 1,
+    pageSize: number = 10,
+  ): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/student-finance`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+        page,
+        pageSize,
+      },
+    });
+  }
+
+  /*
+   * admin teacher finance
+   */
+  getTeacherFinanceReport(
+    month: number,
+    year: number,
+    page: number = 1,
+    pageSize: number = 10,
+  ): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/teacher-finance`, {
+      ...this.getOptions(),
+      params: {
+        month,
+        year,
+        page,
+        pageSize,
+      },
+    });
   }
 }

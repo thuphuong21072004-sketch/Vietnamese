@@ -6,6 +6,6 @@ namespace Backend.Services
     {
         Task<VideoRoomDTO>Create(int bookingId);
 
-        Task<VideoRoomDTO?>GetByBookingId(int bookingId);
+        Task<string> JoinRoom(int bookingId);
     }
 }

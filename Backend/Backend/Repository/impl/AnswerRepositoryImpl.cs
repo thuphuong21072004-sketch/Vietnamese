@@ -57,7 +57,6 @@ namespace Backend.Repository.impl
         public async Task<Answer?> GetAnswerById(int id)
         {
             return await _context.Answers
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.AnswerId == id);
         }
 

@@ -52,7 +52,6 @@ namespace Backend.Repository.impl
         public async Task<Question?> GetQuestionById(int id)
         {
             return await _context.Questions
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.QuestionId == id);
         }
 

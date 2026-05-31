@@ -211,17 +211,14 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
-        public async Task UpdateUserProgress(
-    UserProgress progress
-)
+        public async Task UpdateUserProgress( UserProgress progress)
         {
             _context.Entry(progress).State =
                 EntityState.Modified;
 
             await Task.CompletedTask;
         }
-        public async Task<bool>
-    ExistsProgress(
+        public async Task<bool> ExistsProgress(
         int userId,
         string refType,
         int refId

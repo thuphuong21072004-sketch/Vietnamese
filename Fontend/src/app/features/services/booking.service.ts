@@ -225,4 +225,51 @@ export class BookingService {
   getStudentName(booking: any): string {
     return booking?.student?.name || 'Student';
   }
+  /*
+   * student statistics
+   */
+  getMyStatistics(month: number, year: number): Observable<any> {
+    const params = new HttpParams().set('month', month).set('year', year);
+
+    return this.http.get<any>(`${this.apiUrl}/me/statistics`, {
+      ...this.getOptions(),
+      params,
+    });
+  }
+
+  /*
+   * teacher statistics
+   */
+  getTeacherStatistics(month: number, year: number): Observable<any> {
+    const params = new HttpParams().set('month', month).set('year', year);
+
+    return this.http.get<any>(`${this.apiUrl}/teacher/statistics`, {
+      ...this.getOptions(),
+      params,
+    });
+  }
+
+  /*
+   * admin top teachers
+   */
+  getTopTeachers(month: number, year: number): Observable<any[]> {
+    const params = new HttpParams().set('month', month).set('year', year);
+
+    return this.http.get<any[]>(`${this.apiUrl}/admin/top-teachers`, {
+      ...this.getOptions(),
+      params,
+    });
+  }
+
+  /*
+   * admin top students
+   */
+  getTopStudents(month: number, year: number): Observable<any[]> {
+    const params = new HttpParams().set('month', month).set('year', year);
+
+    return this.http.get<any[]>(`${this.apiUrl}/admin/top-students`, {
+      ...this.getOptions(),
+      params,
+    });
+  }
 }

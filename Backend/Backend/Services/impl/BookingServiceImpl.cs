@@ -48,216 +48,116 @@ namespace Backend.Services.impl
         /*
          * student đặt lịch
          */
-        public async Task<BookingDTO>
-        Create(int availabilityId)
+        public async Task<BookingDTO> Create(int availabilityId)
         {
-            var email =
-                _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var availability =
-                await _availabilityRepository
-                    .GetById(availabilityId);
+            var availability = await _availabilityRepository.GetById(availabilityId);
 
             if (availability == null)
             {
-                throw new KeyNotFoundException(
-                    "Schedule not found");
+                throw new KeyNotFoundException("Schedule not found");
             }
 
-            var teacher =
-                await _teacherProfileRepository
-                    .GetByUserId(
-                        availability.InstructorId);
+            var teacher = await _teacherProfileRepository.GetByUserId(availability.InstructorId);
 
-            if (
-                teacher == null
-                ||
-                teacher.Status !=
-               common.Constant
-                    .StatusTeacherProfile
-                    .Approved
-            )
+            if (teacher == null || teacher.Status != common.Constant.StatusTeacherProfile.Approved)
             {
-                throw new InvalidOperationException(
-                    "Teacher not approved");
+                throw new InvalidOperationException("Teacher not approved");
             }
 
-            /*
-             * không tự đặt lịch của mình
-             */
-            if (
-                availability.InstructorId ==
-                userId
-            )
+            if (availability.InstructorId == userId)
             {
-                throw new InvalidOperationException(
-                    "Cannot book your own schedule");
+                throw new InvalidOperationException("Cannot book your own schedule");
             }
 
-            /*
-             * slot đã được đặt
-             */
-            if (
-                availability.Status ==
-               common.Constant
-                    .StatusTeacherAvailability
-                    .Booked
-            )
+            if (availability.Status == common.Constant.StatusTeacherAvailability.Booked)
             {
-                throw new InvalidOperationException(
-                    "Schedule already booked");
+                throw new InvalidOperationException("Schedule already booked");
             }
 
-            /*
-             * phải đặt trước 30 phút
-             */
-            if (
-                availability.StartTime <=
-                DateTime.UtcNow.AddMinutes(30)
-            )
+            if (availability.StartTime <= DateTime.UtcNow.AddMinutes(30))
             {
-                throw new InvalidOperationException(
-                    "Cannot book within 30 minutes");
+                throw new InvalidOperationException("Cannot book within 30 minutes");
             }
 
-            /*
-             * check trùng lịch học
-             */
-            bool overlap =
-                await _bookingRepository
-                    .HasOverlapBooking(
-                        userId,
-                        availability.StartTime,
-                        availability.EndTime);
+            bool overlap = await _bookingRepository.HasOverlapBooking(
+                userId,
+                availability.StartTime,
+                availability.EndTime
+            );
 
             if (overlap)
             {
-                throw new InvalidOperationException(
-                    "You already have another class at this time");
+                throw new InvalidOperationException("You already have another class at this time");
             }
 
-            var booking =
-                new Booking
-                {
-                    StudentId =
-                        userId,
+            double hours = (availability.EndTime - availability.StartTime).TotalHours;
 
-                    InstructorId =
-                        availability.InstructorId,
+            decimal totalPrice = teacher.PricePerHour * (decimal)hours;
 
-                    AvailabilityId =
-                        availability.AvailabilityId,
+            var booking = new Booking
+            {
+                StudentId = userId,
+                InstructorId = availability.InstructorId,
+                AvailabilityId = availability.AvailabilityId,
+                StartTime = availability.StartTime,
+                EndTime = availability.EndTime,
+                TotalPrice = totalPrice,
+                Status = common.Constant.StatusBooking.PendingPayment,
+                CreatedDate = DateTime.UtcNow
+            };
 
-                    StartTime =
-                        availability.StartTime,
+            
+            availability.Status = common.Constant.StatusTeacherAvailability.Booked;
 
-                    EndTime =
-                        availability.EndTime,
+            await _bookingRepository.Create(booking);
+            await _availabilityRepository.Update(availability);
+            await _bookingRepository.Save();
 
-                    Status =
-                       common.Constant
-                            .StatusBooking
-                            .PendingPayment,
+            var createdBooking = await _bookingRepository.GetById(booking.BookingId);
 
-                    CreatedDate =
-                        DateTime.UtcNow
-                };
-
-            /*
-             * giữ slot
-             */
-            availability.Status =
-               common.Constant
-                    .StatusTeacherAvailability
-                    .Booked;
-
-            await _bookingRepository
-                .Create(booking);
-
-            await _availabilityRepository
-                .Update(availability);
-
-            await _bookingRepository
-                .Save();
-
-            var createdBooking =
-                await _bookingRepository
-                    .GetById(
-                        booking.BookingId);
-
-            return _mapper.Map<BookingDTO>(
-                createdBooking);
+            return _mapper.Map<BookingDTO>(createdBooking);
         }
 
         /*
          * booking của student
          */
-        public async Task<List<BookingDTO>>
-        GetMyBookings(
-            byte? status,
-            DateOnly? date)
+        public async Task<List<BookingDTO>> GetMyBookings(byte? status, DateOnly? date)
         {
-            var email =
-                _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var data =
-                await _bookingRepository
-                    .GetByStudentId(
-                        userId,
-                        status,
-                        date);
+            var data = await _bookingRepository.GetByStudentId(userId, status, date);
 
             foreach (var booking in data)
             {
-                await AutoUpdateStatus(
-                    booking);
+                await AutoUpdateStatus(booking);
             }
 
-            return _mapper.Map<
-                List<BookingDTO>>(data);
+            return _mapper.Map<List<BookingDTO>>(data);
         }
 
         /*
          * booking của teacher
          */
-        public async Task<List<BookingDTO>>
-        GetTeacherBookings(
-            byte? status,
-            DateOnly? date)
+        public async Task<List<BookingDTO>> GetTeacherBookings(byte? status, DateOnly? date)
         {
-            var email =
-                _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var data =
-                await _bookingRepository
-                    .GetByTeacherId(
-                        userId,
-                        status,
-                        date);
+            var data = await _bookingRepository.GetByTeacherId(userId, status, date);
 
             foreach (var booking in data)
             {
-                await AutoUpdateStatus(
-                    booking);
+                await AutoUpdateStatus(booking);
             }
 
-            return _mapper.Map<
-                List<BookingDTO>>(data);
+            return _mapper.Map<List<BookingDTO>>(data);
         }
 
         /*
@@ -265,382 +165,230 @@ namespace Backend.Services.impl
          */
         public async Task Cancel(int bookingId)
         {
-            var email =
-                _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
+            var booking = await _bookingRepository.GetById(bookingId);
 
             if (booking == null)
             {
-                throw new KeyNotFoundException(
-                    "Booking not found");
+                throw new KeyNotFoundException("Booking not found");
             }
 
-            /*
-             * chỉ teacher hoặc student
-             */
-            if (
-                booking.StudentId != userId
-                &&
-                booking.InstructorId != userId
-            )
+            if (booking.StudentId != userId && booking.InstructorId != userId)
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
+                throw new UnauthorizedAccessException("No permission");
             }
 
-            /*
-             * đã hoàn thành
-             */
-            if (
-                booking.Status ==
-               common.Constant
-                    .StatusBooking
-                    .Completed
-            )
+            if (booking.Status == common.Constant.StatusBooking.Completed)
             {
-                throw new InvalidOperationException(
-                    "Class completed");
+                throw new InvalidOperationException("Class completed");
             }
 
-            /*
-             * đã hủy
-             */
-            if (
-                booking.Status ==
-               common.Constant
-                    .StatusBooking
-                    .Cancelled
-            )
+            if (booking.Status == common.Constant.StatusBooking.Cancelled)
             {
-                throw new InvalidOperationException(
-                    "Booking already cancelled");
+                throw new InvalidOperationException("Booking already cancelled");
             }
 
-            /*
-             * đang học
-             */
-            if (
-                booking.Status ==
-               common.Constant
-                    .StatusBooking
-                    .InProgress
-            )
+            if (booking.Status == common.Constant.StatusBooking.InProgress)
             {
-                throw new InvalidOperationException(
-                    "Class is in progress");
+                throw new InvalidOperationException("Class is in progress");
             }
 
-            /*
-             * student phải huỷ trước 1 ngày
-             */
-            if (
-                booking.StudentId == userId
-                &&
-                booking.StartTime <=
-                DateTime.UtcNow.AddDays(1)
-            )
+            if (booking.StudentId == userId && booking.StartTime <= DateTime.UtcNow.AddDays(1))
             {
-                throw new InvalidOperationException(
-                    "Must cancel at least 1 day before class");
+                throw new InvalidOperationException("Must cancel at least 1 day before class");
             }
 
-            booking.Status =
-               common.Constant
-                    .StatusBooking
-                    .Cancelled;
+            booking.Status = common.Constant.StatusBooking.Cancelled;
 
-            /*
-             * mở lại slot
-             */
-            var availability =
-                await _availabilityRepository
-                    .GetById(
-                        booking.AvailabilityId);
+            var availability = await _availabilityRepository.GetById(booking.AvailabilityId);
 
             if (availability != null)
             {
-                availability.Status =
-                   common.Constant
-                        .StatusTeacherAvailability
-                        .Available;
-
-                await _availabilityRepository
-                    .Update(availability);
+                availability.Status = common.Constant.StatusTeacherAvailability.Available;
+                await _availabilityRepository.Update(availability);
             }
 
-            await _bookingRepository
-                .Update(booking);
-
-            await _bookingRepository
-                .Save();
-        }
-
-        /*
-         * bắt đầu lớp học
-         */
-        public async Task Start(int bookingId)
-        {
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
-
-            if (booking == null)
-            {
-                throw new KeyNotFoundException(
-                    "Booking not found");
-            }
-
-            /*
-             * chỉ lớp confirmed mới start
-             */
-            if (
-                booking.Status !=
-               common.Constant
-                    .StatusBooking
-                    .Confirmed
-            )
-            {
-                throw new InvalidOperationException(
-                    "Class is not confirmed");
-            }
-
-            booking.Status =
-               common.Constant
-                    .StatusBooking
-                    .InProgress;
-
-            await _bookingRepository
-                .Update(booking);
-
-            await _bookingRepository
-                .Save();
-        }
-
-        /*
-         * hoàn thành lớp học
-         */
-        public async Task Complete(int bookingId)
-        {
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
-
-            if (booking == null)
-            {
-                throw new KeyNotFoundException(
-                    "Booking not found");
-            }
-
-            if (
-                booking.Status !=
-               common.Constant
-                    .StatusBooking
-                    .InProgress
-            )
-            {
-                throw new InvalidOperationException(
-                    "Class is not in progress");
-            }
-
-            booking.Status =
-               common.Constant
-                    .StatusBooking
-                    .Completed;
-
-            booking.CompletedAt =
-                DateTime.UtcNow;
-
-            await _bookingRepository
-                .Update(booking);
-
-            await _bookingRepository
-                .Save();
+            await _bookingRepository.Update(booking);
+            await _bookingRepository.Save();
         }
 
         /*
          * chi tiết booking
          */
-        public async Task<BookingDTO>
-        GetDetail(int bookingId)
+        public async Task<BookingDTO> GetDetail(int bookingId)
         {
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
+            var booking = await _bookingRepository.GetById(bookingId);
 
             if (booking == null)
             {
-                throw new KeyNotFoundException(
-                    "Booking not found");
+                throw new KeyNotFoundException("Booking not found");
             }
 
-            var email =
-                _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
-            if (
-                booking.StudentId != userId
-                &&
-                booking.InstructorId != userId
-            )
+            if (booking.StudentId != userId && booking.InstructorId != userId)
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
+                throw new UnauthorizedAccessException("No permission");
             }
 
-            await AutoUpdateStatus(
-                booking);
+            await AutoUpdateStatus(booking);
 
-            return _mapper.Map<BookingDTO>(
-                booking);
+            return _mapper.Map<BookingDTO>(booking);
         }
 
         /*
          * auto update status
          */
 
-        private async Task AutoUpdateStatus(
-    Booking booking)
+        private async Task AutoUpdateStatus(Booking booking)
         {
             var now = DateTime.Now;
-            
-            if (
-                booking.Status ==
-                common.Constant
-                    .StatusBooking
-                    .PendingPayment
-            )
+
+            // Hết hạn thanh toán
+            if (booking.Status == common.Constant.StatusBooking.PendingPayment)
             {
-                var payment =
-                    await _paymentRepository
-                        .GetByBookingId(
-                            booking.BookingId);
+                var payment = await _paymentRepository.GetByBookingId(booking.BookingId);
 
-                if (
-    payment != null
-    &&
-    booking.Status ==
-    common.Constant
-        .StatusBooking
-        .PendingPayment
-    &&
-    (
-        payment.Status ==
-        common.Constant
-            .StatusPayment
-            .Pending
-
-        ||
-
-        payment.Status ==
-        common.Constant
-            .StatusPayment
-            .Failed
-    )
-    &&
-    payment.CreatedDate
-        .AddMinutes(5)
-        <= DateTime.Now
-)
+                if (payment != null &&
+                    (payment.Status == common.Constant.StatusPayment.Pending ||
+                     payment.Status == common.Constant.StatusPayment.Failed) &&
+                    payment.CreatedDate.AddMinutes(5) <= now)
                 {
-                    payment.Status =
-                        common.Constant
-                            .StatusPayment
-                            .Expired;
+                    payment.Status = common.Constant.StatusPayment.Expired;
+                    booking.Status = common.Constant.StatusBooking.Cancelled;
 
-                    booking.Status =
-                        common.Constant
-                            .StatusBooking
-                            .Cancelled;
-
-                    var availability =
-                        await _availabilityRepository
-                            .GetById(
-                                booking.AvailabilityId);
+                    var availability = await _availabilityRepository.GetById(booking.AvailabilityId);
 
                     if (availability != null)
                     {
-                        availability.Status =
-                            common.Constant
-                                .StatusTeacherAvailability
-                                .Available;
-
-                        await _availabilityRepository
-                            .Update(availability);
+                        availability.Status = common.Constant.StatusTeacherAvailability.Available;
+                        await _availabilityRepository.Update(availability);
                     }
 
-                    await _paymentRepository
-                        .Update(payment);
+                    await _paymentRepository.Update(payment);
+                    await _bookingRepository.Update(booking);
+                    await _bookingRepository.Save();
 
-                    await _bookingRepository
-                        .Update(booking);
-
-                    await _bookingRepository
-                        .Save();
+                    return;
                 }
             }
-            /*
-             * confirmed -> in progress
-             */
-            if (
-                booking.Status ==
-                common.Constant
-                    .StatusBooking
-                    .Confirmed
-                &&
-                booking.StartTime <= now
-                &&
-                booking.EndTime > now
-            )
+
+            // Đang học
+            if (booking.Status == common.Constant.StatusBooking.Confirmed &&
+                booking.StartTime <= now &&
+                booking.EndTime > now)
             {
-                booking.Status =
-                    common.Constant
-                        .StatusBooking
-                        .InProgress;
+                booking.Status = common.Constant.StatusBooking.InProgress;
 
-                await _bookingRepository
-                    .Update(booking);
+                await _bookingRepository.Update(booking);
+                await _bookingRepository.Save();
 
-                await _bookingRepository
-                    .Save();
+                return;
             }
 
-            /*
-             * in progress -> completed
-             */
-            if (
-                booking.Status ==
-                common.Constant
-                    .StatusBooking
-                    .InProgress
-                &&
-                booking.EndTime <= now
-            )
+            // Hoàn thành
+            if ((booking.Status == common.Constant.StatusBooking.Confirmed ||
+                 booking.Status == common.Constant.StatusBooking.InProgress) &&
+                booking.EndTime <= now)
             {
-                booking.Status =
-                    common.Constant
-                        .StatusBooking
-                        .Completed;
-
+                booking.Status = common.Constant.StatusBooking.Completed;
                 booking.CompletedAt = now;
 
-                await _bookingRepository
-                    .Update(booking);
-
-                await _bookingRepository
-                    .Save();
+                await _bookingRepository.Update(booking);
+                await _bookingRepository.Save();
             }
+        }
+
+        public async Task<object> GetMyStatistics(int month, int year)
+        {
+            var email = _userContext.GetEmail();
+
+            int studentId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            var bookings = await _bookingRepository.GetByStudentId(studentId, null, null);
+
+            bookings = bookings.Where(x => x.StartTime.Month == month && x.StartTime.Year == year).ToList();
+
+            return new
+            {
+                TotalBookings = bookings.Count,
+                PendingPaymentBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.PendingPayment),
+                ConfirmedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Confirmed),
+                InProgressBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.InProgress),
+                CompletedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Completed),
+                CancelledBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Cancelled),
+                RefundedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Refunded),
+                TotalSpent = bookings.Sum(x => x.TotalPrice)
+            };
+        }
+
+        public async Task<object> GetTeacherStatistics(int month, int year)
+        {
+            var email = _userContext.GetEmail();
+
+            int teacherId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            var bookings = await _bookingRepository.GetByTeacherId(teacherId, null, null);
+
+            bookings = bookings.Where(x => x.StartTime.Month == month && x.StartTime.Year == year).ToList();
+
+            return new
+            {
+                TotalBookings = bookings.Count,
+                PendingPaymentBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.PendingPayment),
+                ConfirmedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Confirmed),
+                InProgressBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.InProgress),
+                CompletedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Completed),
+                CancelledBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Cancelled),
+                RefundedBookings = bookings.Count(x => x.Status == common.Constant.StatusBooking.Refunded),
+                TotalStudents = bookings.Select(x => x.StudentId).Distinct().Count(),
+                TotalRevenue = bookings.Sum(x => x.TotalPrice)
+            };
+        }
+
+        public async Task<object> GetTopTeachers(int month, int year)
+        {
+            var bookings = await _bookingRepository.GetBookingsByMonth(month, year);
+
+            return bookings
+                .GroupBy(x => new { x.InstructorId, x.Instructor.Name })
+                .Select(g => new
+                {
+                    TeacherId = g.Key.InstructorId,
+                    TeacherName = g.Key.Name,
+                    TotalBookings = g.Count(),
+                    CompletedBookings = g.Count(x => x.Status == common.Constant.StatusBooking.Completed),
+                    Revenue = g.Where(x => x.Status == common.Constant.StatusBooking.Completed).Sum(x => x.TotalPrice)
+                })
+                .OrderByDescending(x => x.CompletedBookings)
+                .ThenByDescending(x => x.Revenue)
+                .Take(5)
+                .ToList();
+        }
+
+        public async Task<object> GetTopStudents(int month, int year)
+        {
+            var bookings = await _bookingRepository.GetBookingsByMonth(month, year);
+
+            return bookings
+                .GroupBy(x => new { x.StudentId, x.Student.Name })
+                .Select(g => new
+                {
+                    StudentId = g.Key.StudentId,
+                    StudentName = g.Key.Name,
+                    TotalBookings = g.Count(),
+                    CompletedBookings = g.Count(x => x.Status == common.Constant.StatusBooking.Completed),
+                    TotalSpent = g.Where(x => x.Status == common.Constant.StatusBooking.Completed).Sum(x => x.TotalPrice)
+                })
+                .OrderByDescending(x => x.CompletedBookings)
+                .ThenByDescending(x => x.TotalSpent)
+                .Take(5)
+                .ToList();
         }
     }
 }

@@ -112,9 +112,6 @@ namespace Backend.Services.impl
                     "You cannot edit this profile");
             }
 
-            /*
-             * tài khoản bị khóa
-             */
             if (
                 teacher.Status ==
                 common.Constant
@@ -125,9 +122,6 @@ namespace Backend.Services.impl
                     "Account has been banned");
             }
 
-            /*
-             * hồ sơ đã duyệt
-             */
             if (
                 teacher.Status ==
                 common.Constant
@@ -182,9 +176,6 @@ namespace Backend.Services.impl
                     "Teacher profile not found");
             }
 
-            /*
-             * tài khoản bị khóa
-             */
             if (
                 teacher.Status ==
                 common.Constant
@@ -195,9 +186,6 @@ namespace Backend.Services.impl
                     "Account has been banned");
             }
 
-            /*
-             * đã được duyệt
-             */
             if (
                 teacher.Status ==
                 common.Constant
@@ -219,9 +207,7 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task UpdateStatus(
-    int id,
-    int status)
+        public async Task UpdateStatus( int id, int status)
         {
             if (!ValidateAdmin())
             {
@@ -252,10 +238,6 @@ namespace Backend.Services.impl
                     "Teacher profile not found");
             }
 
-            /*
-             * chỉ hồ sơ đã submit
-             * admin mới duyệt
-             */
             if (
                 teacher.Status !=
                 common.Constant
@@ -268,9 +250,6 @@ namespace Backend.Services.impl
 
             teacher.Status = (byte)status;
 
-            /*
-             * approve => cấp quyền teacher
-             */
             if (
                 status ==
                 common.Constant
@@ -299,8 +278,7 @@ namespace Backend.Services.impl
          * O(n)
          * (thuphuong21072004) 
          */
-        public async Task<List<TeacherProfileDTO>>
-    GetAllTeachers(int? status)
+        public async Task<List<TeacherProfileDTO>>GetAllTeachers(int? status)
         {
             if (!ValidateAdmin())
             {
@@ -487,16 +465,10 @@ namespace Backend.Services.impl
                     "User not found");
             }
 
-            /*
-             * khóa hồ sơ giáo viên
-             */
             teacher.Status =
                 common.Constant
                     .StatusTeacherProfile.Banned;
 
-            /*
-             * khóa user vĩnh viễn
-             */
             teacher.User.Status = 0;
 
             await _teacherRepository.Save();

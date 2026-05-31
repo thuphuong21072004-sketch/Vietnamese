@@ -109,7 +109,6 @@ namespace Backend.Repository.impl
         public async Task<Passage?> GetPassageById(int id)
         {
             return await _context.Passages
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.PassageId == id);
         }
     }

@@ -10,158 +10,58 @@ namespace Backend.Services
     {
         private readonly VNPayConfig _config;
 
-        public VNPayService(
-            IOptions<VNPayConfig> config)
+        public VNPayService(IOptions<VNPayConfig> config)
         {
             _config = config.Value;
         }
 
-        public string CreatePaymentUrl(
-            int paymentId,
-            decimal amount,
-            string ipAddress)
+        public string CreatePaymentUrl(int paymentId, decimal amount, string ipAddress)
         {
-            var createDate =
-                DateTime.Now
-                    .ToString("yyyyMMddHHmmss");
-
+            var createDate = DateTime.Now.ToString("yyyyMMddHHmmss");
             decimal usdToVnd = 25000m;
+            long vnpAmount = (long)(amount * usdToVnd * 100);
 
-            long vnpAmount =
-                (long)(amount * usdToVnd * 100); ;
+            var vnpParams = new SortedDictionary<string, string>
+            {
+                { "vnp_Amount", vnpAmount.ToString() },
+                { "vnp_BankCode", "NCB" },
+                { "vnp_Command", "pay" },
+                { "vnp_CreateDate", createDate },
+                { "vnp_CurrCode", "VND" },
+                { "vnp_IpAddr", ipAddress },
+                { "vnp_Locale", "vn" },
+                { "vnp_OrderInfo", $"Thanh toan booking {paymentId}" },
+                { "vnp_OrderType", "other" },
+                { "vnp_ReturnUrl", _config.ReturnUrl },
+                { "vnp_TmnCode", _config.TmnCode },
+                { "vnp_TxnRef", paymentId.ToString() },
+                { "vnp_Version", "2.0.0" }
+            };
 
-            var vnpParams =
-    new SortedDictionary<
-        string,
-        string>
-{
-    {
-        "vnp_Amount",
-        vnpAmount.ToString()
-    },
-
-    {
-        "vnp_BankCode",
-        "NCB"
-    },
-
-    {
-        "vnp_Command",
-        "pay"
-    },
-
-    {
-        "vnp_CreateDate",
-        createDate
-    },
-
-    {
-        "vnp_CurrCode",
-        "VND"
-    },
-
-    {
-        "vnp_IpAddr",
-        ipAddress
-    },
-
-    {
-        "vnp_Locale",
-        "vn"
-    },
-
-    {
-        "vnp_OrderInfo",
-        $"Thanh toan booking {paymentId}"
-    },
-
-    {
-        "vnp_OrderType",
-        "other"
-    },
-
-    {
-        "vnp_ReturnUrl",
-        _config.ReturnUrl
-    },
-
-    {
-        "vnp_TmnCode",
-        _config.TmnCode
-    },
-
-    {
-        "vnp_TxnRef",
-        paymentId.ToString()
-    },
-
-    {
-        "vnp_Version",
-        "2.0.0"
-    }
-};
-
-            /*
-             * HASH RAW DATA
-             */
-            var hashData =
-                new StringBuilder();
-
-            /*
-             * QUERY URL
-             */
-            var query =
-                new StringBuilder();
+            var hashData = new StringBuilder();
+            var query = new StringBuilder();
 
             foreach (var item in vnpParams)
             {
-                if (!string.IsNullOrEmpty(
-                    item.Value))
+                if (!string.IsNullOrEmpty(item.Value))
                 {
-                    /*
-                     * RAW HASH
-                     */
-                    hashData.Append(
-                        $"{item.Key}={item.Value}&");
-
-                    /*
-                     * URL QUERY
-                     */
-                    query.Append(
-                        $"{item.Key}={HttpUtility.UrlEncode(item.Value)}&");
+                    hashData.Append($"{item.Key}={item.Value}&");
+                    query.Append($"{item.Key}={HttpUtility.UrlEncode(item.Value)}&");
                 }
             }
 
-            /*
-             * remove last &
-             */
-            var rawData =
-                hashData
-                    .ToString()
-                    .TrimEnd('&');
+            var rawData = hashData.ToString().TrimEnd('&');
+            var queryUrl = query.ToString().TrimEnd('&');
 
-            var queryUrl =
-                query
-                    .ToString()
-                    .TrimEnd('&');
             Console.WriteLine("RAW DATA:");
             Console.WriteLine(rawData);
 
             Console.WriteLine("SECRET:");
             Console.WriteLine(_config.HashSecret);
-            /*
-             * SECURE HASH
-             */
-            var secureHash =
-    HmacSHA512(
-        _config.HashSecret,
-        rawData);
 
-            /*
-             * FINAL URL
-             */
-            var finalUrl =
-    $"{_config.BaseUrl}?{queryUrl}&vnp_SecureHashType=HmacSHA256&vnp_SecureHash={secureHash}";
+            var secureHash = HmacSHA512(_config.HashSecret, rawData);
+
+            var finalUrl = $"{_config.BaseUrl}?{queryUrl}&vnp_SecureHashType=HmacSHA256&vnp_SecureHash={secureHash}";
 
             Console.WriteLine("RAW DATA:");
             Console.WriteLine(rawData);
@@ -172,30 +72,15 @@ namespace Backend.Services
             return finalUrl;
         }
 
-        private string HmacSHA512(
-    string key,
-    string inputData)
+        private string HmacSHA512(string key, string inputData)
         {
-            var keyBytes =
-                Encoding.UTF8.GetBytes(
-                    key);
+            var keyBytes = Encoding.UTF8.GetBytes(key);
+            var inputBytes = Encoding.UTF8.GetBytes(inputData);
 
-            var inputBytes =
-                Encoding.UTF8.GetBytes(
-                    inputData);
+            using var hmac = new HMACSHA512(keyBytes);
+            var hashValue = hmac.ComputeHash(inputBytes);
 
-            using var hmac =
-                new HMACSHA512(
-                    keyBytes);
-
-            var hashValue =
-                hmac.ComputeHash(
-                    inputBytes);
-
-            return BitConverter
-                .ToString(hashValue)
-                .Replace("-", "")
-                .ToLower();
+            return BitConverter.ToString(hashValue).Replace("-", "").ToLower();
         }
     }
 }

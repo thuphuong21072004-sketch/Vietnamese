@@ -10,21 +10,15 @@ namespace Backend.Controllers
     [Route("api/teacher-profile")]
     public class TeacherProfileController : ControllerBase
     {
-        private readonly TeacherProfileService
-            _teacherProfileService;
-
-        private readonly UserContextUtil
-            _userContext;
+        private readonly TeacherProfileService _teacherProfileService;
+        private readonly UserContextUtil _userContext;
 
         public TeacherProfileController(
             TeacherProfileService teacherProfileService,
             UserContextUtil userContext)
         {
-            _teacherProfileService =
-                teacherProfileService;
-
-            _userContext =
-                userContext;
+            _teacherProfileService = teacherProfileService;
+            _userContext = userContext;
         }
 
         /*
@@ -33,13 +27,9 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpGet("me")]
-        public async Task<IActionResult>
-            GetMyProfile()
+        public async Task<IActionResult> GetMyProfile()
         {
-            var result =
-                await _teacherProfileService
-                    .GetMyProfile();
-
+            var result = await _teacherProfileService.GetMyProfile();
             return Ok(result);
         }
 
@@ -49,20 +39,14 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult>
-            CreateProfile(
-                [FromBody]
-                TeacherProfileDTO dto)
+        public async Task<IActionResult> CreateProfile([FromBody] TeacherProfileDTO dto)
         {
-            await _teacherProfileService
-                .CreateProfile(dto);
+            await _teacherProfileService.CreateProfile(dto);
 
             return Ok(new
             {
                 success = true,
-
-                message =
-                    "Teacher profile created successfully"
+                message = "Teacher profile created successfully"
             });
         }
 
@@ -72,20 +56,14 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpPut("update")]
-        public async Task<IActionResult>
-            UpdateProfile(
-                [FromBody]
-                TeacherProfileDTO dto)
+        public async Task<IActionResult> UpdateProfile([FromBody] TeacherProfileDTO dto)
         {
-            await _teacherProfileService
-                .UpdateProfile(dto);
+            await _teacherProfileService.UpdateProfile(dto);
 
             return Ok(new
             {
                 success = true,
-
-                message =
-                    "Teacher profile updated successfully"
+                message = "Teacher profile updated successfully"
             });
         }
 
@@ -95,18 +73,14 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpPut("submit")]
-        public async Task<IActionResult>
-            SubmitProfile()
+        public async Task<IActionResult> SubmitProfile()
         {
-            await _teacherProfileService
-                .SubmitProfile();
+            await _teacherProfileService.SubmitProfile();
 
             return Ok(new
             {
                 success = true,
-
-                message =
-                    "Teacher profile submitted successfully"
+                message = "Teacher profile submitted successfully"
             });
         }
 
@@ -116,20 +90,14 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpPut("update/{id}/status")]
-        public async Task<IActionResult>
-            UpdateStatus(
-                int id,
-                [FromQuery] int status)
+        public async Task<IActionResult> UpdateStatus(int id, [FromQuery] int status)
         {
-            await _teacherProfileService
-                .UpdateStatus(id, status);
+            await _teacherProfileService.UpdateStatus(id, status);
 
             return Ok(new
             {
                 success = true,
-
-                message =
-                    "Teacher profile status updated successfully"
+                message = "Teacher profile status updated successfully"
             });
         }
 
@@ -139,14 +107,10 @@ namespace Backend.Controllers
          */
         [Authorize]
         [HttpGet("admin")]
-        public async Task<IActionResult>
-            GetAllTeachers(
-                [FromQuery] int? status)
+        public async Task<IActionResult> GetAllTeachers([FromQuery] int? status)
         {
-            return Ok(
-                await _teacherProfileService
-                    .GetAllTeachers(status)
-            );
+            var result = await _teacherProfileService.GetAllTeachers(status);
+            return Ok(result);
         }
 
         /*
@@ -154,32 +118,26 @@ namespace Backend.Controllers
          * O(1)
          */
         [HttpGet("{id}")]
-        public async Task<IActionResult>
-            GetDetail(int id)
+        public async Task<IActionResult> GetDetail(int id)
         {
-            return Ok(
-                await _teacherProfileService
-                    .GetDetail(id)
-            );
+            var result = await _teacherProfileService.GetDetail(id);
+            return Ok(result);
         }
+
         /*
- * khóa vĩnh viễn giáo viên
- * O(1)
- */
+         * khóa vĩnh viễn giáo viên
+         * O(1)
+         */
         [Authorize]
         [HttpPut("ban/{id}")]
-        public async Task<IActionResult>
-            BanTeacher(int id)
+        public async Task<IActionResult> BanTeacher(int id)
         {
-            await _teacherProfileService
-                .BanTeacher(id);
+            await _teacherProfileService.BanTeacher(id);
 
             return Ok(new
             {
                 success = true,
-
-                message =
-                    "Teacher banned successfully"
+                message = "Teacher banned successfully"
             });
         }
     }

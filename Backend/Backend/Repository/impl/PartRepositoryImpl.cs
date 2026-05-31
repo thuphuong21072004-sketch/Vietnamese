@@ -89,7 +89,6 @@ namespace Backend.Repository.impl
         public async Task<Part?> GetPartById(int id)
         {
             return await _context.Parts
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.PartId == id);
         }
     }

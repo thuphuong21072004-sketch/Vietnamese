@@ -13,73 +13,35 @@ namespace Backend.Repository.impl
             _context = context;
         }
 
-        /* 
-         * lấy thông tin đặt lịch theo id
-         * O(1)
-         * (thuphuong21072004) 
-         */
         public async Task<Booking?> GetById(int id)
         {
             return await _context.Bookings
                 .Include(x => x.Student)
                     .ThenInclude(x => x.Role)
-
                 .Include(x => x.Instructor)
                     .ThenInclude(x => x.Role)
-
                 .Include(x => x.Instructor)
                     .ThenInclude(x => x.TeacherProfile)
-
                 .Include(x => x.Availability)
-
-                .FirstOrDefaultAsync(
-                    x => x.BookingId == id);
+                .FirstOrDefaultAsync(x => x.BookingId == id);
         }
 
-        /* 
-         * lấy danh sách đặt lịch của học sinh
-         * O(n)
-         * (thuphuong21072004) 
-         */
-        public async Task<List<Booking>>
-GetByStudentId(
-    int studentId,
-    byte? status,
-    DateOnly? date)
+        public async Task<List<Booking>> GetByStudentId(int studentId, byte? status, DateOnly? date)
         {
-            var query =
-                _context.Bookings
+            var query = _context.Bookings
+                .Include(x => x.Student)
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.TeacherProfile)
+                .Where(x => x.StudentId == studentId && x.EndTime >= DateTime.UtcNow);
 
-                    .Include(x => x.Student)
-
-                    .Include(x => x.Instructor)
-                        .ThenInclude(x =>
-                            x.TeacherProfile)
-
-                    .Where(x =>
-
-                        x.StudentId == studentId
-
-                        && x.EndTime >= DateTime.UtcNow);
-
-            /*
-             * status
-             */
             if (status.HasValue)
             {
-                query = query.Where(x =>
-                    x.Status == status.Value);
+                query = query.Where(x => x.Status == status.Value);
             }
 
-            /*
-             * date
-             */
             if (date.HasValue)
             {
-                query = query.Where(x =>
-
-                    DateOnly.FromDateTime(
-                        x.StartTime) == date.Value);
+                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date.Value);
             }
 
             return await query
@@ -87,44 +49,22 @@ GetByStudentId(
                 .ToListAsync();
         }
 
-        /* 
-         * lấy danh sách đặt lịch của giáo viên
-         * O(n)
-         * (thuphuong21072004) 
-         */
-        public async Task<List<Booking>>
-GetByTeacherId(
-    int instructorId,
-    byte? status,
-    DateOnly? date)
+        public async Task<List<Booking>> GetByTeacherId(int instructorId, byte? status, DateOnly? date)
         {
-            var query =
-                _context.Bookings
-
-                    .Include(x => x.Student)
-
-                    .Include(x => x.Instructor)
-                        .ThenInclude(x =>
-                            x.TeacherProfile)
-
-                    .Where(x =>
-
-                        x.InstructorId == instructorId
-
-                        && x.EndTime >= DateTime.UtcNow);
+            var query = _context.Bookings
+                .Include(x => x.Student)
+                .Include(x => x.Instructor)
+                    .ThenInclude(x => x.TeacherProfile)
+                .Where(x => x.InstructorId == instructorId && x.EndTime >= DateTime.UtcNow);
 
             if (status.HasValue)
             {
-                query = query.Where(x =>
-                    x.Status == status.Value);
+                query = query.Where(x => x.Status == status.Value);
             }
 
             if (date.HasValue)
             {
-                query = query.Where(x =>
-
-                    DateOnly.FromDateTime(
-                        x.StartTime) == date.Value);
+                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date.Value);
             }
 
             return await query
@@ -132,141 +72,76 @@ GetByTeacherId(
                 .ToListAsync();
         }
 
-        /* 
-         * tạo mới một lượt đặt lịch
-         * O(1)
-         * (thuphuong21072004) 
-         */
         public async Task Create(Booking booking)
         {
             await _context.Bookings.AddAsync(booking);
         }
 
-        /* 
-         * cập nhật thông tin đặt lịch
-         * O(1)
-         * (thuphuong21072004) 
-         */
         public async Task Update(Booking booking)
         {
             _context.Bookings.Update(booking);
             await Task.CompletedTask;
         }
 
-        /* 
-         * kiểm tra trùng lặp thời gian đặt lịch
-         * O(1)
-         * (thuphuong21072004) 
-         */
-        public async Task<Booking?>
-GetActiveBookingByAvailabilityId(
-    int availabilityId,
-    DateTime activeSince)
+        public async Task<Booking?> GetActiveBookingByAvailabilityId(int availabilityId, DateTime activeSince)
         {
             return await _context.Bookings
-                .FirstOrDefaultAsync(x =>
-
-                    x.AvailabilityId == availabilityId
-
-                    &&
-
-                    x.Status !=
-                        common.Constant
-                        .StatusBooking.Cancelled
-
-                    &&
-
-                    (
-                        x.Status ==
-                        common.Constant
-                        .StatusBooking.Confirmed
-
-                        ||
-
-                        x.Status ==
-                        common.Constant
-                        .StatusBooking.InProgress
-
-                        ||
-
-                        x.Status ==
-                        common.Constant
-                        .StatusBooking.Completed
-
-                        ||
-
-                        (
-                            x.Status ==
-                            common.Constant
-                            .StatusBooking.PendingPayment
-
-                            &&
-
-                            x.CreatedDate >=
-                            activeSince
-                        )
-                    ));
+                .FirstOrDefaultAsync(x => x.AvailabilityId == availabilityId
+                    && x.Status != common.Constant.StatusBooking.Cancelled
+                    && (x.Status == common.Constant.StatusBooking.Confirmed
+                        || x.Status == common.Constant.StatusBooking.InProgress
+                        || x.Status == common.Constant.StatusBooking.Completed
+                        || (x.Status == common.Constant.StatusBooking.PendingPayment
+                            && x.CreatedDate >= activeSince)));
         }
-        public async Task<List<Booking>>
-GetPendingBookingsBefore(
-    int availabilityId,
-    DateTime threshold)
+
+        public async Task<List<Booking>> GetPendingBookingsBefore(int availabilityId, DateTime threshold)
         {
             return await _context.Bookings
-                .Where(x =>
-
-                    x.AvailabilityId == availabilityId
-
-                    && x.Status ==
-                        common.Constant
-                        .StatusBooking.PendingPayment
-
+                .Where(x => x.AvailabilityId == availabilityId
+                    && x.Status == common.Constant.StatusBooking.PendingPayment
                     && x.CreatedDate < threshold)
-
                 .ToListAsync();
         }
-        public async Task<bool>
-HasOverlapBooking(
-    int studentId,
-    DateTime startTime,
-    DateTime endTime)
+
+        public async Task<bool> HasOverlapBooking(int studentId, DateTime startTime, DateTime endTime)
         {
             return await _context.Bookings
-                .AnyAsync(x =>
-
-                    x.StudentId == studentId
-
-                    && x.Status !=
-                        common.Constant
-                        .StatusBooking.Cancelled
-
-                    && (
-                        startTime < x.EndTime
-                        &&
-                        endTime > x.StartTime
-                    ));
+                .AnyAsync(x => x.StudentId == studentId
+                    && x.Status != common.Constant.StatusBooking.Cancelled
+                    && (startTime < x.EndTime && endTime > x.StartTime));
         }
 
-        /* 
-         * lưu thay đổi vào cơ sở dữ liệu
-         * O(1)
-         * (thuphuong21072004) 
-         */
         public async Task Save()
         {
             await _context.SaveChangesAsync();
         }
-        public async Task<bool> HasBookingByAvailabilityId(
-    int availabilityId)
+
+        public async Task<bool> HasBookingByAvailabilityId(int availabilityId)
         {
             return await _context.Bookings
-                .AnyAsync(x =>
-
-                    x.AvailabilityId == availabilityId
-
-                    && x.Status !=
-                        common.Constant
-                        .StatusBooking.Cancelled);
+                .AnyAsync(x => x.AvailabilityId == availabilityId
+                    && x.Status != common.Constant.StatusBooking.Cancelled);
         }
+
+        public async Task<List<Booking>> GetBookingsByMonth(
+    int month,
+    int year)
+        {
+            return await _context.Bookings
+
+                .Include(x => x.Student)
+
+                .Include(x => x.Instructor)
+
+                .Include(x => x.Payment)
+
+                .Where(x =>
+                    x.CreatedDate.Month == month &&
+                    x.CreatedDate.Year == year)
+
+                .ToListAsync();
+        }
+
     }
 }
