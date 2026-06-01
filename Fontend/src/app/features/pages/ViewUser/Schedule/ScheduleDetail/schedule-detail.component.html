@@ -17,119 +17,76 @@
     </button>
 
     <div class="teacher-card">
-
-        <img *ngIf="
-                getTeacherAvatar()
-            " [src]="
-                getTeacherAvatar()
-            " class="teacher-avatar">
-
-        <div *ngIf="
-                !getTeacherAvatar()
-            " class="teacher-avatar placeholder">
-
-            {{
-            getTeacherName()
-            .charAt(0)
-            }}
-
+    
+        <div class="teacher-left">
+    
+            <img *ngIf="getTeacherAvatar()" [src]="getTeacherAvatar()" class="teacher-avatar">
+    
+            <div *ngIf="!getTeacherAvatar()" class="teacher-avatar placeholder">
+    
+                {{ getTeacherName().charAt(0) }}
+    
+            </div>
+    
         </div>
-
-        <div class="teacher-info">
-
+    
+        <div class="teacher-right">
+    
             <h1>
-
-                {{
-                getTeacherName()
-                }}
-
+                {{ getTeacherName() }}
             </h1>
-
-            <p class="specialty">
-
-                {{
-                getSpecialty()
-                }}
-
-            </p>
-
-            <div class="meta-row">
-
-                <span class="rating">
-
-                    ⭐
-                    {{
-                    getRating()
-                    }}
-
-                    ·
-
-                    {{
-                    getTotalReviews()
-                    }}
-                    reviews
-
+    
+            <div class="teacher-badges">
+    
+                <span class="badge">
+                    ⭐ {{ getRating() | number:'1.1-1' }}
                 </span>
-
-                <span class="experience">
-
-                    {{
-                    schedule
-                    ?.instructorProfile
-                    ?.experienceYears || 0
-                    }}
-
-                    years experience
-
+    
+                <span class="badge">
+                    {{ getTotalReviews() }} đánh giá
                 </span>
-
+    
+                <span class="badge">
+                    {{ schedule?.instructorProfile?.experienceYears || 0 }}
+                    năm kinh nghiệm
+                </span>
+    
             </div>
-
-            <div class="price">
-
-                $
-                {{
-                getPricePerHour()
-                }}/hour
-
+    
+            <div class="teacher-specialty">
+    
+                {{ getSpecialty() }}
+    
             </div>
-
-            <p class="description">
-
-                {{
-                schedule
-                ?.instructorProfile
-                ?.description
-                }}
-
-            </p>
-
+    
+            <div class="teacher-price">
+            
+                ${{ getPricePerHour() | number:'1.2-2' }}
+                / hour
+            
+            </div>
+    
+            <div class="teacher-description">
+    
+                {{ schedule?.instructorProfile?.description }}
+    
+            </div>
+    
         </div>
-
+    
     </div>
-
-    <div *ngIf="
-            schedule
-                ?.instructorProfile
-                ?.introVideoUrl
-        " class="video-card">
-
+    <div *ngIf="getTeacherVideo()" class="video-card">
+    
         <h2>
-
-            Introduction Video
-
+            Teacher introduction video
         </h2>
-
-        <video controls>
-
-            <source [src]="
-                    schedule
-                        ?.instructorProfile
-                        ?.introVideoUrl
-                " type="video/mp4">
-
+    
+        <video controls class="intro-video">
+    
+            <source [src]="getTeacherVideo()" type="video/mp4">
+    
         </video>
-
+    
     </div>
 
     <div class="schedule-card">
@@ -460,34 +417,35 @@
                 " class="review-item">
 
                 <div class="review-header">
-
+                
+                    <div class="review-user">
+                
+                        <img *ngIf="getReviewAvatar(review)" [src]="getReviewAvatar(review)" class="review-avatar">
+                
+                        <div *ngIf="!getReviewAvatar(review)" class="review-avatar placeholder">
+                
+                            {{ (review.studentName || 'A').charAt(0) }}
+                
+                        </div>
+                
+                        <div>
+                
+                            <div class="student-name">
+                                {{ review.studentName || 'Anonymous' }}
+                            </div>
+                
+                            <div class="review-date">
+                                {{ review.createdDate | date:'dd/MM/yyyy' }}
+                            </div>
+                
+                        </div>
+                
+                    </div>
+                
                     <span class="rating">
-
-                        {{
-                        review.rating
-                        }}
-                        ★
-
+                        {{ review.rating }} ★
                     </span>
-
-                    <span class="student-name">
-
-                        {{
-                        review.studentName
-                        || 'Anonymous'
-                        }}
-
-                    </span>
-
-                    <span class="review-date">
-
-                        {{
-                        review.createdDate
-                        | date:'dd/MM/yyyy'
-                        }}
-
-                    </span>
-
+                
                 </div>
 
                 <div class="review-comment">

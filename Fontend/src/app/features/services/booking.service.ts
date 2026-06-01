@@ -168,6 +168,20 @@ export class BookingService {
     return `http://localhost:5108/uploads/${avatar}`;
   }
 
+  getStudentAvatar(booking: any): string {
+    const avatar = booking?.student?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
+  }
+
   /*
    * helper booking duration
    */
@@ -271,5 +285,44 @@ export class BookingService {
       ...this.getOptions(),
       params,
     });
+  }
+  getTeacherSpecialty(booking: any): string {
+    return (
+      booking?.instructorProfile?.specialty ||
+      booking?.instructor?.teacherProfile?.specialty ||
+      ''
+    );
+  }
+
+  getTeacherExperience(booking: any): number {
+    return Number(
+      booking?.instructorProfile?.experienceYears ||
+        booking?.instructor?.teacherProfile?.experienceYears ||
+        0,
+    );
+  }
+
+  getTeacherDescription(booking: any): string {
+    return (
+      booking?.instructorProfile?.description ||
+      booking?.instructor?.teacherProfile?.description ||
+      ''
+    );
+  }
+
+  getTeacherVideo(booking: any): string {
+    const video =
+      booking?.instructorProfile?.introVideoUrl ||
+      booking?.instructor?.teacherProfile?.introVideoUrl;
+
+    if (!video) {
+      return '';
+    }
+
+    if (video.startsWith('http')) {
+      return video;
+    }
+
+    return `http://localhost:5108/videos/${video}`;
   }
 }

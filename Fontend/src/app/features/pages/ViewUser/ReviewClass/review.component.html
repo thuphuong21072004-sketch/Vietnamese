@@ -14,34 +14,82 @@
 
         </h1>
 
-        <p>
-
-            Booking ID:
-            #{{ bookingId }}
-
-        </p>
-
         <div *ngIf="booking" class="booking-summary">
-
-            <div class="info-row">
-
-                <span>Teacher</span>
-
-                <strong>{{ booking.teacherName }}</strong>
-
+        
+            <div class="teacher-header">
+        
+                <img *ngIf="getTeacherAvatar()" [src]="getTeacherAvatar()" class="teacher-avatar">
+        
+                <div *ngIf="!getTeacherAvatar()" class="teacher-avatar placeholder">
+        
+                    {{ getTeacherName().charAt(0) }}
+        
+                </div>
+        
+                <div class="teacher-info">
+        
+                    <h2>
+                        {{ getTeacherName() }}
+                    </h2>
+        
+                    <p>
+                        {{ getTeacherSpecialty() }}
+                    </p>
+        
+                </div>
+        
             </div>
-
+        
             <div class="info-row">
-
-                <span>Schedule</span>
-
+        
+                <span>
+                    Class Date
+                </span>
+        
                 <strong>
-                    {{ booking.startTime | date:'dd/MM/yyyy HH:mm' }} -
+                    {{ booking.startTime | date:'dd/MM/yyyy' }}
+                </strong>
+        
+            </div>
+        
+            <div class="info-row">
+        
+                <span>
+                    Class Time
+                </span>
+        
+                <strong>
+                    {{ booking.startTime | date:'HH:mm' }}
+                    -
                     {{ booking.endTime | date:'HH:mm' }}
                 </strong>
-
+        
             </div>
-
+        
+            <div class="info-row">
+        
+                <span>
+                    Duration
+                </span>
+        
+                <strong>
+                    {{ getDuration() }} hours
+                </strong>
+        
+            </div>
+        
+            <div class="info-row">
+        
+                <span>
+                    Lesson Fee
+                </span>
+        
+                <strong>
+                    ${{ booking.totalPrice | number:'1.2-2' }}
+                </strong>
+        
+            </div>
+        
         </div>
 
         <div *ngIf="reviewed && review" class="reviewed-box">

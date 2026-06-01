@@ -158,4 +158,22 @@ export class TeacherProfileService {
       this.getOptions(),
     );
   }
+  /*
+   * upload video giới thiệu
+   */
+  uploadVideo(file: File): Observable<any> {
+    const formData = new FormData();
+
+    formData.append('file', file);
+
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.post(`${this.apiUrl}/upload-video`, formData, {
+      headers,
+    });
+  }
 }

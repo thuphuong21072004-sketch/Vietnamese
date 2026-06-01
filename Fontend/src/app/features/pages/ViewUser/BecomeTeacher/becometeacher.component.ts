@@ -43,12 +43,6 @@ export class TeacherProfileComponent implements OnInit {
 
     description: '',
 
-    /*
-     * 0 = Draft
-     * 1 = Submitted
-     * 2 = Approved
-     * 3 = Rejected
-     */
     status: 0,
   };
 
@@ -59,6 +53,8 @@ export class TeacherProfileComponent implements OnInit {
   userRole: string | null = null;
 
   isPrivilegedTeacherUser = false;
+
+  videoPreviewUrl = '';
 
   constructor(private teacherService: TeacherProfileService) {}
 
@@ -93,9 +89,6 @@ export class TeacherProfileComponent implements OnInit {
     });
   }
 
-  /*
-   * approved không cho edit
-   */
   canEdit(): boolean {
     return this.profile.status !== 2;
   }
@@ -103,19 +96,16 @@ export class TeacherProfileComponent implements OnInit {
   saveProfile() {
     if (!this.profile.specialty) {
       alert('Please enter specialty');
-
       return;
     }
 
     if (!this.profile.description) {
       alert('Please enter description');
-
       return;
     }
 
     if (this.profile.pricePerHour <= 0) {
       alert('Price per hour must be greater than 0');
-
       return;
     }
 
@@ -150,10 +140,6 @@ export class TeacherProfileComponent implements OnInit {
     });
   }
 
-  /*
-   * submit hồ sơ
-   * cho admin duyệt
-   */
   submitForReview() {
     this.loading = true;
 
@@ -182,7 +168,7 @@ export class TeacherProfileComponent implements OnInit {
         return 'Created';
 
       case 1:
-        return 'Submitted ';
+        return 'Submitted';
 
       case 2:
         return 'Approved';
@@ -249,18 +235,31 @@ export class TeacherProfileComponent implements OnInit {
     }
 
     Array.from(files).forEach((file: any) => {
+      if (file.type.startsWith('video/')) {
+        this.teacherService.uploadVideo(file).subscribe({
+          next: (res: any) => {
+            this.profile.introVideoUrl = res.videoUrl;
+
+            this.videoPreviewUrl = URL.createObjectURL(file);
+          },
+
+          error: (err) => {
+            console.error(err);
+
+            alert('Upload video failed');
+          },
+        });
+
+        return;
+      }
+
       const reader = new FileReader();
 
       reader.onload = () => {
-        
         if (file.type.startsWith('image/')) {
           this.profile.avatarUrl = reader.result;
-        } else if (file.type.startsWith('video/')) {
-
-          this.profile.introVideoUrl = reader.result;
         } else {
-
-          this.profile.cvUrl = reader.result;
+          this.profile.cvUrl = file.name;
         }
       };
 

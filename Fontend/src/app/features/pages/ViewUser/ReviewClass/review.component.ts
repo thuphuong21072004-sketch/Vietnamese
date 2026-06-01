@@ -138,4 +138,42 @@ export class ReviewComponent implements OnInit {
   back() {
     history.back();
   }
+  getTeacherAvatar(): string {
+    const avatar = this.booking?.instructor?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
+  }
+
+  getTeacherName(): string {
+    return (
+      this.booking?.instructor?.name || this.booking?.teacherName || 'Teacher'
+    );
+  }
+
+  getTeacherSpecialty(): string {
+    return this.booking?.instructorProfile?.specialty || '';
+  }
+
+  getDuration(): number {
+    if (!this.booking) {
+      return 0;
+    }
+
+    const start = new Date(this.booking.startTime);
+
+    const end = new Date(this.booking.endTime);
+
+    return (
+      Math.round(((end.getTime() - start.getTime()) / (1000 * 60 * 60)) * 100) /
+      100
+    );
+  }
 }

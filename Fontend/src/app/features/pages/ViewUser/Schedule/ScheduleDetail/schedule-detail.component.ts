@@ -267,6 +267,7 @@ export class ScheduleDetailComponent implements OnInit {
 
       .subscribe({
         next: (res) => {
+          console.log(res);
           this.reviews = res || [];
 
           this.applyReviewFilter();
@@ -336,5 +337,31 @@ export class ScheduleDetailComponent implements OnInit {
    */
   hasReviews(): boolean {
     return this.reviews.length > 0;
+  }
+  getTeacherVideo(): string {
+    const video = this.schedule?.instructorProfile?.introVideoUrl;
+
+    if (!video) {
+      return '';
+    }
+
+    if (video.startsWith('http')) {
+      return video;
+    }
+
+    return `http://localhost:5108/videos/${video}`;
+  }
+  getReviewAvatar(review: any): string {
+    const avatar = review?.studentAvatar || review?.student?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
   }
 }

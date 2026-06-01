@@ -140,5 +140,41 @@ namespace Backend.Controllers
                 message = "Teacher banned successfully"
             });
         }
+        [Authorize]
+        [HttpPost("upload-video")]
+        public async Task<IActionResult> UploadVideo(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Invalid file");
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+
+            var uploadFolder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "videos"
+            );
+
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+
+            var filePath = Path.Combine(uploadFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok(new
+            {
+                videoUrl = fileName
+            });
+        }
     }
 }

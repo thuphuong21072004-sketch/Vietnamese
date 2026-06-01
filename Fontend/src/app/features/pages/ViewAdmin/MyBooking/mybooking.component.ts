@@ -144,7 +144,17 @@ export class TeacherBookingDetailComponent implements OnInit {
    * avatar
    */
   getAvatar(): string {
-    return this.bookingService.getAvatar(this.booking);
+    const avatar = this.booking?.student?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
   }
 
   /*

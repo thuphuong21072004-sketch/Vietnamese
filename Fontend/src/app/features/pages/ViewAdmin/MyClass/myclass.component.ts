@@ -55,6 +55,7 @@ export class TeacherBookingsComponent implements OnInit {
 
       .subscribe({
         next: (res) => {
+          console.log(res);
           this.bookings = res || [];
 
           this.filteredBookings = [...this.bookings];
@@ -284,5 +285,18 @@ export class TeacherBookingsComponent implements OnInit {
     }
 
     return false;
+  }
+  getStudentAvatar(item: any): string {
+    const avatar = item?.student?.avatarUrl;
+
+    if (!avatar) {
+      return '';
+    }
+
+    if (avatar.startsWith('http')) {
+      return avatar;
+    }
+
+    return `http://localhost:5108/uploads/${avatar}`;
   }
 }

@@ -26,13 +26,16 @@ namespace Backend.Repository.impl
                 .FirstOrDefaultAsync(x => x.BookingId == id);
         }
 
-        public async Task<List<Booking>> GetByStudentId(int studentId, byte? status, DateOnly? date)
+        public async Task<List<Booking>> GetByStudentId(
+    int studentId,
+    byte? status,
+    DateOnly? date)
         {
             var query = _context.Bookings
                 .Include(x => x.Student)
                 .Include(x => x.Instructor)
                     .ThenInclude(x => x.TeacherProfile)
-                .Where(x => x.StudentId == studentId && x.EndTime >= DateTime.UtcNow);
+                .Where(x => x.StudentId == studentId);
 
             if (status.HasValue)
             {
@@ -41,21 +44,40 @@ namespace Backend.Repository.impl
 
             if (date.HasValue)
             {
-                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date.Value);
+                query = query.Where(
+                    x => DateOnly.FromDateTime(x.StartTime) == date.Value);
             }
 
-            return await query
-                .OrderBy(x => x.StartTime)
-                .ToListAsync();
+            
+            var now = DateTime.UtcNow;
+
+            var data = await query.ToListAsync();
+
+            var today = DateTime.UtcNow.Date;
+
+            return data
+                .OrderBy(x => Math.Abs((x.StartTime.Date - today).Days))
+                .ThenBy(x =>
+                    x.Status == common.Constant.StatusBooking.InProgress ? 0 :
+                    x.Status == common.Constant.StatusBooking.Confirmed ? 1 :
+                    x.Status == common.Constant.StatusBooking.Completed ? 2 :
+                    x.Status == common.Constant.StatusBooking.PendingPayment ? 3 :
+                    x.Status == common.Constant.StatusBooking.Cancelled ? 4 :
+                    x.Status == common.Constant.StatusBooking.Refunded ? 5 : 99)
+                .ThenBy(x => x.StartTime)
+                .ToList();
         }
 
-        public async Task<List<Booking>> GetByTeacherId(int instructorId, byte? status, DateOnly? date)
+        public async Task<List<Booking>> GetByTeacherId(
+    int instructorId,
+    byte? status,
+    DateOnly? date)
         {
             var query = _context.Bookings
                 .Include(x => x.Student)
                 .Include(x => x.Instructor)
                     .ThenInclude(x => x.TeacherProfile)
-                .Where(x => x.InstructorId == instructorId && x.EndTime >= DateTime.UtcNow);
+                .Where(x => x.InstructorId == instructorId);
 
             if (status.HasValue)
             {
@@ -64,12 +86,28 @@ namespace Backend.Repository.impl
 
             if (date.HasValue)
             {
-                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date.Value);
+                query = query.Where(
+                    x => DateOnly.FromDateTime(x.StartTime) == date.Value);
             }
 
-            return await query
-                .OrderBy(x => x.StartTime)
-                .ToListAsync();
+            
+            var now = DateTime.UtcNow;
+
+            var data = await query.ToListAsync();
+
+            var today = DateTime.UtcNow.Date;
+
+            return data
+                .OrderBy(x => Math.Abs((x.StartTime.Date - today).Days))
+                .ThenBy(x =>
+                    x.Status == common.Constant.StatusBooking.InProgress ? 0 :
+                    x.Status == common.Constant.StatusBooking.Confirmed ? 1 :
+                    x.Status == common.Constant.StatusBooking.Completed ? 2 :
+                    x.Status == common.Constant.StatusBooking.PendingPayment ? 3 :
+                    x.Status == common.Constant.StatusBooking.Cancelled ? 4 :
+                    x.Status == common.Constant.StatusBooking.Refunded ? 5 : 99)
+                .ThenBy(x => x.StartTime)
+                .ToList();
         }
 
         public async Task Create(Booking booking)

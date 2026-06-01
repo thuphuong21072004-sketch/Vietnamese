@@ -95,9 +95,7 @@ export class TeacherDetailComponent implements OnInit {
           this.teacher?.introVideoUrl &&
           !this.teacher.introVideoUrl.startsWith('http')
         ) {
-          const baseUrl = environment.apiBaseUrl.replace('/api', '');
-
-          this.teacher.introVideoUrl = `${baseUrl}/uploads/${this.teacher.introVideoUrl}`;
+          this.teacher.introVideoUrl = `http://localhost:5108/videos/${this.teacher.introVideoUrl}`;
         }
 
         /*

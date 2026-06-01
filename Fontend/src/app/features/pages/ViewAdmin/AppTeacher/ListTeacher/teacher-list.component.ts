@@ -192,6 +192,6 @@ export class AdminTeacherListComponent implements OnInit {
       return url;
     }
 
-    return `${environment.apiBaseUrl}/uploads/${url}`;
+    return `http://localhost:5108/uploads/${url}`;
   }
 }
