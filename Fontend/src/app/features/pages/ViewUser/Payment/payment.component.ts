@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentService } from '../../../services/payment.service';
 
 import { BookingService } from '../../../services/booking.service';
+import { loadStripe } from '@stripe/stripe-js';
 
 @Component({
   selector: 'app-payment',
@@ -27,6 +28,11 @@ export class PaymentComponent implements OnInit {
   booking: any = null;
 
   payment: any = null;
+  currencies: Record<string, number> = {};
+
+  selectedCurrency = 'USD';
+
+  showCurrencyModal = false;
 
   loading = false;
 
@@ -170,7 +176,6 @@ export class PaymentComponent implements OnInit {
   pay() {
     if (!this.booking) {
       alert('Booking not found');
-
       return;
     }
 
@@ -178,102 +183,29 @@ export class PaymentComponent implements OnInit {
 
     if (amount <= 0) {
       alert('Invalid payment amount');
-
       return;
     }
 
-    this.loading = true;
-
-    /*
-     * payment success
-     */
     if (this.payment && this.payment.status === 1) {
       this.goClassroom();
-
       return;
     }
 
-    /*
-     * already has payment
-     * pending or failed
-     */
-    if (
-      this.payment &&
-      (this.payment.status === 0 || this.payment.status === 2)
-    ) {
-      this.paymentService
-        .createVNPayUrl(this.payment.paymentId)
+    this.paymentService.getCurrencies(amount).subscribe({
+      next: (res) => {
+        this.currencies = res;
 
-        .subscribe({
-          next: (vnpayRes) => {
-            /*
-             * redirect VNPay
-             */
-            window.location.href = vnpayRes.paymentUrl;
-          },
+        this.selectedCurrency = 'USD';
 
-          error: (err) => {
-            console.error(err);
+        this.showCurrencyModal = true;
+      },
 
-            this.loading = false;
+      error: (err) => {
+        console.error(err);
 
-            alert(err.error?.message || 'Create VNPay failed');
-          },
-        });
-
-      return;
-    }
-
-    /*
-     * create new payment
-     */
-    const body = {
-      bookingId: this.bookingId,
-
-      amount: amount,
-
-      paymentMethod: 0,
-    };
-
-    this.paymentService
-      .create(body)
-
-      .subscribe({
-        next: (res) => {
-          this.payment = res;
-
-          /*
-           * create VNPay url
-           */
-          this.paymentService
-            .createVNPayUrl(res.paymentId)
-
-            .subscribe({
-              next: (vnpayRes) => {
-                /*
-                 * redirect VNPay
-                 */
-                window.location.href = vnpayRes.paymentUrl;
-              },
-
-              error: (err) => {
-                console.error(err);
-
-                this.loading = false;
-
-                alert(err.error?.message || 'Create VNPay failed');
-              },
-            });
-        },
-
-        error: (err) => {
-          console.error(err);
-
-          this.loading = false;
-
-          alert(err.error?.message || 'Create payment failed');
-        },
-      });
+        alert(err.error?.message || 'Failed to load currencies');
+      },
+    });
   }
 
   /*
@@ -309,5 +241,126 @@ export class PaymentComponent implements OnInit {
    */
   goClassroom() {
     this.router.navigate(['/video-room', this.bookingId]);
+  }
+  confirmPayment() {
+    this.loading = true;
+
+    if (
+      this.payment &&
+      (this.payment.status === 0 || this.payment.status === 2)
+    ) {
+      this.paymentService
+        .createStripeUrl(this.payment.paymentId, this.selectedCurrency)
+        .subscribe({
+          next: (stripeRes) => {
+            window.location.href = stripeRes.paymentUrl;
+          },
+
+          error: (err) => {
+            console.error(err);
+
+            alert(err.error);
+
+            this.loading = false;
+          },
+        });
+
+      return;
+    }
+
+    const body = {
+      bookingId: this.bookingId,
+      amount: this.getAmount(),
+      paymentMethod: 0,
+    };
+
+    this.paymentService.create(body).subscribe({
+      next: (res) => {
+        this.payment = res;
+
+        this.paymentService
+          .createStripeUrl(res.paymentId, this.selectedCurrency)
+          .subscribe({
+            next: (stripeRes) => {
+              window.location.href = stripeRes.paymentUrl;
+            },
+
+            error: (err) => {
+              console.error(err);
+
+              this.loading = false;
+            },
+          });
+      },
+
+      error: (err) => {
+        console.error(err);
+
+        this.loading = false;
+      },
+    });
+  }
+  closeCurrencyModal() {
+    this.showCurrencyModal = false;
+  }
+  currencyOptions = [
+    { code: 'USD', name: 'US Dollar' },
+    { code: 'EUR', name: 'Euro' },
+    { code: 'GBP', name: 'British Pound' },
+    { code: 'AUD', name: 'Australian Dollar' },
+    { code: 'CAD', name: 'Canadian Dollar' },
+    { code: 'SGD', name: 'Singapore Dollar' },
+    { code: 'NZD', name: 'New Zealand Dollar' },
+    { code: 'JPY', name: 'Japanese Yen' },
+    { code: 'KRW', name: 'South Korean Won' },
+    { code: 'CNY', name: 'Chinese Yuan' },
+    { code: 'HKD', name: 'Hong Kong Dollar' },
+    { code: 'TWD', name: 'Taiwan Dollar' },
+    { code: 'THB', name: 'Thai Baht' },
+    { code: 'MYR', name: 'Malaysian Ringgit' },
+    { code: 'PHP', name: 'Philippine Peso' },
+    { code: 'IDR', name: 'Indonesian Rupiah' },
+    { code: 'INR', name: 'Indian Rupee' },
+    { code: 'VND', name: 'Vietnamese Dong' },
+    { code: 'AED', name: 'UAE Dirham' },
+    { code: 'SAR', name: 'Saudi Riyal' },
+    { code: 'QAR', name: 'Qatari Riyal' },
+    { code: 'KWD', name: 'Kuwaiti Dinar' },
+    { code: 'BHD', name: 'Bahraini Dinar' },
+    { code: 'OMR', name: 'Omani Rial' },
+    { code: 'CHF', name: 'Swiss Franc' },
+    { code: 'SEK', name: 'Swedish Krona' },
+    { code: 'NOK', name: 'Norwegian Krone' },
+    { code: 'DKK', name: 'Danish Krone' },
+    { code: 'PLN', name: 'Polish Zloty' },
+    { code: 'CZK', name: 'Czech Koruna' },
+    { code: 'HUF', name: 'Hungarian Forint' },
+    { code: 'RON', name: 'Romanian Leu' },
+    { code: 'BGN', name: 'Bulgarian Lev' },
+    { code: 'HRK', name: 'Croatian Kuna' },
+    { code: 'TRY', name: 'Turkish Lira' },
+    { code: 'MXN', name: 'Mexican Peso' },
+    { code: 'BRL', name: 'Brazilian Real' },
+    { code: 'ARS', name: 'Argentine Peso' },
+    { code: 'CLP', name: 'Chilean Peso' },
+    { code: 'COP', name: 'Colombian Peso' },
+    { code: 'PEN', name: 'Peruvian Sol' },
+    { code: 'UYU', name: 'Uruguayan Peso' },
+    { code: 'ZAR', name: 'South African Rand' },
+    { code: 'ILS', name: 'Israeli Shekel' },
+  ];
+  searchCurrency = '';
+  get filteredCurrencies() {
+    if (!this.searchCurrency) {
+      return this.currencyOptions;
+    }
+
+    const keyword = this.searchCurrency.toLowerCase();
+
+    return this.currencyOptions.filter(
+      (x) =>
+        x.code.toLowerCase().includes(keyword) ||
+        x.name.toLowerCase().includes(keyword),
+    );
   }
 }

@@ -1,21 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { TeacherAvailabilityService } from '../../../../services/teacher-availability.service';
-
 import { BookingService } from '../../../../services/booking.service';
-
 import { ReviewService } from '../../../../services/review.service';
-import { PaymentService } from '../../../../services/payment.service';
+
 @Component({
   selector: 'app-schedule-detail',
 
   standalone: true,
 
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
 
   templateUrl: './schedule-detail.component.html',
 
@@ -40,7 +38,6 @@ export class ScheduleDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private paymentService: PaymentService,
     private router: Router,
 
     public scheduleService: TeacherAvailabilityService,
@@ -59,118 +56,57 @@ export class ScheduleDetailComponent implements OnInit {
   loadDetail(id: number) {
     this.loading = true;
 
-    this.scheduleService
-      .getDetail(id)
+    this.scheduleService.getDetail(id).subscribe({
+      next: (res) => {
+        this.schedule = res;
 
-      .subscribe({
-        next: (res) => {
-          this.schedule = res;
+        this.loadReviews();
 
-          this.loadReviews();
+        this.loading = false;
+      },
 
-          this.loading = false;
-        },
+      error: (err) => {
+        console.error(err);
 
-        error: (err) => {
-          console.error(err);
+        alert(err.error?.message || 'Failed to load schedule');
 
-          alert(err.error?.message || 'Failed to load schedule');
-
-          this.loading = false;
-        },
-      });
+        this.loading = false;
+      },
+    });
   }
 
   bookSchedule() {
-    if (this.schedule?.status !== 0) {
+    if (this.schedule?.status !== 0 || this.bookingLoading) {
       return;
     }
 
     this.bookingLoading = true;
 
-    this.bookingService
-      .create(this.schedule.availabilityId)
+    this.bookingService.create(this.schedule.availabilityId).subscribe({
+      next: (bookingRes) => {
+        this.bookingLoading = false;
 
-      .subscribe({
-        next: (bookingRes) => {
-          const start = new Date(this.schedule.startTime);
+        this.router.navigate(['/payment', bookingRes.bookingId]);
+      },
 
-          const end = new Date(this.schedule.endTime);
+      error: (err) => {
+        console.error(err);
 
-          const hours =
-            Math.max(0, end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        this.bookingLoading = false;
 
-          const amount =
-            Math.round(
-              ((this.schedule?.instructorProfile?.pricePerHour || 0) * hours +
-                Number.EPSILON) *
-                100,
-            ) / 100;
-
-          const body = {
-            bookingId: bookingRes.bookingId,
-
-            amount: amount,
-
-            paymentMethod: 0,
-          };
-
-          this.paymentService
-            .create(body)
-
-            .subscribe({
-              next: (paymentRes) => {
-                this.paymentService
-                  .createVNPayUrl(paymentRes.paymentId)
-
-                  .subscribe({
-                    next: (vnpayRes) => {
-                      window.location.href = vnpayRes.paymentUrl;
-                    },
-
-                    error: (err) => {
-                      console.error(err);
-
-                      this.bookingLoading = false;
-
-                      alert(err.error?.message || 'VNPay failed');
-                    },
-                  });
-              },
-
-              error: (err) => {
-                console.error(err);
-
-                this.bookingLoading = false;
-
-                alert(err.error?.message || 'Create payment failed');
-              },
-            });
-        },
-
-        error: (err) => {
-          console.error(err);
-
-          this.bookingLoading = false;
-
-          alert(err.error?.message || 'Booking failed');
-        },
-      });
+        alert(err.error?.message || 'Booking failed');
+      },
+    });
   }
+
   back() {
     history.back();
   }
 
-  /*
-   * teacher name
-   */
   getTeacherName(): string {
     return this.schedule?.instructor?.name || 'Teacher';
   }
 
-  /*
-   * teacher avatar
-   */
   getTeacherAvatar(): string {
     const avatar = this.schedule?.instructor?.avatarUrl;
 
@@ -185,37 +121,22 @@ export class ScheduleDetailComponent implements OnInit {
     return `http://localhost:5108/uploads/${avatar}`;
   }
 
-  /*
-   * specialty
-   */
   getSpecialty(): string {
     return this.schedule?.instructorProfile?.specialty || '';
   }
 
-  /*
-   * price
-   */
   getPricePerHour(): number {
     return this.schedule?.instructorProfile?.pricePerHour || 0;
   }
 
-  /*
-   * rating
-   */
   getRating(): number {
     return this.schedule?.instructorProfile?.ratingAverage || 0;
   }
 
-  /*
-   * total reviews
-   */
   getTotalReviews(): number {
     return this.schedule?.instructorProfile?.totalReviews || 0;
   }
 
-  /*
-   * duration
-   */
   getDurationHours(): number {
     if (!this.schedule?.startTime || !this.schedule?.endTime) {
       return 0;
@@ -230,9 +151,6 @@ export class ScheduleDetailComponent implements OnInit {
     return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
   }
 
-  /*
-   * total amount
-   */
   getTotalAmount(): number {
     return (
       Math.round(
@@ -242,9 +160,6 @@ export class ScheduleDetailComponent implements OnInit {
     );
   }
 
-  /*
-   * load reviews
-   */
   loadReviews() {
     this.reviews = [];
 
@@ -262,42 +177,32 @@ export class ScheduleDetailComponent implements OnInit {
 
     this.reviewLoading = true;
 
-    this.reviewService
-      .getByTeacherId(teacherId)
+    this.reviewService.getByTeacherId(teacherId).subscribe({
+      next: (res) => {
+        this.reviews = res || [];
 
-      .subscribe({
-        next: (res) => {
-          console.log(res);
-          this.reviews = res || [];
+        this.applyReviewFilter();
 
-          this.applyReviewFilter();
+        this.reviewLoading = false;
+      },
 
-          this.reviewLoading = false;
-        },
+      error: (err) => {
+        console.error(err);
 
-        error: (err) => {
-          console.error(err);
+        this.reviewError =
+          err.error?.message || 'Failed to load teacher reviews.';
 
-          this.reviewError =
-            err.error?.message || 'Failed to load teacher reviews.';
-
-          this.reviewLoading = false;
-        },
-      });
+        this.reviewLoading = false;
+      },
+    });
   }
 
-  /*
-   * rating filter
-   */
   setRatingFilter(rating: number) {
     this.selectedRatingFilter = rating;
 
     this.applyReviewFilter();
   }
 
-  /*
-   * apply review filter
-   */
   applyReviewFilter() {
     if (this.selectedRatingFilter <= 0) {
       this.filteredReviews = [...this.reviews];
@@ -308,16 +213,10 @@ export class ScheduleDetailComponent implements OnInit {
     }
   }
 
-  /*
-   * review count
-   */
   getReviewCount(rating: number): number {
     return this.reviews.filter((review) => review.rating === rating).length;
   }
 
-  /*
-   * average rating
-   */
   getAverageRating(): number {
     if (!this.reviews.length) {
       return 0;
@@ -325,19 +224,16 @@ export class ScheduleDetailComponent implements OnInit {
 
     const total = this.reviews.reduce(
       (sum, review) => sum + (review.rating || 0),
-
       0,
     );
 
     return total / this.reviews.length;
   }
 
-  /*
-   * has reviews
-   */
   hasReviews(): boolean {
     return this.reviews.length > 0;
   }
+
   getTeacherVideo(): string {
     const video = this.schedule?.instructorProfile?.introVideoUrl;
 
@@ -351,6 +247,7 @@ export class ScheduleDetailComponent implements OnInit {
 
     return `http://localhost:5108/videos/${video}`;
   }
+
   getReviewAvatar(review: any): string {
     const avatar = review?.studentAvatar || review?.student?.avatarUrl;
 

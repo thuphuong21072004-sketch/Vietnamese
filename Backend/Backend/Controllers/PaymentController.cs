@@ -1,7 +1,12 @@
-﻿using Backend.dto;
+﻿using Backend.Common;
+using Backend.dto;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
+using Stripe.Checkout;
+using Backend.Common;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Controllers
 {
@@ -10,10 +15,14 @@ namespace Backend.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly PaymentService _paymentService;
+        private readonly ExchangeRateService _exchangeRateService;
+        private readonly StripeConfig _stripeConfig;
 
-        public PaymentController(PaymentService paymentService)
+        public PaymentController(PaymentService paymentService, ExchangeRateService exchangeRateService, IOptions<StripeConfig> stripeConfig)
         {
             _paymentService = paymentService;
+            _exchangeRateService = exchangeRateService;
+            _stripeConfig= stripeConfig.Value;
         }
 
         [Authorize]
@@ -24,39 +33,119 @@ namespace Backend.Controllers
             return Ok(payment);
         }
 
+        
         [Authorize]
-        [HttpPost("{paymentId}/vnpay")]
-        public async Task<IActionResult> VNPay(int paymentId)
+        [HttpGet("currencies")]
+        public async Task<IActionResult> GetCurrencies(
+    [FromQuery] decimal amount)
+        {
+            return Ok(
+                await _exchangeRateService
+                    .GetAllCurrencies(amount));
+        }
+       
+        [Authorize]
+        [HttpPost("{paymentId}/stripe")]
+        public async Task<IActionResult> CreateStripeUrl(
+    int paymentId,
+    string currency)
         {
             try
             {
-                var url = await _paymentService.CreateVNPayUrl(paymentId);
-                return Ok(new { success = true, paymentUrl = url });
+                var url =
+                    await _paymentService
+                        .CreateStripeUrl(
+                            paymentId,
+                            currency);
+
+                return Ok(new
+                {
+                    paymentUrl = url
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message, detail = ex.ToString() });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    stack = ex.StackTrace
+                });
             }
         }
 
         [AllowAnonymous]
-        [HttpGet("vnpay-return")]
-        public async Task<IActionResult> VNPayReturn()
+        [HttpPost("stripe-webhook")]
+        public async Task<IActionResult> StripeWebhook()
         {
-            var responseCode = Request.Query["vnp_ResponseCode"].ToString();
-            var txnRef = Request.Query["vnp_TxnRef"].ToString();
-            var transactionNo = Request.Query["vnp_TransactionNo"].ToString();
+            var json =
+                await new StreamReader(
+                    Request.Body)
+                .ReadToEndAsync();
 
-            int paymentId = int.Parse(txnRef);
+            var stripeSignature =
+                Request.Headers["Stripe-Signature"];
 
-            if (responseCode == "00")
+            Event stripeEvent;
+
+            try
             {
-                await _paymentService.Success(paymentId, transactionNo);
-                return Redirect("http://localhost:4200/my-bookings");
+                stripeEvent =
+                    EventUtility.ConstructEvent(
+                        json,
+                        stripeSignature,
+                        _stripeConfig.WebhookSecret);
+
+                Console.WriteLine(
+                    $"Webhook received: {stripeEvent.Type}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Webhook Error: {ex.Message}");
+
+                return BadRequest();
             }
 
-            await _paymentService.Failed(paymentId);
-            return Redirect("http://localhost:4200/my-bookings");
+            if (
+                stripeEvent.Type ==
+                "checkout.session.completed")
+            {
+                var session =
+                    stripeEvent.Data.Object
+                    as Session;
+
+                Console.WriteLine(
+                    $"Checkout completed");
+
+                if (
+                    session == null ||
+                    session.Metadata == null ||
+                    !session.Metadata.ContainsKey(
+                        "PaymentId"))
+                {
+                    Console.WriteLine(
+                        "PaymentId not found");
+
+                    return BadRequest();
+                }
+
+                int paymentId =
+                    int.Parse(
+                        session.Metadata["PaymentId"]);
+
+                Console.WriteLine(
+                    $"PaymentId = {paymentId}");
+
+                await _paymentService.Success(
+                    paymentId,
+                    session.PaymentIntentId
+                    ?? session.Id);
+
+                Console.WriteLine(
+                    $"SUCCESS PAYMENT {paymentId}");
+            }
+
+            return Ok();
         }
 
         [Authorize]

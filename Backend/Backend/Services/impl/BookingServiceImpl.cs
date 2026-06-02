@@ -78,7 +78,7 @@ namespace Backend.Services.impl
                 throw new InvalidOperationException("Schedule already booked");
             }
 
-            if (availability.StartTime <= DateTime.UtcNow.AddMinutes(30))
+            if (availability.StartTime <= DateTime.Now.AddMinutes(30))
             {
                 throw new InvalidOperationException("Cannot book within 30 minutes");
             }
@@ -107,7 +107,7 @@ namespace Backend.Services.impl
                 EndTime = availability.EndTime,
                 TotalPrice = totalPrice,
                 Status = common.Constant.StatusBooking.PendingPayment,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.Now
             };
 
             
@@ -196,7 +196,7 @@ namespace Backend.Services.impl
                 throw new InvalidOperationException("Class is in progress");
             }
 
-            if (booking.StudentId == userId && booking.StartTime <= DateTime.UtcNow.AddDays(1))
+            if (booking.StudentId == userId && booking.StartTime <= DateTime.Now.AddDays(1))
             {
                 throw new InvalidOperationException("Must cancel at least 1 day before class");
             }
@@ -257,7 +257,7 @@ namespace Backend.Services.impl
                 if (payment != null &&
                     (payment.Status == common.Constant.StatusPayment.Pending ||
                      payment.Status == common.Constant.StatusPayment.Failed) &&
-                    payment.CreatedDate.AddMinutes(5) <= now)
+                    payment.CreatedDate.AddMinutes(15) <= now)
                 {
                     payment.Status = common.Constant.StatusPayment.Expired;
                     booking.Status = common.Constant.StatusBooking.Cancelled;

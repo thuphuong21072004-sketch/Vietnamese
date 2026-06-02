@@ -15,9 +15,11 @@ namespace Backend.Services.impl
         private readonly UserRepository _userRepository;
         private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
-        private readonly VNPayService _vnpayService;
+        
+        private readonly StripeService _stripeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
+        private readonly ExchangeRateService _exchangeRateService;
         public PaymentServiceImpl(
             PaymentRepository paymentRepository,
             BookingRepository bookingRepository,
@@ -25,7 +27,7 @@ namespace Backend.Services.impl
             UserRepository userRepository,
             UserContextUtil userContext,
             IMapper mapper,
-            VNPayService vnpayService,
+           StripeService stripeService, ExchangeRateService exchangeRateService,
             IHttpContextAccessor httpContextAccessor)
         {
             _paymentRepository =
@@ -45,12 +47,11 @@ namespace Backend.Services.impl
 
             _mapper =
                 mapper;
-
-            _vnpayService =
-                vnpayService;
+            _stripeService = stripeService;
 
             _httpContextAccessor =
                 httpContextAccessor;
+            _exchangeRateService = exchangeRateService;
         }
 
         /*
@@ -125,8 +126,8 @@ namespace Backend.Services.impl
                         .Pending
                     &&
                     exist.CreatedDate
-                        .AddMinutes(5)
-                        > DateTime.UtcNow
+                        .AddMinutes(15)
+                        > DateTime.Now
                 )
                 {
                     throw new InvalidOperationException(
@@ -140,8 +141,8 @@ namespace Backend.Services.impl
                         .Pending
                     &&
                     exist.CreatedDate
-                        .AddMinutes(5)
-                        <= DateTime.UtcNow
+                        .AddMinutes(15)
+                        <= DateTime.Now
                 )
                 {
                     exist.Status =
@@ -163,7 +164,7 @@ namespace Backend.Services.impl
                     .Pending;
 
             payment.CreatedDate =
-                DateTime.UtcNow;
+                DateTime.Now;
 
             payment.PaidAt = null;
 
@@ -180,8 +181,13 @@ namespace Backend.Services.impl
         /*
          * payment success
          */
-        public async Task Success( int paymentId, string transactionCode)
+        public async Task Success(
+    int paymentId,
+    string transactionCode)
         {
+            Console.WriteLine(
+                $"ENTER SUCCESS: {paymentId}");
+
             if (
                 string.IsNullOrWhiteSpace(
                     transactionCode)
@@ -194,6 +200,9 @@ namespace Backend.Services.impl
             var payment =
                 await _paymentRepository
                     .GetById(paymentId);
+
+            Console.WriteLine(
+                $"Payment Status Before = {payment?.Status}");
 
             if (payment == null)
             {
@@ -230,6 +239,9 @@ namespace Backend.Services.impl
                     .Expired
             )
             {
+                Console.WriteLine(
+                    $"PAYMENT EXPIRED BEFORE SUCCESS");
+
                 throw new InvalidOperationException(
                     "Payment expired");
             }
@@ -243,7 +255,7 @@ namespace Backend.Services.impl
                 transactionCode;
 
             payment.PaidAt =
-                DateTime.UtcNow;
+                DateTime.Now;
 
             var booking =
                 await _bookingRepository
@@ -266,6 +278,9 @@ namespace Backend.Services.impl
 
             await _paymentRepository
                 .Save();
+
+            Console.WriteLine(
+                $"PAYMENT SUCCESS SAVED");
         }
 
         /*
@@ -376,42 +391,29 @@ namespace Backend.Services.impl
                     "No permission");
             }
 
+            // Tạm thời tắt auto expire để test Stripe
+
+            /*
             if (
                 payment.Status ==
-               common.Constant
+                common.Constant
                     .StatusPayment
                     .Pending
                 &&
                 payment.CreatedDate
-                    .AddMinutes(5)
-                    <= DateTime.UtcNow
+                    .AddMinutes(15)
+                    <= DateTime.Now
             )
             {
                 payment.Status =
-                   common.Constant
+                    common.Constant
                         .StatusPayment
                         .Expired;
 
                 booking.Status =
-                   common.Constant
+                    common.Constant
                         .StatusBooking
                         .Cancelled;
-
-                var availability =
-                    await _availabilityRepository
-                        .GetById(
-                            booking.AvailabilityId);
-
-                if (availability != null)
-                {
-                    availability.Status =
-                       common.Constant
-                            .StatusTeacherAvailability
-                            .Available;
-
-                    await _availabilityRepository
-                        .Update(availability);
-                }
 
                 await _bookingRepository
                     .Update(booking);
@@ -422,6 +424,7 @@ namespace Backend.Services.impl
                 await _paymentRepository
                     .Save();
             }
+            */
 
             return _mapper.Map<PaymentDTO>(
                 payment);
@@ -430,7 +433,10 @@ namespace Backend.Services.impl
         /*
          * tạo url vnpay
          */
-        public async Task<string> CreateVNPayUrl(int paymentId)
+
+        public async Task<string> CreateStripeUrl(
+        int paymentId,
+        string currency)
         {
             var payment =
                 await _paymentRepository
@@ -442,57 +448,35 @@ namespace Backend.Services.impl
                     "Payment not found");
             }
 
-            /*
-             * chỉ payment pending
-             */
+            decimal finalAmount =
+                payment.Amount;
+
             if (
-                payment.Status !=
-               common.Constant
-                    .StatusPayment
-                    .Pending
+                currency.ToUpper() != "USD"
             )
             {
-                throw new InvalidOperationException(
-                    "Payment is not pending");
+                var allRates =
+                    await _exchangeRateService
+                        .GetAllCurrencies(
+                            payment.Amount);
+
+                if (
+                    allRates.ContainsKey(
+                        currency.ToUpper())
+                )
+                {
+                    finalAmount =
+                        allRates[
+                            currency.ToUpper()];
+                }
             }
 
-            /*
-             * payment expired
-             */
-            if (
-                payment.CreatedDate
-                    .AddMinutes(5)
-                    <= DateTime.UtcNow
-            )
-            {
-                payment.Status =
-                   common.Constant
-                        .StatusPayment
-                        .Expired;
-
-                await _paymentRepository
-                    .Update(payment);
-
-                await _paymentRepository
-                    .Save();
-
-                throw new InvalidOperationException(
-                    "Payment expired");
-            }
-
-            /*
-             * FIX IPV6
-             */
-            var ipAddress =
-                "127.0.0.1";
-
-            return _vnpayService
-                .CreatePaymentUrl(
+            return _stripeService
+                .CreateCheckoutSession(
                     payment.PaymentId,
-                    payment.Amount,
-                    ipAddress);
+                    finalAmount,
+                    currency);
         }
-
 
         public async Task<object> GetMyPaymentHistory(int month, int year, int page, int pageSize)
         {

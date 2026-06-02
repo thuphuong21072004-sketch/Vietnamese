@@ -6,7 +6,10 @@ namespace Backend.Services
     {
         Task<PaymentDTO> Create(PaymentDTO dto);
         Task<PaymentDTO?> GetByBooking(int bookingId);
-        Task<string> CreateVNPayUrl(int paymentId);
+       
+        Task<string> CreateStripeUrl(
+    int paymentId,
+    string currency);
         Task Success(int paymentId, string transactionCode);
         Task Failed(int paymentId);
        

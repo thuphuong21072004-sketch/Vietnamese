@@ -141,7 +141,7 @@
     <section class="panel action-panel">
       <div class="panel-card payment-card">
         <h2>
-          VNPay Payment
+          Stripe Payment
         </h2>
 
         <!-- amount -->
@@ -176,8 +176,8 @@
             <p>
               {{
               payment
-              ? 'Your payment is still pending. Continue payment through VNPay gateway.'
-              : 'Click the button below to continue to VNPay secure payment gateway.'
+              ? 'Your payment is still pending. Continue payment through Stripe gateway.'
+              : 'Click the button below to continue to Stripe secure payment gateway.'
               }}
             </p>
           </div>
@@ -232,9 +232,7 @@
           </h3>
 
           <p>
-            Your payment was not
-            completed. You can
-            continue payment again.
+            Your payment is still pending. Continue payment through Stripe.
           </p>
 
           <button class="btn btn-danger" [disabled]="loading" (click)="pay()">
@@ -247,5 +245,41 @@
         </div>
       </div>
     </section>
+  </div>
+  <div *ngIf="showCurrencyModal" class="currency-modal-overlay">
+    <div class="currency-modal">
+      <h3>
+        Select Currency
+      </h3>
+  
+      <p>
+        Choose your payment currency
+      </p>
+  
+      <input type="text" class="currency-search" placeholder="Search currency..." [(ngModel)]="searchCurrency">
+      
+      <select [(ngModel)]="selectedCurrency" class="currency-select">
+      
+        <option *ngFor="let currency of filteredCurrencies" [value]="currency.code">
+      
+          {{ currency.code }} - {{ currency.name }}
+      
+        </option>
+      
+      </select>
+  
+      <div class="currency-actions">
+        <button type="button" (click)="closeCurrencyModal()">
+          Cancel
+        </button>
+  
+
+
+        
+        <button type="button" (click)="confirmPayment()">
+          Pay Now
+        </button>
+      </div>
+    </div>
   </div>
 </div>

@@ -95,26 +95,25 @@ export class PaymentService {
   /*
    * payment method text
    */
-  getMethodText(method: number): string {
-    switch (method) {
-      case 0:
-        return 'VNPay';
-
-      case 1:
-        return 'Momo';
-
-      case 2:
-        return 'Paypal';
-
-      default:
-        return 'Unknown';
-    }
+  getCurrencies(amount: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/currencies`, {
+      ...this.getOptions(),
+      params: {
+        amount,
+      },
+    });
   }
-  createVNPayUrl(paymentId: number): Observable<any> {
+  
+  createStripeUrl(paymentId: number, currency: string): Observable<any> {
     return this.http.post(
-      `${this.apiUrl}/${paymentId}/vnpay`,
+      `${this.apiUrl}/${paymentId}/stripe`,
       {},
-      this.getOptions(),
+      {
+        ...this.getOptions(),
+        params: {
+          currency,
+        },
+      },
     );
   }
 

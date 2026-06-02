@@ -134,13 +134,14 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<TextToSpeechService, GttsTextToSpeechService>();
 
-builder.Services.Configure<VNPayConfig>(
-    builder.Configuration.GetSection("VNPay"));
+builder.Services.AddScoped<StripeService>();
 
-builder.Services.AddScoped<VNPayService>();
+builder.Services.AddHttpClient<ExchangeRateService>();
+builder.Services.Configure<StripeConfig>(
+ builder.Configuration.GetSection("Stripe"));
+
 var app = builder.Build();
-builder.Services
-    .AddHttpContextAccessor();
+
 
 app.UseMiddleware<ExceptionMiddleware>();
 
