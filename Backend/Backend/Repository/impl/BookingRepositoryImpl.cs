@@ -53,10 +53,13 @@ namespace Backend.Repository.impl
 
             var data = await query.ToListAsync();
 
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.Now.Date;
 
             return data
-                .OrderBy(x => Math.Abs((x.StartTime.Date - today).Days))
+                .OrderBy(x =>
+                    x.StartTime.Date == today ? 0 :
+                    x.StartTime.Date > today ? 1 : 2)
+
                 .ThenBy(x =>
                     x.Status == common.Constant.StatusBooking.InProgress ? 0 :
                     x.Status == common.Constant.StatusBooking.Confirmed ? 1 :
@@ -64,7 +67,9 @@ namespace Backend.Repository.impl
                     x.Status == common.Constant.StatusBooking.PendingPayment ? 3 :
                     x.Status == common.Constant.StatusBooking.Cancelled ? 4 :
                     x.Status == common.Constant.StatusBooking.Refunded ? 5 : 99)
+
                 .ThenBy(x => x.StartTime)
+
                 .ToList();
         }
 
@@ -90,15 +95,15 @@ namespace Backend.Repository.impl
                     x => DateOnly.FromDateTime(x.StartTime) == date.Value);
             }
 
-            
-            var now = DateTime.UtcNow;
-
             var data = await query.ToListAsync();
 
-            var today = DateTime.UtcNow.Date;
+            var today = DateTime.Now.Date;
 
             return data
-                .OrderBy(x => Math.Abs((x.StartTime.Date - today).Days))
+                .OrderBy(x =>
+                    x.StartTime.Date == today ? 0 :
+                    x.StartTime.Date > today ? 1 : 2)
+
                 .ThenBy(x =>
                     x.Status == common.Constant.StatusBooking.InProgress ? 0 :
                     x.Status == common.Constant.StatusBooking.Confirmed ? 1 :
@@ -106,7 +111,9 @@ namespace Backend.Repository.impl
                     x.Status == common.Constant.StatusBooking.PendingPayment ? 3 :
                     x.Status == common.Constant.StatusBooking.Cancelled ? 4 :
                     x.Status == common.Constant.StatusBooking.Refunded ? 5 : 99)
+
                 .ThenBy(x => x.StartTime)
+
                 .ToList();
         }
 

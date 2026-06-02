@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { BookingService } from '../../../../services/booking.service';
 
 import { VideoRoomService } from '../../../../services/video-room.service';
-
+import { ReviewService } from '../../../../services/review.service';
 @Component({
   selector: 'app-my-bookings',
 
@@ -34,6 +34,7 @@ export class MyBookingsComponent implements OnInit {
   selectedStatus = '';
 
   selectedDate = '';
+  reviewedBookings = new Set<number>();
 
   constructor(
     public bookingService: BookingService,
@@ -41,6 +42,7 @@ export class MyBookingsComponent implements OnInit {
     private router: Router,
 
     private roomService: VideoRoomService,
+    private reviewService: ReviewService,
   ) {}
 
   ngOnInit(): void {
@@ -64,7 +66,7 @@ export class MyBookingsComponent implements OnInit {
           this.bookings = res || [];
 
           this.filteredBookings = [...this.bookings];
-
+          this.checkReviewedBookings();
           this.loading = false;
         },
 
@@ -332,5 +334,30 @@ export class MyBookingsComponent implements OnInit {
    */
   getDurationHours(item: any): number {
     return this.bookingService.getDurationHours(item);
+  }
+  checkReviewedBookings() {
+    this.reviewedBookings.clear();
+
+    this.bookings.forEach((item) => {
+      if (item.status !== 3) {
+        return;
+      }
+
+      this.reviewService.getByBookingId(item.bookingId).subscribe({
+        next: (review) => {
+          if (review) {
+            this.reviewedBookings.add(item.bookingId);
+          }
+        },
+      });
+    });
+  }
+
+  canReview(item: any): boolean {
+    return item?.status === 3 && !this.reviewedBookings.has(item.bookingId);
+  }
+
+  hasReviewed(item: any): boolean {
+    return this.reviewedBookings.has(item.bookingId);
   }
 }

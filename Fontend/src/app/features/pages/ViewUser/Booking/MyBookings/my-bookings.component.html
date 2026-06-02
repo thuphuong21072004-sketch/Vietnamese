@@ -296,16 +296,12 @@
                 </button>
 
                 <!-- review -->
-                <button *ngIf="
-                        showReviewButton(item)
-                    " class="review-btn" (click)="
-                        writeReview(
-                            item.bookingId
-                        )
-                    ">
-
-                    Review
-
+                <button *ngIf="canReview(item)" class="review-btn" (click)="writeReview(item.bookingId)">
+                    Write Review
+                </button>
+                
+                <button *ngIf="hasReviewed(item)" class="reviewed-btn" disabled>
+                    Reviewed
                 </button>
 
                 <!-- cancel -->

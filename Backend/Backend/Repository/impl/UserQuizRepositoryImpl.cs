@@ -51,7 +51,6 @@ namespace Backend.Repository.impl
         public async Task<UserQuiz?> GetUserQuiz(int userId, int quizId)
         {
             return await _context.UserQuiz
-                .AsNoTracking()
                 .Include(x => x.UserAnswers)
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.QuizId == quizId);
         }

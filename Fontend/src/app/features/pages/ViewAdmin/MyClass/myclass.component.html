@@ -256,18 +256,8 @@
                 </button>
 
                 <!-- completed -->
-                <button *ngIf="
-                        canViewReview(
-                            item
-                        )
-                    " class="review-btn" (click)="
-                        openDetail(
-                            item.bookingId
-                        )
-                    ">
-
+                <button *ngIf="canViewReview(item)" class="review-btn" (click)="openDetail(item.bookingId)">
                     View Review
-
                 </button>
 
                 <!-- cancel -->

@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { VideoRoomService } from '../../../services/video-room.service';
 
 import { BookingService } from '../../../services/booking.service';
-
+import { ReviewService } from '../../../services/review.service';
 @Component({
   selector: 'app-teacher-bookings',
 
@@ -31,13 +31,14 @@ export class TeacherBookingsComponent implements OnInit {
   selectedDate = '';
 
   selectedStatus = '';
-
+  reviewedBookings = new Set<number>();
   constructor(
     public bookingService: BookingService,
 
     private router: Router,
 
     private roomService: VideoRoomService,
+    private reviewService: ReviewService,
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +60,7 @@ export class TeacherBookingsComponent implements OnInit {
           this.bookings = res || [];
 
           this.filteredBookings = [...this.bookings];
-
+          this.checkReviewedBookings();
           this.loading = false;
         },
 
@@ -220,11 +221,7 @@ export class TeacherBookingsComponent implements OnInit {
    * can view review
    */
   canViewReview(item: any): boolean {
-    if (!item) {
-      return false;
-    }
-
-    return item.status === 3;
+    return this.reviewedBookings.has(item.bookingId);
   }
 
   getStudentName(item: any): string {
@@ -298,5 +295,22 @@ export class TeacherBookingsComponent implements OnInit {
     }
 
     return `http://localhost:5108/uploads/${avatar}`;
+  }
+  checkReviewedBookings() {
+    this.reviewedBookings.clear();
+
+    this.bookings.forEach((item) => {
+      if (item.status !== 3) {
+        return;
+      }
+
+      this.reviewService.getByBookingId(item.bookingId).subscribe({
+        next: (review) => {
+          if (review) {
+            this.reviewedBookings.add(item.bookingId);
+          }
+        },
+      });
+    });
   }
 }
