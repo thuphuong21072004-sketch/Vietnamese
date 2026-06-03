@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-
-using Backend.Models;
-
 using Backend.dto;
+using Backend.DTO;
+using Backend.Models;
 
 namespace Backend.Mapper
 {

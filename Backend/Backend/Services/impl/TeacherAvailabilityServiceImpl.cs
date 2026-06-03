@@ -68,7 +68,7 @@ namespace Backend.Services.impl
             }
 
             if (teacherProfile.Status !=
-                common.Constant.StatusTeacherProfile.Approved)
+                common.Constant.StatusTeacherProfile.ApprovedTeacher)
             {
                 throw new Exception(
                     "Teacher profile is not approved");
@@ -168,7 +168,7 @@ namespace Backend.Services.impl
             if (teacher == null
                 || teacher.Status !=
                 common.Constant
-                .StatusTeacherProfile.Approved)
+                .StatusTeacherProfile.ApprovedTeacher)
             {
                 throw new Exception(
                     "Teacher not approved");

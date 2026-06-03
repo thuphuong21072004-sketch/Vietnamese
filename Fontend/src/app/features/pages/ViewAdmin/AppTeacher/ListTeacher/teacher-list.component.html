@@ -16,8 +16,6 @@
 
     </div>
 
-    <!-- filter -->
-
     <div class="filter-bar">
 
         <button [class.active]="selectedStatus === -1" (click)="setStatusFilter(-1)">
@@ -28,23 +26,35 @@
 
         <button [class.active]="selectedStatus === 1" (click)="setStatusFilter(1)">
 
-            Pending
+            Submitted
 
         </button>
 
         <button [class.active]="selectedStatus === 2" (click)="setStatusFilter(2)">
 
-            Approved
+            Approved Admin
 
         </button>
 
         <button [class.active]="selectedStatus === 3" (click)="setStatusFilter(3)">
 
-            Rejected
+            Rejected Admin
 
         </button>
 
         <button [class.active]="selectedStatus === 4" (click)="setStatusFilter(4)">
+
+            Approved Teacher
+
+        </button>
+
+        <button [class.active]="selectedStatus === 5" (click)="setStatusFilter(5)">
+
+            Rejected Teacher
+
+        </button>
+
+        <button [class.active]="selectedStatus === 6" (click)="setStatusFilter(6)">
 
             Banned
 
@@ -52,97 +62,45 @@
 
     </div>
 
-    <!-- loading -->
-
     <div *ngIf="loading" class="loading">
 
         Loading teacher profiles...
 
     </div>
 
-    <!-- empty -->
-
-    <div *ngIf="
-            !loading
-            &&
-            teachers.length === 0
-        " class="empty-box">
+    <div *ngIf="!loading && teachers.length === 0" class="empty-box">
 
         No teacher profiles found.
 
     </div>
 
-    <!-- list -->
+    <div *ngIf="!loading && teachers.length > 0" class="teacher-grid">
 
-    <div *ngIf="
-            !loading
-            &&
-            teachers.length > 0
-        " class="teacher-grid">
-
-        <div *ngFor="
-                let teacher
-                of teachers
-            " class="teacher-card">
-
-            <!-- top -->
+        <div *ngFor="let teacher of teachers" class="teacher-card">
 
             <div class="teacher-top">
 
-                <img *ngIf="teacher.avatarUrl" [src]="getImageUrl(
-                        teacher.avatarUrl
-                    )" class="teacher-avatar">
+                <img *ngIf="teacher.avatarUrl" [src]="getImageUrl(teacher.avatarUrl)" class="teacher-avatar">
 
-                <div *ngIf="!teacher.avatarUrl" class="
-                        teacher-avatar
-                        placeholder
-                    ">
+                <div *ngIf="!teacher.avatarUrl" class="teacher-avatar placeholder">
 
-                    {{
-                    teacher.teacherName
-                    ?.charAt(0)
-                    || 'T'
-                    }}
+                    {{ teacher.teacherName?.charAt(0) || 'T' }}
 
                 </div>
 
                 <div class="teacher-info">
 
                     <h2>
-
-                        {{
-                        teacher.teacherName
-                        }}
-
+                        {{ teacher.teacherName }}
                     </h2>
 
                     <span>
-
-                        {{
-                        teacher.specialty
-                        }}
-
+                        {{ teacher.country }}
                     </span>
 
                 </div>
 
             </div>
-
-            <!-- body -->
-
-            <div class="teacher-body">
-
-                <p>
-
-                    {{
-                    teacher.description
-                    }}
-
-                </p>
-
-            </div>
-
-            <!-- info -->
 
             <div class="teacher-meta">
 
@@ -152,9 +110,7 @@
                         Experience:
                     </strong>
 
-                    {{
-                    teacher.experienceYears
-                    }}
+                    {{ teacher.experienceYears }}
                     years
 
                 </div>
@@ -162,71 +118,67 @@
                 <div class="meta-item">
 
                     <strong>
-                        Country:
+                        Desired Price:
                     </strong>
 
-                    {{
-                    teacher.country
-                    }}
+                    {{ teacher.desiredPricePerHour }}
+
+                </div>
+
+                <div class="meta-item" *ngIf="teacher.approvedPricePerHour">
+
+                    <strong>
+                        Approved Price:
+                    </strong>
+
+                    {{ teacher.approvedPricePerHour }}
 
                 </div>
 
                 <div class="meta-item">
 
                     <strong>
-                        Price:
+                        Rating:
                     </strong>
 
-                    ${{
-                    teacher.pricePerHour
-                    }}/h
+                    {{ teacher.ratingAverage }}
+
+                </div>
+
+                <div class="meta-item">
+
+                    <strong>
+                        Reviews:
+                    </strong>
+
+                    {{ teacher.totalReviews }}
 
                 </div>
 
             </div>
-
-            <!-- footer -->
 
             <div class="teacher-footer">
 
                 <div class="teacher-badge">
 
-                    ⭐
-                    {{
-                    teacher.ratingAverage
-                    }}
+                    ⭐ {{ teacher.ratingAverage }}
 
                 </div>
 
                 <div class="teacher-badge">
 
-                    {{
-                    teacher.totalReviews
-                    }}
+                    {{ teacher.totalReviews }}
                     Reviews
 
                 </div>
 
-                <div class="
-                        teacher-badge
-                        status
-                    " [ngClass]="
-                        getStatusClass(
-                            teacher.status
-                        )
-                    ">
+                <div class="teacher-badge status" [ngClass]="getStatusClass(teacher.status)">
 
-                    {{
-                    getStatusText(
-                    teacher.status
-                    )
-                    }}
+                    {{ getStatusText(teacher.status) }}
 
                 </div>
 
             </div>
-
-            <!-- actions -->
 
             <div class="action-group">
 
@@ -238,7 +190,13 @@
 
                 </button>
 
-                
+                <button *ngIf="canBan(teacher.status)" class="ban-btn" (click)="banTeacher(
+                        teacher.teacherProfileId
+                    )">
+
+                    Ban Teacher
+
+                </button>
 
             </div>
 

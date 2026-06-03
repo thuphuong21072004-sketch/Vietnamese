@@ -63,7 +63,7 @@ namespace Backend.Services.impl
 
             var teacher = await _teacherProfileRepository.GetByUserId(availability.InstructorId);
 
-            if (teacher == null || teacher.Status != common.Constant.StatusTeacherProfile.Approved)
+            if (teacher == null || teacher.Status != common.Constant.StatusTeacherProfile.ApprovedTeacher)
             {
                 throw new InvalidOperationException("Teacher not approved");
             }
@@ -96,7 +96,8 @@ namespace Backend.Services.impl
 
             double hours = (availability.EndTime - availability.StartTime).TotalHours;
 
-            decimal totalPrice = teacher.PricePerHour * (decimal)hours;
+            decimal totalPrice =
+    (teacher.ApprovedPricePerHour ?? 0) * (decimal)hours;
 
             var booking = new Booking
             {

@@ -60,7 +60,7 @@ namespace Backend.Repository.impl
                     && x.Status == common.Constant.StatusTeacherAvailability.Available
                     && x.Instructor != null
                     && x.Instructor.TeacherProfile != null
-                    && x.Instructor.TeacherProfile.Status == common.Constant.StatusTeacherProfile.Approved);
+                    && x.Instructor.TeacherProfile.Status == common.Constant.StatusTeacherProfile.ApprovedTeacher);
 
             if (date != null)
             {

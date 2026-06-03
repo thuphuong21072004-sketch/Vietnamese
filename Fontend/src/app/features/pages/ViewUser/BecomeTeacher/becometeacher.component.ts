@@ -1,59 +1,41 @@
 import { Component, OnInit } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
-
 import { FormsModule } from '@angular/forms';
-
 import { jwtDecode } from 'jwt-decode';
-
 import { TeacherProfileService } from '../../../services/teacherProfile.service';
 
 @Component({
   selector: 'app-teacher-profile',
-
   standalone: true,
-
   imports: [CommonModule, FormsModule],
-
   templateUrl: './becometeacher.component.html',
-
   styleUrls: ['./becometeacher.component.css'],
 })
 export class TeacherProfileComponent implements OnInit {
   profile: any = {
     teacherProfileId: 0,
-
     userId: 0,
-
-    introVideoUrl: '',
-
-    cvUrl: '',
-
+    teacherName: '',
+    country: '',
     avatarUrl: '',
-
+    introVideoUrl: '',
+    englishCertificateUrl: '',
     specialty: '',
-
     experienceYears: 0,
-
-    pricePerHour: 0,
-
-    ratingAverage: 0,
-
-    totalReviews: 0,
-
     description: '',
-
+    desiredPricePerHour: 0,
+    approvedPricePerHour: null,
+    ratingAverage: 0,
+    totalReviews: 0,
     status: 0,
+    adminNote: '',
+    approvedBy: '',
   };
 
   loading = false;
-
   hasProfile = false;
-
   userRole: string | null = null;
-
   isPrivilegedTeacherUser = false;
-
   videoPreviewUrl = '';
 
   constructor(private teacherService: TeacherProfileService) {}
@@ -67,33 +49,50 @@ export class TeacherProfileComponent implements OnInit {
     this.loadProfile();
   }
 
-  loadProfile() {
+  loadProfile(): void {
     this.loading = true;
 
     this.teacherService.getMyProfile().subscribe({
       next: (res: any) => {
         if (res) {
           this.profile = res;
-
           this.hasProfile = true;
         }
 
         this.loading = false;
       },
-
       error: (err) => {
         console.error(err);
-
         this.loading = false;
       },
     });
   }
 
   canEdit(): boolean {
-    return this.profile.status !== 2;
+    return (
+      this.profile.status === 0 ||
+      this.profile.status === 3 ||
+      this.profile.status === 5
+    );
   }
 
-  saveProfile() {
+  canSave(): boolean {
+    return (
+      this.profile.status === 0 ||
+      this.profile.status === 3 ||
+      this.profile.status === 5
+    );
+  }
+
+  canSubmit(): boolean {
+    return this.profile.status === 0;
+  }
+
+  canTeacherDecision(): boolean {
+    return this.profile.status === 2;
+  }
+
+  saveProfile(): void {
     if (!this.profile.specialty) {
       alert('Please enter specialty');
       return;
@@ -104,8 +103,11 @@ export class TeacherProfileComponent implements OnInit {
       return;
     }
 
-    if (this.profile.pricePerHour <= 0) {
-      alert('Price per hour must be greater than 0');
+    if (
+      !this.profile.desiredPricePerHour ||
+      this.profile.desiredPricePerHour <= 0
+    ) {
+      alert('Desired price per hour must be greater than 0');
       return;
     }
 
@@ -124,38 +126,93 @@ export class TeacherProfileComponent implements OnInit {
         );
 
         this.hasProfile = true;
-
         this.loading = false;
 
         this.loadProfile();
       },
-
       error: (err) => {
         console.error(err);
 
-        alert('Failed to save teacher profile');
+        alert(err?.error?.message || 'Failed to save teacher profile');
 
         this.loading = false;
       },
     });
   }
 
-  submitForReview() {
+  submitForReview(): void {
+    if (!this.canSubmit()) {
+      return;
+    }
+
+    if (!confirm('Are you sure you want to submit your profile for review?')) {
+      return;
+    }
+
     this.loading = true;
 
     this.teacherService.submitProfile().subscribe({
       next: () => {
-        alert('Submitted to admin successfully');
+        alert('Profile submitted successfully');
 
         this.loading = false;
 
         this.loadProfile();
       },
-
       error: (err) => {
         console.error(err);
 
-        alert('Failed to submit profile');
+        alert(err?.error?.message || 'Failed to submit profile');
+
+        this.loading = false;
+      },
+    });
+  }
+
+  acceptProfile(): void {
+    if (!confirm('Do you accept the teaching price proposed by admin?')) {
+      return;
+    }
+
+    this.loading = true;
+
+    this.teacherService.acceptProfile().subscribe({
+      next: () => {
+        alert('You are now an approved teacher');
+
+        this.loading = false;
+
+        this.loadProfile();
+      },
+      error: (err) => {
+        console.error(err);
+
+        alert(err?.error?.message || 'Failed to accept');
+
+        this.loading = false;
+      },
+    });
+  }
+
+  rejectProfile(): void {
+    if (!confirm('Do you want to reject the proposed teaching price?')) {
+      return;
+    }
+
+    this.loading = true;
+
+    this.teacherService.rejectApprovedProfile().subscribe({
+      next: () => {
+        alert('Teaching offer rejected');
+
+        this.loading = false;
+
+        this.loadProfile();
+      },
+      error: (err) => {
+        console.error(err);
+
+        alert(err?.error?.message || 'Failed to reject');
 
         this.loading = false;
       },
@@ -165,20 +222,67 @@ export class TeacherProfileComponent implements OnInit {
   getStatusText(status: number): string {
     switch (status) {
       case 0:
-        return 'Created';
+        return 'Draft';
 
       case 1:
         return 'Submitted';
 
       case 2:
-        return 'Approved';
+        return 'Approved By Admin - Waiting Teacher Decision';
 
       case 3:
-        return 'Rejected';
+        return 'Rejected By Admin';
+
+      case 4:
+        return 'Approved Teacher';
+
+      case 5:
+        return 'Rejected By Teacher';
+
+      case 6:
+        return 'Banned';
 
       default:
-        return 'Banned';
+        return 'Unknown';
     }
+  }
+
+  onTeacherFilesChange(event: any): void {
+    const files = event.target.files;
+
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    Array.from(files).forEach((file: any) => {
+      if (file.type.startsWith('video/')) {
+        this.teacherService.uploadVideo(file).subscribe({
+          next: (res: any) => {
+            this.profile.introVideoUrl = res.videoUrl;
+
+            this.videoPreviewUrl = URL.createObjectURL(file);
+          },
+          error: (err) => {
+            console.error(err);
+
+            alert('Upload video failed');
+          },
+        });
+
+        return;
+      }
+
+      this.teacherService.uploadCertificate(file).subscribe({
+        next: (res: any) => {
+          this.profile.englishCertificateUrl = res.fileUrl;
+        },
+        error: (err) => {
+          console.error(err);
+
+          alert('Upload certificate failed');
+        },
+      });
+    });
   }
 
   private getRoleFromToken(): string | null {
@@ -225,45 +329,5 @@ export class TeacherProfileComponent implements OnInit {
     }
 
     return value.toString().trim();
-  }
-
-  onTeacherFilesChange(event: any) {
-    const files = event.target.files;
-
-    if (!files || files.length === 0) {
-      return;
-    }
-
-    Array.from(files).forEach((file: any) => {
-      if (file.type.startsWith('video/')) {
-        this.teacherService.uploadVideo(file).subscribe({
-          next: (res: any) => {
-            this.profile.introVideoUrl = res.videoUrl;
-
-            this.videoPreviewUrl = URL.createObjectURL(file);
-          },
-
-          error: (err) => {
-            console.error(err);
-
-            alert('Upload video failed');
-          },
-        });
-
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (file.type.startsWith('image/')) {
-          this.profile.avatarUrl = reader.result;
-        } else {
-          this.profile.cvUrl = file.name;
-        }
-      };
-
-      reader.readAsDataURL(file);
-    });
   }
 }

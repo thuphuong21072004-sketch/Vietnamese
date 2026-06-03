@@ -1,47 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
-
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-
+import { FormsModule } from '@angular/forms';
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
-
 import { ReviewService } from '../../../../services/review.service';
-
-import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-detail',
-
   standalone: true,
-
-  imports: [CommonModule],
-
+  imports: [CommonModule, FormsModule],
   templateUrl: './teacher-detail.component.html',
-
   styleUrls: ['./teacher-detail.component.css'],
 })
 export class TeacherDetailComponent implements OnInit {
-  /*
-   * teacher detail
-   */
   teacher: any = null;
 
-  /*
-   * loading
-   */
   loading = true;
 
-  /*
-   * safe video
-   */
   safeVideoUrl: SafeResourceUrl | null = null;
 
-  /*
-   * reviews
-   */
   reviews: any[] = [];
 
   filteredReviews: any[] = [];
@@ -50,20 +28,17 @@ export class TeacherDetailComponent implements OnInit {
 
   reviewError = '';
 
-  /*
-   * filter rating
-   */
   selectedRatingFilter = 0;
+
+  approvedPrice = 0;
+
+  adminNote = '';
 
   constructor(
     private route: ActivatedRoute,
-
     private router: Router,
-
     private teacherService: TeacherProfileService,
-
     private reviewService: ReviewService,
-
     private sanitizer: DomSanitizer,
   ) {}
 
@@ -73,34 +48,27 @@ export class TeacherDetailComponent implements OnInit {
     this.loadTeacher(id);
   }
 
-  /*
-   * load teacher detail
-   */
-  loadTeacher(id: number) {
+  loadTeacher(id: number): void {
     this.loading = true;
 
-    this.teacherService.getTeacherDetail(id).subscribe({
+    this.teacherService.getTeacherDetailForAdmin(id).subscribe({
       next: (res: any) => {
         this.teacher = res;
 
-        /*
-         * load reviews
-         */
+        this.approvedPrice = res.approvedPricePerHour || 0;
+
+        this.adminNote = res.adminNote || '';
+
         this.loadReviews(this.teacher.teacherProfileId);
 
-        /*
-         * convert local video
-         */
         if (
           this.teacher?.introVideoUrl &&
           !this.teacher.introVideoUrl.startsWith('http')
         ) {
-          this.teacher.introVideoUrl = `http://localhost:5108/videos/${this.teacher.introVideoUrl}`;
+          this.teacher.introVideoUrl =
+            'http://localhost:5108/videos/' + this.teacher.introVideoUrl;
         }
 
-        /*
-         * safe video
-         */
         if (this.teacher?.introVideoUrl) {
           this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
             this.teacher.introVideoUrl,
@@ -113,20 +81,13 @@ export class TeacherDetailComponent implements OnInit {
       error: (err) => {
         console.error(err);
 
-        alert('Failed to load teacher detail');
-
         this.loading = false;
       },
     });
   }
 
-  /*
-   * load reviews
-   */
-  loadReviews(teacherId: number) {
+  loadReviews(teacherId: number): void {
     this.reviewLoading = true;
-
-    this.reviewError = '';
 
     this.reviewService.getByTeacherId(teacherId).subscribe({
       next: (res: any) => {
@@ -137,9 +98,7 @@ export class TeacherDetailComponent implements OnInit {
         this.reviewLoading = false;
       },
 
-      error: (err) => {
-        console.log(err);
-
+      error: () => {
         this.reviewError = 'Failed to load reviews';
 
         this.reviewLoading = false;
@@ -147,153 +106,111 @@ export class TeacherDetailComponent implements OnInit {
     });
   }
 
-  /*
-   * has reviews
-   */
-  hasReviews(): boolean {
-    return this.reviews.length > 0;
-  }
+  approveTeacher(): void {
+    if (this.approvedPrice <= 0) {
+      alert('Please enter approved price');
 
-  /*
-   * average rating
-   */
-  getAverageRating(): number {
-    if (!this.reviews.length) {
-      return 0;
-    }
-
-    const total = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-
-    return total / this.reviews.length;
-  }
-
-  /*
-   * review count
-   */
-  getReviewCount(rating: number): number {
-    return this.reviews.filter((review) => review.rating === rating).length;
-  }
-
-  /*
-   * filter reviews
-   */
-  setRatingFilter(rating: number) {
-    this.selectedRatingFilter = rating;
-
-    /*
-     * all
-     */
-    if (rating === 0) {
-      this.filteredReviews = this.reviews;
-
-      return;
-    }
-
-    this.filteredReviews = this.reviews.filter(
-      (review) => review.rating === rating,
-    );
-  }
-
-  /*
-   * approve teacher
-   */
-  approveTeacher() {
-    if (!confirm('Approve this teacher profile?')) {
       return;
     }
 
     this.teacherService
-      .approveProfile(this.teacher.teacherProfileId)
+      .approveProfile(
+        this.teacher.teacherProfileId,
+        this.approvedPrice,
+        this.adminNote,
+      )
       .subscribe({
         next: () => {
-          this.teacher.status = 2;
+          alert('Approved successfully');
 
-          alert('Teacher approved successfully');
+          this.loadTeacher(this.teacher.teacherProfileId);
         },
 
         error: (err) => {
           console.error(err);
 
-          alert('Failed to approve teacher');
+          alert(err?.error?.message || 'Approve failed');
         },
       });
   }
 
-  /*
-   * reject teacher
-   */
-  rejectTeacher() {
-    if (!confirm('Reject this teacher profile?')) {
+  rejectTeacher(): void {
+    if (!this.adminNote.trim()) {
+      alert('Please enter rejection note');
+
       return;
     }
 
-    this.teacherService.rejectProfile(this.teacher.teacherProfileId).subscribe({
-      next: () => {
-        this.teacher.status = 3;
+    this.teacherService
+      .rejectProfile(this.teacher.teacherProfileId, this.adminNote)
+      .subscribe({
+        next: () => {
+          alert('Rejected successfully');
 
-        alert('Teacher rejected successfully');
-      },
+          this.loadTeacher(this.teacher.teacherProfileId);
+        },
 
-      error: (err) => {
-        console.error(err);
+        error: (err) => {
+          console.error(err);
 
-        alert('Failed to reject teacher');
-      },
-    });
+          alert(err?.error?.message || 'Reject failed');
+        },
+      });
   }
 
-  /*
-   * ban teacher
-   */
-  banTeacher() {
-    if (!confirm('Bạn có chắc muốn khóa giáo viên này?')) {
+  banTeacher(): void {
+    const reason = prompt('Enter ban reason');
+
+    if (!reason) {
       return;
     }
 
-    this.teacherService.banTeacher(this.teacher.teacherProfileId).subscribe({
-      next: () => {
-        this.teacher.status = 4;
+    this.teacherService
+      .banTeacher(this.teacher.teacherProfileId, reason)
+      .subscribe({
+        next: () => {
+          alert('Teacher banned');
 
-        alert('Khóa giáo viên thành công');
-      },
+          this.loadTeacher(this.teacher.teacherProfileId);
+        },
 
-      error: (err) => {
-        console.log(err);
+        error: (err) => {
+          console.error(err);
 
-        alert('Có lỗi xảy ra');
-      },
-    });
+          alert(err?.error?.message || 'Ban failed');
+        },
+      });
   }
 
-  /*
-   * back
-   */
-  backToList() {
+  backToList(): void {
     this.router.navigate(['/admin/teachers']);
   }
 
-  /*
-   * can review
-   */
   canReview(): boolean {
     return this.teacher?.status === 1;
   }
 
-  /*
-   * status text
-   */
   getStatusText(status: number): string {
     switch (status) {
+      case 0:
+        return 'Created';
+
       case 1:
-        return 'Pending';
+        return 'Submitted';
 
       case 2:
-        return 'Approved';
+        return 'Approved By Admin';
 
       case 3:
-        return 'Rejected';
+        return 'Rejected By Admin';
 
       case 4:
+        return 'Approved Teacher';
+
+      case 5:
+        return 'Rejected Teacher';
+
+      case 6:
         return 'Banned';
 
       default:
@@ -301,21 +218,24 @@ export class TeacherDetailComponent implements OnInit {
     }
   }
 
-  /*
-   * status class
-   */
   getStatusClass(status: number): string {
     switch (status) {
       case 1:
-        return 'pending';
+        return 'submitted';
 
       case 2:
-        return 'approved';
+        return 'approved-admin';
 
       case 3:
-        return 'rejected';
+        return 'rejected-admin';
 
       case 4:
+        return 'approved-teacher';
+
+      case 5:
+        return 'rejected-teacher';
+
+      case 6:
         return 'banned';
 
       default:
@@ -323,24 +243,45 @@ export class TeacherDetailComponent implements OnInit {
     }
   }
 
-  /*
-   * image url
-   */
+  setRatingFilter(rating: number): void {
+    this.selectedRatingFilter = rating;
+
+    if (rating === 0) {
+      this.filteredReviews = this.reviews;
+
+      return;
+    }
+
+    this.filteredReviews = this.reviews.filter((x) => x.rating === rating);
+  }
+
+  getReviewCount(rating: number): number {
+    return this.reviews.filter((x) => x.rating === rating).length;
+  }
+
+  getAverageRating(): number {
+    if (!this.reviews.length) {
+      return 0;
+    }
+
+    const total = this.reviews.reduce((sum, x) => sum + x.rating, 0);
+
+    return total / this.reviews.length;
+  }
+
+  hasReviews(): boolean {
+    return this.reviews.length > 0;
+  }
+
   getImageUrl(url: string): string {
     if (!url) {
       return '';
-    }
-
-    if (url.startsWith('data:')) {
-      return url;
     }
 
     if (url.startsWith('http')) {
       return url;
     }
 
-    const baseUrl = environment.apiBaseUrl.replace('/api', '');
-
-    return `${baseUrl}/uploads/${url}`;
+    return `http://localhost:5108/uploads/${url}`;
   }
 }

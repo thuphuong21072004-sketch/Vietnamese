@@ -1,4 +1,5 @@
 ﻿using Backend.dto;
+using Backend.DTO;
 
 namespace Backend.Services
 {
@@ -7,10 +8,15 @@ namespace Backend.Services
         Task<TeacherProfileDTO?> GetMyProfile();
         Task CreateProfile(TeacherProfileDTO dto);
         Task UpdateProfile(TeacherProfileDTO dto);
-        Task UpdateStatus(int id, int status);
-        Task<List<TeacherProfileDTO>> GetAllTeachers(int? status);
-        Task<TeacherProfileDTO?>GetDetail(int id);
         Task SubmitProfile();
-        Task BanTeacher(int id);
+        Task ApprovedAdmin(int id, decimal approvedPrice, string? note);
+        Task RejectedAdmin(int id, string note);
+        Task ApprovedTeacher();
+        Task RejectedTeacher();
+        Task BanTeacher(int id, string reason);
+
+        Task<List<TeacherProfileDTO>> GetAllTeachers(int? status);
+        Task<TeacherProfileDTO?> GetDetailForAdmin( int id);
+        Task<TeacherProfileDTO?> GetDetailForStudent(int id);
     }
 }

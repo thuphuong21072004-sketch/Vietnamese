@@ -116,10 +116,12 @@
 
             public const byte Submitted = 1;
 
-            public const byte Approved = 2;
+            public const byte ApprovedAdmin = 2;
 
-            public const byte Rejected = 3;
-            public const byte Banned = 4;
+            public const byte RejectedAdmin = 3;
+            public const byte ApprovedTeacher=4;
+            public const byte RejectedTeacher=5;
+            public const byte Banned = 6;
 
         }
         public class StatusTeacherAvailability
