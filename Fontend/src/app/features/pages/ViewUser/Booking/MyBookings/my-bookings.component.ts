@@ -323,13 +323,6 @@ export class MyBookingsComponent implements OnInit {
   }
 
   /*
-   * total amount
-   */
-  getBookingAmount(item: any): number {
-    return this.bookingService.getBookingAmount(item);
-  }
-
-  /*
    * duration
    */
   getDurationHours(item: any): number {

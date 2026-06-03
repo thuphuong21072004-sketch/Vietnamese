@@ -219,9 +219,9 @@ namespace Backend.Services.impl
                 teacher.Status =
                 common.Constant
                     .StatusTeacherProfile.ApprovedTeacher;
-            }
+                teacher.ApprovedPricePerHour= teacher.DesiredPricePerHour;
 
-            
+            }
 
             await _teacherRepository.Save();
         }

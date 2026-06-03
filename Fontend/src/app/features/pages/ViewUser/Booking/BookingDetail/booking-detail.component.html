@@ -240,6 +240,24 @@
             </strong>
 
         </div>
+        
+        <div class="info-row">
+        
+        <span>
+            Total Amount
+        </span>
+        
+        <strong>
+
+            $
+            {{
+            booking.totalPrice
+            
+            }}
+        
+        </strong>
+        
+        </div>
 
         <!-- payment status -->
         <div *ngIf="payment" class="info-row">
@@ -290,7 +308,7 @@
 
         <!-- total -->
         <div *ngIf="
-                getAmount() > 0
+                payment.totalPrice > 0
             " class="info-row total-row">
 
             <span>
@@ -299,7 +317,7 @@
 
             <strong>
 
-                ${{ getAmount() }}
+                ${{ payment.totalPrice }}
 
             </strong>
 

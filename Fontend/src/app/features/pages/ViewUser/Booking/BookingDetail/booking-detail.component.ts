@@ -302,13 +302,6 @@ export class BookingDetailComponent implements OnInit {
   }
 
   /*
-   * amount
-   */
-  getAmount(): number {
-    return this.bookingService.getBookingAmount(this.booking);
-  }
-
-  /*
    * can pay
    */
   canPay(): boolean {

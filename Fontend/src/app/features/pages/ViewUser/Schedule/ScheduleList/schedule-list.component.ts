@@ -114,9 +114,7 @@ export class TeacherSchedulesComponent implements OnInit {
     return this.scheduleService.getSpecialty(item);
   }
 
-  getPricePerHour(item: any): number {
-    return this.scheduleService.getPricePerHour(item);
-  }
+  
 
   getRating(item: any): number {
     return this.scheduleService.getRating(item);

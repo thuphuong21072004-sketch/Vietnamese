@@ -61,7 +61,7 @@
     
             <div class="teacher-price">
             
-                ${{ getPricePerHour() | number:'1.2-2' }}
+                ${{ getPricePerHour(schedule) | number:'1.2-2' }}
                 / hour
             
             </div>
@@ -208,9 +208,7 @@
             <strong>
 
                 $
-                {{
-                getTotalAmount()
-                }}
+                {{schedule.pricePerHour}}
 
             </strong>
 

@@ -74,6 +74,14 @@ namespace Backend.Services.impl
                     "Teacher profile is not approved");
             }
 
+            double hours =
+    (dto.EndTime - dto.StartTime)
+    .TotalHours;
+
+            decimal totalPrice =
+                teacherProfile.ApprovedPricePerHour.Value
+                * (decimal)hours;
+
             var availability =
                 new TeacherAvailability
                 {
@@ -89,7 +97,9 @@ namespace Backend.Services.impl
                             .Available,
 
                     CreatedDate =
-                        DateTime.Now
+                        DateTime.Now,
+                    PricePerHour = totalPrice
+
                 };
 
             await _availabilityRepository

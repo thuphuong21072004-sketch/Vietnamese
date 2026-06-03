@@ -16,7 +16,7 @@ namespace Backend.Models
         public byte Status { get; set; } = 0;
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
-
+        public decimal PricePerHour { get; set; }
 
 
         public User? Instructor { get; set; }

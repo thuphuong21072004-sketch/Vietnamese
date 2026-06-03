@@ -97,14 +97,7 @@
             </span>
 
             <strong>
-              {{
-              formatCurrency(
-              booking
-              .instructor
-              ?.teacherProfile
-              ?.pricePerHour || 0
-              )
-              }}/hour
+              ${{ getPricePerHour() }}/hour
             </strong>
           </div>
 
@@ -126,10 +119,8 @@
             </span>
 
             <strong class="total-value">
-              {{
-              formatCurrency(
-              getAmount()
-              )
+              ${{
+              booking.totalPrice
               }}
             </strong>
           </div>
@@ -151,10 +142,8 @@
           </span>
 
           <strong>
-            {{
-            formatCurrency(
-            getAmount()
-            )
+            ${{
+            booking.totalPrice
             }}
           </strong>
         </div>

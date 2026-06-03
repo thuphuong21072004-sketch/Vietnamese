@@ -179,13 +179,6 @@ export class TeacherBookingDetailComponent implements OnInit {
   }
 
   /*
-   * total amount
-   */
-  getBookingAmount(): number {
-    return this.bookingService.getBookingAmount(this.booking);
-  }
-
-  /*
    * can join room
    */
   canJoinRoom(): boolean {

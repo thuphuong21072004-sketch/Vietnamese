@@ -232,9 +232,6 @@ export class TeacherBookingsComponent implements OnInit {
     return this.bookingService.getAvatar(item);
   }
 
-  getBookingAmount(item: any): number {
-    return this.bookingService.getBookingAmount(item);
-  }
 
   getDurationHours(item: any): number {
     return this.bookingService.getDurationHours(item);

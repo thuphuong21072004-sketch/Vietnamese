@@ -110,7 +110,7 @@ export class PaymentComponent implements OnInit {
     }
 
     const pricePerHour = Number(
-      this.booking?.instructor?.teacherProfile?.pricePerHour || 0,
+      this.booking?.instructor?.teacherProfile?.approvedPricePerHour || 0,
     );
 
     const start = new Date(this.booking.startTime);
@@ -126,7 +126,11 @@ export class PaymentComponent implements OnInit {
       Math.round((pricePerHour * durationHours + Number.EPSILON) * 100) / 100
     );
   }
-
+  getPricePerHour(): number {
+    return Number(
+      this.booking?.instructor?.teacherProfile?.approvedPricePerHour || 0,
+    );
+  }
   /*
    * booking duration
    */

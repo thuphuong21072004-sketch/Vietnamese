@@ -22,7 +22,7 @@ namespace Backend.Services
             decimal amount,
             string currency)
         {
-            return (long)Math.Round(amount * 100);
+            return (long)Math.Round(amount);
         }
 
         public string CreateCheckoutSession(

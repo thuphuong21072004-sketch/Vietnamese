@@ -15,17 +15,8 @@ namespace Backend.dto
         public byte Status { get; set; }
 
         public DateTime CreatedDate { get; set; }
-
-        public TeacherProfileDTO?
-            InstructorProfile
-        {
-            get;
-            set;
-        }
-        public UserDTO? Instructor
-        {
-            get;
-            set;
-        }
+        public decimal PricePerHour { get; set; }
+        public TeacherProfileDTO? InstructorProfile { get; set; }
+        public UserDTO? Instructor { get; set; }
     }
 }

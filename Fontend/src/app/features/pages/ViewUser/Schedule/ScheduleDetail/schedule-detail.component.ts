@@ -125,8 +125,8 @@ export class ScheduleDetailComponent implements OnInit {
     return this.schedule?.instructorProfile?.specialty || '';
   }
 
-  getPricePerHour(): number {
-    return this.schedule?.instructorProfile?.pricePerHour || 0;
+  getPricePerHour(item: any): number {
+    return this.scheduleService.getPricePerHour(item);
   }
 
   getRating(): number {
@@ -151,14 +151,7 @@ export class ScheduleDetailComponent implements OnInit {
     return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
   }
 
-  getTotalAmount(): number {
-    return (
-      Math.round(
-        (this.getPricePerHour() * this.getDurationHours() + Number.EPSILON) *
-          100,
-      ) / 100
-    );
-  }
+  
 
   loadReviews() {
     this.reviews = [];

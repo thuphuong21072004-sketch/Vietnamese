@@ -125,8 +125,21 @@ export class TeacherAvailabilityService {
   /*
    * giá dạy
    */
+
   getPricePerHour(item: any): number {
-    return item?.instructorProfile?.pricePerHour || 0;
+    console.log('InstructorProfile:', item?.instructorProfile);
+
+    console.log(
+      'ApprovedPricePerHour:',
+      item?.instructorProfile?.approvedPricePerHour,
+    );
+
+    console.log(
+      'DesiredPricePerHour:',
+      item?.instructorProfile?.desiredPricePerHour,
+    );
+
+    return item?.instructorProfile?.approvedPricePerHour || 0;
   }
 
   /*

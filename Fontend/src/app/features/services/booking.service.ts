@@ -199,16 +199,6 @@ export class BookingService {
     return Math.round((diff / (1000 * 60 * 60)) * 100) / 100;
   }
 
-  /*
-   * helper total amount
-   */
-  getBookingAmount(booking: any): number {
-    const price = this.getTeacherPrice(booking);
-
-    const hours = this.getDurationHours(booking);
-
-    return Math.round((price * hours + Number.EPSILON) * 100) / 100;
-  }
 
   /*
    * helper teacher price

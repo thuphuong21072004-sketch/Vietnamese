@@ -96,9 +96,6 @@ namespace Backend.Services.impl
 
             double hours = (availability.EndTime - availability.StartTime).TotalHours;
 
-            decimal totalPrice =
-    (teacher.ApprovedPricePerHour ?? 0) * (decimal)hours;
-
             var booking = new Booking
             {
                 StudentId = userId,
@@ -106,7 +103,7 @@ namespace Backend.Services.impl
                 AvailabilityId = availability.AvailabilityId,
                 StartTime = availability.StartTime,
                 EndTime = availability.EndTime,
-                TotalPrice = totalPrice,
+                TotalPrice = availability.PricePerHour,
                 Status = common.Constant.StatusBooking.PendingPayment,
                 CreatedDate = DateTime.Now
             };
