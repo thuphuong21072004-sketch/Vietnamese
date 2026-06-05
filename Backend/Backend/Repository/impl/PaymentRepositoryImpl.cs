@@ -21,24 +21,7 @@ namespace Backend.Repository.impl
         public async Task<Payment?> GetById(int id)
         {
             return await _context.Payments
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Student)
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Instructor)
-
-                        .ThenInclude(x => x.TeacherProfile)
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Availability)
-
-                .FirstOrDefaultAsync(
-                    x => x.PaymentId == id
-                );
+                .FirstOrDefaultAsync(x => x.PaymentId == id);
         }
 
         /* 
@@ -49,24 +32,9 @@ namespace Backend.Repository.impl
         public async Task<Payment?> GetByBookingId(int bookingId)
         {
             return await _context.Payments
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Student)
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Instructor)
-
-                        .ThenInclude(x => x.TeacherProfile)
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Availability)
-
-                .FirstOrDefaultAsync(
-                    x => x.BookingId == bookingId
-                );
+                .FirstOrDefaultAsync(x =>
+                    x.RefName == common.Constant.RefName.Booking
+                    && x.RefId == bookingId);
         }
 
         /* 
@@ -98,24 +66,6 @@ namespace Backend.Repository.impl
         {
             await _context.SaveChangesAsync();
         }
-        public async Task<List<Payment>> GetByMonth(int month, int year)
-        {
-            return await _context.Payments
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Student)
-
-                .Include(x => x.Booking)
-
-                    .ThenInclude(x => x.Instructor)
-
-                .Where(x =>
-                    x.Booking != null &&
-                    x.Booking.StartTime.Month == month &&
-                    x.Booking.StartTime.Year == year)
-
-                .ToListAsync();
-        }
+    
     }
 }

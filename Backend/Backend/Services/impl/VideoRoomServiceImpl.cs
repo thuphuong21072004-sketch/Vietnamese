@@ -144,7 +144,8 @@ namespace Backend.Services.impl
 
             var room = new VideoRoom
             {
-                BookingId = bookingId,
+                RefId = bookingId,
+                RefName = common.Constant.RefName.Booking,
 
                 RoomCode = roomCode,
 

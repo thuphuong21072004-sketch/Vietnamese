@@ -4,8 +4,8 @@
     {
         public int ReviewId { get; set; }
 
-        public int BookingId { get; set; }
-
+        public int RefId { get; set; }
+        public string RefName { get; set; }
         public int StudentId { get; set; }
 
         public string? StudentName { get; set; }

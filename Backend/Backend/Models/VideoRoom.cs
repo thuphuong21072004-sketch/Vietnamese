@@ -7,8 +7,8 @@ namespace Backend.Models
         [Key]
         public int RoomId { get; set; }
 
-        public int BookingId { get; set; }
-
+        public int RefId { get; set; }
+        public string RefName { get; set; }
         public string RoomCode { get; set; }
             = string.Empty;
 
@@ -22,8 +22,5 @@ namespace Backend.Models
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-
-
-        public Booking? Booking { get; set; }
     }
 }

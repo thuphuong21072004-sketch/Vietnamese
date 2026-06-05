@@ -180,6 +180,51 @@ namespace Backend.Mapper
         ))
 
     .ReverseMap();
+
+
+            CreateMap<TeacherClass, TeacherClassDto>()
+    .ForMember(
+        dest => dest.TeacherName,
+        opt => opt.MapFrom(src =>
+            src.TeacherProfile != null &&
+            src.TeacherProfile.User != null
+                ? src.TeacherProfile.User.Name
+                : ""
+        ))
+    .ForMember(
+        dest => dest.Country,
+        opt => opt.MapFrom(src =>
+            src.TeacherProfile != null &&
+            src.TeacherProfile.User != null
+                ? src.TeacherProfile.User.Country
+                : ""
+        ))
+    .ForMember(
+        dest => dest.RatingAverage,
+        opt => opt.MapFrom(src =>
+            src.TeacherProfile != null
+                ? src.TeacherProfile.RatingAverage
+                : 0
+        ))
+    .ForMember(
+        dest => dest.Sessions,
+        opt => opt.MapFrom(
+            src => src.ClassSessions
+        ))
+    .ForMember(
+        dest => dest.ScheduleDays,
+        opt => opt.MapFrom(
+            src => src.ClassScheduleDays
+        ))
+    .ReverseMap();
+
+            CreateMap<ClassScheduleDay, ClassScheduleDayDto>()
+    .ReverseMap();
+            CreateMap<ClassSession, ClassSessionDto>()
+    .ReverseMap();
+            CreateMap<ClassEnrollment,
+    ClassEnrollmentDto>().ReverseMap();
+
         }
     }
 }

@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
 
 import { AccountService } from '../../services/account.service';
 
 import { BaseService } from '../../services/base.service';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-profile',
 
@@ -15,7 +14,7 @@ import { CommonModule } from '@angular/common';
 
   styleUrls: ['./profile.component.css'],
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   name: string = '';
 
   email: string = '';
@@ -52,6 +51,7 @@ export class ProfileComponent {
 
   ngOnInit() {
     this.loadProfile();
+    this.loadCountries();
   }
 
   loadProfile() {
@@ -149,6 +149,21 @@ export class ProfileComponent {
       error: () => {
         alert('Upload failed');
       },
+    });
+  }
+
+  countries: string[] = [];
+  loadCountries(): void {
+    this.api.getCountries().subscribe((res) => {
+      this.countries = res.map((x) => x.name.common).sort();
+
+      const vietnamIndex = this.countries.indexOf('Vietnam');
+
+      if (vietnamIndex >= 0) {
+        this.countries.splice(vietnamIndex, 1);
+
+        this.countries.unshift('Vietnam');
+      }
     });
   }
 }

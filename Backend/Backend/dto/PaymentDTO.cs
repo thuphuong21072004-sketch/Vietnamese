@@ -4,8 +4,8 @@
     {
         public int PaymentId { get; set; }
 
-        public int BookingId { get; set; }
-
+        public int RefId { get; set; }
+        public string RefName { get; set; }
         public decimal Amount { get; set; }
 
         public int PaymentMethod { get; set; }

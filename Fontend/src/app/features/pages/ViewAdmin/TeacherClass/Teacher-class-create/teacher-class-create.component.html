@@ -1,0 +1,238 @@
+<div class="class-form">
+
+  <h2>Create Class</h2>
+
+  <div class="form-group">
+    <label>Title</label>
+
+    <input
+      type="text"
+      [(ngModel)]="teacherClass.title">
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+
+    <textarea
+      rows="4"
+      [(ngModel)]="teacherClass.description">
+    </textarea>
+  </div>
+
+  <div class="row">
+
+    <div class="form-group">
+
+      <label>Main Topic</label>
+
+      <select
+        [(ngModel)]="teacherClass.mainTopic">
+
+        <option value="">
+          Select Main Topic
+        </option>
+
+        <option
+          *ngFor="
+            let topic
+            of mainTopics
+          "
+          [value]="topic">
+
+          {{ topic }}
+
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Sub Topic</label>
+
+      <select
+        [(ngModel)]="teacherClass.subTopic">
+
+        <option value="">
+          Select Sub Topic
+        </option>
+
+        <option
+          *ngFor="
+            let topic of
+            subTopics[
+              teacherClass.mainTopic
+            ] || []
+          "
+          [value]="topic">
+
+          {{ topic }}
+
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="form-group">
+      <label>Price</label>
+
+      <input type="number" [(ngModel)]="teacherClass.price" (blur)="loadMaxPrice()">
+      <small *ngIf="maxPrice > 0" style="color: red;">
+      
+        Maximum allowed price:
+        {{ maxPrice }}
+      
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label>Max Students</label>
+
+      <input type="number" min="1" max="10" [(ngModel)]="teacherClass.maxStudents" (change)="loadMaxPrice()">
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="form-group">
+      <label>Total Sessions</label>
+
+      <input
+        type="number"
+        [(ngModel)]="teacherClass.totalSessions" (change)="loadMaxPrice()">
+    </div>
+
+    <div class="form-group">
+      <label>Start Date</label>
+
+      <input
+        type="date"
+        [(ngModel)]="teacherClass.startDate">
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="form-group">
+      <label>Start Time</label>
+
+      <input
+        type="time"
+        [(ngModel)]="teacherClass.startTime"(change)="loadMaxPrice()">
+    </div>
+
+    <div class="form-group">
+      <label>End Time</label>
+
+      <input
+        type="time"
+        [(ngModel)]="teacherClass.endTime" (change)="loadMaxPrice()">
+    </div>
+
+  </div>
+
+  <h3>Study Days</h3>
+
+  <div class="days">
+
+    <label
+      *ngFor="
+        let day
+        of weekDays
+      ">
+
+      <input
+        type="checkbox"
+        (change)="
+          toggleDay(
+            day,
+            $any($event.target)
+              .checked
+          )
+        ">
+
+      {{ day }}
+
+    </label>
+
+  </div>
+
+  <button
+    class="generate-btn"
+    (click)="generateSchedule()">
+
+    Generate Schedule
+
+  </button>
+
+  <div
+    *ngIf="
+      teacherClass
+        .sessions
+        .length > 0
+    "
+    class="sessions">
+
+    <h3>Sessions</h3>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Date</th>
+          <th>Topic</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr
+          *ngFor="
+            let session
+            of teacherClass.sessions
+          ">
+
+          <td>
+            {{ session.sessionNumber }}
+          </td>
+
+          <td>
+            {{ session.studyDate }}
+          </td>
+
+          <td>
+
+            <input
+              type="text"
+              [(ngModel)]="
+                session.topic
+              ">
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <button
+      class="save-btn"
+      (click)="saveClass()">
+
+      Save Class
+
+    </button>
+
+  </div>
+
+</div>

@@ -1,0 +1,193 @@
+.detail-page {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.header p {
+    margin-top: 6px;
+    color: #6b7280;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.edit-btn,
+.delete-btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.edit-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.info-card,
+.sessions-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.info-card h2,
+.sessions-card h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 22px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.info-grid div {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-grid label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.info-grid span {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.description {
+    margin-top: 24px;
+}
+
+.description label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.description p {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.sessions-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sessions-card th {
+    background: #f8fafc;
+    padding: 16px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.sessions-card td {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.sessions-card tr:hover {
+    background: #fafafa;
+}
+
+.sessions-card textarea {
+    width: 100%;
+    min-height: 90px;
+    resize: vertical;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: 0.2s;
+    box-sizing: border-box;
+}
+
+.sessions-card textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.loading {
+    text-align: center;
+    padding: 80px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        flex: 1;
+    }
+
+    .sessions-card {
+        overflow-x: auto;
+    }
+
+    .sessions-card table {
+        min-width: 700px;
+    }
+}

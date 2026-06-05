@@ -22,7 +22,7 @@ namespace Backend.Repository.impl
         {
             return await _context.VideoRooms
 
-                .Include(x => x.Booking)
+               
 
                 .FirstOrDefaultAsync(
                     x => x.RoomId == id);
@@ -33,15 +33,12 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoom?> GetByBookingId(
-    int bookingId)
+        public async Task<VideoRoom?> GetByBookingId(int bookingId)
         {
             return await _context.VideoRooms
-
-                .Include(x => x.Booking)
-
-                .FirstOrDefaultAsync(
-                    x => x.BookingId == bookingId);
+                .FirstOrDefaultAsync(x =>
+                    x.RefName == common.Constant.RefName.Booking
+                    && x.RefId == bookingId);
         }
 
         /* 

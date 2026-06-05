@@ -4,8 +4,8 @@
     {
         public int RoomId { get; set; }
 
-        public int BookingId { get; set; }
-
+        public int RefId { get; set; }
+        public string RefName { get; set; }
         public string RoomCode { get; set; }
             = string.Empty;
 

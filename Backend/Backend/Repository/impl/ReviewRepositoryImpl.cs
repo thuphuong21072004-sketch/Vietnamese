@@ -26,7 +26,7 @@ namespace Backend.Repository.impl
 
                 .Include(x => x.Instructor)
 
-                .Include(x => x.Booking)
+                
 
                 .FirstOrDefaultAsync(
                     x => x.ReviewId == id);
@@ -37,20 +37,15 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<Review?> GetByBookingId(
-     int bookingId)
-        {
-            return await _context.Reviews
-
-                .Include(x => x.Student)
-
-                .Include(x => x.Instructor)
-
-                .Include(x => x.Booking)
-
-                .FirstOrDefaultAsync(
-                    x => x.BookingId == bookingId);
-        }
+        public async Task<Review?> GetByBookingId(int bookingId)
+{
+    return await _context.Reviews
+        .Include(x => x.Student)
+        .Include(x => x.Instructor)
+        .FirstOrDefaultAsync(x =>
+            x.RefName == common.Constant.RefName.Booking
+            && x.RefId == bookingId);
+}
 
         /* 
          * lấy danh sách đánh giá của giáo viên
@@ -65,7 +60,6 @@ namespace Backend.Repository.impl
 
                 .Include(x => x.Instructor)
 
-                .Include(x => x.Booking)
 
                 .Where(x =>
                     x.InstructorId ==

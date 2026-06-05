@@ -8,7 +8,7 @@ namespace Backend.Repository
         Task<Payment?> GetByBookingId(int bookingId);
         Task Create(Payment payment);
         Task Update(Payment payment);
-        Task<List<Payment>> GetByMonth(int month, int year);
+       
         Task Save();
     }
 }

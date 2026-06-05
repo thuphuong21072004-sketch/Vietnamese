@@ -1,0 +1,262 @@
+.class-list-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 38px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 16px;
+}
+
+.filter-card {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    margin-bottom: 32px;
+}
+
+.filter-card h2 {
+    margin-bottom: 24px;
+    color: #0f172a;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37,99,235,.15);
+}
+
+.days-section {
+    margin-top: 24px;
+}
+
+.days-section > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.day-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.filter-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.search-btn,
+.clear-btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: .3s;
+}
+
+.search-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+}
+
+.clear-btn {
+    background: #e2e8f0;
+}
+
+.clear-btn:hover {
+    background: #cbd5e1;
+}
+
+.loading,
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(360px,1fr));
+    gap: 24px;
+}
+
+.class-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    transition: .3s;
+}
+
+.class-card:hover {
+    transform: translateY(-6px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-header h3 {
+    color: #0f172a;
+    font-size: 22px;
+    margin: 0;
+}
+
+.price {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.description {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-row strong {
+    color: #334155;
+}
+
+.schedule-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.day-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.detail-btn,
+.enroll-btn {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.detail-btn {
+    background: #e2e8f0;
+}
+
+.detail-btn:hover {
+    background: #cbd5e1;
+}
+
+.enroll-btn {
+    background: #16a34a;
+    color: white;
+}
+
+.enroll-btn:hover {
+    background: #15803d;
+}
+
+@media (max-width: 768px) {
+    .class-list-page {
+        padding: 16px;
+    }
+
+    .class-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-actions {
+        flex-direction: column;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+}

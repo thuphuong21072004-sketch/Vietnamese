@@ -59,7 +59,7 @@ namespace Backend.Services.impl
 
             var booking =
                 await _bookingRepository
-                    .GetById(dto.BookingId);
+                    .GetById(dto.RefId);
 
             if (booking == null)
             {
@@ -84,7 +84,7 @@ namespace Backend.Services.impl
             var exist =
                 await _reviewRepository
                     .GetByBookingId(
-                        dto.BookingId);
+                        dto.RefId);
 
             if (exist != null)
             {
@@ -94,8 +94,8 @@ namespace Backend.Services.impl
 
             var review = new Review
             {
-                BookingId =
-                    dto.BookingId,
+                RefId = dto.RefId,
+                RefName = common.Constant.RefName.Booking,
 
                 StudentId =
                     userId,

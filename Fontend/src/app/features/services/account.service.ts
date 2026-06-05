@@ -64,10 +64,8 @@ export class AccountService {
       Authorization: `Bearer ${token}`,
     });
 
-    let params = new HttpParams()
-      .set('page', page)
-      .set('pageSize', pageSize);
-    
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+
     if (email) {
       params = params.set('email', email);
     }
@@ -77,7 +75,7 @@ export class AccountService {
     if (roleId !== null && roleId !== undefined) {
       params = params.set('roleId', roleId.toString());
     }
-    
+
     return this.http.get(`${this.apiUrl}/users`, { params, headers });
   }
 
@@ -115,5 +113,11 @@ export class AccountService {
     formData.append('file', file);
 
     return this.http.post(`${this.apiUrl}/upload-avatar`, formData);
+  }
+
+  getCountries() {
+    return this.http.get<any[]>(
+      'https://restcountries.com/v3.1/all?fields=name',
+    );
   }
 }

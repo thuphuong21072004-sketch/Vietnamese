@@ -45,6 +45,16 @@ namespace Backend.Data
         public DbSet<Review> Reviews { get; set; }
 
         public DbSet<VideoRoom> VideoRooms { get; set; }
+        public DbSet<TeacherClass> TeacherClasses { get; set; }
+
+        public DbSet<ClassScheduleDay> ClassScheduleDays { get; set; }
+
+        public DbSet<ClassSession> ClassSessions { get; set; }
+
+        public DbSet<ClassEnrollment> ClassEnrollments { get; set; }
+
+        public DbSet<ClassAttendance> ClassAttendances { get; set; }
+
 
         /* * Cấu hình các ràng buộc Cascade Delete 
          * thuphuong21072004 
@@ -190,27 +200,13 @@ namespace Backend.Data
             modelBuilder.Entity<PlacementTest>()
     .HasKey(x => x.PlacementId);
 
-            modelBuilder.Entity<TeacherAvailability>()
-                .HasKey(x => x.AvailabilityId);
-
-            modelBuilder.Entity<TeacherAvailability>()
-    .HasIndex(x => new
-    {
-        x.InstructorId,
-        x.StartTime,
-        x.EndTime
-    });
-            modelBuilder.Entity<VideoRoom>()
-    .HasKey(x => x.RoomId);
-
             /*
  * teacher profile
  */
             modelBuilder.Entity<TeacherProfile>()
                 .HasOne(x => x.User)
                 .WithOne(x => x.TeacherProfile)
-                .HasForeignKey<TeacherProfile>(
-                    x => x.UserId)
+                .HasForeignKey<TeacherProfile>(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             /*
@@ -250,27 +246,7 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             /*
-             * payment
-             */
-            modelBuilder.Entity<Payment>()
-                .HasOne(x => x.Booking)
-                .WithOne(x => x.Payment)
-                .HasForeignKey<Payment>(
-                    x => x.BookingId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            /*
-             * review - booking
-             */
-            modelBuilder.Entity<Review>()
-                .HasOne(x => x.Booking)
-                .WithOne(x => x.Review)
-                .HasForeignKey<Review>(
-                    x => x.BookingId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            /*
-             * review - student
+             * review
              */
             modelBuilder.Entity<Review>()
                 .HasOne(x => x.Student)
@@ -278,9 +254,6 @@ namespace Backend.Data
                 .HasForeignKey(x => x.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            /*
-             * review - instructor
-             */
             modelBuilder.Entity<Review>()
                 .HasOne(x => x.Instructor)
                 .WithMany()
@@ -288,38 +261,93 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             /*
-             * video room
+             * teacher class
              */
-            modelBuilder.Entity<VideoRoom>()
-                .HasOne(x => x.Booking)
-                .WithOne(x => x.VideoRoom)
-                .HasForeignKey<VideoRoom>(
-                    x => x.BookingId)
+            modelBuilder.Entity<TeacherClass>()
+                .HasKey(x => x.ClassId);
+
+            modelBuilder.Entity<TeacherClass>()
+                .HasOne(x => x.TeacherProfile)
+                .WithMany()
+                .HasForeignKey(x => x.TeacherProfileId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             /*
-             * unique booking payment
+             * class schedule day
              */
-            modelBuilder.Entity<Payment>()
-                .HasIndex(x => x.BookingId)
-                .IsUnique();
+            modelBuilder.Entity<ClassScheduleDay>()
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<ClassScheduleDay>()
+                .HasOne(x => x.TeacherClass)
+                .WithMany(x => x.ClassScheduleDays)
+                .HasForeignKey(x => x.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             /*
-             * unique booking review
+             * class session
              */
-            modelBuilder.Entity<Review>()
-                .HasIndex(x => x.BookingId)
-                .IsUnique();
+            modelBuilder.Entity<ClassSession>()
+                .HasKey(x => x.SessionId);
+
+            modelBuilder.Entity<ClassSession>()
+                .HasOne(x => x.TeacherClass)
+                .WithMany(x => x.ClassSessions)
+                .HasForeignKey(x => x.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             /*
-             * unique booking video room
+             * class enrollment
              */
-            modelBuilder.Entity<VideoRoom>()
-                .HasIndex(x => x.BookingId)
-                .IsUnique();
+            modelBuilder.Entity<ClassEnrollment>()
+                .HasKey(x => x.EnrollmentId);
+
+            modelBuilder.Entity<ClassEnrollment>()
+                .HasOne(x => x.TeacherClass)
+                .WithMany(x => x.ClassEnrollments)
+                .HasForeignKey(x => x.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ClassEnrollment>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            /*
+             * class attendance
+             */
+            modelBuilder.Entity<ClassAttendance>()
+                .HasKey(x => x.AttendanceId);
+
+            modelBuilder.Entity<ClassAttendance>()
+                .HasOne(x => x.ClassSession)
+                .WithMany(x => x.ClassAttendances)
+                .HasForeignKey(x => x.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ClassAttendance>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ClassSession>()
+    .HasOne(x => x.TeacherClass)
+    .WithMany(x => x.ClassSessions)
+    .HasForeignKey(x => x.ClassId)
+    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ClassScheduleDay>()
+                .HasOne(x => x.TeacherClass)
+                .WithMany(x => x.ClassScheduleDays)
+                .HasForeignKey(x => x.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ClassEnrollment>()
+                .HasOne(x => x.TeacherClass)
+                .WithMany(x => x.ClassEnrollments)
+                .HasForeignKey(x => x.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
-
-
-
     }
 }

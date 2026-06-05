@@ -156,50 +156,5 @@ namespace Backend.Controllers
         }
 
 
-        [Authorize]
-        [HttpGet("me/statistics")]
-        public async Task<IActionResult> GetMyStatistics([FromQuery] int month, [FromQuery] int year)
-        {
-            return Ok(await _paymentService.GetMyStatistics(month, year));
-        }
-
-        [Authorize]
-        [HttpGet("me/payments")]
-        public async Task<IActionResult> GetMyPayments([FromQuery] int month, [FromQuery] int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            return Ok(await _paymentService.GetMyPaymentHistory(month, year, page, pageSize));
-        }
-
-        [Authorize]
-        [HttpGet("teacher/salary-statistics")]
-        public async Task<IActionResult> GetMySalaryStatistics([FromQuery] int month, [FromQuery] int year)
-        {
-            return Ok(await _paymentService.GetMySalaryStatistics(month, year));
-        }
-        [Authorize]
-        [HttpGet("teacher/salary-history")]
-        public async Task<IActionResult> GetMySalaryHistory([FromQuery] int month, [FromQuery] int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            return Ok(await _paymentService.GetMySalaryHistory(month, year, page, pageSize));
-        }
-
-        [Authorize]
-        [HttpGet("admin/finance-overview")]
-        public async Task<IActionResult> GetAdminFinanceOverview([FromQuery] int month, [FromQuery] int year)
-        {
-            return Ok(await _paymentService.GetAdminFinanceOverview(month, year));
-        }
-        [Authorize]
-        [HttpGet("admin/student-finance")]
-        public async Task<IActionResult> GetStudentFinanceReport([FromQuery] int month, [FromQuery] int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            return Ok(await _paymentService.GetStudentFinanceReport(month, year, page, pageSize));
-        }
-        [Authorize]
-        [HttpGet("admin/teacher-finance")]
-        public async Task<IActionResult> GetTeacherFinanceReport([FromQuery] int month, [FromQuery] int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            return Ok(await _paymentService.GetTeacherFinanceReport(month, year, page, pageSize));
-        }
     }
 }

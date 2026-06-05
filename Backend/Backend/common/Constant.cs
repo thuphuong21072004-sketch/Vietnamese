@@ -152,6 +152,19 @@
 
             public const string Student = "STUDENT";
         }
+        public class RefName
+        {
+            /*
+             * Booking học 1-1
+             */
+            public const string Booking = "PrivateLesson";
+
+            /*
+             * Lớp học nhóm 1 - nhiều 
+             */
+            public const string Class = "CLASS";
+
+        }
 
     }
 }

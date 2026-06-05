@@ -139,6 +139,22 @@ builder.Services.AddScoped<StripeService>();
 builder.Services.AddHttpClient<ExchangeRateService>();
 builder.Services.Configure<StripeConfig>(
  builder.Configuration.GetSection("Stripe"));
+builder.Services.AddScoped<
+    TeacherClassRepository,
+    TeacherClassRepositoryImpl>();
+
+builder.Services.AddScoped<
+    ClassScheduleDayRepository,
+    ClassScheduleDayRepositoryImpl>();
+
+builder.Services.AddScoped<
+    ClassSessionRepository,
+    ClassSessionRepositoryImpl>();
+builder.Services.AddScoped<
+    TeacherClassService,
+    TeacherClassServiceImpl>();
+
+
 
 var app = builder.Build();
 

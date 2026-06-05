@@ -19,6 +19,8 @@ import { TeacherBookingsComponent} from './features/pages/ViewAdmin/MyClass/mycl
 import { DashboardAdminComponent } from './features/pages/ViewAdmin/DashboardAdmin/dashboard.component';
 import { TeacherBookingDetailComponent } from './features/pages/ViewAdmin/MyBooking/mybooking.component';
 import { DashboardTeacherComponent } from './features/pages/ViewAdmin/DashboardTeacher/dashboard.component';
+import { TeacherClassCreateComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-create/teacher-class-create.component';
+import { TeacherClassDetailComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-detail/teacher-class-detail.component' 
 
 import { MyProgressComponent } from './features/pages/ViewUser/Learning/unit/unit.component';
 import { UserDashboardComponent } from './features/pages/ViewUser/DashboardUser/dashboard.component';
@@ -34,6 +36,9 @@ import { VideoRoomComponent } from './features/pages/ViewUser/VideoRoom/video-ro
 import { ReviewComponent } from './features/pages/ViewUser/ReviewClass/review.component';
 import { SpeakComponent } from './features/pages/ViewUser/Speaking/speak.component';
 import { Component } from '@angular/core';
+import { TeacherClassListComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-list/class-list.component';
+import { ClassListComponent } from './features/pages/ViewUser/ClassRoom/ClassList/classList.component'
+import { StudentCourseDetailComponent } from './features/pages/ViewUser/ClassRoom/ClassDetail/classDetail.component'
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -56,7 +61,11 @@ export const routes: Routes = [
   { path: 'admin/classrooms', component: TeacherBookingsComponent },
   { path: 'admin/bookings/:id', component: TeacherBookingDetailComponent },
   { path: 'teacher/dashboard', component: DashboardTeacherComponent },
+  { path: 'teacher/listclass', component: TeacherClassListComponent },
+  { path: 'class/create', component: TeacherClassCreateComponent },
+  { path: 'teacher/detail/:id', component: TeacherClassDetailComponent},
 
+  
   { path: 'user/units', component: MyProgressComponent },
   { path: 'user/dashboard', component: UserDashboardComponent },
   { path: 'user/search', component: SearchComponent },
@@ -72,6 +81,8 @@ export const routes: Routes = [
   { path: 'user/review/:id', component: ReviewComponent },
   { path: 'teacher/schedule', component: TeacherScheduleComponent },
   { path: 'teacher/bookings', component: TeacherBookingsComponent },
+  { path: 'teacher/class', component: ClassListComponent},
+  { path: 'user/classdetail/:id',component: StudentCourseDetailComponent},
 
   { path: 'my-bookings', component: MyBookingsComponent },
 

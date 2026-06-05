@@ -1,17 +1,19 @@
-import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router,RouterLink } from '@angular/router';
-import { NgIf } from '@angular/common';
 import { AccountService } from '../../../services/account.service';
 import { BaseService } from '../../../services/base.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, RouterLink, NgIf],
+  imports: [FormsModule, RouterLink, CommonModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   name: string = '';
   email: string = '';
   password: string = '';
@@ -29,6 +31,9 @@ export class RegisterComponent {
     private router: Router,
     private baseService: BaseService,
   ) {}
+  ngOnInit(): void {
+    this.loadCountries();
+  }
 
   register() {
     if (!this.name || !this.email || !this.password) {
@@ -100,6 +105,20 @@ export class RegisterComponent {
       error: () => {
         alert('Upload failed');
       },
+    });
+  }
+  countries: string[] = [];
+  loadCountries(): void {
+    this.api.getCountries().subscribe((res) => {
+      this.countries = res.map((x) => x.name.common).sort();
+
+      const vietnamIndex = this.countries.indexOf('Vietnam');
+
+      if (vietnamIndex >= 0) {
+        this.countries.splice(vietnamIndex, 1);
+
+        this.countries.unshift('Vietnam');
+      }
     });
   }
 }

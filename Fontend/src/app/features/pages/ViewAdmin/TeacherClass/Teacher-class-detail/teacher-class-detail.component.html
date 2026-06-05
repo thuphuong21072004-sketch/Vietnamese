@@ -1,0 +1,211 @@
+<div class="detail-page" *ngIf="!loading && teacherClass">
+
+    <div class="header">
+
+        <div>
+
+            <h1>
+                {{ teacherClass.title }}
+            </h1>
+
+            <p>
+                Class Detail
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <button class="edit-btn" (click)="saveAllSessions()">
+
+                Edit Class
+
+            </button>
+
+            <button class="delete-btn" (click)="deleteClass()">
+
+                Delete Class
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="info-card">
+
+        <h2>
+            Class Information
+        </h2>
+
+        <div class="info-grid">
+
+            <div>
+
+                <label>
+                    Main Topic
+                </label>
+
+                <span>
+                    {{ teacherClass.mainTopic }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Sub Topic
+                </label>
+
+                <span>
+                    {{ teacherClass.subTopic }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Price
+                </label>
+
+                <span>
+                    ${{ teacherClass.price }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Students
+                </label>
+
+                <span>
+                    {{ teacherClass.currentStudents }}
+                    /
+                    {{ teacherClass.maxStudents }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Total Sessions
+                </label>
+
+                <span>
+                    {{ teacherClass.totalSessions }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Time
+                </label>
+
+                <span>
+                    {{ teacherClass.startTime }}
+                    -
+                    {{ teacherClass.endTime }}
+                </span>
+
+            </div>
+
+            <div>
+
+                <label>
+                    Start Date
+                </label>
+
+                <span>
+                    {{ teacherClass.startDate }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="description">
+
+            <label>
+                Description
+            </label>
+
+            <p>
+                {{ teacherClass.description }}
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="sessions-card">
+
+        <h2>
+            Sessions
+        </h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        No
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Topic
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+            
+                <tr *ngFor="
+                    let session of teacherClass.sessions;
+                    trackBy: trackSession
+                ">
+            
+                    <td>
+                        {{ session.sessionNumber }}
+                    </td>
+            
+                    <td>
+                        {{ session.studyDate }}
+                    </td>
+            
+                    <td>
+            
+                        <textarea rows="3" [(ngModel)]="session.topic" placeholder="Lesson topic">
+                        </textarea>
+            
+                    </td>
+            
+                </tr>
+            
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<div *ngIf="loading" class="loading">
+
+    Loading class detail...
+
+</div>

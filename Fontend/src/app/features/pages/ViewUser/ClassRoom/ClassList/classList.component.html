@@ -1,0 +1,406 @@
+<div class="class-list-page">
+
+    <div class="page-header">
+
+        <h1>
+            Find Vietnamese Classes
+        </h1>
+
+        <p>
+            Search and enroll in Vietnamese classes from qualified teachers.
+        </p>
+
+    </div>
+
+    <div class="filter-card">
+
+        <h2>
+            Search Filters
+        </h2>
+
+        <div class="filter-grid">
+            <div class="form-group">
+
+            <select [(ngModel)]="filter.country">
+            
+                <option value="">
+                    Country
+                </option>
+            
+                <option *ngFor="let country of countries" [value]="country">
+            
+                    {{ country }}
+            
+                </option>
+            
+            </select>
+            </div>
+
+            <div class="form-group">
+            
+                <label>
+                    Minimum Rating
+                </label>
+            
+                <select [(ngModel)]="filter.minRating">
+            
+                    <option [ngValue]="undefined">
+                        Any Rating
+                    </option>
+            
+                    <option [ngValue]="1">
+                        1★+
+                    </option>
+            
+                    <option [ngValue]="2">
+                        2★+
+                    </option>
+            
+                    <option [ngValue]="3">
+                        3★+
+                    </option>
+            
+                    <option [ngValue]="4">
+                        4★+
+                    </option>
+            
+                    <option [ngValue]="4.5">
+                        4.5★+
+                    </option>
+            
+                </select>
+            
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Main Topic
+                </label>
+
+                <select [(ngModel)]="filter.mainTopic">
+
+                    <option value="">
+                        All Main Topics
+                    </option>
+
+                    <option *ngFor="
+                            let topic
+                            of mainTopics
+                        " [value]="topic">
+
+                        {{ topic }}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Sub Topic
+                </label>
+
+                <select [(ngModel)]="filter.subTopic">
+
+                    <option value="">
+                        All Sub Topics
+                    </option>
+
+                    <option *ngFor="
+                            let topic
+                            of subTopics[
+                                filter.mainTopic || ''
+                            ] || []
+                        " [value]="topic">
+
+                        {{ topic }}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Min Price
+                </label>
+
+                <input type="number" min="0" [(ngModel)]="filter.minPrice">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Max Price
+                </label>
+
+                <input type="number" min="0" [(ngModel)]="filter.maxPrice">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Course Start Date
+                </label>
+
+                <input type="date" [(ngModel)]="filter.startDate">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Course End Date
+                </label>
+
+                <input type="date" [(ngModel)]="filter.endDate">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Start Time
+                </label>
+
+                <input type="time" [(ngModel)]="filter.startTime">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    End Time
+                </label>
+
+                <input type="time" [(ngModel)]="filter.endTime">
+
+            </div>
+
+        </div>
+
+        <div class="days-section">
+
+            <label>
+                Study Days
+            </label>
+
+            <div class="days">
+
+                <label *ngFor="
+                        let day
+                        of weekDays
+                    " class="day-item">
+
+                    <input type="checkbox" (change)="
+                            toggleDay(
+                                day,
+                                $any(
+                                    $event.target
+                                ).checked
+                            )
+                        ">
+
+                    {{ day }}
+
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="filter-actions">
+
+            <button class="search-btn" (click)="searchClasses()">
+
+                Search Classes
+
+            </button>
+
+            <button class="clear-btn" (click)="clearFilter()">
+
+                Clear Filters
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading classes...
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            classes.length === 0
+        " class="empty-state">
+
+        No classes found.
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            classes.length > 0
+        " class="class-grid">
+
+        <div *ngFor="
+                let item
+                of classes
+            " class="class-card">
+
+            <div class="card-header">
+
+                <h3>
+                    {{ item.title }}
+                </h3>
+
+                <span class="price">
+
+                    ${{ item.price }}
+
+                </span>
+
+            </div>
+
+            <p class="description">
+
+                {{ item.description }}
+
+            </p>
+
+            <div class="info-row">
+
+                <strong>
+                    Teacher:
+                </strong>
+
+                {{ item.teacherName }}
+
+            </div>
+            <div class="info-row">
+            
+                <strong>
+                    Country:
+                </strong>
+            
+                {{ item.country }}
+            
+            </div>
+            
+            <div class="info-row">
+            
+                <strong>
+                    Rating:
+                </strong>
+            
+                ⭐ {{ item.ratingAverage }}
+            
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Main Topic:
+                </strong>
+
+                {{ item.mainTopic }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Sub Topic:
+                </strong>
+
+                {{ item.subTopic }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Time:
+                </strong>
+
+                {{ item.startTime }}
+                -
+                {{ item.endTime }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Students:
+                </strong>
+
+                {{ item.currentStudents }}
+                /
+                {{ item.maxStudents }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Sessions:
+                </strong>
+
+                {{ item.totalSessions }}
+
+            </div>
+
+            <div class="schedule-days">
+
+                <span *ngFor="
+                        let day
+                        of item.scheduleDays
+                    " class="day-badge">
+
+                    {{ day.dayOfWeek }}
+
+                </span>
+
+            </div>
+
+            <div class="card-actions">
+
+                <button class="detail-btn" (click)="
+                        viewClass(
+                            item.classId
+                        )
+                    ">
+
+                    View Details
+
+                </button>
+
+                <button class="enroll-btn" (click)="
+                        enroll(
+                            item.classId
+                        )
+                    ">
+
+                    Enroll Now
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

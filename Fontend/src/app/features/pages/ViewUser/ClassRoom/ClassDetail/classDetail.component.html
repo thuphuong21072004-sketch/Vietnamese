@@ -1,0 +1,215 @@
+<div class="course-detail-page" *ngIf="!loading && teacherClass">
+
+      
+    <div class="course-header">
+
+        <div class="header-content">
+
+            <h1>
+                {{ teacherClass.title }}
+            </h1>
+
+            <p class="course-description">
+                {{ teacherClass.description }}
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <button class="enroll-btn">
+
+                Enroll Now
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="info-card">
+
+        <h2>
+            Course Information
+        </h2>
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <span class="label">
+                    Teacher
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.teacherName || 'Teacher' }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Country
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.country || 'N/A' }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Rating
+                </span>
+
+                <span class="value">
+                    ⭐ {{ teacherClass.ratingAverage || 0 }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Price
+                </span>
+
+                <span class="value">
+                    ${{ teacherClass.price }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Main Topic
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.mainTopic }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Sub Topic
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.subTopic }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Students
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.currentStudents }}
+                    /
+                    {{ teacherClass.maxStudents }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Total Sessions
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.totalSessions }}
+                </span>
+
+            </div>
+
+            <div class="info-item">
+
+                <span class="label">
+                    Study Time
+                </span>
+
+                <span class="value">
+                    {{ teacherClass.startTime }}
+                    -
+                    {{ teacherClass.endTime }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="sessions-card">
+
+        <h2>
+            Course Curriculum
+        </h2>
+
+        <div *ngFor="
+            let session
+            of teacherClass.sessions
+        " class="session-card">
+
+            <div class="session-number">
+
+                Session
+                {{ session.sessionNumber }}
+
+            </div>
+
+            <div class="session-content">
+
+                <h3>
+                    {{ session.topic }}
+                </h3>
+
+                <p>
+
+                    <strong>
+                        Date:
+                    </strong>
+
+                    {{ session.studyDate }}
+
+                </p>
+
+                <p>
+
+                    <strong>
+                        Time:
+                    </strong>
+
+                    {{ session.startTime }}
+                    -
+                    {{ session.endTime }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+      
+
+</div>
+
+<div *ngIf="loading" class="loading">
+
+      
+    Loading course details...
+      
+
+</div>
