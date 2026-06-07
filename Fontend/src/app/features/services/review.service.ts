@@ -25,17 +25,43 @@ export class ReviewService {
   }
 
   create(data: any): Observable<any> {
-    return this.http.post(this.apiUrl, data, this.getOptions());
-  }
-
-  getByTeacherId(teacherId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/${teacherId}`);
-  }
-
-  getByBookingId(bookingId: number): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/booking/${bookingId}`,
+    return this.http.post(
+      this.apiUrl,
+      data,
       this.getOptions(),
     );
   }
+
+  getByTeacherId(
+    teacherId: number,
+  ): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/${teacherId}`,
+    );
+  }
+
+  getByRef(
+    refName: string,
+    refId: number,
+  ): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/${refName}/${refId}`,
+      this.getOptions(),
+    );
+  }
+
+  getByBookingId(bookingId: number): Observable<any> {
+  return this.http.get(
+    `${this.apiUrl}/PrivateLesson/${bookingId}`,
+    this.getOptions(),
+  );
+}
+getByClassEnrollmentId(
+  enrollmentId: number,
+): Observable<any> {
+  return this.http.get(
+    `${this.apiUrl}/CLASS/${enrollmentId}`,
+    this.getOptions(),
+  );
+}
 }

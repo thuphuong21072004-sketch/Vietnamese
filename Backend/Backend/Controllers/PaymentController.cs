@@ -1,12 +1,13 @@
 ﻿using Backend.Common;
+using Backend.Common;
 using Backend.dto;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
-using Backend.Common;
-using Microsoft.Extensions.Options;
+using static Backend.common.Constant;
 
 namespace Backend.Controllers
 {
@@ -149,12 +150,15 @@ namespace Backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("booking/{bookingId}")]
-        public async Task<IActionResult> GetByBooking(int bookingId)
+        [HttpGet("{refName}/{refId}")]
+        public async Task<IActionResult> GetByRef(
+    string refName,
+    int refId)
         {
-            return Ok(await _paymentService.GetByBooking(bookingId));
+            return Ok(
+                await _paymentService.GetByRef(
+                    refName,
+                    refId));
         }
-
-
     }
 }

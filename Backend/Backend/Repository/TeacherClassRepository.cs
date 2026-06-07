@@ -30,5 +30,8 @@ namespace Backend.Repository
         Task<List<TeacherClass>>SearchClassesAsync(ClassFilterDto filter);
         Task<TeacherClass?> GetClassWithSessionsAsync( int classId);
 
+        Task<List<TeacherClass>> GetTeacherClassesAsync( int teacherProfileId);
+        Task<TeacherClass?> GetById(int classId);
+
     }
 }

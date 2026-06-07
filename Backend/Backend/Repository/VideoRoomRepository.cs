@@ -6,7 +6,7 @@ namespace Backend.Repository
     {
         Task<VideoRoom?> GetById(int id);
 
-        Task<VideoRoom?> GetByBookingId( int bookingId );
+        Task<VideoRoom?> GetByRef( string refName, int refId);
 
         Task Create(VideoRoom room);
 

@@ -1,10 +1,19 @@
 export interface PaymentDTO {
-  PaymentId: number;
+  paymentId: number;
 
-  BookingId: number;
-  Amount: number;
-  PaymentMethod: string;
-  TransactionCode: string;
-  Status: number;
-  PaidAt: Date;
+  refId: number;
+
+  refName: string;
+
+  amount: number;
+
+  paymentMethod: number;
+
+  status?: number;
+
+  transactionCode?: string;
+
+  paidAt?: string;
+
+  createdDate?: string;
 }

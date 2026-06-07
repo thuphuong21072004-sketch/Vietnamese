@@ -1,6 +1,6 @@
 <div class="course-detail-page" *ngIf="!loading && teacherClass">
 
-      
+    <!-- Header -->
     <div class="course-header">
 
         <div class="header-content">
@@ -16,17 +16,154 @@
         </div>
 
         <div class="header-actions">
-
-            <button class="enroll-btn">
-
+        
+            <!-- Chưa đăng ký -->
+            <button *ngIf="
+                    getStatus() === null ||
+                    getStatus() === 4 ||
+                    getStatus() === 5
+                " class="enroll-btn" (click)="enroll()">
+        
                 Enroll Now
-
+        
             </button>
-
+        
+            <!-- Chờ thanh toán -->
+            <button *ngIf="getStatus() === 0" class="payment-btn" (click)="goPayment()">
+        
+                Pay Now
+        
+            </button>
+        
+            <!-- Đã xác nhận -->
+            <button *ngIf="getStatus() === 1" class="cancel-btn" (click)="cancel()">
+        
+                Cancel Enrollment
+        
+            </button>
+        
+            <!-- Đang học -->
+            <button *ngIf="getStatus() === 2" class="detail-btn">
+        
+                In Progress
+        
+            </button>
+        
+            <!-- Hoàn thành -->
+            <button *ngIf="getStatus() === 3" class="detail-btn">
+        
+                Completed
+        
+            </button>
+        
         </div>
 
     </div>
 
+    <!-- Teacher -->
+    <div class="teacher-section">
+
+        <button class="teacher-info-btn" (click)="toggleTeacherInfo()">
+
+            {{
+            showTeacherInfo
+            ? 'Hide Teacher Information'
+            : 'View Teacher Information'
+            }}
+
+        </button>
+
+    </div>
+
+    <div *ngIf="
+            showTeacherInfo &&
+            teacherClass?.teacherProfile
+        " class="teacher-profile-card">
+
+        <div class="teacher-top">
+
+            <img *ngIf="teacherClass.teacherProfile?.avatarUrl" [src]="
+                    'http://localhost:5108/uploads/' +
+                    teacherClass.teacherProfile?.avatarUrl
+                " class="teacher-avatar">
+
+            <div class="teacher-meta">
+
+                <h2>
+                    {{
+                    teacherClass.teacherProfile?.teacherName
+                    }}
+                </h2>
+
+                <p>
+                    {{
+                    teacherClass.teacherProfile?.country
+                    }}
+                </p>
+
+                <p>
+                    {{
+                    teacherClass.teacherProfile?.specialty
+                    }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="teacher-stats">
+
+            <div>
+
+                ⭐
+                {{
+                teacherClass.teacherProfile?.ratingAverage
+                }}
+
+            </div>
+
+            <div>
+
+                {{
+                teacherClass.teacherProfile?.totalReviews
+                }}
+                reviews
+
+            </div>
+
+            <div>
+
+                {{
+                teacherClass.teacherProfile?.experienceYears
+                }}
+                years experience
+
+            </div>
+
+        </div>
+
+        <p class="teacher-description">
+
+            {{
+            teacherClass.teacherProfile?.description
+            }}
+
+        </p>
+
+        <video *ngIf="
+                teacherClass.teacherProfile?.introVideoUrl
+            " controls class="intro-video">
+
+            <source [src]="
+                    'http://localhost:5108/videos/' +
+                    teacherClass.teacherProfile?.introVideoUrl
+                ">
+
+        </video>
+
+    </div>
+
+    <!-- Course Information -->
     <div class="info-card">
 
         <h2>
@@ -42,7 +179,7 @@
                 </span>
 
                 <span class="value">
-                    {{ teacherClass.teacherName || 'Teacher' }}
+                    {{ teacherClass.teacherName }}
                 </span>
 
             </div>
@@ -54,7 +191,7 @@
                 </span>
 
                 <span class="value">
-                    {{ teacherClass.country || 'N/A' }}
+                    {{ teacherClass.country }}
                 </span>
 
             </div>
@@ -66,7 +203,7 @@
                 </span>
 
                 <span class="value">
-                    ⭐ {{ teacherClass.ratingAverage || 0 }}
+                    ⭐ {{ teacherClass.ratingAverage }}
                 </span>
 
             </div>
@@ -151,6 +288,7 @@
 
     </div>
 
+    <!-- Curriculum -->
     <div class="sessions-card">
 
         <h2>
@@ -158,9 +296,9 @@
         </h2>
 
         <div *ngFor="
-            let session
-            of teacherClass.sessions
-        " class="session-card">
+                let session
+                of teacherClass.sessions
+            " class="session-card">
 
             <div class="session-number">
 
@@ -202,14 +340,11 @@
         </div>
 
     </div>
-      
 
 </div>
 
 <div *ngIf="loading" class="loading">
 
-      
     Loading course details...
-      
 
 </div>

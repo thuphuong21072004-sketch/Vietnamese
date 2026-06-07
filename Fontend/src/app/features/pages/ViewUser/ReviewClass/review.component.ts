@@ -7,6 +7,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BookingService } from '../../../services/booking.service';
+
+import { ClassEnrollmentService } from '../../../services/class-enrollment.service';
+
 import { ReviewService } from '../../../services/review.service';
 
 @Component({
@@ -21,7 +24,9 @@ import { ReviewService } from '../../../services/review.service';
   styleUrls: ['./review.component.css'],
 })
 export class ReviewComponent implements OnInit {
-  bookingId = 0;
+  refId = 0;
+
+  refName = 'PrivateLesson';
 
   rating = 5;
 
@@ -35,6 +40,8 @@ export class ReviewComponent implements OnInit {
 
   booking: any = null;
 
+  enrollment: any = null;
+
   constructor(
     private route: ActivatedRoute,
 
@@ -42,18 +49,33 @@ export class ReviewComponent implements OnInit {
 
     private bookingService: BookingService,
 
+    private classEnrollmentService: ClassEnrollmentService,
+
     private reviewService: ReviewService,
   ) {}
 
   ngOnInit(): void {
-    this.bookingId = Number(this.route.snapshot.paramMap.get('id'));
+    this.refId = Number(
+      this.route.snapshot.paramMap.get('id'),
+    );
 
-    this.loadBooking();
+    this.refName =
+      this.route.snapshot.queryParamMap.get('type') ||
+      'PrivateLesson';
+
+    if (this.refName === 'PrivateLesson') {
+      this.loadBooking();
+    }
+
+    if (this.refName === 'CLASS') {
+      this.loadEnrollment();
+    }
+
     this.loadReview();
   }
 
   loadBooking() {
-    this.bookingService.getDetail(this.bookingId).subscribe({
+    this.bookingService.getDetail(this.refId).subscribe({
       next: (res) => {
         this.booking = res;
       },
@@ -64,39 +86,67 @@ export class ReviewComponent implements OnInit {
     });
   }
 
+  loadEnrollment() {
+    this.classEnrollmentService
+      .getDetail(this.refId)
+      .subscribe({
+        next: (res) => {
+          this.enrollment = res;
+        },
+
+        error: (err) => {
+          console.error(err);
+        },
+      });
+  }
+
   loadReview() {
-    this.reviewService.getByBookingId(this.bookingId).subscribe({
-      next: (res) => {
-        if (res) {
-          this.reviewed = true;
+    this.reviewService
+      .getByRef(
+        this.refName,
+        this.refId,
+      )
+      .subscribe({
+        next: (res) => {
+          if (res) {
+            this.reviewed = true;
 
-          this.review = res;
-        }
-      },
+            this.review = res;
+          }
+        },
 
-      error: (err) => {
-        console.error(err);
-      },
-    });
+        error: (err) => {
+          console.error(err);
+        },
+      });
   }
 
   canReview(): boolean {
-    if (!this.booking) {
-      return false;
+    if (this.refName === 'PrivateLesson') {
+      if (!this.booking) {
+        return false;
+      }
+
+      return this.booking.status === 3;
     }
 
-    if (this.booking.status === 3) {
-      return true;
+    if (this.refName === 'CLASS') {
+      if (!this.enrollment) {
+        return false;
+      }
+
+      return this.enrollment.status === 3;
     }
 
-    const now = new Date();
-    const end = new Date(this.booking.endTime);
-    return now > end;
+    return false;
   }
 
   submit() {
     if (!this.canReview()) {
-      alert('You can only review after the class is completed.');
+      alert(
+        'You can only review after completion',
+      );
+
       return;
     }
 
@@ -109,7 +159,9 @@ export class ReviewComponent implements OnInit {
     this.loading = true;
 
     const body = {
-      bookingId: this.bookingId,
+      refName: this.refName,
+
+      refId: this.refId,
 
       rating: this.rating,
 
@@ -122,7 +174,17 @@ export class ReviewComponent implements OnInit {
 
         alert('Review submitted');
 
-        this.router.navigate(['/my-bookings']);
+        if (
+          this.refName === 'PrivateLesson'
+        ) {
+          this.router.navigate([
+            '/my-bookings',
+          ]);
+        } else {
+          this.router.navigate([
+            '/user/myclass',
+          ]);
+        }
       },
 
       error: (err) => {
@@ -130,7 +192,10 @@ export class ReviewComponent implements OnInit {
 
         this.loading = false;
 
-        alert(err.error?.message || 'Failed');
+        alert(
+          err.error?.message ||
+            'Failed',
+        );
       },
     });
   }
@@ -138,8 +203,20 @@ export class ReviewComponent implements OnInit {
   back() {
     history.back();
   }
+
   getTeacherAvatar(): string {
-    const avatar = this.booking?.instructor?.avatarUrl;
+    let avatar = '';
+
+    if (
+      this.refName === 'PrivateLesson'
+    ) {
+      avatar =
+        this.booking?.instructor?.avatarUrl;
+    } else {
+      avatar =
+        this.enrollment?.teacherClass
+          ?.teacherProfile?.avatarUrl;
+    }
 
     if (!avatar) {
       return '';
@@ -153,27 +230,62 @@ export class ReviewComponent implements OnInit {
   }
 
   getTeacherName(): string {
+    if (
+      this.refName === 'PrivateLesson'
+    ) {
+      return (
+        this.booking?.instructor?.name ||
+        'Teacher'
+      );
+    }
+
     return (
-      this.booking?.instructor?.name || this.booking?.teacherName || 'Teacher'
+      this.enrollment?.teacherClass
+        ?.teacherProfile?.teacherName ||
+      'Teacher'
     );
   }
 
   getTeacherSpecialty(): string {
-    return this.booking?.instructorProfile?.specialty || '';
+    if (
+      this.refName === 'PrivateLesson'
+    ) {
+      return (
+        this.booking?.instructorProfile
+          ?.specialty || ''
+      );
+    }
+
+    return (
+      this.enrollment?.teacherClass
+        ?.teacherProfile?.specialty || ''
+    );
   }
 
   getDuration(): number {
-    if (!this.booking) {
+    if (
+      this.refName !==
+        'PrivateLesson' ||
+      !this.booking
+    ) {
       return 0;
     }
 
-    const start = new Date(this.booking.startTime);
+    const start = new Date(
+      this.booking.startTime,
+    );
 
-    const end = new Date(this.booking.endTime);
+    const end = new Date(
+      this.booking.endTime,
+    );
 
     return (
-      Math.round(((end.getTime() - start.getTime()) / (1000 * 60 * 60)) * 100) /
-      100
+      Math.round(
+        ((end.getTime() -
+          start.getTime()) /
+          (1000 * 60 * 60)) *
+          100,
+      ) / 100
     );
   }
 }

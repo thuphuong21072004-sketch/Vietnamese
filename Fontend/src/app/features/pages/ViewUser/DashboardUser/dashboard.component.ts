@@ -56,8 +56,7 @@ export class UserDashboardComponent implements OnInit {
 
     Promise.all([
       this.loadStatistics(),
-      this.loadPaymentStatistics(),
-      this.loadPaymentHistory(),
+      
     ]).finally(() => {
       this.loading = false;
     });
@@ -87,58 +86,6 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  loadPaymentStatistics(): Promise<void> {
-    return new Promise((resolve) => {
-      this.paymentService.getMyStatistics(this.month, this.year).subscribe({
-        next: (res: any) => {
-          this.paymentStatistics = {
-            totalPaid: res.totalPaid ?? res.TotalPaid ?? 0,
-
-            refundedAmount: res.refundedAmount ?? res.RefundedAmount ?? 0,
-
-            pendingRefundAmount:
-              res.pendingRefundAmount ?? res.PendingRefundAmount ?? 0,
-          };
-
-          resolve();
-        },
-
-        error: () => resolve(),
-      });
-    });
-  }
-
-  loadPaymentHistory(): Promise<void> {
-    return new Promise((resolve) => {
-      this.paymentService
-        .getMyPayments(this.month, this.year, this.page, this.pageSize)
-        .subscribe({
-          next: (res: any) => {
-            this.paymentHistory = res.data ?? res.Data ?? [];
-
-            this.totalPayments = res.total ?? res.Total ?? 0;
-
-            resolve();
-          },
-
-          error: () => resolve(),
-        });
-    });
-  }
-
-  previousPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.loadPaymentHistory();
-    }
-  }
-
-  nextPage(): void {
-    if (this.page * this.pageSize < this.totalPayments) {
-      this.page++;
-      this.loadPaymentHistory();
-    }
-  }
 
   onMonthChange(): void {
     const [year, month] = this.selectedMonth.split('-').map(Number);

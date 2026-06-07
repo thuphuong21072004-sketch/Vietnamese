@@ -12,6 +12,9 @@ import {
 import { TeacherClassService } from '../../../../services/teacher-class.service';
 
 import { BaseService } from '../../../../services/base.service';
+import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
+
+import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 
 @Component({
   selector: 'app-teacher-class-detail',
@@ -34,8 +37,11 @@ export class TeacherClassDetailComponent implements OnInit {
 
     private teacherClassService: TeacherClassService,
 
+    private enrollmentService: ClassEnrollmentService,
+
     private baseService: BaseService,
   ) {}
+  students: ClassEnrollmentDto[] = [];
 
   ngOnInit(): void {
     this.classId = Number(this.route.snapshot.paramMap.get('id'));
@@ -47,6 +53,8 @@ export class TeacherClassDetailComponent implements OnInit {
     }
 
     this.loadClassDetail();
+
+    this.loadStudents();
   }
 
   loadClassDetail(): void {
@@ -116,9 +124,20 @@ export class TeacherClassDetailComponent implements OnInit {
         next: () => {
           alert('All sessions updated');
         },
-        error: () => {
-          alert('Update failed');
+        error: (err) => {
+          this.baseService.handleError(err, 'Update failed');
         },
       });
+  }
+  loadStudents(): void {
+    this.enrollmentService.getClassStudents(this.classId).subscribe({
+      next: (res) => {
+        this.students = res;
+      },
+
+      error: (err) => {
+        console.error(err);
+      },
+    });
   }
 }

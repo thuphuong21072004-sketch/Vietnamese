@@ -4,6 +4,7 @@ using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
 using Microsoft.AspNetCore.Http;
+using static Backend.common.Constant;
 
 namespace Backend.Services.impl
 {
@@ -20,6 +21,8 @@ namespace Backend.Services.impl
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly ExchangeRateService _exchangeRateService;
+        private readonly ClassEnrollmentRepository _classEnrollmentRepository;
+        private readonly TeacherClassRepository _teacherClassRepository;
         public PaymentServiceImpl(
             PaymentRepository paymentRepository,
             BookingRepository bookingRepository,
@@ -28,7 +31,7 @@ namespace Backend.Services.impl
             UserContextUtil userContext,
             IMapper mapper,
            StripeService stripeService, ExchangeRateService exchangeRateService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ClassEnrollmentRepository classEnrollmentRepository, TeacherClassRepository teacherClassRepository)
         {
             _paymentRepository =
                 paymentRepository;
@@ -52,6 +55,8 @@ namespace Backend.Services.impl
             _httpContextAccessor =
                 httpContextAccessor;
             _exchangeRateService = exchangeRateService;
+            _classEnrollmentRepository = classEnrollmentRepository;
+            _teacherClassRepository = teacherClassRepository;
         }
 
         /*
@@ -65,16 +70,6 @@ namespace Backend.Services.impl
                     "Invalid amount");
             }
 
-            var booking =
-                await _bookingRepository
-                    .GetById(dto.RefId);
-
-            if (booking == null)
-            {
-                throw new KeyNotFoundException(
-                    "Booking not found");
-            }
-
             var email =
                 _userContext.GetEmail();
 
@@ -83,51 +78,80 @@ namespace Backend.Services.impl
                     .GetUserIdByEmail(email))!
                     .Value;
 
-            if (booking.StudentId != userId)
+            if (dto.RefName == RefName.Booking)
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
-            }
+                var booking =
+                    await _bookingRepository
+                        .GetById(dto.RefId);
 
-            if (
-                booking.Status ==
-               common.Constant
-                    .StatusBooking
-                    .Cancelled
-            )
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Booking not found");
+                }
+
+                if (booking.StudentId != userId)
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
+
+                if (
+                    booking.Status ==
+                    StatusBooking.Cancelled
+                )
+                {
+                    throw new InvalidOperationException(
+                        "Booking cancelled");
+                }
+
+                if (
+                    booking.Status !=
+                    StatusBooking.PendingPayment
+                )
+                {
+                    throw new InvalidOperationException(
+                        "Booking is not waiting for payment");
+                }
+            }
+            else if (dto.RefName == RefName.Class)
+            {
+                var enrollment =
+                    await _classEnrollmentRepository.GetByIdAsync(dto.RefId);
+
+                if (enrollment == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Enrollment not found");
+                }
+
+                if (enrollment.StudentId != userId)
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
+            }
+            else
             {
                 throw new InvalidOperationException(
-                    "Booking cancelled");
-            }
-
-            if (
-                booking.Status !=
-               common.Constant
-                    .StatusBooking
-                    .PendingPayment
-            )
-            {
-                throw new InvalidOperationException(
-                    "Booking is not waiting for payment");
+                    "Invalid RefName");
             }
 
             var exist =
                 await _paymentRepository
-                    .GetByBookingId(
+                    .GetByRef(
+                        dto.RefName,
                         dto.RefId);
 
             if (exist != null)
             {
-
                 if (
                     exist.Status ==
-                   common.Constant
-                        .StatusPayment
-                        .Pending
+                    StatusPayment.Pending
                     &&
                     exist.CreatedDate
                         .AddMinutes(15)
-                        > DateTime.Now
+                    > DateTime.Now
                 )
                 {
                     throw new InvalidOperationException(
@@ -136,19 +160,15 @@ namespace Backend.Services.impl
 
                 if (
                     exist.Status ==
-                   common.Constant
-                        .StatusPayment
-                        .Pending
+                    StatusPayment.Pending
                     &&
                     exist.CreatedDate
                         .AddMinutes(15)
-                        <= DateTime.Now
+                    <= DateTime.Now
                 )
                 {
                     exist.Status =
-                       common.Constant
-                            .StatusPayment
-                            .Expired;
+                        StatusPayment.Expired;
 
                     await _paymentRepository
                         .Update(exist);
@@ -159,9 +179,7 @@ namespace Backend.Services.impl
                 _mapper.Map<Payment>(dto);
 
             payment.Status =
-               common.Constant
-                    .StatusPayment
-                    .Pending;
+                StatusPayment.Pending;
 
             payment.CreatedDate =
                 DateTime.Now;
@@ -181,17 +199,12 @@ namespace Backend.Services.impl
         /*
          * payment success
          */
-        public async Task Success(
-    int paymentId,
-    string transactionCode)
+        public async Task Success( int paymentId, string transactionCode)
         {
             Console.WriteLine(
                 $"ENTER SUCCESS: {paymentId}");
 
-            if (
-                string.IsNullOrWhiteSpace(
-                    transactionCode)
-            )
+            if (string.IsNullOrWhiteSpace(transactionCode))
             {
                 throw new ArgumentException(
                     "Transaction code required");
@@ -201,55 +214,35 @@ namespace Backend.Services.impl
                 await _paymentRepository
                     .GetById(paymentId);
 
-            Console.WriteLine(
-                $"Payment Status Before = {payment?.Status}");
-
             if (payment == null)
             {
                 throw new KeyNotFoundException(
                     "Payment not found");
             }
 
-            if (
-                payment.Status ==
-               common.Constant
-                    .StatusPayment
-                    .Success
-            )
+            if (payment.Status ==
+                StatusPayment.Success)
             {
                 throw new InvalidOperationException(
                     "Payment already succeeded");
             }
 
-            if (
-                payment.Status ==
-               common.Constant
-                    .StatusPayment
-                    .Failed
-            )
+            if (payment.Status ==
+                StatusPayment.Failed)
             {
                 throw new InvalidOperationException(
                     "Payment already failed");
             }
 
-            if (
-                payment.Status ==
-               common.Constant
-                    .StatusPayment
-                    .Expired
-            )
+            if (payment.Status ==
+                StatusPayment.Expired)
             {
-                Console.WriteLine(
-                    $"PAYMENT EXPIRED BEFORE SUCCESS");
-
                 throw new InvalidOperationException(
                     "Payment expired");
             }
 
             payment.Status =
-               common.Constant
-                    .StatusPayment
-                    .Success;
+                StatusPayment.Success;
 
             payment.TransactionCode =
                 transactionCode;
@@ -257,88 +250,55 @@ namespace Backend.Services.impl
             payment.PaidAt =
                 DateTime.Now;
 
-            var booking =
-                await _bookingRepository
-                    .GetById(
+            if (payment.RefName == RefName.Booking)
+            {
+                var booking =
+                    await _bookingRepository
+                        .GetById(payment.RefId);
+
+                if (booking != null)
+                {
+                    booking.Status =
+                        StatusBooking.Confirmed;
+
+                    await _bookingRepository
+                        .Update(booking);
+                }
+            }
+            else if (payment.RefName == RefName.Class)
+            {
+                var enrollment =
+                    await _classEnrollmentRepository.GetByIdAsync(
                         payment.RefId);
 
-            if (booking != null)
-            {
-                booking.Status =
-                   common.Constant
-                        .StatusBooking
-                        .Confirmed;
+                if (enrollment == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Enrollment not found");
+                }
 
-                await _bookingRepository
-                    .Update(booking);
+                enrollment.Status =
+                    StatusBooking.Confirmed;
+
+                await _classEnrollmentRepository
+                    .UpdateAsync(enrollment);
+
+                var teacherClass =
+                    await _teacherClassRepository
+                        .GetByIdAsync(enrollment.ClassId);
+
+                if (teacherClass != null)
+                {
+                    teacherClass.CurrentStudents++;
+
+                    await _teacherClassRepository
+                        .UpdateAsync(teacherClass);
+                }
             }
-
-            await _paymentRepository
-                .Update(payment);
-
-            await _paymentRepository
-                .Save();
-
-            Console.WriteLine(
-                $"PAYMENT SUCCESS SAVED");
-        }
-
-        /*
-         * payment failed
-         */
-        public async Task Failed(int paymentId)
-        {
-            var payment =
-                await _paymentRepository
-                    .GetById(paymentId);
-
-            if (payment == null)
-            {
-                throw new KeyNotFoundException(
-                    "Payment not found");
-            }
-
-            if (
-                payment.Status ==
-               common.Constant
-                    .StatusPayment
-                    .Success
-            )
+            else
             {
                 throw new InvalidOperationException(
-                    "Payment already succeeded");
-            }
-
-            if (
-                payment.Status ==
-               common.Constant
-                    .StatusPayment
-                    .Failed
-            )
-            {
-                throw new InvalidOperationException(
-                    "Payment already failed");
-            }
-
-            payment.Status =
-               common.Constant
-                    .StatusPayment
-                    .Failed;
-
-            var booking =
-                await _bookingRepository
-                    .GetById(
-                        payment.RefId);
-
-            if (booking != null)
-            {
-                booking.Status =
-                   common.Constant
-                        .StatusBooking
-                        .PendingPayment;
-
-                await _bookingRepository
-                    .Update(booking);
+                    "Invalid RefName");
             }
 
             await _paymentRepository
@@ -351,26 +311,17 @@ namespace Backend.Services.impl
         /*
          * payment theo booking
          */
-        public async Task<PaymentDTO?> GetByBooking(int bookingId)
+        public async Task<PaymentDTO?> GetByRef( string refName, int refId)
         {
             var payment =
                 await _paymentRepository
-                    .GetByBookingId(
-                        bookingId);
+                    .GetByRef(
+                        refName,
+                        refId);
 
             if (payment == null)
             {
                 return null;
-            }
-
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
-
-            if (booking == null)
-            {
-                throw new KeyNotFoundException(
-                    "Booking not found");
             }
 
             var email =
@@ -381,57 +332,56 @@ namespace Backend.Services.impl
                     .GetUserIdByEmail(email))!
                     .Value;
 
-            if (
-                booking.StudentId != userId
-                &&
-                booking.InstructorId != userId
-            )
+            if (refName == RefName.Booking)
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
+                var booking =
+                    await _bookingRepository
+                        .GetById(refId);
+
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Booking not found");
+                }
+
+                if (
+                    booking.StudentId != userId
+                    &&
+                    booking.InstructorId != userId
+                )
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
             }
-
-            // Tạm thời tắt auto expire để test Stripe
-
-            /*
-            if (
-                payment.Status ==
-                common.Constant
-                    .StatusPayment
-                    .Pending
-                &&
-                payment.CreatedDate
-                    .AddMinutes(15)
-                    <= DateTime.Now
-            )
+            else if (refName == RefName.Class)
             {
-                payment.Status =
-                    common.Constant
-                        .StatusPayment
-                        .Expired;
+                var enrollment =
+                    await _classEnrollmentRepository.GetByIdAsync(refId);
+                if (enrollment == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Enrollment not found");
+                }
 
-                booking.Status =
-                    common.Constant
-                        .StatusBooking
-                        .Cancelled;
-
-                await _bookingRepository
-                    .Update(booking);
-
-                await _paymentRepository
-                    .Update(payment);
-
-                await _paymentRepository
-                    .Save();
+                if (enrollment.StudentId != userId)
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
             }
-            */
+            else
+            {
+                throw new InvalidOperationException(
+                    "Invalid RefName");
+            }
 
             return _mapper.Map<PaymentDTO>(
                 payment);
         }
 
         /*
-         * tạo url vnpay
+         * tạo url stripeUrl
          */
 
         public async Task<string> CreateStripeUrl(

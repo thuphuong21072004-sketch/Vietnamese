@@ -3,6 +3,7 @@ using Backend.Common;
 using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
+using static Backend.common.Constant;
 
 namespace Backend.Services.impl
 {
@@ -113,6 +114,13 @@ namespace Backend.Services.impl
             {
                 throw new Exception(
                     "End time must be greater than start time");
+            }
+            var duration = dto.EndTime - dto.StartTime;
+
+            if (duration.TotalHours > 3)
+            {
+                throw new Exception(
+                    "Each class session cannot exceed 3 hours");
             }
             if (dto.MaxStudents<=0 || dto.MaxStudents>10)
             {
@@ -397,12 +405,11 @@ namespace Backend.Services.impl
         }
 
         public async Task<List<TeacherClassDto>> SearchClassesAsync(
-        ClassFilterDto filter)
+    ClassFilterDto filter)
         {
             var classes =
                 await _teacherClassRepository
-                    .SearchClassesAsync(
-                        filter);
+                    .SearchClassesAsync(filter);
 
             return _mapper.Map<
                 List<TeacherClassDto>>(
@@ -426,7 +433,8 @@ namespace Backend.Services.impl
                     teacherClass);
         }
 
-        public async Task DeleteClassAsync( int classId)
+        public async Task DeleteClassAsync(
+    int classId)
         {
             var teacherClass =
                 await _teacherClassRepository
@@ -462,6 +470,19 @@ namespace Backend.Services.impl
                     "You do not have permission");
             }
 
+            var enrolledCount =
+    teacherClass.ClassEnrollments
+        .Count(x =>
+            x.Status == StatusBooking.Confirmed
+            || x.Status == StatusBooking.InProgress
+            || x.Status == StatusBooking.Completed);
+
+            if (enrolledCount > 0)
+            {
+                throw new Exception(
+                    "Cannot delete class because students have already enrolled");
+            }
+
             await _teacherClassRepository
                 .DeleteAsync(
                     teacherClass);
@@ -483,6 +504,19 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
+            var enrolledCount =
+    teacherClass.ClassEnrollments
+        .Count(x =>
+            x.Status == StatusBooking.Confirmed
+            || x.Status == StatusBooking.InProgress
+            || x.Status == StatusBooking.Completed);
+
+            if (enrolledCount > 0)
+            {
+                throw new Exception(
+                    "Cannot modify schedule because students have already enrolled");
+            }
+
             foreach (var dto in sessions)
             {
                 var session =
@@ -498,6 +532,15 @@ namespace Backend.Services.impl
 
                 session.Topic =
                     dto.Topic;
+
+                session.StudyDate =
+                    dto.StudyDate;
+
+                session.StartTime =
+                    dto.StartTime;
+
+                session.EndTime =
+                    dto.EndTime;
             }
 
             await _teacherClassRepository

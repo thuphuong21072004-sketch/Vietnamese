@@ -101,6 +101,9 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
+        /*
+         * tìm các lớp học
+         */
 
         [HttpPost("search")]
         public async Task<IActionResult> SearchClasses(
@@ -114,7 +117,9 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
-
+        /*
+         * chi tiết lớp học
+         */
         [Authorize]
         [HttpGet("{classId}")]
         public async Task<IActionResult> GetClassDetail(int classId)
@@ -126,7 +131,9 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
-
+        /*
+         * xóa lớp hoc
+         */
         [Authorize]
         [HttpDelete("{classId}")]
         public async Task<IActionResult> DeleteClass( int classId)
@@ -152,24 +159,39 @@ namespace Backend.Controllers
                 });
             }
         }
-
+        /*
+         * sửa lớp học
+         */
         [Authorize]
         [HttpPut("{classId}/sessions")]
         public async Task<IActionResult> UpdateSessions(
     int classId,
-    [FromBody]
-    List<ClassSessionDto> sessions)
+    [FromBody] List<ClassSessionDto> sessions)
         {
-            await _teacherClassService
-                .UpdateSessionsAsync(
-                    classId,
-                    sessions);
-
-            return Ok(new
+            try
             {
-                success = true,
-                message = "Sessions updated"
-            });
+                await _teacherClassService
+                    .UpdateSessionsAsync(
+                        classId,
+                        sessions);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Sessions updated"
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
+            }
         }
     }
 }

@@ -32,10 +32,16 @@ namespace Backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("booking/{bookingId}")]
-        public async Task<IActionResult> GetByBookingId(int bookingId)
+        [HttpGet("{refName}/{refId}")]
+        public async Task<IActionResult> GetByRef(
+     string refName,
+     int refId)
         {
-            return Ok(await _reviewService.GetByBookingId(bookingId));
+            return Ok(
+                await _reviewService
+                    .GetByRef(
+                        refName,
+                        refId));
         }
     }
 }

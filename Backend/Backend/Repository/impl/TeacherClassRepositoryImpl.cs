@@ -446,12 +446,29 @@ namespace Backend.Repository.impl
         {
             return await _context
                 .TeacherClasses
-                .Include(x =>
-                    x.ClassSessions)
+                .Include(x => x.ClassSessions)
+                .Include(x => x.ClassEnrollments)
                 .FirstOrDefaultAsync(x =>
-                    x.ClassId ==
-                    classId);
+                    x.ClassId == classId);
         }
 
+        public async Task<List<TeacherClass>> GetTeacherClassesAsync( int teacherProfileId)
+        {
+            return await _context.TeacherClasses
+                .Include(x => x.ClassSessions)
+                .Where(x =>
+                    x.TeacherProfileId ==
+                    teacherProfileId)
+                .ToListAsync();
+        }
+
+        public async Task<TeacherClass?> GetById(
+    int classId)
+        {
+            return await _context.TeacherClasses
+                .Include(x => x.TeacherProfile)
+                .FirstOrDefaultAsync(
+                    x => x.ClassId == classId);
+        }
     }
 }

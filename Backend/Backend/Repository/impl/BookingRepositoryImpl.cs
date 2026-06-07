@@ -179,8 +179,6 @@ namespace Backend.Repository.impl
 
                 .Include(x => x.Instructor)
 
-                .Include(x => x.Payment)
-
                 .Where(x =>
                     x.CreatedDate.Month == month &&
                     x.CreatedDate.Year == year)

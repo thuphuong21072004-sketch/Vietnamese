@@ -137,17 +137,11 @@
 
     <div class="pagination" *ngIf="totalPayments > pageSize">
 
-      <button (click)="previousPage()" [disabled]="page === 1">
-        Previous
-      </button>
 
       <span>
         Page {{ page }}
       </span>
 
-      <button (click)="nextPage()" [disabled]="page * pageSize >= totalPayments">
-        Next
-      </button>
 
     </div>
 

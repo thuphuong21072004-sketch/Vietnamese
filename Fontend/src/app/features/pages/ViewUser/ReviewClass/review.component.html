@@ -1,204 +1,303 @@
 <div class="review-page">
 
-    <button class="back-btn" (click)="back()">
+<button class="back-btn" (click)="back()">
 
-        ← Back
+    ← Back
 
-    </button>
+</button>
 
-    <div class="review-card">
+<div class="review-card">
 
-        <h1>
+    <h1>
 
-            Teacher Review
+        {{
+            refName === 'CLASS'
+                ? 'Course Review'
+                : 'Teacher Review'
+        }}
 
-        </h1>
+    </h1>
 
-        <div *ngIf="booking" class="booking-summary">
-        
-            <div class="teacher-header">
-        
-                <img *ngIf="getTeacherAvatar()" [src]="getTeacherAvatar()" class="teacher-avatar">
-        
-                <div *ngIf="!getTeacherAvatar()" class="teacher-avatar placeholder">
-        
-                    {{ getTeacherName().charAt(0) }}
-        
-                </div>
-        
-                <div class="teacher-info">
-        
-                    <h2>
-                        {{ getTeacherName() }}
-                    </h2>
-        
-                    <p>
-                        {{ getTeacherSpecialty() }}
-                    </p>
-        
-                </div>
-        
+    <div *ngIf="booking || enrollment" class="booking-summary">
+
+        <div class="teacher-header">
+
+            <img
+                *ngIf="getTeacherAvatar()"
+                [src]="getTeacherAvatar()"
+                class="teacher-avatar">
+
+            <div
+                *ngIf="!getTeacherAvatar()"
+                class="teacher-avatar placeholder">
+
+                {{ getTeacherName().charAt(0) }}
+
             </div>
-        
+
+            <div class="teacher-info">
+
+                <h2>
+
+                    {{ getTeacherName() }}
+
+                </h2>
+
+                <p>
+
+                    {{ getTeacherSpecialty() }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- Private Lesson -->
+
+        <div *ngIf="booking">
+
             <div class="info-row">
-        
+
                 <span>
                     Class Date
                 </span>
-        
+
                 <strong>
                     {{ booking.startTime | date:'dd/MM/yyyy' }}
                 </strong>
-        
+
             </div>
-        
+
             <div class="info-row">
-        
+
                 <span>
                     Class Time
                 </span>
-        
+
                 <strong>
                     {{ booking.startTime | date:'HH:mm' }}
                     -
                     {{ booking.endTime | date:'HH:mm' }}
                 </strong>
-        
+
             </div>
-        
+
             <div class="info-row">
-        
+
                 <span>
                     Duration
                 </span>
-        
+
                 <strong>
                     {{ getDuration() }} hours
                 </strong>
-        
+
             </div>
-        
+
             <div class="info-row">
-        
+
                 <span>
                     Lesson Fee
                 </span>
-        
+
                 <strong>
                     ${{ booking.totalPrice | number:'1.2-2' }}
                 </strong>
-        
-            </div>
-        
-        </div>
-
-        <div *ngIf="reviewed && review" class="reviewed-box">
-
-            <h2>
-
-                Your Review
-
-            </h2>
-
-            <div class="rating">
-
-                ⭐ {{ review.rating }}/5
-
-            </div>
-
-            <p class="comment">
-
-                {{ review.comment }}
-
-            </p>
-
-            <div class="created-date">
-
-                {{
-                review.createdDate
-                | date:'dd/MM/yyyy HH:mm'
-                }}
 
             </div>
 
         </div>
 
-        <div *ngIf="!reviewed">
+        <!-- Group Class -->
 
-            <div *ngIf="booking && !canReview()" class="info-note">
-                Review is available after the class is completed.
-            </div>
+        <div *ngIf="enrollment">
 
-            <div class="form-group">
+            <div class="info-row">
 
-                <label>
+                <span>
+                    Course
+                </span>
 
-                    Rating
-
-                </label>
-
-                <select [(ngModel)]="rating">
-
-                    <option value="1">
-
-                        1 Star
-
-                    </option>
-
-                    <option value="2">
-
-                        2 Stars
-
-                    </option>
-
-                    <option value="3">
-
-                        3 Stars
-
-                    </option>
-
-                    <option value="4">
-
-                        4 Stars
-
-                    </option>
-
-                    <option value="5">
-
-                        5 Stars
-
-                    </option>
-
-                </select>
+                <strong>
+                    {{ enrollment.teacherClass?.title }}
+                </strong>
 
             </div>
 
-            <div class="form-group">
+            <div class="info-row">
 
-                <label>
+                <span>
+                    Main Topic
+                </span>
 
-                    Comment
-
-                </label>
-
-                <textarea rows="5" [(ngModel)]="comment">
-
-                </textarea>
+                <strong>
+                    {{ enrollment.teacherClass?.mainTopic }}
+                </strong>
 
             </div>
 
-            <button class="submit-btn" [disabled]="loading || !canReview()" (click)="submit()">
+            <div class="info-row">
 
-                {{
-                loading
-                ? 'Submitting...'
-                : 'Submit Review'
-                }}
+                <span>
+                    Sub Topic
+                </span>
 
-            </button>
+                <strong>
+                    {{ enrollment.teacherClass?.subTopic }}
+                </strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>
+                    Students
+                </span>
+
+                <strong>
+                    {{ enrollment.teacherClass?.currentStudents }}
+                    /
+                    {{ enrollment.teacherClass?.maxStudents }}
+                </strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>
+                    Sessions
+                </span>
+
+                <strong>
+                    {{ enrollment.teacherClass?.totalSessions }}
+                </strong>
+
+            </div>
+
+            <div class="info-row">
+
+                <span>
+                    Course Fee
+                </span>
+
+                <strong>
+                    ${{ enrollment.teacherClass?.price }}
+                </strong>
+
+            </div>
 
         </div>
 
     </div>
 
+    <div
+        *ngIf="reviewed && review"
+        class="reviewed-box">
+
+        <h2>
+
+            Your Review
+
+        </h2>
+
+        <div class="rating">
+
+            ⭐ {{ review.rating }}/5
+
+        </div>
+
+        <p class="comment">
+
+            {{ review.comment }}
+
+        </p>
+
+        <div class="created-date">
+
+            {{
+                review.createdDate
+                | date:'dd/MM/yyyy HH:mm'
+            }}
+
+        </div>
+
+    </div>
+
+    <div *ngIf="!reviewed">
+
+        <div
+            *ngIf="(booking || enrollment) && !canReview()"
+            class="info-note">
+
+            Review is available after the class is completed.
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+
+                Rating
+
+            </label>
+
+            <select [(ngModel)]="rating">
+
+                <option [ngValue]="1">
+                    1 Star
+                </option>
+
+                <option [ngValue]="2">
+                    2 Stars
+                </option>
+
+                <option [ngValue]="3">
+                    3 Stars
+                </option>
+
+                <option [ngValue]="4">
+                    4 Stars
+                </option>
+
+                <option [ngValue]="5">
+                    5 Stars
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+
+                Comment
+
+            </label>
+
+            <textarea
+                rows="5"
+                [(ngModel)]="comment">
+
+            </textarea>
+
+        </div>
+
+        <button
+            class="submit-btn"
+            [disabled]="loading || !canReview()"
+            (click)="submit()">
+
+            {{
+                loading
+                    ? 'Submitting...'
+                    : 'Submit Review'
+            }}
+
+        </button>
+
+    </div>
+
+</div>
 </div>

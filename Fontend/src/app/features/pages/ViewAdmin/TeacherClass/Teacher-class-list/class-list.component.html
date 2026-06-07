@@ -14,11 +14,21 @@
     
         </div>
     
-        <button class="create-btn" routerLink="/class/create">
+        <div class="header-actions">
     
-            Create New Class
+            <button class="schedule-btn" (click)="viewSchedule()">
     
-        </button>
+                Upcoming Schedule
+    
+            </button>
+    
+            <button class="create-btn" routerLink="/class/create">
+    
+                Create New Class
+    
+            </button>
+    
+        </div>
     
     </div>
 
@@ -243,7 +253,7 @@
                     Start Date:
                 </strong>
 
-                {{ item.startDate }}
+                {{ item.startDate | date:'dd/MM/yyyy' }}
 
             </div>
 

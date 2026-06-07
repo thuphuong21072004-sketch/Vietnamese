@@ -1,0 +1,115 @@
+<div class="schedule-page">
+
+    <div class="page-header">
+
+        <h1>
+            Upcoming Teaching Schedule
+        </h1>
+
+        <p>
+            Your upcoming classes and sessions.
+        </p>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading schedule...
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            schedules.length === 0
+        " class="empty-state">
+
+        <h3>
+            No upcoming sessions
+        </h3>
+
+        <p>
+            There are currently no scheduled classes.
+        </p>
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            schedules.length > 0
+        " class="schedule-list">
+
+        <div *ngFor="
+                let item
+                of schedules
+            " class="schedule-card">
+
+            <div class="card-header">
+
+                <h3>
+                    {{ item.classTitle }}
+                </h3>
+
+                <span class="session-badge">
+
+                    Session
+                    {{ item.sessionNumber }}
+
+                </span>
+
+            </div>
+
+            <div class="info-row teacher">
+
+                <strong>
+                    Teacher:
+                </strong>
+
+                <span>
+                    {{ item.teacherName }}
+                </span>
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Topic:
+                </strong>
+
+                <span>
+                    {{ item.topic }}
+                </span>
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Date:
+                </strong>
+
+                <span>
+                    {{ item.studyDate }}
+                </span>
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Time:
+                </strong>
+
+                <span>
+                    {{ item.startTime }}
+                    -
+                    {{ item.endTime }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

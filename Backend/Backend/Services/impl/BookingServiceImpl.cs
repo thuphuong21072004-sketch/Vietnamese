@@ -250,7 +250,7 @@ namespace Backend.Services.impl
             // Hết hạn thanh toán
             if (booking.Status == common.Constant.StatusBooking.PendingPayment)
             {
-                var payment = await _paymentRepository.GetByBookingId(booking.BookingId);
+                var payment = await _paymentRepository.GetByRef(common.Constant.RefName.Booking,booking.BookingId);
 
                 if (payment != null &&
                     (payment.Status == common.Constant.StatusPayment.Pending ||

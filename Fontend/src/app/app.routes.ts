@@ -21,6 +21,7 @@ import { TeacherBookingDetailComponent } from './features/pages/ViewAdmin/MyBook
 import { DashboardTeacherComponent } from './features/pages/ViewAdmin/DashboardTeacher/dashboard.component';
 import { TeacherClassCreateComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-create/teacher-class-create.component';
 import { TeacherClassDetailComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-detail/teacher-class-detail.component' 
+import { TeacherUpcomingComponent } from './features/pages/ViewAdmin/TeacherClass/TeacherSchedule/teacher-schedule.component';
 
 import { MyProgressComponent } from './features/pages/ViewUser/Learning/unit/unit.component';
 import { UserDashboardComponent } from './features/pages/ViewUser/DashboardUser/dashboard.component';
@@ -39,6 +40,8 @@ import { Component } from '@angular/core';
 import { TeacherClassListComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-list/class-list.component';
 import { ClassListComponent } from './features/pages/ViewUser/ClassRoom/ClassList/classList.component'
 import { StudentCourseDetailComponent } from './features/pages/ViewUser/ClassRoom/ClassDetail/classDetail.component'
+import { MyClassesComponent } from './features/pages/ViewUser/ClassRoom/MyClasses/my-classes.component'
+import { StudentScheduleComponent } from './features/pages/ViewUser/ClassRoom/StudentUpcoming/student-upcoming.component'
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -64,7 +67,7 @@ export const routes: Routes = [
   { path: 'teacher/listclass', component: TeacherClassListComponent },
   { path: 'class/create', component: TeacherClassCreateComponent },
   { path: 'teacher/detail/:id', component: TeacherClassDetailComponent},
-
+  { path: 'teacher/schedule', component: TeacherUpcomingComponent},
   
   { path: 'user/units', component: MyProgressComponent },
   { path: 'user/dashboard', component: UserDashboardComponent },
@@ -83,6 +86,8 @@ export const routes: Routes = [
   { path: 'teacher/bookings', component: TeacherBookingsComponent },
   { path: 'teacher/class', component: ClassListComponent},
   { path: 'user/classdetail/:id',component: StudentCourseDetailComponent},
+  { path: 'user/myclass',component: MyClassesComponent},
+  { path: 'user/schedule',component: StudentScheduleComponent},
 
   { path: 'my-bookings', component: MyBookingsComponent },
 

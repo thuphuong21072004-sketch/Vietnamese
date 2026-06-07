@@ -17,23 +17,28 @@
         <h2>
             Search Filters
         </h2>
+        
 
         <div class="filter-grid">
             <div class="form-group">
-
-            <select [(ngModel)]="filter.country">
             
-                <option value="">
-                    Country
-                </option>
+                <label>
+                    Contry
+                </label>
             
-                <option *ngFor="let country of countries" [value]="country">
+                <select [(ngModel)]="filter.country">
             
-                    {{ country }}
+                    <option value="">
+                        Country
+                    </option>
             
-                </option>
+                    <option *ngFor="let country of countries" [value]="country">
             
-            </select>
+                        {{ country }}
+            
+                    </option>
+            
+                </select>
             </div>
 
             <div class="form-group">
@@ -258,55 +263,53 @@
                 let item
                 of classes
             " class="class-card">
+<div class="teacher-header">
 
-            <div class="card-header">
+    <img *ngIf="item.avatarUrl" [src]="'http://localhost:5108/uploads/' + item.avatarUrl" class="teacher-avatar">
 
-                <h3>
-                    {{ item.title }}
-                </h3>
+    <div *ngIf="!item.avatarUrl" class="teacher-avatar placeholder">
+        {{ item.teacherName?.charAt(0) }}
+    </div>
 
-                <span class="price">
+    <div class="teacher-info">
 
-                    ${{ item.price }}
+        <div class="teacher-top">
 
-                </span>
+            <h4>
+                {{ item.teacherName }}
+            </h4>
 
-            </div>
+            <span class="teacher-country">
+                {{ item.country }}
+            </span>
+
+        </div>
+
+        <div class="teacher-rating">
+            ⭐ {{ item.ratingAverage }}
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card-header">
+
+    <h3>
+        {{ item.title }}
+    </h3>
+
+    <span class="price">
+        ${{ item.price }}
+    </span>
+
+</div>
 
             <p class="description">
 
                 {{ item.description }}
 
             </p>
-
-            <div class="info-row">
-
-                <strong>
-                    Teacher:
-                </strong>
-
-                {{ item.teacherName }}
-
-            </div>
-            <div class="info-row">
-            
-                <strong>
-                    Country:
-                </strong>
-            
-                {{ item.country }}
-            
-            </div>
-            
-            <div class="info-row">
-            
-                <strong>
-                    Rating:
-                </strong>
-            
-                ⭐ {{ item.ratingAverage }}
-            
-            </div>
 
             <div class="info-row">
 
@@ -376,27 +379,53 @@
             </div>
 
             <div class="card-actions">
-
-                <button class="detail-btn" (click)="
-                        viewClass(
-                            item.classId
-                        )
-                    ">
-
+            
+                <button class="detail-btn" (click)="viewClass(item.classId)">
                     View Details
-
                 </button>
-
-                <button class="enroll-btn" (click)="
-                        enroll(
-                            item.classId
-                        )
-                    ">
-
+            
+                <!-- Chưa đăng ký -->
+                <button *ngIf="getStatus(item.classId) === null" class="enroll-btn" (click)="enroll(item.classId)">
                     Enroll Now
-
                 </button>
-
+            
+                <!-- Chờ thanh toán -->
+                <button *ngIf="getStatus(item.classId) === 0" class="payment-btn" [routerLink]="[
+                      '/payment',
+                      getEnrollment(item.classId)?.enrollmentId
+                    ]" [queryParams]="{
+                      type: 'CLASS'
+                    }">
+                    Pay Now
+                </button>
+            
+                <!-- Đã xác nhận -->
+                <button *ngIf="getStatus(item.classId) === 1" class="cancel-btn" (click)="cancel(
+                      getEnrollment(item.classId)!.enrollmentId
+                    )">
+                    Cancel Enrollment
+                </button>
+            
+                <!-- Đang học -->
+                <button *ngIf="getStatus(item.classId) === 2" class="detail-btn" (click)="viewClass(item.classId)">
+                    Enter Class
+                </button>
+            
+                <!-- Hoàn thành -->
+                <button *ngIf="getStatus(item.classId) === 3" class="detail-btn" (click)="viewClass(item.classId)">
+                    View Result
+                </button>
+            
+                <!-- Đã hủy -->
+                <button *ngIf="getStatus(item.classId) === 4" class="enroll-btn" (click)="enroll(item.classId)">
+                    Enroll Again
+                </button>
+            
+                <!-- Hoàn tiền -->
+                <button *ngIf="getStatus(item.classId) === 5" class="enroll-btn" (click)="enroll(item.classId)">
+                    Enroll Again
+                </button>
+            
             </div>
 
         </div>

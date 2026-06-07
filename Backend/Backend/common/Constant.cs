@@ -99,14 +99,6 @@
 
             public const byte Expired = 4;
         }
-        public class PaymentMethod
-        {
-            public const byte VNPay = 0;
-
-            public const byte Momo = 1;
-
-            public const byte Paypal = 2;
-        }
         /*
          * trạng thái hồ sơ giáo viên
          */
@@ -165,6 +157,5 @@
             public const string Class = "CLASS";
 
         }
-
     }
 }

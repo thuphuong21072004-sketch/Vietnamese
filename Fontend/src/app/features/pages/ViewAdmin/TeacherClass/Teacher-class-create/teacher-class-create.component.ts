@@ -4,12 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 import {
   TeacherClassDto,
-  ClassSessionDto
-} from '../../../../models/teacher-class.model';
-
+  ClassSessionDto} from '../../../../models/teacher-class.model';
+import { Router } from '@angular/router';
 import {
-  TeacherClassService
-} from '../../../../services/teacher-class.service';
+  TeacherClassService} from '../../../../services/teacher-class.service';
 import { BaseService } from '../../../../services/base.service';
 @Component({
   selector: 'app-teacher-class-create',
@@ -190,6 +188,7 @@ export class TeacherClassCreateComponent {
   constructor(
     private teacherClassService: TeacherClassService,
     private baseService: BaseService,
+    private router: Router,
   ) {}
 
   toggleDay(day: string, checked: boolean): void {
@@ -277,12 +276,12 @@ export class TeacherClassCreateComponent {
     this.loading = true;
 
     this.teacherClassService.createClass(request).subscribe({
-      next: (response) => {
-        console.log('CREATE SUCCESS:', response);
-
+      next: (response: any) => {
         this.loading = false;
 
         alert('Create class successfully');
+
+        this.router.navigate(['/teacher/detail', response.classId]);
       },
 
       error: (err) => {

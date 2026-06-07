@@ -37,10 +37,5 @@
 
         public TeacherAvailabilityDTO? Availability { get; set; }
 
-        public PaymentDTO? Payment { get; set; }
-
-        public VideoRoomDTO? VideoRoom { get; set; }
-
-        public ReviewDTO? Review { get; set; }
     }
 }

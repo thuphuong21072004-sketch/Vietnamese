@@ -3,6 +3,7 @@ using Backend.Common;
 using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
+using static Backend.common.Constant;
 
 namespace Backend.Services.impl
 {
@@ -14,8 +15,10 @@ namespace Backend.Services.impl
         private readonly UserRepository _userRepository;
         private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
+        private readonly ClassEnrollmentRepository
+    _classEnrollmentRepository;
 
-        public ReviewServiceImpl(ReviewRepository reviewRepository, BookingRepository bookingRepository, TeacherProfileRepository teacherRepository, UserRepository userRepository, UserContextUtil userContext, IMapper mapper)
+        public ReviewServiceImpl(ReviewRepository reviewRepository, BookingRepository bookingRepository, TeacherProfileRepository teacherRepository, UserRepository userRepository, UserContextUtil userContext, IMapper mapper, ClassEnrollmentRepository classEnrollmentRepository)
         {
             _reviewRepository = reviewRepository;
             _bookingRepository = bookingRepository;
@@ -23,6 +26,7 @@ namespace Backend.Services.impl
             _userRepository = userRepository;
             _userContext = userContext;
             _mapper = mapper;
+            _classEnrollmentRepository = classEnrollmentRepository;
         }
 
         /* 
@@ -30,22 +34,25 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task Create( ReviewDTO dto)
+        public async Task Create(ReviewDTO dto)
         {
             var email = _userContext.GetEmail();
 
-            int userId = (await _userRepository
-                .GetUserIdByEmail(email))!.Value;
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))!
+                .Value;
 
-            if (dto.Rating < 1
-                || dto.Rating > 5)
+            if (
+                dto.Rating < 1 ||
+                dto.Rating > 5
+            )
             {
                 throw new ArgumentException(
                     "Rating must be between 1 and 5");
             }
 
-            if (string.IsNullOrWhiteSpace(
-                dto.Comment))
+            if (string.IsNullOrWhiteSpace(dto.Comment))
             {
                 throw new ArgumentException(
                     "Comment is required");
@@ -57,33 +64,84 @@ namespace Backend.Services.impl
                     "Comment too long");
             }
 
-            var booking =
-                await _bookingRepository
-                    .GetById(dto.RefId);
-
-            if (booking == null)
+            if (
+                dto.RefName != RefName.Booking
+                &&
+                dto.RefName != RefName.Class
+)
             {
-                throw new KeyNotFoundException(
-                    "Booking not found");
+                throw new ArgumentException(
+                    "Invalid review type");
             }
 
-            if (booking.StudentId != userId)
-            {
-                throw new UnauthorizedAccessException(
-                    "No permission");
-            }
+            int instructorId;
 
-            if (booking.Status !=
-                common.Constant
-                .StatusBooking.Completed)
+            if (dto.RefName == RefName.Booking)
             {
-                throw new InvalidOperationException(
-                    "Class not completed");
+                var booking =
+                    await _bookingRepository
+                        .GetById(dto.RefId);
+
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Booking not found");
+                }
+
+                if (booking.StudentId != userId)
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
+
+                if (
+                    booking.Status !=
+                    StatusBooking.Completed
+                )
+                {
+                    throw new InvalidOperationException(
+                        "Lesson not completed");
+                }
+
+                instructorId =
+                    booking.InstructorId;
+            }
+            else
+            {
+                var enrollment =
+                    await _classEnrollmentRepository
+                        .GetByIdAsync(dto.RefId);
+
+                if (enrollment == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Enrollment not found");
+                }
+
+                if (enrollment.StudentId != userId)
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
+
+                if (
+                    enrollment.Status !=
+                    StatusBooking.Completed
+                )
+                {
+                    throw new InvalidOperationException(
+                        "Course not completed");
+                }
+
+                instructorId =
+                    enrollment.TeacherClass
+                        .TeacherProfileId;
             }
 
             var exist =
                 await _reviewRepository
-                    .GetByBookingId(
+                    .GetByRef(
+                        dto.RefName,
                         dto.RefId);
 
             if (exist != null)
@@ -95,19 +153,17 @@ namespace Backend.Services.impl
             var review = new Review
             {
                 RefId = dto.RefId,
-                RefName = common.Constant.RefName.Booking,
 
-                StudentId =
-                    userId,
+                RefName = dto.RefName,
+
+                StudentId = userId,
 
                 InstructorId =
-                    booking.InstructorId,
+    instructorId,
 
-                Rating =
-                    dto.Rating,
+                Rating = dto.Rating,
 
-                Comment =
-                    dto.Comment,
+                Comment = dto.Comment,
 
                 CreatedDate =
                     DateTime.UtcNow
@@ -117,23 +173,23 @@ namespace Backend.Services.impl
                 .Create(review);
 
             var teacher =
-                await _teacherRepository
-                    .GetByUserId(
-                        booking.InstructorId);
+    await _teacherRepository
+        .GetByUserId(
+            instructorId);
 
             if (teacher != null)
             {
                 decimal totalScore =
-                    teacher.RatingAverage
-                    * teacher.TotalReviews;
+                    teacher.RatingAverage *
+                    teacher.TotalReviews;
 
                 teacher.TotalReviews++;
 
                 teacher.RatingAverage =
                     Math.Round(
                         (
-                            totalScore
-                            + dto.Rating
+                            totalScore +
+                            dto.Rating
                         )
                         /
                         teacher.TotalReviews,
@@ -180,39 +236,79 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<ReviewDTO?> GetByBookingId(int bookingId)
+        public async Task<ReviewDTO?> GetByRef(
+    string refName,
+    int refId)
         {
-            
             var review =
                 await _reviewRepository
-                    .GetByBookingId(
-                        bookingId);
+                    .GetByRef(
+                        refName,
+                        refId);
 
             if (review == null)
             {
                 return null;
             }
 
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
-
-            if (booking == null)
+            if (
+    refName != RefName.Booking
+    &&
+    refName != RefName.Class
+)
             {
-                throw new KeyNotFoundException(
-                    "Booking not found");
+                throw new ArgumentException(
+                    "Invalid review type");
             }
 
-            var email = _userContext.GetEmail();
+            var email =
+    _userContext.GetEmail();
 
-            int userId = (await _userRepository
-                .GetUserIdByEmail(email))!.Value;
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))!
+                .Value;
 
-            if (booking.StudentId != userId
-                && booking.InstructorId != userId)
+            if (refName == RefName.Booking)
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
+                var booking =
+                    await _bookingRepository
+                        .GetById(refId);
+
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Booking not found");
+                }
+
+                if (
+                    booking.StudentId != userId &&
+                    booking.InstructorId != userId
+                )
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
+            }
+            else
+            {
+                var enrollment =
+                    await _classEnrollmentRepository
+                        .GetByIdAsync(refId);
+
+                if (enrollment == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Enrollment not found");
+                }
+
+                if (
+                    enrollment.StudentId != userId
+                )
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
             }
 
             return _mapper.Map<ReviewDTO>(

@@ -1,0 +1,91 @@
+<div class="schedule-page">
+
+    <div class="page-header">
+
+        <h1>
+            Upcoming Teaching Schedule
+        </h1>
+
+        <p>
+            Your upcoming classes and sessions.
+        </p>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading schedule...
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            schedules.length === 0
+        " class="empty-state">
+
+        No upcoming sessions.
+
+    </div>
+
+    <div *ngIf="
+            !loading &&
+            schedules.length > 0
+        " class="schedule-list">
+
+        <div *ngFor="
+                let item
+                of schedules
+            " class="schedule-card">
+
+            <div class="card-header">
+
+                <h3>
+                    {{ item.classTitle }}
+                </h3>
+
+                <span class="session-badge">
+
+                    Session
+                    {{ item.sessionNumber }}
+
+                </span>
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Topic:
+                </strong>
+
+                {{ item.topic }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Date:
+                </strong>
+
+                {{ item.studyDate }}
+
+            </div>
+
+            <div class="info-row">
+
+                <strong>
+                    Time:
+                </strong>
+
+                {{ item.startTime }}
+                -
+                {{ item.endTime }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

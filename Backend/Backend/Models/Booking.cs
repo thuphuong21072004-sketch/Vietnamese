@@ -32,10 +32,5 @@
 
         public TeacherAvailability? Availability { get; set; }
 
-        public Payment? Payment { get; set; }
-
-        public VideoRoom? VideoRoom { get; set; }
-
-        public Review? Review { get; set; }
     }
 }

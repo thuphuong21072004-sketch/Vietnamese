@@ -32,9 +32,16 @@ public class ExceptionMiddleware
         {
             await HandleException(context, HttpStatusCode.BadRequest, ex.Message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await HandleException(context, HttpStatusCode.InternalServerError, "An unexpected error occurred.");
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                success = false,
+                message = ex.ToString()
+            });
         }
     }
 

@@ -169,10 +169,14 @@
 }
 
 .price {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: rgba(59,130,246,.12);
+
+    color: #2563eb;
+
     padding: 8px 14px;
+
     border-radius: 999px;
+
     font-weight: 700;
 }
 
@@ -227,20 +231,27 @@
 }
 
 .detail-btn {
-    background: #e2e8f0;
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.enroll-btn {
+    background: linear-gradient(
+        135deg,
+        #7c3aed,
+        #6366f1
+    );
+
+    color: white;
+}
+
+.cancel-btn {
+    background: #ef4444;
+    color: white;
 }
 
 .detail-btn:hover {
     background: #cbd5e1;
-}
-
-.enroll-btn {
-    background: #16a34a;
-    color: white;
-}
-
-.enroll-btn:hover {
-    background: #15803d;
 }
 
 @media (max-width: 768px) {
@@ -259,4 +270,69 @@
     .filter-actions {
         flex-direction: column;
     }
+}
+.teacher-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.teacher-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid #eef2ff;
+}
+
+.teacher-avatar.placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+        135deg,
+        #7c3aed,
+        #6366f1
+    );
+
+    color: white;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+.teacher-info {
+    flex: 1;
+}
+
+.teacher-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.teacher-top h4 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 16px;
+}
+
+.teacher-country {
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.teacher-rating {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 13px;
 }

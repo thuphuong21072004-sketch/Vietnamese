@@ -4,18 +4,21 @@ import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { TeacherClassDto } from '../../../../models/teacher-class.model';
 
 import { ClassFilterDto } from '../../../../models/class-filter.model';
 
 import { TeacherClassService } from '../../../../services/teacher-class.service';
+import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
+
+import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 
 @Component({
   selector: 'app-class-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './classList.component.html',
   styleUrls: ['./classList.component.css'],
 })
@@ -179,12 +182,15 @@ export class ClassListComponent implements OnInit {
 
   constructor(
     private teacherClassService: TeacherClassService,
+    private classEnrollmentService: ClassEnrollmentService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
-    
     this.loadCountries();
+
+    this.loadMyEnrollments();
+
     this.searchClasses();
   }
 
@@ -260,10 +266,19 @@ export class ClassListComponent implements OnInit {
   }
 
   enroll(classId: number): void {
-    console.log('Enroll class:', classId);
+    this.classEnrollmentService.enroll(classId).subscribe({
+      next: (res: any) => {
+        this.router.navigate(['/payment', res.enrollmentId], {
+          queryParams: {
+            type: 'CLASS',
+          },
+        });
+      },
 
-    // TODO:
-    // gọi API đăng ký lớp học
+      error: (err: any) => {
+        alert(err.error.message);
+      },
+    });
   }
   countries: string[] = [];
 
@@ -279,5 +294,41 @@ export class ClassListComponent implements OnInit {
         this.countries.unshift('Vietnam');
       }
     });
+  }
+  enrolledClasses: ClassEnrollmentDto[] = [];
+  loadMyEnrollments(): void {
+    this.classEnrollmentService.getMyClasses().subscribe({
+      next: (res) => {
+        this.enrolledClasses = res;
+      },
+      error: (err) => {
+        console.error(err);
+      },
+    });
+  }
+ 
+  getEnrollmentId(classId: number): number | undefined {
+    return this.enrolledClasses.find((x) => x.classId === classId)
+      ?.enrollmentId;
+  }
+  cancel(enrollmentId: number): void {
+    this.classEnrollmentService.cancel(enrollmentId).subscribe({
+      next: () => {
+        this.loadMyEnrollments();
+
+        this.searchClasses();
+      },
+      error: (err) => {
+        alert(err.error.message);
+      },
+    });
+  }
+  getEnrollment(classId: number): ClassEnrollmentDto | undefined {
+    return this.enrolledClasses.find((x) => x.classId === classId);
+  }
+  getStatus(classId: number): number | null {
+    const enrollment = this.getEnrollment(classId);
+
+    return enrollment ? enrollment.status : null;
   }
 }

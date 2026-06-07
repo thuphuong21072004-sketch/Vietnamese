@@ -17,5 +17,7 @@
         public int SessionNumber { get; set; }
 
         public string Status { get; set; } = string.Empty;
+        public string? TeacherName { get; set; }
+
     }
 }

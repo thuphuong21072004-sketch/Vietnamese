@@ -4,8 +4,12 @@ namespace Backend.Services
 {
     public interface VideoRoomService
     {
-        Task<VideoRoomDTO>Create(int bookingId);
+        Task<VideoRoomDTO> Create(
+    string refName,
+    int refId);
 
-        Task<string> JoinRoom(int bookingId);
+        Task<string> JoinRoom(
+            string refName,
+            int refId);
     }
 }

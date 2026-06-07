@@ -9,11 +9,13 @@ namespace Backend.Services.impl
     public class VideoRoomServiceImpl : VideoRoomService
     {
         private readonly VideoRoomRepository _videoRoomRepository;
-        private readonly BookingRepository _bookingRepository;
+        private readonly TeacherClassRepository _teacherClassRepository;
+
+        private readonly ClassEnrollmentRepository _classEnrollmentRepository;
         private readonly UserRepository _userRepository;
         private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
-
+        private readonly BookingRepository _bookingRepository;
         public VideoRoomServiceImpl(VideoRoomRepository videoRoomRepository, BookingRepository bookingRepository, UserRepository userRepository, UserContextUtil userContext, IMapper mapper)
         {
             _videoRoomRepository = videoRoomRepository;
@@ -28,124 +30,39 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoomDTO> Create(int bookingId)
+        public async Task<VideoRoomDTO> Create(
+    string refName,
+    int refId)
         {
-            var booking = await _bookingRepository.GetById(bookingId);
+            var email =
+                _userContext.GetEmail();
 
-            if (booking == null)
-            {
-                throw new KeyNotFoundException("Booking not found");
-            }
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))
+                ?? throw new Exception(
+                    "User not found");
 
-            var email = _userContext.GetEmail();
-
-            int? maybeUserId =
-                await _userRepository.GetUserIdByEmail(email);
-
-            if (maybeUserId == null)
-            {
-                throw new InvalidOperationException(
-                    "Authenticated user not found");
-            }
-
-            int userId = maybeUserId.Value;
-
-            if (
-                booking.StudentId != userId &&
-                booking.InstructorId != userId
-            )
-            {
-                throw new UnauthorizedAccessException(
-                    "No permission");
-            }
-
-            if (
-                booking.Status != common.Constant.StatusBooking.Confirmed &&
-                booking.Status != common.Constant.StatusBooking.InProgress
-            )
-            {
-                throw new ArgumentException(
-                    "Booking is not active");
-            }
-
-            var now =
-                GetNowForComparison(
-                    booking.StartTime);
-
-            if (
-                now <
-                booking.StartTime.AddMinutes(-30)
-            )
-            {
-                throw new ArgumentException(
-                    "Room can only be created 30 minutes before class");
-            }
-
-            if (
-                now >
-                booking.EndTime.AddMinutes(15)
-            )
-            {
-                throw new ArgumentException(
-                    "Room can only be created until 15 minutes after class ends");
-            }
-
-            var exist =
+            var room =
                 await _videoRoomRepository
-                    .GetByBookingId(bookingId);
+                    .GetByRef(
+                        refName,
+                        refId);
 
-            if (
-                exist != null &&
-                exist.ExpiredAt >
-                GetNowForComparison(exist.ExpiredAt)
-            )
+            if (room != null)
             {
-                var existingDto =
-                    _mapper.Map<VideoRoomDTO>(exist);
-
-                existingDto.JoinUrl = null;
-
-                return existingDto;
-            }
-
-            if (exist != null)
-            {
-                exist.RoomCode =
-                    Guid.NewGuid().ToString();
-
-                exist.HostToken =
-                    Guid.NewGuid().ToString();
-
-                exist.StudentToken =
-                    Guid.NewGuid().ToString();
-
-                exist.StartUrl =
-                    $"https://meet.jit.si/{exist.RoomCode}";
-
-                exist.ExpiredAt =
-                    booking.EndTime.AddMinutes(15);
-
-                await _videoRoomRepository
-                    .Update(exist);
-
-                await _videoRoomRepository
-                    .Save();
-
-                var updatedDto =
-                    _mapper.Map<VideoRoomDTO>(exist);
-
-                updatedDto.JoinUrl = null;
-
-                return updatedDto;
+                return _mapper.Map<VideoRoomDTO>(
+                    room);
             }
 
             var roomCode =
                 Guid.NewGuid().ToString();
 
-            var room = new VideoRoom
+            room = new VideoRoom
             {
-                RefId = bookingId,
-                RefName = common.Constant.RefName.Booking,
+                RefName = refName,
+
+                RefId = refId,
 
                 RoomCode = roomCode,
 
@@ -159,7 +76,7 @@ namespace Backend.Services.impl
                     $"https://meet.jit.si/{roomCode}",
 
                 ExpiredAt =
-                    booking.EndTime.AddMinutes(15),
+                    DateTime.UtcNow.AddYears(1),
 
                 CreatedDate =
                     DateTime.UtcNow
@@ -171,19 +88,44 @@ namespace Backend.Services.impl
             await _videoRoomRepository
                 .Save();
 
-            var createdDto =
-                _mapper.Map<VideoRoomDTO>(room);
-
-            createdDto.JoinUrl = null;
-
-            return createdDto;
+            return _mapper.Map<VideoRoomDTO>(
+                room);
         }
 
-        public async Task<string> JoinRoom(int bookingId)
+        public async Task<string> JoinRoom(
+    string refName,
+    int refId)
         {
+            var email =
+                _userContext.GetEmail();
+
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))
+                ?? throw new Exception(
+                    "User not found");
+
             var room =
                 await _videoRoomRepository
-                    .GetByBookingId(bookingId);
+                    .GetByRef(
+                        refName,
+                        refId);
+
+            /*
+             * chưa có phòng thì tạo
+             */
+            if (room == null)
+            {
+                await Create(
+                    refName,
+                    refId);
+
+                room =
+                    await _videoRoomRepository
+                        .GetByRef(
+                            refName,
+                            refId);
+            }
 
             if (room == null)
             {
@@ -191,83 +133,73 @@ namespace Backend.Services.impl
                     "Room not found");
             }
 
-            var booking =
-                await _bookingRepository
-                    .GetById(bookingId);
-
-            if (booking == null)
+            
+            if (refName == common.Constant.RefName.Booking)
             {
-                throw new KeyNotFoundException(
-                    "Booking not found");
+                var booking =
+                    await _bookingRepository
+                        .GetById(refId);
+
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Booking not found");
+                }
+
+                if (
+                    booking.StudentId != userId &&
+                    booking.InstructorId != userId
+                )
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
             }
 
-            var email =
-                _userContext.GetEmail();
-
-            int? maybeUserId =
-                await _userRepository
-                    .GetUserIdByEmail(email);
-
-            if (maybeUserId == null)
-            {
-                throw new InvalidOperationException(
-                    "Authenticated user not found");
-            }
-
-            int userId = maybeUserId.Value;
-
-            if (
-                booking.StudentId != userId &&
-                booking.InstructorId != userId
+            
+            else if (
+                refName ==
+                common.Constant.RefName.Class
             )
             {
-                throw new UnauthorizedAccessException(
-                    "No permission");
+                var teacherClass =
+                    await _teacherClassRepository
+                        .GetById(refId);
+
+                if (teacherClass == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Class not found");
+                }
+
+                bool isTeacher =
+                    teacherClass
+                        .TeacherProfile
+                        ?.UserId == userId;
+
+                var enrollment =
+                    await _classEnrollmentRepository
+                        .GetByClassAndStudent(
+                            refId,
+                            userId);
+
+                bool isStudent =
+                    enrollment != null;
+
+                if (
+                    !isTeacher &&
+                    !isStudent
+                )
+                {
+                    throw new UnauthorizedAccessException(
+                        "No permission");
+                }
             }
 
-            if (
-                booking.Status != common.Constant.StatusBooking.Confirmed &&
-                booking.Status != common.Constant.StatusBooking.InProgress
-            )
-            {
-                throw new ArgumentException(
-                    "Booking is not active");
-            }
-
-            var now =
-                GetNowForComparison(
-                    booking.StartTime);
-
-            if (
-                now <
-                booking.StartTime.AddMinutes(-15)
-            )
-            {
-                throw new ArgumentException(
-                    "Class has not started yet");
-            }
-
-            if (
-                now >
-                booking.EndTime.AddMinutes(15)
-            )
-            {
-                throw new ArgumentException(
-                    "Class expired");
-            }
-
-            if (
-                room.ExpiredAt <=
-                GetNowForComparison(room.ExpiredAt)
-            )
-            {
-                throw new ArgumentException(
-                    "Room expired");
-            }
-
-            return room.StartUrl;
+            return room.StartUrl
+                ?? throw new Exception(
+                    "Join url not found");
         }
-
         private DateTime GetNowForComparison(
             DateTime referenceTime)
         {

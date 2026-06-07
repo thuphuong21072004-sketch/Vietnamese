@@ -62,4 +62,7 @@ export interface TeacherClassDto {
   country?: string;
 
   ratingAverage?: number;
+  avatarUrl?: string;
+  teacherProfile?: TeacherProfileDTO;
 }
+import { TeacherProfileDTO } from './teacher-profile.model';

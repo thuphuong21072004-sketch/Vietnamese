@@ -1,89 +1,95 @@
 <div class="payment-page">
+
   <button class="back-btn" (click)="back()">
     ← Back
   </button>
 
   <div class="payment-grid">
-    <!-- LEFT -->
+
     <section class="panel summary-panel">
+
       <div class="panel-card header-card">
-        <div class="header-top">
-          <div>
-            <p class="eyebrow">
-              Payment
-            </p>
 
-            <h1>
-              Payment details
-            </h1>
-          </div>
+        <p class="eyebrow">
+          Secure Payment
+        </p>
 
-          <span class="status-chip" [ngClass]="
-              payment
-                ? getStatusClass(payment.status)
-                : 'pending'
-            ">
-            {{
-            payment
-            ? getStatusText(payment.status)
-            : 'Unpaid'
-            }}
-          </span>
-        </div>
+        <h1>
+          Payment Details
+        </h1>
 
         <p class="panel-copy">
-          Complete your payment
-          securely to access the
-          online classroom.
+          Complete your payment securely to access your lesson or course.
         </p>
+
+        <div class="payment-highlight">
+          <div>
+            <span>Total Amount</span>
+
+            <h2>
+              ${{ getAmount() }}
+            </h2>
+          </div>
+
+          <div>
+            <span>Gateway</span>
+
+            <h4>Stripe</h4>
+          </div>
+        </div>
+
       </div>
 
-      <!-- booking -->
-      <div class="panel-card detail-card" *ngIf="booking">
+      <div class="panel-card detail-card" *ngIf="refName === 'PrivateLesson' && booking">
+
+        <div class="card-badge">
+          Private Lesson
+        </div>
+
         <h2>
-          Booking information
+          Booking Information
         </h2>
 
         <div class="summary-grid">
+
           <div class="summary-item">
-            <span>
-              Booking ID
-            </span>
+            <span>Booking ID</span>
 
             <strong>
-              #{{ bookingId }}
+              #{{ refId }}
             </strong>
           </div>
 
           <div class="summary-item">
-            <span>
-              Teacher
-            </span>
+            <span>Teacher</span>
 
             <strong>
               {{
-              booking
-              .instructor
-              ?.name ||
-              'Teacher'
+              booking.instructor?.name
               }}
             </strong>
           </div>
 
           <div class="summary-item">
-            <span>
-              Schedule
-            </span>
+            <span>Date</span>
 
             <strong>
               {{
               booking.startTime
-              | date:
-              'dd/MM/yyyy HH:mm'
+              | date:'dd/MM/yyyy'
               }}
+            </strong>
+          </div>
 
+          <div class="summary-item">
+            <span>Time</span>
+
+            <strong>
+              {{
+              booking.startTime
+              | date:'HH:mm'
+              }}
               -
-
               {{
               booking.endTime
               | date:'HH:mm'
@@ -92,183 +98,280 @@
           </div>
 
           <div class="summary-item">
-            <span>
-              Price per hour
-            </span>
+            <span>Duration</span>
 
             <strong>
-              ${{ getPricePerHour() }}/hour
+              {{ getDuration() }}
             </strong>
           </div>
 
-          <div class="summary-item full-width">
-            <span>
-              Duration
-            </span>
+          <div class="summary-item">
+            <span>Price / Hour</span>
+
+            <strong>
+              ${{ getPricePerHour() }}
+            </strong>
+          </div>
+
+          <div class="summary-item full-width total-row">
+            <span>Total Payment</span>
+
+            <strong class="total-value">
+              ${{ getAmount() }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="panel-card detail-card" *ngIf="refName === 'CLASS' && enrollment">
+
+        <div class="card-badge class-badge">
+          Online Course
+        </div>
+
+        <h2>
+          Course Information
+        </h2>
+
+        <div class="summary-grid">
+
+          <div class="summary-item">
+            <span>Enrollment ID</span>
+
+            <strong>
+              #{{ enrollment.enrollmentId }}
+            </strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Course</span>
 
             <strong>
               {{
-              getDuration()
+              enrollment.teacherClass?.title
+              }}
+            </strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Teacher</span>
+
+            <strong>
+              {{
+              enrollment.teacherClass?.teacherProfile?.user?.name
+              }}
+            </strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Students</span>
+
+            <strong>
+              {{
+              enrollment.teacherClass?.currentStudents
+              }}
+              /
+              {{
+              enrollment.teacherClass?.maxStudents
               }}
             </strong>
           </div>
 
           <div class="summary-item full-width">
-            <span>
-              Total amount
-            </span>
+            <span>Description</span>
 
-            <strong class="total-value">
-              ${{
-              booking.totalPrice
+            <strong>
+              {{
+              enrollment.teacherClass?.description
               }}
             </strong>
           </div>
+
+          <div class="summary-item full-width total-row">
+            <span>Course Fee</span>
+
+            <strong class="total-value">
+              ${{ getAmount() }}
+            </strong>
+          </div>
+
         </div>
+
       </div>
+
     </section>
 
-    <!-- RIGHT -->
     <section class="panel action-panel">
+
       <div class="panel-card payment-card">
+
         <h2>
           Stripe Payment
         </h2>
 
-        <!-- amount -->
         <div class="amount-panel">
           <span>
             Amount to pay
           </span>
 
           <strong>
-            ${{
-            booking.totalPrice
-            }}
+            ${{ getAmount() }}
           </strong>
         </div>
 
-        <!-- unpaid or pending -->
+        <div class="payment-status" *ngIf="payment">
+
+          <span class="status-badge pending" *ngIf="payment.status === 0">
+            Pending Payment
+          </span>
+
+          <span class="status-badge success" *ngIf="payment.status === 1">
+            Payment Successful
+          </span>
+
+          <span class="status-badge failed" *ngIf="payment.status === 2">
+            Payment Failed
+          </span>
+
+        </div>
+
         <div class="payment-info" *ngIf="
             !payment ||
             payment.status === 0
           ">
+
           <div class="gateway-box">
+
             <h3>
               {{
               payment
-              ? 'Continue payment'
-              : 'Ready for payment'
+              ? 'Continue Payment'
+              : 'Ready For Payment'
               }}
             </h3>
 
             <p>
               {{
               payment
-              ? 'Your payment is still pending. Continue payment through Stripe gateway.'
-              : 'Click the button below to continue to Stripe secure payment gateway.'
+              ? 'Your payment is pending. Continue payment through Stripe.'
+              : 'Click the button below to proceed to Stripe secure payment gateway.'
               }}
             </p>
+
           </div>
 
           <div class="action-group">
+
             <button class="btn btn-primary" [disabled]="loading" (click)="pay()">
               {{
               loading
               ? 'Processing...'
               : payment
-              ? 'Continue payment'
-              : 'Pay now'
+              ? 'Continue Payment'
+              : 'Pay Now'
               }}
             </button>
+
           </div>
+
         </div>
 
-        <!-- success -->
         <div class="success-box" *ngIf="
             payment &&
             payment.status === 1
           ">
+
           <div class="success-icon">
             ✓
           </div>
 
           <h3>
-            Payment successful
+            Payment Successful
           </h3>
 
           <p>
-            Redirecting to
-            classroom...
+            Your payment has been completed successfully.
           </p>
 
-          <button class="btn btn-success" (click)="goClassroom()">
-            Join classroom
+          <button *ngIf="refName === 'PrivateLesson'" class="btn btn-success" (click)="goClassroom()">
+            Join Classroom
           </button>
+
         </div>
 
-        <!-- failed -->
         <div class="failed-box" *ngIf="
             payment &&
             payment.status === 2
           ">
+
           <div class="failed-icon">
             ✕
           </div>
 
           <h3>
-            Payment failed
+            Payment Failed
           </h3>
 
           <p>
-            Your payment is still pending. Continue payment through Stripe.
+            Please try again using Stripe payment gateway.
           </p>
 
           <button class="btn btn-danger" [disabled]="loading" (click)="pay()">
             {{
             loading
             ? 'Processing...'
-            : 'Try again'
+            : 'Try Again'
             }}
           </button>
+
         </div>
+
       </div>
+
     </section>
+
   </div>
+
   <div *ngIf="showCurrencyModal" class="currency-modal-overlay">
+
     <div class="currency-modal">
+
       <h3>
         Select Currency
       </h3>
-  
+
       <p>
         Choose your payment currency
       </p>
-  
+
       <input type="text" class="currency-search" placeholder="Search currency..." [(ngModel)]="searchCurrency">
-      
+
       <select [(ngModel)]="selectedCurrency" class="currency-select">
-      
+
         <option *ngFor="let currency of filteredCurrencies" [value]="currency.code">
-      
-          {{ currency.code }} - {{ currency.name }}
-      
+          {{ currency.code }}
+          -
+          {{ currency.name }}
         </option>
-      
+
       </select>
-  
+
       <div class="currency-actions">
+
         <button type="button" (click)="closeCurrencyModal()">
           Cancel
         </button>
-  
 
-
-        
         <button type="button" (click)="confirmPayment()">
           Pay Now
         </button>
+
       </div>
+
     </div>
+
   </div>
+
 </div>

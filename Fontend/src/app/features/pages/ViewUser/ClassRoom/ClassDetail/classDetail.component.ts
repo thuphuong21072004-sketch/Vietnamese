@@ -1,16 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-
-import { ActivatedRoute } from '@angular/router';
-
+import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherClassService } from '../../../../services/teacher-class.service';
-
+import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 import {
   TeacherClassDto,
   ClassSessionDto,
 } from '../../../../models/teacher-class.model';
-
 @Component({
   selector: 'app-student-course-detail',
   standalone: true,
@@ -29,13 +26,17 @@ export class StudentCourseDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private teacherClassService: TeacherClassService,
+    private enrollmentService: ClassEnrollmentService,
   ) {}
 
   ngOnInit(): void {
     this.classId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loadCourse();
+
+    this.loadEnrollmentStatus();
   }
 
   loadCourse(): void {
@@ -63,5 +64,93 @@ export class StudentCourseDetailComponent implements OnInit {
 
   selectSession(session: ClassSessionDto): void {
     this.selectedSession = session;
+  }
+  enroll(): void {
+    if (!this.teacherClass) {
+      return;
+    }
+
+    this.enrollmentService.enroll(this.teacherClass.classId).subscribe({
+      next: () => {
+        alert('Enroll successfully');
+
+        this.loadEnrollmentStatus();
+
+        this.loadCourse();
+      },
+
+      error: (err) => {
+        alert(err.error?.message);
+      },
+    });
+  }
+  isEnrolled = false;
+
+  enrollmentId?: number;
+  
+  cancel(): void {
+    if (!this.enrollmentId) {
+      return;
+    }
+
+    this.enrollmentService.cancel(this.enrollmentId).subscribe({
+      next: () => {
+        alert('Enrollment cancelled');
+
+        this.loadEnrollmentStatus();
+
+        this.loadCourse();
+      },
+
+      error: (err) => {
+        alert(err.error?.message);
+      },
+    });
+  }
+  showTeacherInfo = false;
+
+  toggleTeacherInfo(): void {
+    this.showTeacherInfo = !this.showTeacherInfo;
+  }
+  getEnrollment() {
+    return this.enrollmentId ? this.enrollmentService : null;
+  }
+
+  enrollments: any[] = [];
+
+  loadEnrollmentStatus(): void {
+    this.enrollmentService.getMyClasses().subscribe({
+      next: (res) => {
+        this.enrollments = res;
+
+        const enrollment = res.find((x: any) => x.classId === this.classId);
+
+        if (enrollment) {
+          this.enrollmentId = enrollment.enrollmentId;
+        } else {
+          this.enrollmentId = undefined;
+        }
+      },
+    });
+  }
+
+  getStatus(): number | null {
+    const enrollment = this.enrollments.find(
+      (x: any) => x.classId === this.classId,
+    );
+
+    return enrollment ? enrollment.status : null;
+  }
+
+  goPayment(): void {
+    if (!this.enrollmentId) {
+      return;
+    }
+
+    this.router.navigate(['/payment', this.enrollmentId], {
+      queryParams: {
+        type: 'CLASS',
+      },
+    });
   }
 }

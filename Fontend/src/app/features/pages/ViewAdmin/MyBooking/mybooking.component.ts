@@ -90,18 +90,17 @@ export class TeacherBookingDetailComponent implements OnInit {
       return;
     }
 
-    this.paymentService
-      .getByBooking(this.booking.bookingId)
+   this.paymentService
+     .getByRef('PrivateLesson', this.booking.bookingId)
+     .subscribe({
+       next: (res: any) => {
+         this.payment = res;
+       },
 
-      .subscribe({
-        next: (res) => {
-          this.payment = res;
-        },
-
-        error: () => {
-          this.payment = null;
-        },
-      });
+       error: () => {
+         this.payment = null;
+       },
+     });
   }
 
   /*

@@ -25,19 +25,6 @@ namespace Backend.Repository.impl
         }
 
         /* 
-         * lấy thông tin thanh toán theo booking id
-         * O(1)
-         * (thuphuong21072004) 
-         */
-        public async Task<Payment?> GetByBookingId(int bookingId)
-        {
-            return await _context.Payments
-                .FirstOrDefaultAsync(x =>
-                    x.RefName == common.Constant.RefName.Booking
-                    && x.RefId == bookingId);
-        }
-
-        /* 
          * tạo mới thông tin thanh toán
          * O(1)
          * (thuphuong21072004) 
@@ -54,6 +41,8 @@ namespace Backend.Repository.impl
          */
         public async Task Update(Payment payment)
         {
+            _context.Payments.Update(payment);
+
             await Task.CompletedTask;
         }
 
@@ -66,6 +55,13 @@ namespace Backend.Repository.impl
         {
             await _context.SaveChangesAsync();
         }
-    
+        public async Task<Payment?> GetByRef( string refName, int refId)
+        {
+            return await _context.Payments
+                .FirstOrDefaultAsync(x =>
+                    x.RefName == refName
+                    && x.RefId == refId);
+        }
+
     }
 }

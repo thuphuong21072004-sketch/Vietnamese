@@ -11,7 +11,7 @@ import { PaymentService } from '../../../../services/payment.service';
 import { VideoRoomService } from '../../../../services/video-room.service';
 
 import { ReviewService } from '../../../../services/review.service';
-
+import { PaymentDTO } from '../../../../models/payment.model';
 @Component({
   selector: 'app-booking-detail',
 
@@ -68,7 +68,7 @@ export class BookingDetailComponent implements OnInit {
       .getDetail(id)
 
       .subscribe({
-        next: (res) => {
+        next: (res: PaymentDTO | null) => {
           this.booking = res;
 
           this.loadPayment();
@@ -101,7 +101,7 @@ export class BookingDetailComponent implements OnInit {
     }
 
     this.paymentService
-      .getByBooking(this.booking.bookingId)
+      .getByRef('PrivateLesson', this.booking.bookingId)
 
       .subscribe({
         next: (res) => {

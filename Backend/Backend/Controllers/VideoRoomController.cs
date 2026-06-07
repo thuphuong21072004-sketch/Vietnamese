@@ -20,27 +20,30 @@ namespace Backend.Controllers
         /*
          * tạo phòng học
          */
-        [HttpPost("{bookingId}")]
+        [HttpPost("{refName}/{refId}")]
         public async Task<IActionResult> Create(
-            int bookingId)
+    string refName,
+    int refId)
         {
-            var room =
-                await _videoRoomService
-                    .Create(bookingId);
-
-            return Ok(room);
+            return Ok(
+                await _videoRoomService.Create(
+                    refName,
+                    refId));
         }
 
         /*
          * tham gia phòng học
          */
-        [HttpGet("join/{bookingId}")]
+        [HttpGet("join/{refName}/{refId}")]
         public async Task<IActionResult> JoinRoom(
-            int bookingId)
+    string refName,
+    int refId)
         {
             var joinUrl =
                 await _videoRoomService
-                    .JoinRoom(bookingId);
+                    .JoinRoom(
+                        refName,
+                        refId);
 
             return Ok(new
             {

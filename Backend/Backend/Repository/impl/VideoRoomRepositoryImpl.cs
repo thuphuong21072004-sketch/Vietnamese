@@ -33,12 +33,12 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<VideoRoom?> GetByBookingId(int bookingId)
+        public async Task<VideoRoom?> GetByRef(string refName,int refId)
         {
             return await _context.VideoRooms
                 .FirstOrDefaultAsync(x =>
-                    x.RefName == common.Constant.RefName.Booking
-                    && x.RefId == bookingId);
+                    x.RefName == refName
+                    && x.RefId == refId);
         }
 
         /* 

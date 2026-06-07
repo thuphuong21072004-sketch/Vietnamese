@@ -57,8 +57,6 @@ export class DashboardTeacherComponent implements OnInit {
 
     Promise.all([
       this.loadStatistics(),
-      this.loadPaymentStatistics(),
-      this.loadSalaryHistory(),
     ]).finally(() => {
       this.loading = false;
     });
@@ -113,98 +111,12 @@ export class DashboardTeacherComponent implements OnInit {
     });
   }
 
-  loadPaymentStatistics(): Promise<void> {
-    return new Promise((resolve) => {
-      this.paymentService
-        .getMySalaryStatistics(this.month, this.year)
-        .subscribe({
-          next: (res: any) => {
-            this.paymentStatistics = {
-              totalHours:
-                res.totalHours ??
-                res.TotalHours ??
-                0,
-
-              salaryAmount:
-                res.salaryAmount ??
-                res.SalaryAmount ??
-                0,
-            };
-
-            this.statistics.totalTeachingHours =
-              this.paymentStatistics.totalHours;
-
-            this.statistics.totalEarnings =
-              this.paymentStatistics.salaryAmount;
-
-            this.calculateAverage();
-
-            resolve();
-          },
-
-          error: (err: any) => {
-            console.error(err);
-            resolve();
-          },
-        });
-    });
-  }
-
-  loadSalaryHistory(): Promise<void> {
-    return new Promise((resolve) => {
-      this.paymentService
-        .getMySalaryHistory(
-          this.month,
-          this.year,
-          this.page,
-          this.pageSize,
-        )
-        .subscribe({
-          next: (res: any) => {
-            this.salaryHistory =
-              res.data ??
-              res.Data ??
-              [];
-
-            this.totalSalaryRecords =
-              res.total ??
-              res.Total ??
-              0;
-
-            resolve();
-          },
-
-          error: (err: any) => {
-            console.error(err);
-            resolve();
-          },
-        });
-    });
-  }
-
   calculateAverage(): void {
     this.statistics.averageEarnings =
       this.statistics.completedBookings > 0
         ? this.statistics.totalEarnings /
           this.statistics.completedBookings
         : 0;
-  }
-
-  previousPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.loadSalaryHistory();
-    }
-  }
-
-  nextPage(): void {
-    if (
-      this.page * this.pageSize <
-      this.totalSalaryRecords
-    ) {
-      this.page++;
-      this.loadSalaryHistory();
-    }
   }
 
   onMonthChange(): void {

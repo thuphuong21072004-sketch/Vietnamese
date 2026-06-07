@@ -37,15 +37,18 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
-        public async Task<Review?> GetByBookingId(int bookingId)
-{
-    return await _context.Reviews
-        .Include(x => x.Student)
-        .Include(x => x.Instructor)
-        .FirstOrDefaultAsync(x =>
-            x.RefName == common.Constant.RefName.Booking
-            && x.RefId == bookingId);
-}
+        public async Task<Review?> GetByRef(
+    string refName,
+    int refId)
+        {
+            return await _context.Reviews
+                .Include(x => x.Student)
+                .Include(x => x.Instructor)
+                .FirstOrDefaultAsync(x =>
+                    x.RefName == refName
+                    &&
+                    x.RefId == refId);
+        }
 
         /* 
          * lấy danh sách đánh giá của giáo viên

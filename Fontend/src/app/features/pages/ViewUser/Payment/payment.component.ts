@@ -9,7 +9,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PaymentService } from '../../../services/payment.service';
 
 import { BookingService } from '../../../services/booking.service';
-import { loadStripe } from '@stripe/stripe-js';
+
+import { ClassEnrollmentService } from '../../../services/class-enrollment.service';
 
 @Component({
   selector: 'app-payment',
@@ -23,11 +24,16 @@ import { loadStripe } from '@stripe/stripe-js';
   styleUrls: ['./payment.component.css'],
 })
 export class PaymentComponent implements OnInit {
-  bookingId = 0;
+  refId = 0;
+
+  refName = 'PrivateLesson';
 
   booking: any = null;
 
+  enrollment: any = null;
+
   payment: any = null;
+
   currencies: Record<string, number> = {};
 
   selectedCurrency = 'USD';
@@ -44,96 +50,179 @@ export class PaymentComponent implements OnInit {
     public paymentService: PaymentService,
 
     public bookingService: BookingService,
+
+    public classEnrollmentService: ClassEnrollmentService,
   ) {}
 
   ngOnInit(): void {
-    this.bookingId = Number(this.route.snapshot.paramMap.get('id'));
+    this.refId = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.loadBooking();
+    this.refName =
+      this.route.snapshot.queryParamMap.get('type') || 'PrivateLesson';
+
+    if (this.refName === 'PrivateLesson') {
+      this.loadBooking();
+    }
+
+    if (this.refName === 'CLASS') {
+      this.loadEnrollment();
+    }
 
     this.loadPayment();
   }
 
-  /*
-   * load booking detail
-   */
-  loadBooking() {
-    this.bookingService
-      .getDetail(this.bookingId)
-
-      .subscribe({
-        next: (res) => {
-          this.booking = res;
-        },
-
-        error: (err) => {
-          console.error(err);
-
-          this.booking = null;
-
-          alert(err.error?.message || 'Failed to load booking');
-        },
-      });
-  }
-
-  /*
-   * load payment
-   */
   loadPayment() {
-    this.paymentService
-      .getByBooking(this.bookingId)
+    this.paymentService.getByRef(this.refName, this.refId).subscribe({
+      next: (res) => {
+        this.payment = res;
+      },
 
-      .subscribe({
-        next: (res) => {
-          this.payment = res;
-
-          /*
-           * payment success
-           */
-          if (res && res.status === 1) {
-            this.goClassroom();
-          }
-        },
-
-        error: () => {
-          this.payment = null;
-        },
-      });
+      error: () => {
+        this.payment = null;
+      },
+    });
   }
 
-  /*
-   * calculate payment amount
-   */
+  loadBooking() {
+    this.bookingService.getDetail(this.refId).subscribe({
+      next: (res) => {
+        this.booking = res;
+      },
+
+      error: (err) => {
+        console.error(err);
+
+        this.booking = null;
+
+        alert(err.error?.message || 'Failed to load booking');
+      },
+    });
+  }
+
+  loadEnrollment() {
+    this.classEnrollmentService.getDetail(this.refId).subscribe({
+      next: (res: any) => {
+        this.enrollment = res;
+      },
+
+      error: (err: any) => {
+        console.error(err);
+
+        this.enrollment = null;
+
+        alert(err.error?.message || 'Failed to load enrollment');
+      },
+    });
+  }
+
+  confirmPayment() {
+    this.loading = true;
+
+    if (
+      this.payment &&
+      (this.payment.status === 0 || this.payment.status === 2)
+    ) {
+      this.paymentService
+        .createStripeUrl(this.payment.paymentId, this.selectedCurrency)
+        .subscribe({
+          next: (stripeRes) => {
+            window.location.href = stripeRes.paymentUrl;
+          },
+
+          error: (err) => {
+            console.error(err);
+
+            alert(err.error?.message || 'Payment failed');
+
+            this.loading = false;
+          },
+        });
+
+      return;
+    }
+
+    const body = {
+      refName: this.refName,
+
+      refId: this.refId,
+
+      amount: this.getAmount(),
+
+      paymentMethod: 0,
+    };
+
+    this.paymentService.create(body as any).subscribe({
+      next: (res) => {
+        this.payment = res;
+
+        this.paymentService
+          .createStripeUrl(res.paymentId, this.selectedCurrency)
+          .subscribe({
+            next: (stripeRes) => {
+              window.location.href = stripeRes.paymentUrl;
+            },
+
+            error: (err: any) => {
+              console.error(err);
+
+              console.log(err.error);
+
+              alert(err.error?.message || JSON.stringify(err.error));
+
+              this.loading = false;
+            },
+          });
+      },
+
+      error: (err: any) => {
+        console.error('FULL ERROR', err);
+
+        console.log('ERROR BODY', err.error);
+
+        alert(err.error?.message || JSON.stringify(err.error));
+
+        this.loading = false;
+      },
+    });
+  }
+
   getAmount(): number {
+    if (this.refName === 'PrivateLesson' && this.booking) {
+      const pricePerHour = Number(
+        this.booking?.instructor?.teacherProfile?.approvedPricePerHour || 0,
+      );
+
+      const start = new Date(this.booking.startTime);
+
+      const end = new Date(this.booking.endTime);
+
+      const durationHours = Math.max(
+        0.5,
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60),
+      );
+
+      return (
+        Math.round((pricePerHour * durationHours + Number.EPSILON) * 100) / 100
+      );
+    }
+
+    if (this.refName === 'CLASS' && this.enrollment) {
+      return Number(this.enrollment?.teacherClass?.price || 0);
+    }
+
+    return 0;
+  }
+
+  getPricePerHour(): number {
     if (!this.booking) {
       return 0;
     }
 
-    const pricePerHour = Number(
-      this.booking?.instructor?.teacherProfile?.approvedPricePerHour || 0,
-    );
-
-    const start = new Date(this.booking.startTime);
-
-    const end = new Date(this.booking.endTime);
-
-    const durationHours = Math.max(
-      0.5,
-      (end.getTime() - start.getTime()) / (1000 * 60 * 60),
-    );
-
-    return (
-      Math.round((pricePerHour * durationHours + Number.EPSILON) * 100) / 100
-    );
-  }
-  getPricePerHour(): number {
     return Number(
       this.booking?.instructor?.teacherProfile?.approvedPricePerHour || 0,
     );
   }
-  /*
-   * booking duration
-   */
+
   getDuration(): string {
     if (!this.booking) {
       return '-';
@@ -163,9 +252,6 @@ export class PaymentComponent implements OnInit {
     return `${hours}h ${minutes}m`;
   }
 
-  /*
-   * currency format
-   */
   formatCurrency(value: number): string {
     return value.toLocaleString('en-US', {
       style: 'currency',
@@ -174,24 +260,16 @@ export class PaymentComponent implements OnInit {
     });
   }
 
-  /*
-   * pay with VNPay
-   */
   pay() {
-    if (!this.booking) {
-      alert('Booking not found');
-      return;
-    }
-
     const amount = this.getAmount();
 
     if (amount <= 0) {
       alert('Invalid payment amount');
+
       return;
     }
 
     if (this.payment && this.payment.status === 1) {
-      this.goClassroom();
       return;
     }
 
@@ -212,101 +290,14 @@ export class PaymentComponent implements OnInit {
     });
   }
 
-  /*
-   * helper payment status
-   */
-  getStatusText(status: number): string {
-    return this.paymentService.getStatusText(status);
-  }
-
-  /*
-   * helper payment css class
-   */
-  getStatusClass(status: number): string {
-    return this.paymentService.getStatusClass(status);
-  }
-
-  /*
-   * back
-   */
   back() {
     history.back();
   }
 
-  /*
-   * go booking detail
-   */
-  goBooking() {
-    this.router.navigate(['/booking', this.bookingId]);
-  }
-
-  /*
-   * go classroom
-   */
-  goClassroom() {
-    this.router.navigate(['/video-room', this.bookingId]);
-  }
-  confirmPayment() {
-    this.loading = true;
-
-    if (
-      this.payment &&
-      (this.payment.status === 0 || this.payment.status === 2)
-    ) {
-      this.paymentService
-        .createStripeUrl(this.payment.paymentId, this.selectedCurrency)
-        .subscribe({
-          next: (stripeRes) => {
-            window.location.href = stripeRes.paymentUrl;
-          },
-
-          error: (err) => {
-            console.error(err);
-
-            alert(err.error);
-
-            this.loading = false;
-          },
-        });
-
-      return;
-    }
-
-    const body = {
-      bookingId: this.bookingId,
-      amount: this.getAmount(),
-      paymentMethod: 0,
-    };
-
-    this.paymentService.create(body).subscribe({
-      next: (res) => {
-        this.payment = res;
-
-        this.paymentService
-          .createStripeUrl(res.paymentId, this.selectedCurrency)
-          .subscribe({
-            next: (stripeRes) => {
-              window.location.href = stripeRes.paymentUrl;
-            },
-
-            error: (err) => {
-              console.error(err);
-
-              this.loading = false;
-            },
-          });
-      },
-
-      error: (err) => {
-        console.error(err);
-
-        this.loading = false;
-      },
-    });
-  }
   closeCurrencyModal() {
     this.showCurrencyModal = false;
   }
+
   currencyOptions = [
     { code: 'USD', name: 'US Dollar' },
     { code: 'EUR', name: 'Euro' },
@@ -353,7 +344,9 @@ export class PaymentComponent implements OnInit {
     { code: 'ZAR', name: 'South African Rand' },
     { code: 'ILS', name: 'Israeli Shekel' },
   ];
+
   searchCurrency = '';
+
   get filteredCurrencies() {
     if (!this.searchCurrency) {
       return this.currencyOptions;
@@ -366,5 +359,16 @@ export class PaymentComponent implements OnInit {
         x.code.toLowerCase().includes(keyword) ||
         x.name.toLowerCase().includes(keyword),
     );
+  }
+  goClassroom() {
+    if (this.refName === 'PrivateLesson') {
+      this.router.navigate(['/my-bookings']);
+
+      return;
+    }
+
+    if (this.refName === 'CLASS') {
+      this.router.navigate(['/user/myclass']);
+    }
   }
 }

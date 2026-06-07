@@ -1,4 +1,6 @@
-﻿namespace Backend.dto
+﻿using Backend.DTO;
+
+namespace Backend.dto
 {
     public class TeacherClassDto
     {
@@ -42,6 +44,7 @@
         public string? Country { get; set; }
 
         public decimal RatingAverage { get; set; }
-
+        public string? AvatarUrl { get; set; }
+        public TeacherProfileDTO? TeacherProfile { get; set; }
     }
 }

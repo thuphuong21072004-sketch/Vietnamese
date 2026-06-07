@@ -3,22 +3,15 @@
     <div class="header">
 
         <div>
-
-            <h1>
-                {{ teacherClass.title }}
-            </h1>
-
-            <p>
-                Class Detail
-            </p>
-
+            <h1>{{ teacherClass.title }}</h1>
+            <p>Class Detail</p>
         </div>
 
         <div class="header-actions">
 
             <button class="edit-btn" (click)="saveAllSessions()">
 
-                Edit Class
+                Save Changes
 
             </button>
 
@@ -34,107 +27,60 @@
 
     <div class="info-card">
 
-        <h2>
-            Class Information
-        </h2>
+        <h2>Class Information</h2>
 
         <div class="info-grid">
 
             <div>
-
-                <label>
-                    Main Topic
-                </label>
-
-                <span>
-                    {{ teacherClass.mainTopic }}
-                </span>
-
+                <label>Main Topic</label>
+                <span>{{ teacherClass.mainTopic }}</span>
             </div>
 
             <div>
-
-                <label>
-                    Sub Topic
-                </label>
-
-                <span>
-                    {{ teacherClass.subTopic }}
-                </span>
-
+                <label>Sub Topic</label>
+                <span>{{ teacherClass.subTopic }}</span>
             </div>
 
             <div>
-
-                <label>
-                    Price
-                </label>
-
-                <span>
-                    ${{ teacherClass.price }}
-                </span>
-
+                <label>Price</label>
+                <span>${{ teacherClass.price }}</span>
             </div>
 
             <div>
-
-                <label>
-                    Students
-                </label>
-
+                <label>Students</label>
                 <span>
                     {{ teacherClass.currentStudents }}
                     /
                     {{ teacherClass.maxStudents }}
                 </span>
-
             </div>
 
             <div>
-
-                <label>
-                    Total Sessions
-                </label>
-
-                <span>
-                    {{ teacherClass.totalSessions }}
-                </span>
-
+                <label>Total Sessions</label>
+                <span>{{ teacherClass.totalSessions }}</span>
             </div>
 
             <div>
-
-                <label>
-                    Time
-                </label>
-
+                <label>Study Time</label>
                 <span>
                     {{ teacherClass.startTime }}
                     -
                     {{ teacherClass.endTime }}
                 </span>
-
             </div>
 
             <div>
-
-                <label>
-                    Start Date
-                </label>
-
+                <label>Start Date</label>
                 <span>
-                    {{ teacherClass.startDate }}
+                    {{ teacherClass.startDate | date:'dd/MM/yyyy' }}
                 </span>
-
             </div>
 
         </div>
 
         <div class="description">
 
-            <label>
-                Description
-            </label>
+            <label>Description</label>
 
             <p>
                 {{ teacherClass.description }}
@@ -144,61 +90,91 @@
 
     </div>
 
-    <div class="sessions-card">
+    <div class="students-card">
 
         <h2>
-            Sessions
+            Enrolled Students
+            ({{ students.length }})
         </h2>
 
-        <table>
+        <div *ngIf="students.length === 0" class="empty-students">
 
-            <thead>
+            No students enrolled yet.
 
-                <tr>
+        </div>
 
-                    <th>
-                        No
-                    </th>
+        <div class="student-list">
 
-                    <th>
-                        Date
-                    </th>
+            <div *ngFor="let student of students" class="student-item">
 
-                    <th>
-                        Topic
-                    </th>
+                <img *ngIf="student.studentAvatarUrl" [src]="'http://localhost:5108/uploads/' + student.studentAvatarUrl"
+                    class="student-avatar">
 
-                </tr>
+                <div *ngIf="!student.studentAvatarUrl" class="student-avatar placeholder">
 
-            </thead>
+                    {{ student.studentName?.charAt(0) }}
 
-            <tbody>
-            
-                <tr *ngFor="
-                    let session of teacherClass.sessions;
-                    trackBy: trackSession
-                ">
-            
-                    <td>
-                        {{ session.sessionNumber }}
-                    </td>
-            
-                    <td>
-                        {{ session.studyDate }}
-                    </td>
-            
-                    <td>
-            
-                        <textarea rows="3" [(ngModel)]="session.topic" placeholder="Lesson topic">
-                        </textarea>
-            
-                    </td>
-            
-                </tr>
-            
-            </tbody>
+                </div>
 
-        </table>
+                <div class="student-content">
+
+                    <h4>
+                        {{ student.studentName }}
+                    </h4>
+
+                    <div class="student-meta">
+
+                        <span>
+                            {{ student.studentCountry }}
+                        </span>
+
+                        <span>
+                            Joined:
+                            {{ student.enrolledDate | date:'dd/MM/yyyy' }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="sessions-wrapper">
+
+        <h2>
+            Session Content
+        </h2>
+
+        <div *ngFor="
+                let session of teacherClass.sessions;
+                trackBy: trackSession
+            " class="session-card">
+
+            <div class="session-header">
+
+                <div class="session-badge">
+
+                    Session
+                    {{ session.sessionNumber }}
+
+                </div>
+
+                <div class="session-date">
+
+                    {{ session.studyDate | date:'dd/MM/yyyy' }}
+
+                </div>
+
+            </div>
+
+            <textarea rows="3" [(ngModel)]="session.topic" placeholder="Enter lesson topic">
+            </textarea>
+
+        </div>
 
     </div>
 

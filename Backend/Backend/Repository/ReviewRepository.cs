@@ -6,7 +6,9 @@ namespace Backend.Repository
     {
         Task<Review?> GetById(int id);
 
-        Task<Review?> GetByBookingId( int bookingId);
+        Task<Review?> GetByRef(
+    string refName,
+    int refId);
 
         Task<List<Review>>GetByTeacherId(int teacherId);
 

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddScoped<UserService, UserServiceImpl>();
 builder.Services.AddScoped<VideoService, VideoServiceImpl>();
@@ -153,7 +159,13 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     TeacherClassService,
     TeacherClassServiceImpl>();
+builder.Services.AddScoped<
+    ClassEnrollmentRepository,
+    ClassEnrollmentRepositoryImpl>();
 
+builder.Services.AddScoped<
+    ClassEnrollmentService,
+    ClassEnrollmentServiceImpl>();
 
 
 var app = builder.Build();

@@ -152,6 +152,8 @@ export class TeacherClassListComponent implements OnInit {
     ],
   };
 
+  
+
   filter: ClassFilterDto = {
     mainTopic: '',
 
@@ -168,8 +170,9 @@ export class TeacherClassListComponent implements OnInit {
     daysOfWeek: [],
   };
 
-  constructor(private teacherClassService: TeacherClassService,
-              private router: Router,
+  constructor(
+    private teacherClassService: TeacherClassService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -245,9 +248,10 @@ export class TeacherClassListComponent implements OnInit {
   }
 
   viewClass(classId: number): void {
-  this.router.navigate([
-    '/teacher/detail',
-    classId
-  ]);
-}
+    this.router.navigate(['/teacher/detail', classId]);
+  }
+  viewSchedule(): void {
+    this.router.navigate(['/teacher/schedule']);
+  }
+  
 }

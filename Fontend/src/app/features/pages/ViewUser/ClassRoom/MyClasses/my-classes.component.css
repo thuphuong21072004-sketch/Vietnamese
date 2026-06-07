@@ -1,0 +1,256 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.schedule-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.schedule-btn:hover {
+  background: #4338ca;
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state h3 {
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+.empty-state p {
+  color: #6b7280;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(350px, 1fr)
+  );
+  gap: 24px;
+}
+
+.class-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  transition: 0.25s;
+}
+
+.class-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.teacher-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.teacher-avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.teacher-info {
+  flex: 1;
+}
+
+.teacher-info h3 {
+  margin: 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.teacher-info span {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.class-info {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 20px;
+}
+
+.class-info h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.enrolled-date {
+  color: #6b7280;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.detail-btn,
+.cancel-btn {
+  flex: 1;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.detail-btn {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.detail-btn:hover {
+  background: #e0e7ff;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .teacher-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .class-info h2 {
+    font-size: 22px;
+  }
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.price {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.description {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #374151;
+}
+
+.schedule-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.day-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}

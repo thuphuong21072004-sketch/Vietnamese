@@ -1,0 +1,258 @@
+<div class="page">
+
+    <div class="page-header">
+
+        <h1>My Classes</h1>
+
+        <button class="schedule-btn" (click)="viewSchedule()">
+
+            Upcoming Schedule
+
+        </button>
+
+    </div>
+
+    <div *ngIf="loading" class="loading">
+
+        Loading classes...
+
+    </div>
+
+    <div *ngIf="
+      !loading &&
+      enrollments.length === 0
+    " class="empty-state">
+
+        <h3>No enrolled classes</h3>
+
+        <p>
+            Start learning by joining a class.
+        </p>
+
+    </div>
+
+    <div *ngIf="
+      !loading &&
+      enrollments.length > 0
+    " class="class-grid">
+
+        <div *ngFor="let item of enrollments" class="class-card">
+
+            <div class="teacher-section">
+
+                <img *ngIf="item.teacherAvatarUrl" [src]="'http://localhost:5108/uploads/' + item.teacherAvatarUrl"
+                    class="teacher-avatar">
+                
+                <div *ngIf="!item.teacherAvatarUrl" class="teacher-avatar placeholder">
+
+                    {{
+                    item.teacherName
+                    ?.charAt(0)
+                    }}
+
+                </div>
+
+                <div class="teacher-info">
+
+                    <h3>
+
+                        {{
+                        item.teacherName
+                        }}
+
+                    </h3>
+
+                    <span>
+
+                        {{ item.teacherCountry }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="class-info">
+            
+                <div class="card-header">
+            
+                    <h2>
+                        {{ item.classTitle }}
+                    </h2>
+            
+                    <span class="price">
+                        ${{ item.price }}
+                    </span>
+            
+                </div>
+            
+                <p class="description" *ngIf="item.description">
+            
+                    {{ item.description }}
+            
+                </p>
+            
+                <div class="info-row">
+            
+                    <strong>
+                        Main Topic:
+                    </strong>
+            
+                    {{ item.mainTopic }}
+            
+                </div>
+            
+                <div class="info-row">
+            
+                    <strong>
+                        Sub Topic:
+                    </strong>
+            
+                    {{ item.subTopic }}
+            
+                </div>
+            
+                <div class="info-row">
+            
+                    <strong>
+                        Time:
+                    </strong>
+            
+                    {{ item.startTime }}
+                    -
+                    {{ item.endTime }}
+            
+                </div>
+            
+                <div class="info-row">
+            
+                    <strong>
+                        Students:
+                    </strong>
+            
+                    {{ item.currentStudents }}
+                    /
+                    {{ item.maxStudents }}
+            
+                </div>
+            
+                <div class="info-row">
+            
+                    <strong>
+                        Sessions:
+                    </strong>
+            
+                    {{ item.totalSessions }}
+            
+                </div>
+            
+                <div class="schedule-days" *ngIf="
+                        item.scheduleDays &&
+                        item.scheduleDays.length > 0
+                    ">
+            
+                    <span *ngFor="
+                            let day
+                            of item.scheduleDays
+                        " class="day-badge">
+            
+                        {{ day }}
+            
+                    </span>
+            
+                </div>
+            
+                <div class="enrolled-date">
+            
+                    Enrolled on
+            
+                    {{
+                    item.enrolledDate
+                    | date:'dd/MM/yyyy'
+                    }}
+            
+                </div>
+            <div class="status-section">
+            
+                <span class="status pending" *ngIf="item.status === 0">
+                    Pending Payment
+                </span>
+            
+                <span class="status active" *ngIf="item.status === 1">
+                    Confirmed
+                </span>
+            
+                <span class="status progress" *ngIf="item.status === 2">
+                    In Progress
+                </span>
+            
+                <span class="status completed" *ngIf="item.status === 3">
+                    Completed
+                </span>
+            
+                <span class="status cancelled" *ngIf="item.status === 4">
+                    Cancelled
+                </span>
+            
+                <span class="status refunded" *ngIf="item.status === 5">
+                    Refunded
+                </span>
+            
+            </div>
+            
+            </div>
+
+            <div class="actions">
+
+    <button
+        class="detail-btn"
+        (click)="viewClass(item.classId)">
+
+        View Class
+
+    </button>
+
+    <button
+        *ngIf="item.status === 0"
+        class="payment-btn"
+        [routerLink]="['/payment', item.enrollmentId]"
+        [queryParams]="{ type: 'CLASS' }">
+
+        Pay Now
+
+    </button>
+
+    <button
+        *ngIf="item.status === 1"
+        class="cancel-btn"
+        (click)="cancel(item.enrollmentId)">
+
+        Cancel
+
+    </button>
+
+    <button
+        *ngIf="canReview(item)"
+        class="review-btn"
+        (click)="writeReview(item.enrollmentId)">
+
+        Review Teacher
+
+    </button>
+
+    <button
+        *ngIf="hasReviewed(item)"
+        class="view-review-btn"
+        (click)="viewReview(item.enrollmentId)">
+
+        View Review
+
+    </button>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
