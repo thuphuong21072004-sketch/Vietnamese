@@ -234,7 +234,7 @@
     <button
         *ngIf="canReview(item)"
         class="review-btn"
-        (click)="writeReview(item.enrollmentId)">
+        (click)="writeReview(item)">
 
         Review Teacher
 
@@ -243,7 +243,7 @@
     <button
         *ngIf="hasReviewed(item)"
         class="view-review-btn"
-        (click)="viewReview(item.enrollmentId)">
+        (click)="viewReview(item)">
 
         View Review
 

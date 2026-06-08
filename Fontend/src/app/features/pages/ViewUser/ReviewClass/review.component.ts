@@ -68,7 +68,12 @@ export class ReviewComponent implements OnInit {
     }
 
     if (this.refName === 'CLASS') {
-      this.loadEnrollment();
+      const enrollmentId = Number(
+        this.route.snapshot.queryParamMap.get('enrollmentId'),
+      );
+      if (enrollmentId) {
+        this.loadEnrollment(enrollmentId);
+      }
     }
 
     this.loadReview();
@@ -86,9 +91,9 @@ export class ReviewComponent implements OnInit {
     });
   }
 
-  loadEnrollment() {
+  loadEnrollment(enrollmentId: number) {
     this.classEnrollmentService
-      .getDetail(this.refId)
+      .getDetail(enrollmentId)
       .subscribe({
         next: (res) => {
           this.enrollment = res;

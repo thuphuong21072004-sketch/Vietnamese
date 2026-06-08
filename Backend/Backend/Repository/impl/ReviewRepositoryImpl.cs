@@ -78,6 +78,32 @@ namespace Backend.Repository.impl
          * O(1)
          * (thuphuong21072004) 
          */
+        public async Task<Review?> GetByRefAndStudent(
+    string refName,
+    int refId,
+    int studentId)
+        {
+            return await _context.Reviews
+                .Include(x => x.Student)
+                .Include(x => x.Instructor)
+                .FirstOrDefaultAsync(x =>
+                    x.RefName == refName &&
+                    x.RefId == refId &&
+                    x.StudentId == studentId);
+        }
+
+        public async Task<List<Review>> GetByClassId(int classId)
+        {
+            return await _context.Reviews
+                .Include(x => x.Student)
+                .Include(x => x.Instructor)
+                .Where(x =>
+                    x.RefName == "CLASS" &&
+                    x.RefId == classId)
+                .OrderByDescending(x => x.CreatedDate)
+                .ToListAsync();
+        }
+
         public async Task Create(Review review)
         {
             await _context.Reviews.AddAsync(review);

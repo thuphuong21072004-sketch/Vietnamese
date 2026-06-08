@@ -11,6 +11,9 @@ namespace Backend.Repository
             GetByClassIdAsync(
                 int classId);
 
+        Task<ClassSession?> GetByIdAsync(
+            int sessionId);
+
         Task SaveChangesAsync();
     }
 }

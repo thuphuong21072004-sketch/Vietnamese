@@ -62,7 +62,7 @@ namespace Backend.Services.impl
 
             var teacherClass =
                 await _teacherClassRepository
-                    .GetByIdAsync(classId);
+                    .GetById(classId);
 
             if (teacherClass == null)
             {
@@ -70,14 +70,11 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
-            var enrolledCount =
-                teacherClass.ClassEnrollments
-                    .Count(x =>
-                        x.Status == common.Constant.StatusBooking.Confirmed
-                        || x.Status == common.Constant.StatusBooking.InProgress
-                        || x.Status == common.Constant.StatusBooking.Completed);
+            var activeCount =
+                await _enrollmentRepository
+                    .GetActiveEnrollmentCountAsync(classId);
 
-            if (enrolledCount >= teacherClass.MaxStudents)
+            if (activeCount >= teacherClass.MaxStudents)
             {
                 throw new Exception(
                     "This class is full");
@@ -115,10 +112,7 @@ namespace Backend.Services.impl
                         "You have already enrolled this class");
                 }
 
-                if (
-    existed.Status ==
-    common.Constant.StatusBooking.Cancelled
-)
+                if (existed.Status == common.Constant.StatusBooking.Cancelled)
                 {
                     existed.Status =
                         common.Constant.StatusBooking.PendingPayment;
@@ -137,18 +131,12 @@ namespace Backend.Services.impl
                 new ClassEnrollment
                 {
                     ClassId = classId,
-
                     StudentId = userId,
-
-                    Status =
-                        common.Constant.StatusBooking.PendingPayment,
-
-                    EnrolledDate =
-                        DateTime.Now
+                    Status = common.Constant.StatusBooking.PendingPayment,
+                    EnrolledDate = DateTime.Now
                 };
 
-            await _enrollmentRepository
-    .CreateAsync(enrollment);
+            await _enrollmentRepository.CreateAsync(enrollment);
 
             return enrollment.EnrollmentId;
         }

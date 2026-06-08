@@ -34,7 +34,7 @@ export class MyBookingsComponent implements OnInit {
   selectedStatus = '';
 
   selectedDate = '';
-  reviewedBookings = new Set<number>();
+  reviewStatusMap: Record<number, boolean> = {};
 
   constructor(
     public bookingService: BookingService,
@@ -132,11 +132,11 @@ export class MyBookingsComponent implements OnInit {
    */
   joinRoom(id: number) {
     this.roomService
-      .getByBookingId(id)
+      .join('PrivateLesson', id)
 
       .subscribe({
         next: (res: any) => {
-          const url = this.getRoomUrlFrom(res);
+          const url = res?.joinUrl;
 
           if (url) {
             window.open(url, '_blank');
@@ -158,7 +158,7 @@ export class MyBookingsComponent implements OnInit {
    */
   private createAndOpenRoom(id: number) {
     this.roomService
-      .create(id)
+      .create('PrivateLesson', id)
 
       .subscribe({
         next: (res: any) => {
@@ -329,28 +329,25 @@ export class MyBookingsComponent implements OnInit {
     return this.bookingService.getDurationHours(item);
   }
   checkReviewedBookings() {
-    this.reviewedBookings.clear();
+    const initialMap: Record<number, boolean> = {};
+    this.bookings.filter(b => b.status === 3).forEach(b => { initialMap[b.bookingId] = false; });
+    this.reviewStatusMap = initialMap;
 
-    this.bookings.forEach((item) => {
-      if (item.status !== 3) {
-        return;
-      }
-
+    this.bookings.filter(b => b.status === 3).forEach((item) => {
       this.reviewService.getByBookingId(item.bookingId).subscribe({
         next: (review) => {
-          if (review) {
-            this.reviewedBookings.add(item.bookingId);
-          }
+          this.reviewStatusMap = { ...this.reviewStatusMap, [item.bookingId]: !!review };
         },
+        error: () => {}
       });
     });
   }
 
   canReview(item: any): boolean {
-    return item?.status === 3 && !this.reviewedBookings.has(item.bookingId);
+    return item?.status === 3 && this.reviewStatusMap[item.bookingId] === false;
   }
 
   hasReviewed(item: any): boolean {
-    return this.reviewedBookings.has(item.bookingId);
+    return item?.status === 3 && this.reviewStatusMap[item.bookingId] === true;
   }
 }

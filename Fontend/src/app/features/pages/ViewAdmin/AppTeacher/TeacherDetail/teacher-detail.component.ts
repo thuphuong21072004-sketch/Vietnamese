@@ -59,7 +59,7 @@ export class TeacherDetailComponent implements OnInit {
 
         this.adminNote = res.adminNote || '';
 
-        this.loadReviews(this.teacher.teacherProfileId);
+        this.loadReviews(this.teacher.userId);
 
         if (
           this.teacher?.introVideoUrl &&

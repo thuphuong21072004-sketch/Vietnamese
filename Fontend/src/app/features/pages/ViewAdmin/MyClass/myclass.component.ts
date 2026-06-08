@@ -78,11 +78,11 @@ export class TeacherBookingsComponent implements OnInit {
 
   joinRoom(id: number) {
     this.roomService
-      .getByBookingId(id)
+      .join('PrivateLesson', id)
 
       .subscribe({
         next: (res: any) => {
-          const url = this.getRoomUrlFrom(res);
+          const url = res?.joinUrl;
 
           if (url) {
             window.open(url, '_blank');
@@ -101,7 +101,7 @@ export class TeacherBookingsComponent implements OnInit {
 
   private createAndOpenRoom(id: number) {
     this.roomService
-      .create(id)
+      .create('PrivateLesson', id)
 
       .subscribe({
         next: (res: any) => {

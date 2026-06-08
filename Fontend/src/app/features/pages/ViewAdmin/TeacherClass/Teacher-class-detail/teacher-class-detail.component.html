@@ -152,7 +152,8 @@
         <div *ngFor="
                 let session of teacherClass.sessions;
                 trackBy: trackSession
-            " class="session-card">
+            " class="session-card"
+            [class.session-past]="isPastSession(session)">
 
             <div class="session-header">
 
@@ -166,6 +167,8 @@
                 <div class="session-date">
 
                     {{ session.studyDate | date:'dd/MM/yyyy' }}
+                    &nbsp;·&nbsp;
+                    {{ session.startTime }} - {{ session.endTime }}
 
                 </div>
 
@@ -173,6 +176,47 @@
 
             <textarea rows="3" [(ngModel)]="session.topic" placeholder="Enter lesson topic">
             </textarea>
+
+        </div>
+
+    </div>
+
+    <div class="reviews-card">
+
+        <h2>Student Reviews ({{ reviews.length }})</h2>
+
+        <div *ngIf="reviewLoading" class="review-empty">Loading reviews...</div>
+
+        <div *ngIf="!reviewLoading && reviews.length === 0" class="review-empty">
+            No reviews yet.
+        </div>
+
+        <div *ngFor="let review of reviews" class="review-item">
+
+            <div class="review-header">
+
+                <div class="review-user">
+
+                    <img *ngIf="getReviewAvatar(review)"
+                        [src]="getReviewAvatar(review)"
+                        class="review-avatar">
+
+                    <div *ngIf="!getReviewAvatar(review)" class="review-avatar placeholder">
+                        {{ (review.studentName || 'A').charAt(0) }}
+                    </div>
+
+                    <div>
+                        <div class="student-name">{{ review.studentName || 'Anonymous' }}</div>
+                        <div class="review-date">{{ review.createdDate | date:'dd/MM/yyyy' }}</div>
+                    </div>
+
+                </div>
+
+                <span class="review-rating">{{ review.rating }} ★</span>
+
+            </div>
+
+            <div class="review-comment">{{ review.comment }}</div>
 
         </div>
 

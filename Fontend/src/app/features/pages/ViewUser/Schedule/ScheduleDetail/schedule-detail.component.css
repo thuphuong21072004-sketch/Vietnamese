@@ -85,6 +85,12 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
+.review-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 28px 0;
+}
+
 .video-card h2 {
     margin: 0 0 16px;
     font-size: 22px;

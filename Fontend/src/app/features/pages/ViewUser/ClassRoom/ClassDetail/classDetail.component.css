@@ -176,6 +176,53 @@
   overflow: hidden;
 }
 
+.teacher-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.stars-row {
+  display: flex;
+  gap: 3px;
+}
+
+.star {
+  font-size: 26px;
+  line-height: 1;
+  color: #d1d5db;
+}
+
+.star-full {
+  color: #f59e0b;
+}
+
+.star-half {
+  background: linear-gradient(to right, #f59e0b 55%, #d1d5db 55%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-empty {
+  color: #d1d5db;
+}
+
+.rating-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rating-count {
+  font-size: 15px;
+  color: #64748b;
+}
+
 .info-card,
 .sessions-card {
   background: white;
@@ -248,6 +295,25 @@
   transform: translateY(-2px);
 }
 
+.session-card.session-past {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.7;
+}
+
+.session-card.session-past .session-number {
+  background: #e2e8f0;
+  color: #94a3b8;
+}
+
+.session-card.session-past .session-content h3 {
+  color: #94a3b8;
+}
+
+.session-card.session-past .session-content p {
+  color: #94a3b8;
+}
+
 .session-number {
   display: inline-block;
 
@@ -266,6 +332,27 @@
   margin-bottom: 12px;
 }
 
+.session-actions {
+  margin-top: 14px;
+}
+
+.join-btn {
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transition: 0.25s;
+}
+
+.join-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+
 .session-content h3 {
   margin-top: 0;
   color: #0f172a;
@@ -281,6 +368,175 @@
   padding: 60px;
   font-size: 18px;
   color: #64748b;
+}
+
+.review-section {
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+}
+
+.review-section h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #0f172a;
+}
+
+.review-summary {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 14px;
+  font-size: 15px;
+  color: #334155;
+}
+
+.review-summary strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.info-note {
+  padding: 16px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.error-note {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.reviews-card {
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+}
+
+.reviews-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #0f172a;
+}
+
+.review-loading,
+.review-empty {
+  padding: 16px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.review-error {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.review-filters button {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.review-filters button.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 700;
+}
+
+.review-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-item {
+  padding: 16px;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  background: #fafafa;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.review-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.review-avatar.placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+  font-weight: 700;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.review-date {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.review-rating {
+  font-weight: 700;
+  color: #f59e0b;
+  font-size: 15px;
+}
+
+.review-comment {
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-line;
 }
 
 @media (max-width: 900px) {

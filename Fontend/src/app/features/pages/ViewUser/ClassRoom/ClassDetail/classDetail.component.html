@@ -4,284 +4,215 @@
     <div class="course-header">
 
         <div class="header-content">
-
-            <h1>
-                {{ teacherClass.title }}
-            </h1>
-
-            <p class="course-description">
-                {{ teacherClass.description }}
-            </p>
-
+            <h1>{{ teacherClass.title }}</h1>
+            <p class="course-description">{{ teacherClass.description }}</p>
         </div>
 
         <div class="header-actions">
-        
-            <!-- Chưa đăng ký -->
-            <button *ngIf="
-                    getStatus() === null ||
-                    getStatus() === 4 ||
-                    getStatus() === 5
-                " class="enroll-btn" (click)="enroll()">
-        
+
+            <button *ngIf="getStatus() === null || getStatus() === 4 || getStatus() === 5"
+                class="enroll-btn" (click)="enroll()">
                 Enroll Now
-        
             </button>
-        
-            <!-- Chờ thanh toán -->
+
             <button *ngIf="getStatus() === 0" class="payment-btn" (click)="goPayment()">
-        
                 Pay Now
-        
             </button>
-        
-            <!-- Đã xác nhận -->
+
             <button *ngIf="getStatus() === 1" class="cancel-btn" (click)="cancel()">
-        
                 Cancel Enrollment
-        
             </button>
-        
-            <!-- Đang học -->
-            <button *ngIf="getStatus() === 2" class="detail-btn">
-        
-                In Progress
-        
-            </button>
-        
-            <!-- Hoàn thành -->
-            <button *ngIf="getStatus() === 3" class="detail-btn">
-        
-                Completed
-        
-            </button>
-        
+
+            <button *ngIf="getStatus() === 2" class="detail-btn">In Progress</button>
+
+            <button *ngIf="getStatus() === 3" class="detail-btn">Completed</button>
+
         </div>
 
     </div>
 
-    <!-- Teacher -->
+    <!-- Teacher toggle -->
     <div class="teacher-section">
-
         <button class="teacher-info-btn" (click)="toggleTeacherInfo()">
-
-            {{
-            showTeacherInfo
-            ? 'Hide Teacher Information'
-            : 'View Teacher Information'
-            }}
-
+            {{ showTeacherInfo ? 'Hide Teacher Information' : 'View Teacher Information' }}
         </button>
-
     </div>
 
-    <div *ngIf="
-            showTeacherInfo &&
-            teacherClass?.teacherProfile
-        " class="teacher-profile-card">
+    <div *ngIf="showTeacherInfo && teacherClass?.teacherProfile" class="teacher-profile-card">
 
         <div class="teacher-top">
 
-            <img *ngIf="teacherClass.teacherProfile?.avatarUrl" [src]="
-                    'http://localhost:5108/uploads/' +
-                    teacherClass.teacherProfile?.avatarUrl
-                " class="teacher-avatar">
+            <img *ngIf="teacherClass.teacherProfile?.avatarUrl"
+                [src]="'http://localhost:5108/uploads/' + teacherClass.teacherProfile?.avatarUrl"
+                class="teacher-avatar">
 
             <div class="teacher-meta">
-
-                <h2>
-                    {{
-                    teacherClass.teacherProfile?.teacherName
-                    }}
-                </h2>
-
-                <p>
-                    {{
-                    teacherClass.teacherProfile?.country
-                    }}
-                </p>
-
-                <p>
-                    {{
-                    teacherClass.teacherProfile?.specialty
-                    }}
-                </p>
-
+                <h2>{{ teacherClass.teacherProfile?.teacherName }}</h2>
+                <p>{{ teacherClass.teacherProfile?.country }}</p>
+                <p>{{ teacherClass.teacherProfile?.specialty }}</p>
             </div>
 
         </div>
 
         <div class="teacher-stats">
+            <div>⭐ {{ teacherClass.teacherProfile?.ratingAverage }}</div>
+            <div>{{ teacherClass.teacherProfile?.totalReviews }} reviews</div>
+            <div>{{ teacherClass.teacherProfile?.experienceYears }} years experience</div>
+        </div>
 
-            <div>
+        <p class="teacher-description">{{ teacherClass.teacherProfile?.description }}</p>
 
-                ⭐
-                {{
-                teacherClass.teacherProfile?.ratingAverage
-                }}
+        <video *ngIf="teacherClass.teacherProfile?.introVideoUrl" controls class="intro-video">
+            <source [src]="'http://localhost:5108/videos/' + teacherClass.teacherProfile?.introVideoUrl">
+        </video>
 
+        <div class="teacher-rating">
+
+            <div class="stars-row">
+                <span *ngFor="let s of getStars(teacherClass.teacherProfile?.ratingAverage || 0)"
+                    class="star"
+                    [class.star-full]="s === 'full'"
+                    [class.star-half]="s === 'half'"
+                    [class.star-empty]="s === 'empty'">★</span>
             </div>
 
-            <div>
+            <span class="rating-value">
+                {{ teacherClass.teacherProfile?.ratingAverage | number:'1.1-1' }} / 5
+            </span>
 
-                {{
-                teacherClass.teacherProfile?.totalReviews
-                }}
-                reviews
+            <span class="rating-count">
+                · {{ teacherClass.teacherProfile?.totalReviews }} reviews
+            </span>
 
-            </div>
+        </div>
 
-            <div>
+    </div>
 
-                {{
-                teacherClass.teacherProfile?.experienceYears
-                }}
-                years experience
+    <!-- Review toggle -->
+    <div class="teacher-section">
+        <button class="teacher-info-btn" (click)="toggleReviews()">
+            {{ showReviews ? 'Hide Teacher Reviews' : 'View Teacher Reviews' }}
+        </button>
+    </div>
+
+    <div *ngIf="showReviews" class="review-section">
+
+        <h2>Teacher Reviews</h2>
+
+        <div class="review-summary" *ngIf="!reviewLoading && hasReviews()">
+            <div><strong>{{ reviews.length }}</strong> reviews</div>
+            <div>Average rating: <strong>{{ getAverageRating() | number:'1.1-1' }}</strong></div>
+        </div>
+
+        <div *ngIf="reviewLoading" class="info-note">Loading reviews...</div>
+
+        <div *ngIf="!reviewLoading && reviewError" class="error-note">{{ reviewError }}</div>
+
+        <div *ngIf="!reviewLoading && !hasReviews() && !reviewError" class="info-note">
+            No reviews available for this teacher yet.
+        </div>
+
+        <div *ngIf="!reviewLoading && hasReviews()" class="review-filters">
+
+            <button [class.active]="selectedRatingFilter === 0" (click)="setRatingFilter(0)">All</button>
+
+            <button *ngFor="let star of [5,4,3,2,1]"
+                [class.active]="selectedRatingFilter === star"
+                (click)="setRatingFilter(star)">
+                {{ star }} ★ ({{ getReviewCount(star) }})
+            </button>
+
+        </div>
+
+        <div *ngIf="!reviewLoading && filteredReviews.length > 0" class="review-list">
+
+            <div *ngFor="let review of filteredReviews" class="review-item">
+
+                <div class="review-header">
+
+                    <div class="review-user">
+
+                        <img *ngIf="getReviewAvatar(review)"
+                            [src]="getReviewAvatar(review)"
+                            class="review-avatar">
+
+                        <div *ngIf="!getReviewAvatar(review)" class="review-avatar placeholder">
+                            {{ (review.studentName || 'A').charAt(0) }}
+                        </div>
+
+                        <div>
+                            <div class="student-name">{{ review.studentName || 'Anonymous' }}</div>
+                            <div class="review-date">{{ review.createdDate | date:'dd/MM/yyyy' }}</div>
+                        </div>
+
+                    </div>
+
+                    <span class="rating">{{ review.rating }} ★</span>
+
+                </div>
+
+                <div class="review-comment">{{ review.comment }}</div>
 
             </div>
 
         </div>
 
-        <p class="teacher-description">
-
-            {{
-            teacherClass.teacherProfile?.description
-            }}
-
-        </p>
-
-        <video *ngIf="
-                teacherClass.teacherProfile?.introVideoUrl
-            " controls class="intro-video">
-
-            <source [src]="
-                    'http://localhost:5108/videos/' +
-                    teacherClass.teacherProfile?.introVideoUrl
-                ">
-
-        </video>
+        <div *ngIf="!reviewLoading && hasReviews() && filteredReviews.length === 0" class="info-note">
+            No reviews found for selected rating.
+        </div>
 
     </div>
 
     <!-- Course Information -->
     <div class="info-card">
 
-        <h2>
-            Course Information
-        </h2>
+        <h2>Course Information</h2>
 
         <div class="info-grid">
 
             <div class="info-item">
-
-                <span class="label">
-                    Teacher
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.teacherName }}
-                </span>
-
+                <span class="label">Teacher</span>
+                <span class="value">{{ teacherClass.teacherName }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Country
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.country }}
-                </span>
-
+                <span class="label">Country</span>
+                <span class="value">{{ teacherClass.country }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Rating
-                </span>
-
-                <span class="value">
-                    ⭐ {{ teacherClass.ratingAverage }}
-                </span>
-
+                <span class="label">Rating</span>
+                <span class="value">⭐ {{ teacherClass.ratingAverage }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Price
-                </span>
-
-                <span class="value">
-                    ${{ teacherClass.price }}
-                </span>
-
+                <span class="label">Price</span>
+                <span class="value">${{ teacherClass.price }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Main Topic
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.mainTopic }}
-                </span>
-
+                <span class="label">Main Topic</span>
+                <span class="value">{{ teacherClass.mainTopic }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Sub Topic
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.subTopic }}
-                </span>
-
+                <span class="label">Sub Topic</span>
+                <span class="value">{{ teacherClass.subTopic }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Students
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.currentStudents }}
-                    /
-                    {{ teacherClass.maxStudents }}
-                </span>
-
+                <span class="label">Students</span>
+                <span class="value">{{ teacherClass.currentStudents }} / {{ teacherClass.maxStudents }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Total Sessions
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.totalSessions }}
-                </span>
-
+                <span class="label">Total Sessions</span>
+                <span class="value">{{ teacherClass.totalSessions }}</span>
             </div>
 
             <div class="info-item">
-
-                <span class="label">
-                    Study Time
-                </span>
-
-                <span class="value">
-                    {{ teacherClass.startTime }}
-                    -
-                    {{ teacherClass.endTime }}
-                </span>
-
+                <span class="label">Study Time</span>
+                <span class="value">{{ teacherClass.startTime }} - {{ teacherClass.endTime }}</span>
             </div>
 
         </div>
@@ -291,50 +222,26 @@
     <!-- Curriculum -->
     <div class="sessions-card">
 
-        <h2>
-            Course Curriculum
-        </h2>
+        <h2>Course Curriculum</h2>
 
-        <div *ngFor="
-                let session
-                of teacherClass.sessions
-            " class="session-card">
+        <div *ngFor="let session of teacherClass.sessions"
+            class="session-card"
+            [class.session-past]="isPastSession(session)">
 
-            <div class="session-number">
-
-                Session
-                {{ session.sessionNumber }}
-
-            </div>
+            <div class="session-number">Session {{ session.sessionNumber }}</div>
 
             <div class="session-content">
 
-                <h3>
-                    {{ session.topic }}
-                </h3>
+                <h3>{{ session.topic }}</h3>
 
-                <p>
+                <p><strong>Date:</strong> {{ session.studyDate }}</p>
 
-                    <strong>
-                        Date:
-                    </strong>
+                <p><strong>Time:</strong> {{ session.startTime }} - {{ session.endTime }}</p>
 
-                    {{ session.studyDate }}
+            </div>
 
-                </p>
-
-                <p>
-
-                    <strong>
-                        Time:
-                    </strong>
-
-                    {{ session.startTime }}
-                    -
-                    {{ session.endTime }}
-
-                </p>
-
+            <div *ngIf="canJoinSession(session)" class="session-actions">
+                <button class="join-btn" (click)="joinSession(session)">Join Zoom Room</button>
             </div>
 
         </div>
@@ -343,8 +250,4 @@
 
 </div>
 
-<div *ngIf="loading" class="loading">
-
-    Loading course details...
-
-</div>
+<div *ngIf="loading" class="loading">Loading course details...</div>

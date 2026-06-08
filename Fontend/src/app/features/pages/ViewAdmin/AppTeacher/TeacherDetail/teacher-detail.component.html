@@ -298,23 +298,31 @@
 
                     <div class="review-header">
 
-                        <strong>
-                            {{
-                            review.student?.name ||
-                            'Anonymous'
-                            }}
-                        </strong>
+                        <div class="review-left">
 
-                        <span>
-                            {{ review.rating }}★
-                        </span>
+                            <img
+                                *ngIf="review.studentAvatarUrl"
+                                [src]="getImageUrl(review.studentAvatarUrl)"
+                                class="review-avatar">
+
+                            <div
+                                *ngIf="!review.studentAvatarUrl"
+                                class="review-avatar placeholder">
+                                {{ (review.student?.name || 'A').charAt(0).toUpperCase() }}
+                            </div>
+
+                            <strong>
+                                {{ review.student?.name || 'Anonymous' }}
+                            </strong>
+
+                        </div>
+
+                        <span>{{ review.rating }}★</span>
 
                     </div>
 
                     <div class="review-comment">
-
                         {{ review.comment }}
-
                     </div>
 
                 </div>

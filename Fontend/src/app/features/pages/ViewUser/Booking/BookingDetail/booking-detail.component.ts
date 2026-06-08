@@ -125,7 +125,7 @@ export class BookingDetailComponent implements OnInit {
     }
 
     this.roomService
-      .getByBookingId(this.booking.bookingId)
+      .join('PrivateLesson', this.booking.bookingId)
 
       .subscribe({
         next: (res: any) => {
@@ -215,11 +215,11 @@ export class BookingDetailComponent implements OnInit {
     }
 
     this.roomService
-      .getByBookingId(this.booking.bookingId)
+      .join('PrivateLesson', this.booking.bookingId)
 
       .subscribe({
         next: (res: any) => {
-          const url = this.getRoomUrlFrom(res);
+          const url = res?.joinUrl;
 
           if (url) {
             window.open(url, '_blank');
@@ -234,30 +234,6 @@ export class BookingDetailComponent implements OnInit {
       });
   }
 
-  /*
-   * room url
-   */
-  private getRoomUrlFrom(room: any): string | null {
-    if (!room) {
-      return null;
-    }
-
-    if (room.joinUrl) {
-      return room.joinUrl;
-    }
-
-    if (!room.roomCode) {
-      return null;
-    }
-
-    if (room.roomCode.startsWith('http')) {
-      return room.roomCode;
-    }
-
-    const token = room.token ? `?token=${encodeURIComponent(room.token)}` : '';
-
-    return `https://meeting.example.com/${room.roomCode}${token}`;
-  }
 
   /*
    * review

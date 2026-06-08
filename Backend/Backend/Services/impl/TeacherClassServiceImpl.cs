@@ -428,9 +428,27 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
-            return _mapper.Map<
-                TeacherClassDto>(
-                    teacherClass);
+            var now = DateTime.Now;
+            bool anyUpdated = false;
+            foreach (var session in teacherClass.ClassSessions)
+            {
+                if (session.Status != "Completed")
+                {
+                    var endDateTime = session.StudyDate
+                        .ToDateTime(TimeOnly.FromTimeSpan(session.EndTime));
+                    if (now > endDateTime)
+                    {
+                        session.Status = "Completed";
+                        anyUpdated = true;
+                    }
+                }
+            }
+            if (anyUpdated)
+            {
+                await _classSessionRepository.SaveChangesAsync();
+            }
+
+            return _mapper.Map<TeacherClassDto>(teacherClass);
         }
 
         public async Task DeleteClassAsync(

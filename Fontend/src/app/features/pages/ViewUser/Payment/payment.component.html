@@ -32,9 +32,9 @@
           </div>
 
           <div>
-            <span>Gateway</span>
+            <span>Method</span>
 
-            <h4>Stripe</h4>
+            <h4>{{ selectedMethod === 'bank' ? 'Bank Transfer' : 'Stripe' }}</h4>
           </div>
         </div>
 
@@ -205,130 +205,120 @@
 
     <section class="panel action-panel">
 
-      <div class="panel-card payment-card">
+      <!-- Payment successful: show once, skip method selector -->
+      <div class="panel-card success-only-card" *ngIf="payment?.status === 1">
+        <div class="success-icon">✓</div>
+        <h3>Payment Successful</h3>
+        <p>Your payment has been completed successfully.</p>
+        <button class="btn btn-success" (click)="goClassroom()">
+          {{ refName === 'CLASS' ? 'View My Classes' : 'Go to My Bookings' }}
+        </button>
+      </div>
 
-        <h2>
-          Stripe Payment
-        </h2>
+      <!-- Bank transfer awaiting -->
+      <div class="panel-card bank-pending-card" *ngIf="isBankTransferPending()">
+        <div class="pending-icon">⏳</div>
+        <h3>Awaiting Confirmation</h3>
+        <p>Your bank transfer has been submitted. Please wait for admin to confirm your payment.</p>
+      </div>
 
-        <div class="amount-panel">
-          <span>
-            Amount to pay
-          </span>
+      <!-- Method selector + content (when not yet paid) -->
+      <ng-container *ngIf="payment?.status !== 1 && !isBankTransferPending()">
 
-          <strong>
-            ${{ getAmount() }}
-          </strong>
-        </div>
+        <div class="panel-card method-selector-card">
+          <p class="method-label">Select Payment Method</p>
+          <div class="method-tabs">
 
-        <div class="payment-status" *ngIf="payment">
+            <button
+              class="method-tab"
+              [class.active]="selectedMethod === 'stripe'"
+              (click)="selectedMethod = 'stripe'">
+              <span class="method-icon">💳</span>
+              Credit / Debit Card
+            </button>
 
-          <span class="status-badge pending" *ngIf="payment.status === 0">
-            Pending Payment
-          </span>
-
-          <span class="status-badge success" *ngIf="payment.status === 1">
-            Payment Successful
-          </span>
-
-          <span class="status-badge failed" *ngIf="payment.status === 2">
-            Payment Failed
-          </span>
-
-        </div>
-
-        <div class="payment-info" *ngIf="
-            !payment ||
-            payment.status === 0
-          ">
-
-          <div class="gateway-box">
-
-            <h3>
-              {{
-              payment
-              ? 'Continue Payment'
-              : 'Ready For Payment'
-              }}
-            </h3>
-
-            <p>
-              {{
-              payment
-              ? 'Your payment is pending. Continue payment through Stripe.'
-              : 'Click the button below to proceed to Stripe secure payment gateway.'
-              }}
-            </p>
-
-          </div>
-
-          <div class="action-group">
-
-            <button class="btn btn-primary" [disabled]="loading" (click)="pay()">
-              {{
-              loading
-              ? 'Processing...'
-              : payment
-              ? 'Continue Payment'
-              : 'Pay Now'
-              }}
+            <button
+              class="method-tab"
+              [class.active]="selectedMethod === 'bank'"
+              (click)="selectedMethod = 'bank'">
+              <span class="method-icon">🏦</span>
+              Bank Transfer (VietQR)
             </button>
 
           </div>
-
         </div>
 
-        <div class="success-box" *ngIf="
-            payment &&
-            payment.status === 1
-          ">
+        <!-- Stripe -->
+        <div class="panel-card payment-card" *ngIf="selectedMethod === 'stripe'">
 
-          <div class="success-icon">
-            ✓
+          <div class="amount-panel">
+            <span>Amount to pay</span>
+            <strong>${{ getAmount() }}</strong>
           </div>
 
-          <h3>
-            Payment Successful
-          </h3>
+          <div class="payment-status" *ngIf="payment">
+            <span class="status-badge pending" *ngIf="payment.status === 0">Pending Payment</span>
+            <span class="status-badge failed" *ngIf="payment.status === 2">Payment Failed</span>
+          </div>
 
-          <p>
-            Your payment has been completed successfully.
-          </p>
+          <div class="gateway-box">
+            <h3>{{ payment ? 'Continue Payment' : 'Ready For Payment' }}</h3>
+            <p>{{ payment ? 'Your payment is pending. Continue through Stripe.' : 'Proceed to Stripe secure payment gateway.' }}</p>
+          </div>
 
-          <button *ngIf="refName === 'PrivateLesson'" class="btn btn-success" (click)="goClassroom()">
-            Join Classroom
+          <button class="btn btn-primary" [disabled]="loading" (click)="pay()">
+            {{ loading ? 'Processing...' : payment ? 'Continue Payment' : 'Pay Now' }}
           </button>
 
         </div>
 
-        <div class="failed-box" *ngIf="
-            payment &&
-            payment.status === 2
-          ">
+        <!-- Bank Transfer -->
+        <div class="panel-card bank-card" *ngIf="selectedMethod === 'bank'">
 
-          <div class="failed-icon">
-            ✕
+          <p class="bank-subtitle">Scan QR code with your banking app, then click the button below.</p>
+
+          <div class="qr-wrapper" *ngIf="bankInfo">
+            <img [src]="getQrUrl()" alt="VietQR" class="qr-img">
           </div>
 
-          <h3>
-            Payment Failed
-          </h3>
+          <div *ngIf="!bankInfo" class="qr-loading">Loading bank info...</div>
 
-          <p>
-            Please try again using Stripe payment gateway.
-          </p>
+          <div class="bank-details" *ngIf="bankInfo">
 
-          <button class="btn btn-danger" [disabled]="loading" (click)="pay()">
-            {{
-            loading
-            ? 'Processing...'
-            : 'Try Again'
-            }}
+            <div class="bank-row">
+              <span>Bank</span>
+              <strong>{{ bankInfo.bankId | uppercase }}</strong>
+            </div>
+
+            <div class="bank-row">
+              <span>Account No</span>
+              <strong>{{ bankInfo.accountNo }}</strong>
+            </div>
+
+            <div class="bank-row">
+              <span>Account Name</span>
+              <strong>{{ bankInfo.accountName }}</strong>
+            </div>
+
+            <div class="bank-row">
+              <span>Amount (VND)</span>
+              <strong>{{ bankInfo.vndAmount | number:'1.0-0' }} ₫</strong>
+            </div>
+
+            <div class="bank-row">
+              <span>Description</span>
+              <strong>{{ bankInfo.note }} #{{ refId }}</strong>
+            </div>
+
+          </div>
+
+          <button class="btn btn-bank" [disabled]="loading || !bankInfo" (click)="submitBankTransfer()">
+            {{ loading ? 'Processing...' : "I've Transferred" }}
           </button>
 
         </div>
 
-      </div>
+      </ng-container>
 
     </section>
 

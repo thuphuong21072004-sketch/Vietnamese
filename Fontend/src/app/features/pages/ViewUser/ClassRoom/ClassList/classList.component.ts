@@ -14,6 +14,7 @@ import { TeacherClassService } from '../../../../services/teacher-class.service'
 import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
 import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
+import { ReviewService } from '../../../../services/review.service';
 
 @Component({
   selector: 'app-class-list',
@@ -180,9 +181,12 @@ export class ClassListComponent implements OnInit {
     daysOfWeek: [],
   };
 
+  reviewStatusMap: Record<number, boolean> = {};
+
   constructor(
     private teacherClassService: TeacherClassService,
     private classEnrollmentService: ClassEnrollmentService,
+    private reviewService: ReviewService,
     private router: Router,
   ) {}
 
@@ -300,10 +304,57 @@ export class ClassListComponent implements OnInit {
     this.classEnrollmentService.getMyClasses().subscribe({
       next: (res) => {
         this.enrolledClasses = res;
+        this.checkReviewedClasses();
       },
       error: (err) => {
         console.error(err);
       },
+    });
+  }
+
+  checkReviewedClasses(): void {
+    const initialMap: Record<number, boolean> = {};
+    this.enrolledClasses
+      .filter((e) => e.status === 3)
+      .forEach((e) => { initialMap[e.classId] = false; });
+    this.reviewStatusMap = initialMap;
+
+    this.enrolledClasses
+      .filter((e) => e.status === 3)
+      .forEach((e) => {
+        this.reviewService.getByRef('CLASS', e.classId).subscribe({
+          next: (review: any) => {
+            this.reviewStatusMap = {
+              ...this.reviewStatusMap,
+              [e.classId]: !!review,
+            };
+          },
+          error: () => {
+            // keep false
+          },
+        });
+      });
+  }
+
+  canReview(classId: number): boolean {
+    return (
+      this.getStatus(classId) === 3 &&
+      this.reviewStatusMap[classId] === false
+    );
+  }
+
+  hasReviewed(classId: number): boolean {
+    return (
+      this.getStatus(classId) === 3 &&
+      this.reviewStatusMap[classId] === true
+    );
+  }
+
+  writeReview(classId: number): void {
+    const enrollment = this.getEnrollment(classId);
+    if (!enrollment) return;
+    this.router.navigate(['/review', classId], {
+      queryParams: { type: 'CLASS', enrollmentId: enrollment.enrollmentId },
     });
   }
  

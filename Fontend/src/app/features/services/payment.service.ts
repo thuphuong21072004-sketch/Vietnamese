@@ -37,4 +37,20 @@ export class PaymentService {
   getByRef(refName: string, refId: number): Observable<PaymentDTO> {
     return this.http.get<PaymentDTO>(`${this.apiUrl}/${refName}/${refId}`);
   }
+
+  getBankInfo(amount: number = 0): Observable<any> {
+    return this.http.get(`${this.apiUrl}/bank-info?amount=${amount}`);
+  }
+
+  bankTransfer(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/bank-transfer`, data);
+  }
+
+  getPendingBankTransfers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/bank-transfers`);
+  }
+
+  confirmBankTransfer(paymentId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${paymentId}/confirm`, {});
+  }
 }

@@ -24,7 +24,7 @@ export class MyClassesComponent implements OnInit {
   private reviewService: ReviewService,
   private router: Router,
 ) {}
-reviewedEnrollments = new Set<number>();
+reviewStatusMap: Record<number, boolean> = {};
 
   ngOnInit(): void {
     this.loadData();
@@ -49,62 +49,59 @@ reviewedEnrollments = new Set<number>();
   }
 
   checkReviewedEnrollments(): void {
-  this.reviewedEnrollments.clear();
+    const initialMap: Record<number, boolean> = {};
+    this.enrollments
+      .filter((item) => item.status === 3)
+      .forEach((item) => { initialMap[item.classId] = false; });
+    this.reviewStatusMap = initialMap;
 
-  this.enrollments.forEach((item) => {
-    if (item.status !== 3) {
-      return;
-    }
-
-    this.reviewService
-      .getByRef('CLASS', item.enrollmentId)
-      .subscribe({
-        next: (review: any) => {
-          if (review) {
-            this.reviewedEnrollments.add(
-              item.enrollmentId,
-            );
-          }
-        },
+    this.enrollments
+      .filter((item) => item.status === 3)
+      .forEach((item) => {
+        this.reviewService.getByRef('CLASS', item.classId).subscribe({
+          next: (review: any) => {
+            this.reviewStatusMap = {
+              ...this.reviewStatusMap,
+              [item.classId]: !!review,
+            };
+          },
+          error: () => {
+            // keep false
+          },
+        });
       });
+  }
+
+  canReview(item: any): boolean {
+    return (
+      item.status === 3 &&
+      this.reviewStatusMap[item.classId] === false
+    );
+  }
+
+  hasReviewed(item: any): boolean {
+    return (
+      item.status === 3 &&
+      this.reviewStatusMap[item.classId] === true
+    );
+  }
+
+writeReview(item: ClassEnrollmentDto): void {
+  this.router.navigate(['/review', item.classId], {
+    queryParams: {
+      type: 'CLASS',
+      enrollmentId: item.enrollmentId,
+    },
   });
 }
 
-canReview(item: any): boolean {
-  return (
-    item.status === 3 &&
-    !this.reviewedEnrollments.has(
-      item.enrollmentId,
-    )
-  );
-}
-
-hasReviewed(item: any): boolean {
-  return this.reviewedEnrollments.has(
-    item.enrollmentId,
-  );
-}
-
-writeReview(enrollmentId: number): void {
-  this.router.navigate(
-    ['/review', enrollmentId],
-    {
-      queryParams: {
-        type: 'CLASS',
-      },
+viewReview(item: ClassEnrollmentDto): void {
+  this.router.navigate(['/review', item.classId], {
+    queryParams: {
+      type: 'CLASS',
+      enrollmentId: item.enrollmentId,
     },
-  );
-}
-
-viewReview(enrollmentId: number): void {
-  this.router.navigate(
-    ['/review', enrollmentId],
-    {
-      queryParams: {
-        type: 'CLASS',
-      },
-    },
-  );
+  });
 }
 
   viewClass(classId: number): void {

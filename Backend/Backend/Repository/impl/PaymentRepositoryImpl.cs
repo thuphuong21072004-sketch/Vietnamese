@@ -63,5 +63,12 @@ namespace Backend.Repository.impl
                     && x.RefId == refId);
         }
 
+        public async Task<List<Payment>> GetPendingBankTransfers()
+        {
+            return await _context.Payments
+                .Where(p => p.PaymentMethod == 1 && p.Status == 0)
+                .OrderBy(p => p.CreatedDate)
+                .ToListAsync();
+        }
     }
 }

@@ -45,23 +45,29 @@ export class ReviewService {
     refId: number,
   ): Observable<any> {
     return this.http.get(
-      `${this.apiUrl}/${refName}/${refId}`,
+      `${this.apiUrl}/my/${refName}/${refId}`,
+      this.getOptions(),
+    );
+  }
+
+  getByClassId(classId: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/class/${classId}`,
       this.getOptions(),
     );
   }
 
   getByBookingId(bookingId: number): Observable<any> {
-  return this.http.get(
-    `${this.apiUrl}/PrivateLesson/${bookingId}`,
-    this.getOptions(),
-  );
-}
-getByClassEnrollmentId(
-  enrollmentId: number,
-): Observable<any> {
-  return this.http.get(
-    `${this.apiUrl}/CLASS/${enrollmentId}`,
-    this.getOptions(),
-  );
-}
+    return this.http.get(
+      `${this.apiUrl}/my/PrivateLesson/${bookingId}`,
+      this.getOptions(),
+    );
+  }
+
+  getMyClassReview(classId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/my/CLASS/${classId}`,
+      this.getOptions(),
+    );
+  }
 }

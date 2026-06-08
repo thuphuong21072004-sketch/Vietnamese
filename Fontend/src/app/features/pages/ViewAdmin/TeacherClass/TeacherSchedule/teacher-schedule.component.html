@@ -84,6 +84,18 @@
 
             </div>
 
+            <div class="card-actions">
+
+                <button *ngIf="canJoinRoom(item)"
+                    class="join-btn"
+                    (click)="joinRoom(item)">
+
+                    Join Zoom Room
+
+                </button>
+
+            </div>
+
         </div>
 
     </div>

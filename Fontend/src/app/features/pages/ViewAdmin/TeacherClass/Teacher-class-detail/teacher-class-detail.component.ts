@@ -15,6 +15,7 @@ import { BaseService } from '../../../../services/base.service';
 import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
 import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
+import { ReviewService } from '../../../../services/review.service';
 
 @Component({
   selector: 'app-teacher-class-detail',
@@ -40,8 +41,14 @@ export class TeacherClassDetailComponent implements OnInit {
     private enrollmentService: ClassEnrollmentService,
 
     private baseService: BaseService,
+
+    private reviewService: ReviewService,
   ) {}
   students: ClassEnrollmentDto[] = [];
+
+  reviews: any[] = [];
+
+  reviewLoading = false;
 
   ngOnInit(): void {
     this.classId = Number(this.route.snapshot.paramMap.get('id'));
@@ -55,6 +62,8 @@ export class TeacherClassDetailComponent implements OnInit {
     this.loadClassDetail();
 
     this.loadStudents();
+
+    this.loadReviews();
   }
 
   loadClassDetail(): void {
@@ -95,6 +104,11 @@ export class TeacherClassDetailComponent implements OnInit {
         this.baseService.handleError(err, 'Delete class failed');
       },
     });
+  }
+
+  isPastSession(session: ClassSessionDto): boolean {
+    const start = new Date(`${session.studyDate}T${session.startTime}`);
+    return new Date() > start;
   }
 
   getSessionStatus(studyDate: string): string {
@@ -139,5 +153,26 @@ export class TeacherClassDetailComponent implements OnInit {
         console.error(err);
       },
     });
+  }
+
+  loadReviews(): void {
+    this.reviewLoading = true;
+
+    this.reviewService.getByClassId(this.classId).subscribe({
+      next: (res) => {
+        this.reviews = res;
+        this.reviewLoading = false;
+      },
+
+      error: () => {
+        this.reviewLoading = false;
+      },
+    });
+  }
+
+  getReviewAvatar(review: any): string | null {
+    return review.studentAvatarUrl
+      ? `http://localhost:5108/uploads/${review.studentAvatarUrl}`
+      : null;
   }
 }

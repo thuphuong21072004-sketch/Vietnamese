@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Backend.Common;
 using Backend.dto;
 using Backend.Models;
@@ -10,29 +10,41 @@ namespace Backend.Services.impl
     {
         private readonly VideoRoomRepository _videoRoomRepository;
         private readonly TeacherClassRepository _teacherClassRepository;
-
         private readonly ClassEnrollmentRepository _classEnrollmentRepository;
+        private readonly ClassSessionRepository _classSessionRepository;
         private readonly UserRepository _userRepository;
         private readonly UserContextUtil _userContext;
         private readonly IMapper _mapper;
         private readonly BookingRepository _bookingRepository;
-        public VideoRoomServiceImpl(VideoRoomRepository videoRoomRepository, BookingRepository bookingRepository, UserRepository userRepository, UserContextUtil userContext, IMapper mapper)
+
+        public VideoRoomServiceImpl(
+            VideoRoomRepository videoRoomRepository,
+            BookingRepository bookingRepository,
+            TeacherClassRepository teacherClassRepository,
+            ClassEnrollmentRepository classEnrollmentRepository,
+            ClassSessionRepository classSessionRepository,
+            UserRepository userRepository,
+            UserContextUtil userContext,
+            IMapper mapper)
         {
             _videoRoomRepository = videoRoomRepository;
             _bookingRepository = bookingRepository;
+            _teacherClassRepository = teacherClassRepository;
+            _classEnrollmentRepository = classEnrollmentRepository;
+            _classSessionRepository = classSessionRepository;
             _userRepository = userRepository;
             _userContext = userContext;
             _mapper = mapper;
         }
 
-        /* 
+        /*
          * tạo phòng học video
          * O(1)
-         * (thuphuong21072004) 
+         * (thuphuong21072004)
          */
         public async Task<VideoRoomDTO> Create(
-    string refName,
-    int refId)
+            string refName,
+            int refId)
         {
             var email =
                 _userContext.GetEmail();
@@ -93,8 +105,8 @@ namespace Backend.Services.impl
         }
 
         public async Task<string> JoinRoom(
-    string refName,
-    int refId)
+            string refName,
+            int refId)
         {
             var email =
                 _userContext.GetEmail();
@@ -133,7 +145,6 @@ namespace Backend.Services.impl
                     "Room not found");
             }
 
-            
             if (refName == common.Constant.RefName.Booking)
             {
                 var booking =
@@ -155,16 +166,30 @@ namespace Backend.Services.impl
                         "No permission");
                 }
             }
-
-            
             else if (
                 refName ==
                 common.Constant.RefName.Class
             )
             {
+                /*
+                 * refId là sessionId — mỗi buổi học có phòng riêng
+                 * cần lấy classId từ session để kiểm tra quyền
+                 */
+                var session =
+                    await _classSessionRepository
+                        .GetByIdAsync(refId);
+
+                if (session == null)
+                {
+                    throw new KeyNotFoundException(
+                        "Session not found");
+                }
+
+                int classId = session.ClassId;
+
                 var teacherClass =
                     await _teacherClassRepository
-                        .GetById(refId);
+                        .GetById(classId);
 
                 if (teacherClass == null)
                 {
@@ -180,11 +205,17 @@ namespace Backend.Services.impl
                 var enrollment =
                     await _classEnrollmentRepository
                         .GetByClassAndStudent(
-                            refId,
+                            classId,
                             userId);
 
                 bool isStudent =
-                    enrollment != null;
+                    enrollment != null &&
+                    (
+                        enrollment.Status ==
+                            common.Constant.StatusBooking.Confirmed ||
+                        enrollment.Status ==
+                            common.Constant.StatusBooking.InProgress
+                    );
 
                 if (
                     !isTeacher &&
@@ -199,14 +230,6 @@ namespace Backend.Services.impl
             return room.StartUrl
                 ?? throw new Exception(
                     "Join url not found");
-        }
-        private DateTime GetNowForComparison(
-            DateTime referenceTime)
-        {
-            return referenceTime.Kind ==
-                   DateTimeKind.Utc
-                ? DateTime.UtcNow
-                : DateTime.Now;
         }
     }
 }

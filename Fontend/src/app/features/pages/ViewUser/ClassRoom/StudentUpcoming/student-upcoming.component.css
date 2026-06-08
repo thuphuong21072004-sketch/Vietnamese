@@ -107,6 +107,31 @@
   color: #6b7280;
 }
 
+.card-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.join-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #4338ca, #6366f1);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.join-btn:hover {
+  background: linear-gradient(135deg, #3730a3, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
 @media (max-width: 768px) {
   .schedule-page {
     padding: 16px;

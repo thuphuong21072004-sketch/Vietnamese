@@ -6,6 +6,7 @@ namespace Backend.Services
     {
         Task Create(ReviewDTO dto);
         Task<List<ReviewDTO>> GetByTeacherId(int teacherId);
+        Task<List<ReviewDTO>> GetByClassId(int classId);
         Task<ReviewDTO?> GetByRef(
     string refName,
     int refId);

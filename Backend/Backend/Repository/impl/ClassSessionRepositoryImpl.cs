@@ -30,6 +30,13 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
+        public async Task<ClassSession?> GetByIdAsync(
+            int sessionId)
+        {
+            return await _context.ClassSessions
+                .FirstOrDefaultAsync(x => x.SessionId == sessionId);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

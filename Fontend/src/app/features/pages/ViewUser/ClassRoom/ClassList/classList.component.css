@@ -336,3 +336,37 @@
     color: #64748b;
     font-size: 13px;
 }
+
+.review-btn {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    transition: 0.2s;
+}
+
+.review-btn:hover {
+    transform: translateY(-2px);
+}
+
+.view-review-btn {
+    flex: 1;
+    border: 1px solid #f59e0b;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    background: #fffbeb;
+    color: #d97706;
+    transition: 0.2s;
+}
+
+.view-review-btn:hover {
+    background: #fef3c7;
+}

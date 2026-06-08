@@ -415,6 +415,14 @@
                 <button *ngIf="getStatus(item.classId) === 3" class="detail-btn" (click)="viewClass(item.classId)">
                     View Result
                 </button>
+
+                <button *ngIf="canReview(item.classId)" class="review-btn" (click)="writeReview(item.classId)">
+                    Review Teacher
+                </button>
+
+                <button *ngIf="hasReviewed(item.classId)" class="view-review-btn" (click)="writeReview(item.classId)">
+                    View Review
+                </button>
             
                 <!-- Đã hủy -->
                 <button *ngIf="getStatus(item.classId) === 4" class="enroll-btn" (click)="enroll(item.classId)">

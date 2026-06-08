@@ -75,18 +75,81 @@
         </div>
     
     </div>
-    <div *ngIf="getTeacherVideo()" class="video-card">
-    
-        <h2>
-            Teacher introduction video
-        </h2>
-    
-        <video controls class="intro-video">
-    
+
+    <div class="video-card">
+
+        <h2>Teacher Introduction</h2>
+
+        <video *ngIf="getTeacherVideo()" controls class="intro-video">
             <source [src]="getTeacherVideo()" type="video/mp4">
-    
         </video>
-    
+
+        <div class="review-divider"></div>
+
+        <h2>Teacher Reviews</h2>
+
+        <div class="review-summary" *ngIf="!reviewLoading && hasReviews()">
+            <div><strong>{{ reviews.length }}</strong> reviews</div>
+            <div>Average rating: <strong>{{ getAverageRating() | number:'1.1-1' }}</strong></div>
+        </div>
+
+        <div *ngIf="reviewLoading" class="info-note">Loading reviews...</div>
+
+        <div *ngIf="!reviewLoading && reviewError" class="error-note">{{ reviewError }}</div>
+
+        <div *ngIf="!reviewLoading && !hasReviews() && !reviewError" class="info-note">
+            No reviews available for this teacher yet.
+        </div>
+
+        <div *ngIf="!reviewLoading && hasReviews()" class="review-filters">
+
+            <button [class.active]="selectedRatingFilter === 0" (click)="setRatingFilter(0)">All</button>
+
+            <button *ngFor="let star of [5,4,3,2,1]"
+                [class.active]="selectedRatingFilter === star"
+                (click)="setRatingFilter(star)">
+                {{ star }} ★ ({{ getReviewCount(star) }})
+            </button>
+
+        </div>
+
+        <div *ngIf="!reviewLoading && filteredReviews.length > 0" class="review-list">
+
+            <div *ngFor="let review of filteredReviews" class="review-item">
+
+                <div class="review-header">
+
+                    <div class="review-user">
+
+                        <img *ngIf="getReviewAvatar(review)"
+                            [src]="getReviewAvatar(review)"
+                            class="review-avatar">
+
+                        <div *ngIf="!getReviewAvatar(review)" class="review-avatar placeholder">
+                            {{ (review.studentName || 'A').charAt(0) }}
+                        </div>
+
+                        <div>
+                            <div class="student-name">{{ review.studentName || 'Anonymous' }}</div>
+                            <div class="review-date">{{ review.createdDate | date:'dd/MM/yyyy' }}</div>
+                        </div>
+
+                    </div>
+
+                    <span class="rating">{{ review.rating }} ★</span>
+
+                </div>
+
+                <div class="review-comment">{{ review.comment }}</div>
+
+            </div>
+
+        </div>
+
+        <div *ngIf="!reviewLoading && hasReviews() && filteredReviews.length === 0" class="info-note">
+            No reviews found for selected rating.
+        </div>
+
     </div>
 
     <div class="schedule-card">
@@ -234,243 +297,5 @@
 
     </button>
 
-    <div class="review-section">
 
-        <h2>
-
-            Teacher Reviews
-
-        </h2>
-
-        <div class="review-summary" *ngIf="
-                !reviewLoading
-                &&
-                hasReviews()
-            ">
-
-            <div>
-
-                <strong>
-
-                    {{
-                    reviews.length
-                    }}
-
-                </strong>
-
-                reviews
-
-            </div>
-
-            <div>
-
-                Average rating:
-
-                <strong>
-
-                    {{
-                    getAverageRating()
-                    | number:'1.1-1'
-                    }}
-
-                </strong>
-
-            </div>
-
-        </div>
-
-        <div *ngIf="reviewLoading" class="info-note">
-
-            Loading reviews...
-
-        </div>
-
-        <div *ngIf="
-                !reviewLoading
-                &&
-                reviewError
-            " class="error-note">
-
-            {{
-            reviewError
-            }}
-
-        </div>
-
-        <div *ngIf="
-                !reviewLoading
-                &&
-                !hasReviews()
-                &&
-                !reviewError
-            " class="info-note">
-
-            No reviews available
-            for this teacher yet.
-
-        </div>
-
-        <div *ngIf="
-                !reviewLoading
-                &&
-                hasReviews()
-            " class="review-filters">
-
-            <button [class.active]="
-                    selectedRatingFilter === 0
-                " (click)="
-                    setRatingFilter(0)
-                ">
-
-                All
-
-            </button>
-
-            <button [class.active]="
-                    selectedRatingFilter === 5
-                " (click)="
-                    setRatingFilter(5)
-                ">
-
-                5 ★
-                (
-                {{
-                getReviewCount(5)
-                }}
-                )
-
-            </button>
-
-            <button [class.active]="
-                    selectedRatingFilter === 4
-                " (click)="
-                    setRatingFilter(4)
-                ">
-
-                4 ★
-                (
-                {{
-                getReviewCount(4)
-                }}
-                )
-
-            </button>
-
-            <button [class.active]="
-                    selectedRatingFilter === 3
-                " (click)="
-                    setRatingFilter(3)
-                ">
-
-                3 ★
-                (
-                {{
-                getReviewCount(3)
-                }}
-                )
-
-            </button>
-
-            <button [class.active]="
-                    selectedRatingFilter === 2
-                " (click)="
-                    setRatingFilter(2)
-                ">
-
-                2 ★
-                (
-                {{
-                getReviewCount(2)
-                }}
-                )
-
-            </button>
-
-            <button [class.active]="
-                    selectedRatingFilter === 1
-                " (click)="
-                    setRatingFilter(1)
-                ">
-
-                1 ★
-                (
-                {{
-                getReviewCount(1)
-                }}
-                )
-
-            </button>
-
-        </div>
-
-        <div *ngIf="
-                !reviewLoading
-                &&
-                filteredReviews.length > 0
-            " class="review-list">
-
-            <div *ngFor="
-                    let review
-                    of filteredReviews
-                " class="review-item">
-
-                <div class="review-header">
-                
-                    <div class="review-user">
-                
-                        <img *ngIf="getReviewAvatar(review)" [src]="getReviewAvatar(review)" class="review-avatar">
-                
-                        <div *ngIf="!getReviewAvatar(review)" class="review-avatar placeholder">
-                
-                            {{ (review.studentName || 'A').charAt(0) }}
-                
-                        </div>
-                
-                        <div>
-                
-                            <div class="student-name">
-                                {{ review.studentName || 'Anonymous' }}
-                            </div>
-                
-                            <div class="review-date">
-                                {{ review.createdDate | date:'dd/MM/yyyy' }}
-                            </div>
-                
-                        </div>
-                
-                    </div>
-                
-                    <span class="rating">
-                        {{ review.rating }} ★
-                    </span>
-                
-                </div>
-
-                <div class="review-comment">
-
-                    {{
-                    review.comment
-                    }}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div *ngIf="
-                !reviewLoading
-                &&
-                hasReviews()
-                &&
-                filteredReviews.length === 0
-            " class="info-note">
-
-            No reviews found
-            for selected rating.
-
-        </div>
-
-    </div>
-    
 </div>

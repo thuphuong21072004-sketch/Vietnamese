@@ -18,6 +18,7 @@ import { TeacherScheduleComponent} from'./features/pages/ViewAdmin/Schedule/sche
 import { TeacherBookingsComponent} from './features/pages/ViewAdmin/MyClass/myclass.component';
 import { DashboardAdminComponent } from './features/pages/ViewAdmin/DashboardAdmin/dashboard.component';
 import { TeacherBookingDetailComponent } from './features/pages/ViewAdmin/MyBooking/mybooking.component';
+import { BankTransfersComponent } from './features/pages/ViewAdmin/BankTransfers/bank-transfers.component';
 import { DashboardTeacherComponent } from './features/pages/ViewAdmin/DashboardTeacher/dashboard.component';
 import { TeacherClassCreateComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-create/teacher-class-create.component';
 import { TeacherClassDetailComponent } from './features/pages/ViewAdmin/TeacherClass/Teacher-class-detail/teacher-class-detail.component' 
@@ -63,6 +64,7 @@ export const routes: Routes = [
   { path: 'admin/schedule', component: TeacherScheduleComponent },
   { path: 'admin/classrooms', component: TeacherBookingsComponent },
   { path: 'admin/bookings/:id', component: TeacherBookingDetailComponent },
+  { path: 'admin/bank-transfers', component: BankTransfersComponent },
   { path: 'teacher/dashboard', component: DashboardTeacherComponent },
   { path: 'teacher/listclass', component: TeacherClassListComponent },
   { path: 'class/create', component: TeacherClassCreateComponent },

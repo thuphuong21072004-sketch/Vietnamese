@@ -10,7 +10,14 @@ namespace Backend.Repository
     string refName,
     int refId);
 
-        Task<List<Review>>GetByTeacherId(int teacherId);
+        Task<Review?> GetByRefAndStudent(
+    string refName,
+    int refId,
+    int studentId);
+
+        Task<List<Review>> GetByTeacherId(int teacherId);
+
+        Task<List<Review>> GetByClassId(int classId);
 
         Task Create(Review review);
 

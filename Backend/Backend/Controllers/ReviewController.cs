@@ -32,7 +32,14 @@ namespace Backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("{refName}/{refId}")]
+        [HttpGet("class/{classId}")]
+        public async Task<IActionResult> GetByClassId(int classId)
+        {
+            return Ok(await _reviewService.GetByClassId(classId));
+        }
+
+        [Authorize]
+        [HttpGet("my/{refName}/{refId}")]
         public async Task<IActionResult> GetByRef(
      string refName,
      int refId)

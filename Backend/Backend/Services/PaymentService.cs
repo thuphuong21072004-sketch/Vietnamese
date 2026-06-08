@@ -9,6 +9,9 @@ namespace Backend.Services
        
         Task<string> CreateStripeUrl( int paymentId, string currency);
         Task Success(int paymentId, string transactionCode);
+        Task BankTransfer(PaymentDTO dto);
+        Task<List<PaymentDTO>> GetPendingBankTransfers();
+        Task ConfirmBankTransfer(int paymentId);
         
     }
 }

@@ -108,20 +108,15 @@ namespace Backend.Services.impl
             }
             else
             {
+                // dto.RefId is classId
                 var enrollment =
                     await _classEnrollmentRepository
-                        .GetByIdAsync(dto.RefId);
+                        .GetByClassAndStudent(dto.RefId, userId);
 
                 if (enrollment == null)
                 {
                     throw new KeyNotFoundException(
                         "Enrollment not found");
-                }
-
-                if (enrollment.StudentId != userId)
-                {
-                    throw new UnauthorizedAccessException(
-                        "No permission");
                 }
 
                 if (
@@ -135,14 +130,13 @@ namespace Backend.Services.impl
 
                 instructorId =
                     enrollment.TeacherClass
-                        .TeacherProfileId;
+                        .TeacherProfile!.UserId;
             }
 
             var exist =
-                await _reviewRepository
-                    .GetByRef(
-                        dto.RefName,
-                        dto.RefId);
+                dto.RefName == RefName.Booking
+                    ? await _reviewRepository.GetByRef(dto.RefName, dto.RefId)
+                    : await _reviewRepository.GetByRefAndStudent(dto.RefName, dto.RefId, userId);
 
             if (exist != null)
             {
@@ -236,49 +230,36 @@ namespace Backend.Services.impl
          * O(1)
          * (thuphuong21072004) 
          */
+        public async Task<List<ReviewDTO>> GetByClassId(int classId)
+        {
+            var reviews = await _reviewRepository.GetByClassId(classId);
+            return _mapper.Map<List<ReviewDTO>>(reviews);
+        }
+
         public async Task<ReviewDTO?> GetByRef(
     string refName,
     int refId)
         {
-            var review =
-                await _reviewRepository
-                    .GetByRef(
-                        refName,
-                        refId);
-
-            if (review == null)
-            {
-                return null;
-            }
-
             if (
-    refName != RefName.Booking
-    &&
-    refName != RefName.Class
-)
+                refName != RefName.Booking &&
+                refName != RefName.Class
+            )
             {
-                throw new ArgumentException(
-                    "Invalid review type");
+                throw new ArgumentException("Invalid review type");
             }
 
-            var email =
-    _userContext.GetEmail();
+            var email = _userContext.GetEmail();
 
             int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                .Value;
+                (await _userRepository.GetUserIdByEmail(email))!.Value;
 
             if (refName == RefName.Booking)
             {
-                var booking =
-                    await _bookingRepository
-                        .GetById(refId);
+                var booking = await _bookingRepository.GetById(refId);
 
                 if (booking == null)
                 {
-                    throw new KeyNotFoundException(
-                        "Booking not found");
+                    throw new KeyNotFoundException("Booking not found");
                 }
 
                 if (
@@ -286,33 +267,31 @@ namespace Backend.Services.impl
                     booking.InstructorId != userId
                 )
                 {
-                    throw new UnauthorizedAccessException(
-                        "No permission");
+                    throw new UnauthorizedAccessException("No permission");
                 }
+
+                var review = await _reviewRepository.GetByRef(refName, refId);
+
+                return _mapper.Map<ReviewDTO>(review);
             }
             else
             {
+                // refId is classId
                 var enrollment =
                     await _classEnrollmentRepository
-                        .GetByIdAsync(refId);
+                        .GetByClassAndStudent(refId, userId);
 
                 if (enrollment == null)
                 {
-                    throw new KeyNotFoundException(
-                        "Enrollment not found");
+                    throw new UnauthorizedAccessException("No permission");
                 }
 
-                if (
-                    enrollment.StudentId != userId
-                )
-                {
-                    throw new UnauthorizedAccessException(
-                        "No permission");
-                }
+                var review =
+                    await _reviewRepository
+                        .GetByRefAndStudent(refName, refId, userId);
+
+                return _mapper.Map<ReviewDTO>(review);
             }
-
-            return _mapper.Map<ReviewDTO>(
-                review);
         }
     }
 }

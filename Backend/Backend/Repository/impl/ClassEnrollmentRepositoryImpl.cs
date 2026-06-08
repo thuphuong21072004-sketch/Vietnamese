@@ -54,8 +54,8 @@ namespace Backend.Repository.impl
 
         public async Task UpdateAsync( ClassEnrollment enrollment)
         {
-            _context.ClassEnrollments
-                .Update(enrollment);
+            _context.Entry(enrollment).State =
+                Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             await _context.SaveChangesAsync();
         }
@@ -96,6 +96,22 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
-        public async Task<ClassEnrollment?> GetByClassAndStudent(int classId, int studentId) { return await _context.ClassEnrollments.FirstOrDefaultAsync(x => x.ClassId == classId && x.StudentId == studentId); }
+        public async Task<ClassEnrollment?> GetByClassAndStudent(int classId, int studentId)
+        {
+            return await _context.ClassEnrollments
+                .Include(x => x.TeacherClass)
+                    .ThenInclude(tc => tc.TeacherProfile)
+                .FirstOrDefaultAsync(x => x.ClassId == classId && x.StudentId == studentId);
+        }
+
+        public async Task<int> GetActiveEnrollmentCountAsync(int classId)
+        {
+            return await _context.ClassEnrollments
+                .CountAsync(x =>
+                    x.ClassId == classId &&
+                    (x.Status == StatusBooking.Confirmed ||
+                     x.Status == StatusBooking.InProgress ||
+                     x.Status == StatusBooking.Completed));
+        }
     }
 }

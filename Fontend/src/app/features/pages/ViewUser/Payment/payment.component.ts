@@ -28,6 +28,9 @@ export class PaymentComponent implements OnInit {
 
   refName = 'PrivateLesson';
 
+  bankInfo: any = null;
+  selectedMethod: 'stripe' | 'bank' = 'stripe';
+
   booking: any = null;
 
   enrollment: any = null;
@@ -87,6 +90,7 @@ export class PaymentComponent implements OnInit {
     this.bookingService.getDetail(this.refId).subscribe({
       next: (res) => {
         this.booking = res;
+        this.loadBankInfo();
       },
 
       error: (err) => {
@@ -103,6 +107,7 @@ export class PaymentComponent implements OnInit {
     this.classEnrollmentService.getDetail(this.refId).subscribe({
       next: (res: any) => {
         this.enrollment = res;
+        this.loadBankInfo();
       },
 
       error: (err: any) => {
@@ -288,6 +293,49 @@ export class PaymentComponent implements OnInit {
         alert(err.error?.message || 'Failed to load currencies');
       },
     });
+  }
+
+  loadBankInfo(): void {
+    const amount = this.getAmount();
+    this.paymentService.getBankInfo(amount).subscribe({
+      next: (res) => { this.bankInfo = res; },
+      error: () => {},
+    });
+  }
+
+  getQrUrl(): string {
+    if (!this.bankInfo) return '';
+    const amountVnd = Math.round(this.bankInfo.vndAmount || 0);
+    const info = encodeURIComponent(`${this.bankInfo.note} #${this.refId}`);
+    const name = encodeURIComponent(this.bankInfo.accountName);
+    return `https://img.vietqr.io/image/${this.bankInfo.bankId}-${this.bankInfo.accountNo}-compact2.png?amount=${amountVnd}&accountName=${name}&addInfo=${info}`;
+  }
+
+  submitBankTransfer(): void {
+    this.loading = true;
+    this.paymentService.bankTransfer({
+      refName: this.refName,
+      refId: this.refId,
+      amount: this.getAmount(),
+      paymentMethod: 1,
+    }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.goClassroom();
+      },
+      error: (err: any) => {
+        alert(err.error?.message || 'Failed');
+        this.loading = false;
+      },
+    });
+  }
+
+  isBankTransferPending(): boolean {
+    return this.payment?.paymentMethod === 1 && this.payment?.status === 0;
+  }
+
+  showBankTransferForm(): boolean {
+    return !!this.bankInfo && !this.isBankTransferPending() && this.payment?.status !== 1;
   }
 
   back() {

@@ -41,7 +41,7 @@ export class VideoRoomComponent implements OnInit {
   loadRoom() {
     this.loading = true;
 
-    this.roomService.getByBookingId(this.bookingId).subscribe({
+    this.roomService.join('PrivateLesson', this.bookingId).subscribe({
       next: (res) => {
         this.room = res;
 
@@ -57,7 +57,7 @@ export class VideoRoomComponent implements OnInit {
   createRoom() {
     this.creating = true;
 
-    this.roomService.create(this.bookingId).subscribe({
+    this.roomService.create('PrivateLesson', this.bookingId).subscribe({
       next: (res) => {
         this.room = res;
 

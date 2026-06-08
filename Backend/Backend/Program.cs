@@ -41,7 +41,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
         policy => policy
-            .WithOrigins("http://localhost:4200")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -167,6 +167,9 @@ builder.Services.AddScoped<
     ClassEnrollmentService,
     ClassEnrollmentServiceImpl>();
 
+builder.Services.Configure<Backend.Common.BankConfig>(
+    builder.Configuration.GetSection("BankTransfer"));
+builder.Services.AddHostedService<Backend.Services.impl.AutoCancelService>();
 
 var app = builder.Build();
 
@@ -175,7 +178,8 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("AllowAngular");
 app.UseStaticFiles();
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -31,7 +31,7 @@ namespace Backend.Repository.impl
             return await _context.TeacherClasses
                 .Include(x => x.TeacherProfile)
                     .ThenInclude(x => x.User)
-                .Include(x => x.ClassSessions)
+                .Include(x => x.ClassSessions.OrderBy(s => s.SessionNumber))
                 .Include(x => x.ClassEnrollments)
                 .FirstOrDefaultAsync(
                     x => x.ClassId == classId);
@@ -47,8 +47,8 @@ namespace Backend.Repository.impl
 
         public Task UpdateAsync( TeacherClass teacherClass)
         {
-            _context.TeacherClasses
-                .Update(teacherClass);
+            _context.Entry(teacherClass).State =
+                Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             return Task.CompletedTask;
         }

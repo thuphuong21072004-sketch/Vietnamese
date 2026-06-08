@@ -18,12 +18,14 @@ namespace Backend.Controllers
         private readonly PaymentService _paymentService;
         private readonly ExchangeRateService _exchangeRateService;
         private readonly StripeConfig _stripeConfig;
+        private readonly Backend.Common.BankConfig _bankConfig;
 
-        public PaymentController(PaymentService paymentService, ExchangeRateService exchangeRateService, IOptions<StripeConfig> stripeConfig)
+        public PaymentController(PaymentService paymentService, ExchangeRateService exchangeRateService, IOptions<StripeConfig> stripeConfig, IOptions<Backend.Common.BankConfig> bankConfig)
         {
             _paymentService = paymentService;
             _exchangeRateService = exchangeRateService;
             _stripeConfig= stripeConfig.Value;
+            _bankConfig = bankConfig.Value;
         }
 
         [Authorize]
@@ -147,6 +149,55 @@ namespace Backend.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpGet("bank-transfers")]
+        public async Task<IActionResult> GetPendingBankTransfers()
+        {
+            return Ok(await _paymentService.GetPendingBankTransfers());
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpPost("{paymentId}/confirm")]
+        public async Task<IActionResult> ConfirmBankTransfer(int paymentId)
+        {
+            await _paymentService.ConfirmBankTransfer(paymentId);
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("bank-info")]
+        public async Task<IActionResult> GetBankInfo([FromQuery] decimal amount = 0)
+        {
+            decimal vndAmount = 0;
+            if (amount > 0)
+            {
+                try
+                {
+                    vndAmount = await _exchangeRateService.ConvertFromUsd(amount, "VND");
+                }
+                catch
+                {
+                    vndAmount = Math.Round(amount * 25000, 0);
+                }
+            }
+
+            return Ok(new
+            {
+                bankId = _bankConfig.BankId,
+                accountNo = _bankConfig.AccountNo,
+                accountName = _bankConfig.AccountName,
+                note = _bankConfig.Note,
+                vndAmount
+            });
+        }
+
+        [Authorize]
+        [HttpPost("bank-transfer")]
+        public async Task<IActionResult> BankTransfer([FromBody] PaymentDTO dto)
+        {
+            await _paymentService.BankTransfer(dto);
+            return Ok(new { success = true });
         }
 
         [Authorize]

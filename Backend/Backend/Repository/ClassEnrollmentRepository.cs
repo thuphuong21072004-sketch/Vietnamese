@@ -27,5 +27,7 @@ namespace Backend.Repository
         Task<ClassEnrollment?> GetByClassAndStudent(
     int classId,
     int studentId);
+
+        Task<int> GetActiveEnrollmentCountAsync(int classId);
     }
 }

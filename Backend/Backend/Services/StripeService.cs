@@ -28,7 +28,8 @@ namespace Backend.Services
         public string CreateCheckoutSession(
      int paymentId,
      decimal amount,
-     string currency)
+     string currency,
+     string refName = "PrivateLesson")
         {
             try
             {
@@ -48,11 +49,13 @@ namespace Backend.Services
 
                         Mode = "payment",
 
-                        SuccessUrl =
-                            $"http://localhost:4200/my-bookings?payment=success&paymentId={paymentId}",
+                        SuccessUrl = refName == "CLASS"
+                            ? $"http://localhost:4200/user/myclass?payment=success&paymentId={paymentId}"
+                            : $"http://localhost:4200/my-bookings?payment=success&paymentId={paymentId}",
 
-                        CancelUrl =
-                            $"http://localhost:4200/my-bookings?payment=cancel&paymentId={paymentId}",
+                        CancelUrl = refName == "CLASS"
+                            ? $"http://localhost:4200/user/myclass?payment=cancel&paymentId={paymentId}"
+                            : $"http://localhost:4200/my-bookings?payment=cancel&paymentId={paymentId}",
 
                         LineItems =
                         [

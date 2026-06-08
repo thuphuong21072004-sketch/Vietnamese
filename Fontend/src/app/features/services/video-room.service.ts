@@ -24,11 +24,18 @@ export class VideoRoomService {
     };
   }
 
-  create(bookingId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${bookingId}`, {}, this.getOptions());
+  create(refName: string, refId: number): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/${refName}/${refId}`,
+      {},
+      this.getOptions()
+    );
   }
 
-  getByBookingId(bookingId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${bookingId}`, this.getOptions());
+  join(refName: string, refId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/join/${refName}/${refId}`,
+      this.getOptions()
+    );
   }
 }

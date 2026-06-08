@@ -62,7 +62,8 @@
 
 .info-card,
 .sessions-card,
-.students-card {
+.students-card,
+.reviews-card {
     background: white;
     border-radius: 20px;
     padding: 24px;
@@ -72,7 +73,8 @@
 
 .info-card h2,
 .sessions-card h2,
-.students-card h2 {
+.students-card h2,
+.reviews-card h2 {
     margin: 0 0 20px;
     color: #0f172a;
     font-size: 22px;
@@ -255,6 +257,20 @@ textarea:focus {
     box-shadow: 0 8px 20px rgba(0,0,0,.06);
 }
 
+.session-card.session-past {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    opacity: 0.65;
+}
+
+.session-card.session-past .session-badge {
+    background: #94a3b8;
+}
+
+.session-card.session-past .session-date {
+    color: #94a3b8;
+}
+
 .session-header {
     display: flex;
     justify-content: space-between;
@@ -289,4 +305,61 @@ textarea:focus {
 .session-card textarea:focus {
     outline: none;
     border-color: #2563eb;
+}
+
+.review-empty {
+    color: #64748b;
+    font-size: 15px;
+    padding: 12px 0;
+}
+
+.review-item {
+    padding: 16px;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    background: #fafafa;
+    margin-bottom: 12px;
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.review-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.review-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.review-avatar.placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    font-weight: 700;
+}
+
+.review-rating {
+    font-weight: 700;
+    color: #f59e0b;
+    font-size: 15px;
+}
+
+.review-comment {
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-line;
 }

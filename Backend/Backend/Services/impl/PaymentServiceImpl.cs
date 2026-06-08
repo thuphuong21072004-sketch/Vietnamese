@@ -285,7 +285,7 @@ namespace Backend.Services.impl
 
                 var teacherClass =
                     await _teacherClassRepository
-                        .GetByIdAsync(enrollment.ClassId);
+                        .GetById(enrollment.ClassId);
 
                 if (teacherClass != null)
                 {
@@ -425,8 +425,73 @@ namespace Backend.Services.impl
                 .CreateCheckoutSession(
                     payment.PaymentId,
                     finalAmount,
-                    currency);
+                    currency,
+                    payment.RefName);
         }
 
+        public async Task<List<PaymentDTO>> GetPendingBankTransfers()
+        {
+            var payments = await _paymentRepository.GetPendingBankTransfers();
+            return _mapper.Map<List<PaymentDTO>>(payments);
+        }
+
+        public async Task ConfirmBankTransfer(int paymentId)
+        {
+            await Success(paymentId, "BANK_TRANSFER");
+        }
+
+        public async Task BankTransfer(PaymentDTO dto)
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            if (dto.RefName == RefName.Booking)
+            {
+                var booking = await _bookingRepository.GetById(dto.RefId);
+                if (booking == null) throw new KeyNotFoundException("Booking not found");
+                if (booking.StudentId != userId) throw new UnauthorizedAccessException("No permission");
+                if (booking.Status != StatusBooking.PendingPayment) throw new InvalidOperationException("Booking is not pending payment");
+                dto.Amount = booking.TotalPrice;
+            }
+            else if (dto.RefName == RefName.Class)
+            {
+                var enrollment = await _classEnrollmentRepository.GetByIdAsync(dto.RefId);
+                if (enrollment == null) throw new KeyNotFoundException("Enrollment not found");
+                if (enrollment.StudentId != userId) throw new UnauthorizedAccessException("No permission");
+                if (enrollment.Status != StatusBooking.PendingPayment) throw new InvalidOperationException("Enrollment is not pending payment");
+                dto.Amount = enrollment.TeacherClass!.Price;
+            }
+            else throw new ArgumentException("Invalid RefName");
+
+            var existing = await _paymentRepository.GetByRef(dto.RefName, dto.RefId);
+            int paymentId;
+            if (existing != null)
+            {
+                if (existing.Status == StatusPayment.Success)
+                    throw new InvalidOperationException("Already paid successfully");
+                existing.PaymentMethod = 1;
+                existing.Status = StatusPayment.Pending;
+                await _paymentRepository.Update(existing);
+                await _paymentRepository.Save();
+                paymentId = existing.PaymentId;
+            }
+            else
+            {
+                var payment = new Models.Payment
+                {
+                    RefId = dto.RefId,
+                    RefName = dto.RefName,
+                    Amount = dto.Amount,
+                    PaymentMethod = 1,
+                    Status = StatusPayment.Pending,
+                    CreatedDate = DateTime.Now
+                };
+                await _paymentRepository.Create(payment);
+                await _paymentRepository.Save();
+                paymentId = payment.PaymentId;
+            }
+
+            await Success(paymentId, "BANK_TRANSFER");
+        }
     }
 }

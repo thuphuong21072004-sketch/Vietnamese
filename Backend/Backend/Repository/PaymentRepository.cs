@@ -8,6 +8,7 @@ namespace Backend.Repository
         Task Create(Payment payment);
         Task Update(Payment payment);
         Task<Payment?> GetByRef(string refName, int refId);
+        Task<List<Payment>> GetPendingBankTransfers();
         Task Save();
     }
 }
