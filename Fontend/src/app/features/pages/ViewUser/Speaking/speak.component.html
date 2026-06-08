@@ -7,19 +7,11 @@
     <div class="speak-container">
 
         <div class="top-section">
-
             <div class="logo-box">
-                <div class="logo-icon">
-                    <i class="fas fa-microphone-alt"></i>
-                </div>
+                <div class="logo-icon">🔊</div>
             </div>
-
-            <h1>Luyện Nói</h1>
-
-            <p class="subtitle">
-                Nhập tiếng Anh hoặc tiếng Việt để dịch nhanh
-            </p>
-
+            <h1>Speaking Practice</h1>
+            <p class="subtitle">Enter English or Vietnamese to translate and listen to pronunciation</p>
         </div>
 
         <div class="translate-card">
@@ -27,61 +19,56 @@
             <div class="translate-row">
 
                 <div class="language-box">
-
-                    <div class="language-title">
-                        English
+                    <div class="language-header">
+                        <span class="language-flag">🇬🇧</span>
+                        <span class="language-title">English</span>
                     </div>
-
-                    <input type="text" [(ngModel)]="englishText" (keyup.enter)="translateFromEnglish()"
-                        placeholder="Nhập tiếng Anh..." />
-
+                    <div class="input-wrapper">
+                        <button class="icon-speak-btn"
+                            (click)="speakText(englishText, 'en-US')"
+                            [disabled]="!englishText"
+                            title="Listen in English">
+                            🔊
+                        </button>
+                        <input type="text" [(ngModel)]="englishText"
+                            (input)="onEnglishInput(englishText)"
+                            (keyup.enter)="translateFromEnglish()"
+                            placeholder="Type in English..." />
+                    </div>
                 </div>
 
-                <div class="swap-icon">
-                    ⇄
+                <div class="swap-area">
+                    <button class="swap-btn" (click)="clearAll()" title="Clear all">
+                        ✕
+                    </button>
+                    <div class="swap-icon">⇄</div>
                 </div>
 
                 <div class="language-box">
-
-                    <div class="language-title">
-                        Tiếng Việt
+                    <div class="language-header">
+                        <span class="language-flag">🇻🇳</span>
+                        <span class="language-title">Tiếng Việt</span>
                     </div>
-
-                    <input type="text" [(ngModel)]="vietnameseText" (keyup.enter)="translateFromVietnamese()"
-                        placeholder="Nhập tiếng Việt..." />
-
+                    <div class="input-wrapper">
+                        <button class="icon-speak-btn vi-speak"
+                            (click)="speakVietnamese()"
+                            [disabled]="!vietnameseText || isSpeakingVi"
+                            [class.playing]="isSpeakingVi"
+                            title="Listen in Vietnamese">
+                            {{ isSpeakingVi ? '⏳' : '🔊' }}
+                        </button>
+                        <input type="text" [(ngModel)]="vietnameseText"
+                            (input)="onVietnameseInput(vietnameseText)"
+                            (keyup.enter)="translateFromVietnamese()"
+                            placeholder="Type in Vietnamese..." />
+                    </div>
                 </div>
 
             </div>
 
             <div class="loading-section" *ngIf="isLoading">
-
                 <div class="loader"></div>
-
-                <p>Đang dịch...</p>
-
-            </div>
-
-            <div class="button-group">
-
-                <button class="speak-btn" (click)="speakText(englishText, 'en-US')" [disabled]="!englishText">
-
-                    Nghe Tiếng Anh
-
-                </button>
-
-                <button class="speak-btn" (click)="speakText(vietnameseText, 'vi-VN')" [disabled]="!vietnameseText">
-
-                    Nghe Tiếng Việt
-
-                </button>
-
-                <button class="clear-btn" (click)="clearAll()">
-
-                    Xóa
-
-                </button>
-
+                <p>Translating...</p>
             </div>
 
         </div>

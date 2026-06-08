@@ -62,7 +62,7 @@
             </ng-template>
         </div>
         <div class="profile-details">
-            <p class="profile-label">Hello</p>
+            <p class="profile-label">Xin chào việt nam</p>
             <h3>{{ name || 'Guest' }}</h3>
             <span class="role-chip">{{ role === 'User' ? 'Student' : role === 'Admin' ? 'Administrator' : role || 'Guest' }}</span>
         </div>
@@ -72,6 +72,7 @@
     <div class="menu-section" *ngIf="!isLogin">
         
         <ul>
+            
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="user/search">Vocabulary Search</button></li>
         </ul>
@@ -140,8 +141,9 @@
             <li *ngIf="role === 'Admin'"><button class="menu-btn" routerLink="/admin/teachers">Teacher Applications</button></li>
             <li><button class="menu-btn" routerLink="/admin/schedule">My Availability</button></li>
             <li><button class="menu-btn" routerLink="/admin/classrooms">Student Bookings</button></li>
-            <li><button class="menu-btn" routerLink="/user/become-teacher">Teacher Profile</button></li>
+            
             <li><button class="menu-btn" routerLink="/teacher/listclass">My Group Classes</button></li>
+            <li><button class="menu-btn" routerLink="/user/become-teacher">Teacher Profile</button></li>
             
         </ul>
     </div>

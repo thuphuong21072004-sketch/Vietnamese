@@ -16,7 +16,7 @@ import {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ClassDetail.component.html',
-  styleUrls: ['./ClassDetail.component.css'],
+  styleUrls: ['./classDetail.component.css'],
 })
 export class StudentCourseDetailComponent implements OnInit {
   loading = false;
