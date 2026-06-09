@@ -1,63 +1,45 @@
-
 <div class="speak-page">
-
-    <div class="background-circle circle-1"></div>
-    <div class="background-circle circle-2"></div>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
 
     <div class="speak-container">
 
-        <div class="top-section">
-            <div class="logo-box">
-                <div class="logo-icon">🔊</div>
-            </div>
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">🎙️</div>
             <h1>Speaking Practice</h1>
-            <p class="subtitle">Enter English or Vietnamese to translate and listen to pronunciation</p>
+            <p>Translate and practice Vietnamese pronunciation</p>
         </div>
 
-        <div class="translate-card">
-
+        <!-- Translation card -->
+        <div class="card">
             <div class="translate-row">
 
-                <div class="language-box">
-                    <div class="language-header">
-                        <span class="language-flag">🇬🇧</span>
-                        <span class="language-title">English</span>
-                    </div>
-                    <div class="input-wrapper">
-                        <button class="icon-speak-btn"
-                            (click)="speakText(englishText, 'en-US')"
-                            [disabled]="!englishText"
-                            title="Listen in English">
-                            🔊
-                        </button>
-                        <input type="text" [(ngModel)]="englishText"
+                <div class="lang-col">
+                    <div class="lang-label"><span>🇬🇧</span> English</div>
+                    <div class="input-row" [class.focused]="false">
+                        <button class="listen-btn" (click)="speakText(englishText,'en-US')" [disabled]="!englishText">🔊</button>
+                        <input [(ngModel)]="englishText"
                             (input)="onEnglishInput(englishText)"
                             (keyup.enter)="translateFromEnglish()"
                             placeholder="Type in English..." />
                     </div>
                 </div>
 
-                <div class="swap-area">
-                    <button class="swap-btn" (click)="clearAll()" title="Clear all">
-                        ✕
-                    </button>
-                    <div class="swap-icon">⇄</div>
+                <div class="mid-col">
+                    <button class="clear-btn" (click)="clearAll()" title="Clear">✕</button>
+                    <span class="arrow">⇄</span>
                 </div>
 
-                <div class="language-box">
-                    <div class="language-header">
-                        <span class="language-flag">🇻🇳</span>
-                        <span class="language-title">Tiếng Việt</span>
-                    </div>
-                    <div class="input-wrapper">
-                        <button class="icon-speak-btn vi-speak"
-                            (click)="speakVietnamese()"
+                <div class="lang-col">
+                    <div class="lang-label"><span>🇻🇳</span> Tiếng Việt</div>
+                    <div class="input-row">
+                        <button class="listen-btn vi" (click)="speakVietnamese()"
                             [disabled]="!vietnameseText || isSpeakingVi"
-                            [class.playing]="isSpeakingVi"
-                            title="Listen in Vietnamese">
+                            [class.playing]="isSpeakingVi">
                             {{ isSpeakingVi ? '⏳' : '🔊' }}
                         </button>
-                        <input type="text" [(ngModel)]="vietnameseText"
+                        <input [(ngModel)]="vietnameseText"
                             (input)="onVietnameseInput(vietnameseText)"
                             (keyup.enter)="translateFromVietnamese()"
                             placeholder="Type in Vietnamese..." />
@@ -66,13 +48,49 @@
 
             </div>
 
-            <div class="loading-section" *ngIf="isLoading">
-                <div class="loader"></div>
-                <p>Translating...</p>
+            <div class="status-bar" *ngIf="isLoading || translateError">
+                <span *ngIf="isLoading" class="status-loading">
+                    <span class="dot-spin"></span> Translating...
+                </span>
+                <span *ngIf="translateError" class="status-error">⚠️ {{ translateError }}</span>
+            </div>
+        </div>
+
+        <!-- Practice card -->
+        <div class="card practice-card" *ngIf="vietnameseText && !isLoading">
+
+            <div class="target-row">
+                <span class="target-label">Say this:</span>
+                <span class="target-text">{{ vietnameseText }}</span>
+                <button class="mini-listen" (click)="speakVietnamese()" [disabled]="isSpeakingVi" title="Listen">
+                    {{ isSpeakingVi ? '⏳' : '🔊' }}
+                </button>
+            </div>
+
+            <div class="record-zone">
+                <button class="record-btn" [class.active]="isRecording" (click)="toggleRecording()">
+                    <span class="btn-icon">{{ isRecording ? '⏹' : '🎤' }}</span>
+                    <span class="btn-label">{{ isRecording ? 'Stop' : 'Record' }}</span>
+                    <div class="ripple" *ngIf="isRecording"></div>
+                </button>
+
+                <div class="waves" *ngIf="isRecording">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+
+            <div class="interim-box" *ngIf="isTranscribing">
+                <span class="dot-spin"></span>
+                Đang nhận dạng giọng nói...
+            </div>
+
+            <div class="result-box" *ngIf="transcribedText && !isTranscribing">
+                <span class="result-label">You said:</span>
+                <span class="result-text">{{ transcribedText }}</span>
+                <button class="playback-btn" *ngIf="recordedBlobUrl" (click)="playRecording()" title="Play back">🔊</button>
             </div>
 
         </div>
 
     </div>
-
 </div>

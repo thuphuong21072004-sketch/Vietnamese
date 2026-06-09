@@ -5,494 +5,314 @@
             <div class="school-name">VIETNAMESE LEARNING INSTITUTE</div>
             <div class="exam-subtitle">Official Assessment Paper</div>
         </div>
-        
     </div>
 
-    <div class="top-action" *ngIf="
-            hasDoneQuiz &&
-            !showResult
-         ">
-
-        <button class="review-btn" (click)="reviewQuiz()">
-
-            Review Test
-
-        </button>
-
+    <div class="top-action" *ngIf="hasDoneQuiz && !showResult">
+        <button class="review-btn" (click)="reviewQuiz()">Review Test</button>
     </div>
 
-    <div *ngIf="quiz">
+    <div *ngIf="quiz" class="quiz-layout">
 
-        <div class="quiz-header">
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="quiz-main">
 
-            <h2>
-
-                {{ quiz.quizName }}
-
-            </h2>
-
-            <div class="quiz-type">
-
-                <span *ngIf="refType === 'UNIT'">
-
-                    Unit Test
-
-                </span>
-
-                <span *ngIf="refType === 'COURSE_JUMP'">
-
-                    Skip Course Test
-
-                </span>
-
-                <span *ngIf="refType === 'LEVEL_JUMP'">
-
-                    Skip Level Test
-
-                </span>
-
-                <span *ngIf="refType === 'PLACEMENT'">
-
-                    Placement Test
-
-                </span>
-
+            <div class="quiz-header">
+                <h2>{{ quiz.quizName }}</h2>
+                <div class="quiz-type">
+                    <span *ngIf="refType === 'UNIT'">Unit Test</span>
+                    <span *ngIf="refType === 'COURSE_JUMP'">Skip Course Test</span>
+                    <span *ngIf="refType === 'LEVEL_JUMP'">Skip Level Test</span>
+                    <span *ngIf="refType === 'PLACEMENT'">Placement Test</span>
+                </div>
+                <div class="quiz-pass-score" *ngIf="refType !== 'PLACEMENT'">Pass Score: <span>{{ quiz.passScore || 70 }}%</span></div>
+                <!-- Timer: visible on mobile (sidebar hidden on mobile) -->
+                <div class="timer-box timer-mobile" *ngIf="quiz?.timeLimit && !showResult && !hasDoneQuiz">
+                    <div class="timer-label">Time Remaining</div>
+                    <div class="timer-text" [class.warning]="timeLeft <= 300 && timeLeft > 60" [class.danger]="timeLeft <= 60">{{ timerText }}</div>
+                </div>
             </div>
 
-            <div class="quiz-pass-score">
+            <!-- ===== QUESTIONS (hidden while showing result summary or placement modal) ===== -->
+            <ng-container *ngIf="!showResultSummary && !showPlacementModal">
 
-                Pass Score:
-
-                <span>
-
-                    {{ quiz.passScore || 70 }}%
-
-                </span>
-
+            <!-- Flat questions (no parts) -->
+            <div *ngIf="quiz.questions?.length && !quiz.parts?.length">
+                <div *ngFor="let q of quiz.questions; let i = index"
+                    class="question-box" [id]="'q-' + q.questionId">
+                    <div class="question-title">
+                        <span class="question-label">Question {{ i + 1 }}.</span>
+                        <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
+                        <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                        <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
+                        <span class="question-score">({{ q.score }} pts)</span>
+                        <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                            {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
+                        </button>
+                    </div>
+                    <div *ngFor="let a of q.answers; let ai = index" class="answer-option"
+                        [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
+                        <label class="answer-label">
+                            <input type="radio" class="answer-radio"
+                                [name]="'q' + q.questionId"
+                                [disabled]="showResult"
+                                [checked]="selectedAnswers[q.questionId] === a.answerId"
+                                (change)="selectAnswer(q.questionId, a.answerId)" />
+                            <div class="answer-content">
+                                <span *ngIf="a.answerText" class="answer-text">{{ a.answerText }}</span>
+                                <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
+                                <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
+                            </div>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <div class="timer-box" *ngIf="
-                quiz?.timeLimit &&
-                !showResult &&
-                !hasDoneQuiz
-              ">
+            <!-- Parts -->
+            <div *ngIf="quiz.parts?.length" class="parts-wrapper">
 
-                <div class="timer-label">
-
-                    Time Remaining
-
-                </div>
-
-                <div
-  class="timer-text"
-  [class.warning]="timeLeft <= 300 && timeLeft > 60"
-  [class.danger]="timeLeft <= 60"
->
-
-                    {{ timerText }}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div *ngIf="
-                quiz.questions?.length &&
-                !quiz.parts?.length
-             ">
-
-            <div *ngFor="
-                    let q of quiz.questions;
-                    let i = index
-                 " class="question-box">
-
-                <div class="question-title">
-                    <span class="question-label">Question {{ i + 1 }}.</span>
-                    <span *ngIf="q.questionText" class="question-text-inline">
-                        {{ q.questionText }}
-                    </span>
-                    <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
-                    <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
-                        [src]="getAudioUrl(q.audioUrl)"></audio>
-                    <span class="question-score">
-                        ({{ q.score }} pts)
-                    </span>
-                </div>
-
-
-                <div *ngFor="
-                        let a of q.answers; let ai = index
-                     " class="answer-option" [ngClass]="{
-                        'correct':
-                            showResult &&
-                            a.isCorrect,
-
-                        'wrong':
-                            isWrong(q, a),
-
-                        'unanswered':
-                            isUnanswered(q)
-                     }">
-
-                    <label class="answer-label">
-                        <input type="radio" class="answer-radio" [name]="
-                                    'q' +
-                                    q.questionId
-                               " [disabled]="
-                                    showResult
-                               " [checked]="
-                                    selectedAnswers[
-                                        q.questionId
-                                    ] === a.answerId
-                               " (change)="
-                                    selectAnswer(
-                                        q.questionId,
-                                        a.answerId
-                                    )
-                               " />
-
-                        <div class="answer-content">
-                            <span *ngIf="a.answerText" class="answer-text">
-                                {{ a.answerText }}
-                            </span>
-                            <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
-                            <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
-                        </div>
-                    </label>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div *ngIf="quiz.parts?.length">
-
-            <div *ngFor="
-                    let part of quiz.parts;
-                    let pi = index
-                 " class="part-box">
-
-                <div class="part-header">
-
-                    <div class="part-number">
-
+                <div class="part-tabs">
+                    <button *ngFor="let part of quiz.parts; let pi = index"
+                        class="part-tab"
+                        [class.active]="activePart === pi"
+                        [class.done]="!isSubmitted && answeredInPart(part) === totalInPart(part) && totalInPart(part) > 0"
+                        (click)="selectPart(pi)">
                         Part {{ part.partNumber }}
-
-                    </div>
-
-                    <div class="part-name">
-
-                        {{ part.partName }}
-
-                    </div>
-
+                        <span class="tab-progress" *ngIf="!isSubmitted && totalInPart(part) > 0">
+                            {{ answeredInPart(part) }}/{{ totalInPart(part) }}
+                        </span>
+                    </button>
                 </div>
 
-                <div *ngIf="part.instruction" class="part-instruction">
+                <ng-container *ngFor="let part of quiz.parts; let pi = index">
+                    <div *ngIf="activePart === pi" class="part-box">
 
-                    {{ part.instruction }}
-
-                </div>
-
-                <div *ngIf="part.questions?.length">
-
-                    <div *ngFor="
-                            let q of part.questions
-                         " class="question-box">
-
-                        <div class="question-title">
-                        
-                            <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
-                            <span *ngIf="q.questionText" class="question-text-inline">
-                                {{ q.questionText }}
-                            </span>
-                            <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
-                            <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
-                                [src]="getAudioUrl(q.audioUrl)"></audio>
-                            <span class="question-score">
-                                ({{ q.score }} pts)
-                            </span>
-
-                            
-                        
+                        <div class="part-header">
+                            <div class="part-number">Part {{ part.partNumber }}</div>
+                            <div class="part-name">{{ part.partName }}</div>
                         </div>
+                        <div *ngIf="part.instruction" class="part-instruction">{{ part.instruction }}</div>
 
-                        <div *ngFor="
-                                let a of q.answers
-                             " class="answer-option" [ngClass]="{
-                                'correct':
-                                    showResult &&
-                                    a.isCorrect,
-
-                                'wrong':
-                                    isWrong(q, a),
-
-                                'unanswered':
-                                    isUnanswered(q)
-                             }">
-
-                            <label class="answer-label">
-
-                                <input type="radio" class="answer-radio" [name]="
-                                            'q' +
-                                            q.questionId
-                                       " [disabled]="
-                                            showResult
-                                       " [checked]="
-                                            selectedAnswers[
-                                                q.questionId
-                                            ] === a.answerId
-                                       " (change)="
-                                            selectAnswer(
-                                                q.questionId,
-                                                a.answerId
-                                            )
-                                       " />
-
-                                <div class="answer-content">
-
-                                    <span *ngIf="a.answerText" class="answer-text">
-
-                                        {{ a.answerText }}
-
-                                    </span>
-
-                                    <img *ngIf="
-                                            !a.answerText &&
-                                            a.imageUrl
-                                         " class="answer-image" [src]="getImageUrl(a.imageUrl)">
-
-                                    <audio *ngIf="
-                                                !a.answerText &&
-                                                !a.imageUrl &&
-                                                a.audioUrl
-                                            " controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
-
+                        <div *ngIf="part.questions?.length">
+                            <div *ngFor="let q of part.questions" class="question-box" [id]="'q-' + q.questionId">
+                                <div class="question-title">
+                                    <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
+                                    <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
+                                    <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                                    <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
+                                    <span class="question-score">({{ q.score }} pts)</span>
+                                    <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                        {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
+                                    </button>
                                 </div>
-
-                            </label>
-
+                                <div *ngFor="let a of q.answers" class="answer-option"
+                                    [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
+                                    <label class="answer-label">
+                                        <input type="radio" class="answer-radio"
+                                            [name]="'q' + q.questionId"
+                                            [disabled]="showResult"
+                                            [checked]="selectedAnswers[q.questionId] === a.answerId"
+                                            (change)="selectAnswer(q.questionId, a.answerId)" />
+                                        <div class="answer-content">
+                                            <span *ngIf="a.answerText" class="answer-text">{{ a.answerText }}</span>
+                                            <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
+                                            <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
-                    </div>
-
-                </div>
-
-                <div *ngIf="part.passages?.length">
-                    <div *ngFor="
-                            let psg of part.passages
-                         " class="passage-box">
-                        
-                            <div *ngIf="psg.content" class="passage-text">
-                                {{ psg.content }}
-                            </div>
-                            <div class="passage-content">
-                            <img *ngIf="
-                                    !psg.content &&
-                                    psg.imageUrl
-                                 " class="passage-image" [src]="getImageUrl(psg.imageUrl)">
-                            <audio *ngIf="
-                                        !psg.content &&
-                                        !psg.imageUrl &&
-                                        psg.audioUrl
-                                     " controls class="passage-audio" [src]="getAudioUrl(psg.audioUrl)"></audio>
-                        </div>
-
-                        <div *ngFor="
-                                let q of psg.questions
-                             " class="question-box">
-
-                            <div class="question-title">
-                                <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
-                                <span *ngIf="q.questionText" class="question-text-inline">
-                                    {{ q.questionText }}
-                                </span>
-                                <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
-                                <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio"
-                                    [src]="getAudioUrl(q.audioUrl)"></audio>
-                                <span class="question-score">
-                                    ({{ q.score }} pts)
-                                </span>
-                            </div>
-
-
-                            <div *ngFor="
-                                    let a of q.answers
-                                 " class="answer-option" [ngClass]="{
-                                    'correct':
-                                        showResult &&
-                                        a.isCorrect,
-
-                                    'wrong':
-                                        isWrong(q, a),
-
-                                    'unanswered':
-                                        isUnanswered(q)
-                                 }">
-
-                                <label class="answer-label">
-
-                                    <input type="radio" class="answer-radio" [name]="
-                                                'q' +
-                                                q.questionId
-                                           " [disabled]="
-                                                showResult
-                                           " [checked]="
-                                                selectedAnswers[
-                                                    q.questionId
-                                                ] === a.answerId
-                                           " (change)="
-                                                selectAnswer(
-                                                    q.questionId,
-                                                    a.answerId
-                                                )
-                                           " />
-
-                                    <div class="answer-content">
-
-                                        <span *ngIf="a.answerText" class="answer-text">
-
-                                            {{ a.answerText }}
-
-                                        </span>
-
-                                        <img *ngIf="
-                                                !a.answerText &&
-                                                a.imageUrl
-                                             " class="answer-image" [src]="getImageUrl(a.imageUrl)">
-
-                                                    <audio *ngIf="
-                                                    !a.answerText &&
-                                                    !a.imageUrl &&
-                                                    a.audioUrl
-                                            " controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
-
+                        <div *ngIf="part.passages?.length">
+                            <div *ngFor="let psg of part.passages" class="passage-box">
+                                <div *ngIf="psg.content" class="passage-text">{{ psg.content }}</div>
+                                <div class="passage-content">
+                                    <img *ngIf="!psg.content && psg.imageUrl" class="passage-image" [src]="getImageUrl(psg.imageUrl)">
+                                    <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls class="passage-audio" [src]="getAudioUrl(psg.audioUrl)"></audio>
+                                </div>
+                                <div *ngFor="let q of psg.questions" class="question-box" [id]="'q-' + q.questionId">
+                                    <div class="question-title">
+                                        <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
+                                        <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
+                                        <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                                        <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
+                                        <span class="question-score">({{ q.score }} pts)</span>
+                                        <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                            {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
+                                        </button>
                                     </div>
-
-                                </label>
-
+                                    <div *ngFor="let a of q.answers" class="answer-option"
+                                        [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
+                                        <label class="answer-label">
+                                            <input type="radio" class="answer-radio"
+                                                [name]="'q' + q.questionId"
+                                                [disabled]="showResult"
+                                                [checked]="selectedAnswers[q.questionId] === a.answerId"
+                                                (change)="selectAnswer(q.questionId, a.answerId)" />
+                                            <div class="answer-content">
+                                                <span *ngIf="a.answerText" class="answer-text">{{ a.answerText }}</span>
+                                                <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
+                                                <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
 
+                        <div class="part-nav">
+                            <button class="part-nav-btn" *ngIf="activePart > 0" (click)="selectPart(activePart - 1)">
+                                ← Part {{ quiz.parts[activePart - 1].partNumber }}
+                            </button>
+                            <span></span>
+                            <button class="part-nav-btn next" *ngIf="activePart < quiz.parts.length - 1" (click)="selectPart(activePart + 1)">
+                                Part {{ quiz.parts[activePart + 1].partNumber }} →
+                            </button>
+                        </div>
+
+                    </div>
+                </ng-container>
+
+            </div>
+
+            <!-- Submit (mobile only) -->
+            <button class="submit-btn submit-btn-mobile" *ngIf="!isSubmitted" (click)="submitQuiz()">SUBMIT</button>
+
+            <!-- Review bar shown after clicking OK on summary -->
+            <div class="review-bar" *ngIf="isSubmitted">
+                <div class="rb-info">
+                    <span class="rb-score">{{ currentScore | number:'1.0-0' }}%</span>
+                    <span class="rb-badge pass" *ngIf="isPassed && refType !== 'PLACEMENT'">PASSED</span>
+                    <span class="rb-badge fail" *ngIf="!isPassed && refType !== 'PLACEMENT'">FAILED</span>
+                    <span class="rb-badge pass" *ngIf="refType === 'PLACEMENT'">Level Assigned</span>
+                </div>
+                <div class="rb-actions">
+                    <button class="rb-back-btn" (click)="showResultSummary = true">← Results</button>
+                    <button *ngIf="isPassed" class="next-btn" (click)="goBackCourse()">Continue</button>
+                    <button *ngIf="!isPassed && refType !== 'PLACEMENT'" class="retry-btn" (click)="retryQuiz()">Try Again</button>
+                </div>
+            </div>
+
+            </ng-container>
+
+            <!-- ===== RESULT SUMMARY CARDS ===== -->
+            <div class="rs-section" *ngIf="showResult && showResultSummary">
+
+                <div class="rs-title">Your Results</div>
+
+                <div class="rs-cards">
+                    <div class="rs-card">
+                        <div class="rs-icon-wrap correct">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        </div>
+                        <div class="rs-label correct">Correct Answers</div>
+                        <div class="rs-count">{{ correctCount }}</div>
+                        <div class="rs-unit">questions</div>
+                    </div>
+
+                    <div class="rs-card">
+                        <div class="rs-icon-wrap wrong">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </div>
+                        <div class="rs-label wrong">Wrong Answers</div>
+                        <div class="rs-count">{{ wrongCount }}</div>
+                        <div class="rs-unit">questions</div>
+                    </div>
+
+                    <div class="rs-card">
+                        <div class="rs-icon-wrap skip">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </div>
+                        <div class="rs-label skip">Skipped</div>
+                        <div class="rs-count">{{ unansweredCount }}</div>
+                        <div class="rs-unit">questions</div>
+                    </div>
+
+                    <div class="rs-card">
+                        <div class="rs-icon-wrap score">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        </div>
+                        <div class="rs-label score">Score</div>
+                        <div class="rs-count">{{ currentScore | number:'1.0-0' }}<span class="rs-pct">%</span></div>
+                        <div class="rs-unit">
+                            <span class="rs-verdict pass" *ngIf="isPassed && refType !== 'PLACEMENT'">PASSED</span>
+                            <span class="rs-verdict fail" *ngIf="!isPassed && refType !== 'PLACEMENT'">FAILED</span>
+                            <span *ngIf="refType === 'PLACEMENT'">level assigned</span>
                         </div>
                     </div>
                 </div>
 
-            </div>
-
-        </div>
-
-        <button class="submit-btn" *ngIf="!isSubmitted" (click)="submitQuiz()">
-
-            Submit Test
-
-        </button>
-
-        <div class="result-box" *ngIf="showResult">
-
-            <div *ngIf="previousScore > 0" class="old-score">
-
-                Previous score:
-                {{ previousScore }}%
-
-            </div>
-
-            <div class="current-score">
-
-                Current score:
-                {{
-                currentScore |
-                number:'1.0-0'
-                }}%
-
-            </div>
-
-            <div class="result-summary">
-            
-                <div class="summary-card correct-card">
-            
-                    <div class="summary-number">
-            
-                        {{ correctCount }}
-            
-                    </div>
-            
-                    <div class="summary-label">
-            
-                        Correct
-            
-                    </div>
-            
+                <div class="rs-actions">
+                    <button class="rs-ok-btn" (click)="showResultSummary = false; selectPart(0)">
+                        Review Answers
+                    </button>
+                    <button *ngIf="isPassed && refType !== 'PLACEMENT'" class="next-btn" (click)="goBackCourse()">Continue</button>
+                    <button class="retry-btn" (click)="retryQuiz()">Try Again</button>
+                    <button *ngIf="refType !== 'PLACEMENT'" class="back-btn" (click)="goBackCourse()">Back to Units</button>
+                    <button *ngIf="refType === 'PLACEMENT'" class="back-btn" (click)="router.navigate(['/user/tests'])">Back</button>
                 </div>
-            
-                <div class="summary-card wrong-card">
-            
-                    <div class="summary-number">
-            
-                        {{ wrongCount }}
-            
-                    </div>
-            
-                    <div class="summary-label">
-            
-                        Wrong
-            
-                    </div>
-            
-                </div>
-            
-                <div class="summary-card unanswered-card">
-            
-                    <div class="summary-number">
-            
-                        {{ unansweredCount }}
-            
-                    </div>
-            
-                    <div class="summary-label">
-            
-                        Unanswered
-            
-                    </div>
-            
-                </div>
-            
-            </div>
-            <div class="placement-result" *ngIf="refType === 'PLACEMENT'">
-                Your level has been assigned
-            </div>
-
-            <div *ngIf="refType !== 'PLACEMENT'" class="result-status" [class.pass]="isPassed" [class.fail]="!isPassed">
-
-                {{
-                isPassed
-                ? 'PASSED'
-                : 'FAILED'
-                }}
 
             </div>
 
         </div>
 
-        <div *ngIf="isSubmitted" class="after-submit">
+        <!-- ===== SIDEBAR ===== -->
+        <div class="quiz-sidebar" *ngIf="!isSubmitted">
 
-            <button *ngIf="isPassed" class="next-btn" (click)="goBackCourse()">
+            <!-- Timer -->
+            <div class="sb-timer" *ngIf="quiz.timeLimit && !hasDoneQuiz">
+                <div class="sb-timer-label">Time Remaining:</div>
+                <div class="sb-timer-value"
+                    [class.warning]="timeLeft <= 300 && timeLeft > 60"
+                    [class.danger]="timeLeft <= 60">{{ timerText }}</div>
+            </div>
 
-                Continue
+            <!-- Submit -->
+            <button class="sb-submit-btn" (click)="submitQuiz()">SUBMIT</button>
 
-            </button>
+            <!-- Legend -->
+            <div class="sb-legend">
+                <span class="sb-dot answered"></span> Answered &nbsp;
+                <span class="sb-dot flagged"></span> Flagged
+            </div>
 
-            <button *ngIf="
-                !isPassed &&
-                refType !== 'PLACEMENT'
-              " class="retry-btn" (click)="retryQuiz()">
+            <!-- Note -->
+            <div class="sb-note">
+                Click a number to jump to that question. Click <b>Question X.</b> to flag for review.
+            </div>
 
-                Retry Test
+            <!-- Navigator: parts -->
+            <ng-container *ngIf="quiz.parts?.length">
+                <ng-container *ngFor="let part of quiz.parts; let pi = index">
+                    <div class="sb-part-label">Part {{ part.partNumber }}</div>
+                    <div class="sb-q-grid">
+                        <button *ngFor="let q of getPartQuestionsFlat(part)"
+                            class="sb-q-btn"
+                            [class.sb-answered]="selectedAnswers[q.questionId] !== undefined"
+                            [class.sb-flagged]="flaggedQuestions.has(q.questionId)"
+                            (click)="goToQuestion(pi, q.questionId)">
+                            {{ getQuestionIndex(q) }}
+                        </button>
+                    </div>
+                </ng-container>
+            </ng-container>
 
-            </button>
+            <!-- Navigator: flat questions -->
+            <div class="sb-q-grid" *ngIf="quiz.questions?.length && !quiz.parts?.length">
+                <button *ngFor="let q of quiz.questions; let i = index"
+                    class="sb-q-btn"
+                    [class.sb-answered]="selectedAnswers[q.questionId] !== undefined"
+                    [class.sb-flagged]="flaggedQuestions.has(q.questionId)"
+                    (click)="goToFlatQuestion(q.questionId)">
+                    {{ i + 1 }}
+                </button>
+            </div>
 
         </div>
 
     </div>
 
 </div>
+

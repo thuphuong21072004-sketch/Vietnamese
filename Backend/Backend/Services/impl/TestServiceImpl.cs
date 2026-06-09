@@ -762,248 +762,9 @@ namespace Backend.Services.impl
                 return;
             }
 
+            // PLACEMENT: level assignment deferred to StartLearning()
             if (quiz.RefType == common.Constant.RefType.Placement)
-            {
-                Level? assignedLevel = null;
-
-                if (result.FinalScore >= 90)
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelC2
-                        );
-                }
-                else if (result.FinalScore >= 80)
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelC1
-                        );
-                }
-                else if (result.FinalScore >= 65)
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelB2
-                        );
-                }
-                else if (result.FinalScore >= 50)
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelB1
-                        );
-                }
-                else if (result.FinalScore >= 30)
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelA2
-                        );
-                }
-                else
-                {
-                    assignedLevel =
-                        await _levelRepository.GetByName(
-                            common.Constant.Level.LevelA1
-                        );
-                }
-
-                if (assignedLevel == null)
-                {
-                    return;
-                }
-
-                var currentLevels =
-                    (await _levelRepository.GetAllLevels(true))
-                    .OrderBy(x => x.OrderIndex)
-                    .ToList();
-
-                var userLevels = await _progressRepository.GetUserLevels( userId, common.Constant.RefType.Level );
-
-                var userLevelIds = userLevels.Where(x => x.Status == true).Select(x => x.RefId).ToHashSet();
-
-                int currentMaxOrder = currentLevels
-                    .Where(x =>
-                        userLevelIds.Contains(
-                            x.LevelId))
-                    .Select(x => x.OrderIndex)
-                    .DefaultIfEmpty(-1)
-                    .Max();
-
-                if (
-                    assignedLevel.OrderIndex <=
-                    currentMaxOrder
-                )
-                {
-                    return;
-                }
-                var allLevels =
-                    (await _levelRepository.GetAllLevels(true))
-                    .OrderBy(x => x.OrderIndex)
-                    .ToList();
-
-                foreach (var lv in allLevels)
-                {
-                    if (lv.OrderIndex >= assignedLevel.OrderIndex)
-                    {
-                        break;
-                    }
-
-                    var levelProgress =
-                        await _progressRepository.GetUserLevel(
-                            userId,
-                            lv.LevelId,
-                            common.Constant.RefType.Level
-                        );
-
-                    if (levelProgress == null)
-                    {
-                        await _progressRepository.AddUserProgress(
-                            new UserProgress
-                            {
-                                UserId = userId,
-                                RefType =
-                                    common.Constant.RefType.Level,
-                                RefId = lv.LevelId,
-                                AssignedDate = DateTime.Now,
-                                CompletedDate = DateTime.Now,
-                                Status = true
-                            }
-                        );
-                    }
-                    else
-                    {
-                        levelProgress.Status = true;
-
-                        levelProgress.CompletedDate =
-                            DateTime.Now;
-
-
-                    }
-                }
-
-                var currentLevelProgress =
-                    await _progressRepository.GetUserLevel(
-                        userId,
-                        assignedLevel.LevelId,
-                        common.Constant.RefType.Level
-                    );
-
-                if (currentLevelProgress == null)
-                {
-                    await _progressRepository.AddUserProgress(
-                        new UserProgress
-                        {
-                            UserId = userId,
-                            RefType =
-                                common.Constant.RefType.Level,
-                            RefId = assignedLevel.LevelId,
-                            AssignedDate = DateTime.Now,
-                            Status = false
-                        }
-                    );
-                }
-
-                else
-                {
-                    currentLevelProgress.Status = false;
-
-                    currentLevelProgress.CompletedDate =
-                        null;
-                }
-
-                var firstCourse =
-                    (await _courseRepository.GetAllCourses(
-                        assignedLevel.LevelId,
-                        true
-                    ))
-                    .OrderBy(x => x.OrderIndex)
-                    .FirstOrDefault();
-
-                if (firstCourse != null)
-                {
-                    var courseProgress =
-                        await _progressRepository
-                            .GetUserCourseByCourseId(
-                                userId,
-                                firstCourse.CourseId,
-                                common.Constant.RefType.Course
-                            );
-
-                    if (courseProgress == null)
-                    {
-                        await _progressRepository
-                            .AddUserProgress(
-                                new UserProgress
-                                {
-                                    UserId = userId,
-                                    RefType =
-                                        common.Constant.RefType.Course,
-                                    RefId = firstCourse.CourseId,
-                                    AssignedDate = DateTime.Now,
-                                    Status = false
-                                }
-                            );
-                    }
-
-                    var firstUnit =
-                        (await _unitRepository.GetAllUnits(
-                            firstCourse.CourseId,
-                            true
-                        ))
-                        .OrderBy(x => x.OrderIndex)
-                        .FirstOrDefault();
-
-                    if (firstUnit != null)
-                    {
-                        var unitProgress =
-                            await _progressRepository
-                                .GetUserUnitByUnitId(
-                                    userId,
-                                    firstUnit.UnitId,
-                                    common.Constant.RefType.Unit
-                                );
-
-                        if (unitProgress == null)
-                        {
-                            bool exists =
-                                await _progressRepository
-                                    .ExistsProgress(
-                                        userId,
-                                        common.Constant.RefType.Unit,
-                                        firstUnit.UnitId
-                                    );
-
-                            if (!exists)
-                            {
-                                await _progressRepository
-                                    .AddUserProgress(
-                                        new UserProgress
-                                        {
-                                            UserId = userId,
-
-                                            RefType =
-                                                common.Constant.RefType.Unit,
-
-                                            RefId =
-                                                firstUnit.UnitId,
-
-                                            AssignedDate =
-                                                DateTime.Now,
-
-                                            Status = false
-                                        }
-                                    );
-                            }
-                        }
-                    }
-                }
-
-                await _progressRepository.Save();
-
                 return;
-            }
             if (quiz.RefType == common.Constant.RefType.Unit)
             {
                 var unit =
@@ -1674,12 +1435,91 @@ namespace Backend.Services.impl
          */
         public async Task<UserQuizDTO?> GetMyQuizResult(int quizId)
         {
-            var email= _userContext.GetEmail();
+            var email = _userContext.GetEmail();
             int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
-            
+
             var result = await _userQuizRepository.GetUserQuiz(userId, quizId);
             if (result == null) return null;
-            return _mapper.Map<UserQuizDTO>(result);
+
+            var dto = _mapper.Map<UserQuizDTO>(result);
+
+            var quiz = await _quizRepository.GetQuizById(quizId);
+            if (quiz?.RefType == common.Constant.RefType.Placement)
+                dto.AssignedLevelName = GetLevelNameForScore(result.Score);
+
+            return dto;
+        }
+
+        private static string GetLevelNameForScore(decimal score)
+        {
+            if (score >= 90) return common.Constant.Level.LevelC2;
+            if (score >= 80) return common.Constant.Level.LevelC1;
+            if (score >= 65) return common.Constant.Level.LevelB2;
+            if (score >= 50) return common.Constant.Level.LevelB1;
+            if (score >= 30) return common.Constant.Level.LevelA2;
+            return common.Constant.Level.LevelA1;
+        }
+
+        public async Task StartLearning(int quizId)
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
+
+            var userQuiz = await _userQuizRepository.GetUserQuiz(userId, quizId);
+            if (userQuiz == null) return;
+
+            var quiz = await _quizRepository.GetQuizById(quizId);
+            if (quiz?.RefType != common.Constant.RefType.Placement) return;
+
+            var levelName = GetLevelNameForScore(userQuiz.Score);
+            var assignedLevel = await _levelRepository.GetByName(levelName);
+            if (assignedLevel == null) return;
+
+            var userLevels = await _progressRepository.GetUserLevels(userId, common.Constant.RefType.Level);
+            var userLevelIds = userLevels.Where(x => x.Status == true).Select(x => x.RefId).ToHashSet();
+            var allLevels = (await _levelRepository.GetAllLevels(true)).OrderBy(x => x.OrderIndex).ToList();
+
+            int currentMaxOrder = allLevels
+                .Where(x => userLevelIds.Contains(x.LevelId))
+                .Select(x => x.OrderIndex)
+                .DefaultIfEmpty(-1)
+                .Max();
+
+            if (assignedLevel.OrderIndex <= currentMaxOrder) return;
+
+            foreach (var lv in allLevels)
+            {
+                if (lv.OrderIndex >= assignedLevel.OrderIndex) break;
+                var lp = await _progressRepository.GetUserLevel(userId, lv.LevelId, common.Constant.RefType.Level);
+                if (lp == null)
+                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = lv.LevelId, AssignedDate = DateTime.Now, CompletedDate = DateTime.Now, Status = true });
+                else
+                { lp.Status = true; lp.CompletedDate = DateTime.Now; }
+            }
+
+            var currentLp = await _progressRepository.GetUserLevel(userId, assignedLevel.LevelId, common.Constant.RefType.Level);
+            if (currentLp == null)
+                await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = assignedLevel.LevelId, AssignedDate = DateTime.Now, Status = false });
+            else
+            { currentLp.Status = false; currentLp.CompletedDate = null; }
+
+            var firstCourse = (await _courseRepository.GetAllCourses(assignedLevel.LevelId, true)).OrderBy(x => x.OrderIndex).FirstOrDefault();
+            if (firstCourse != null)
+            {
+                var cp = await _progressRepository.GetUserCourseByCourseId(userId, firstCourse.CourseId, common.Constant.RefType.Course);
+                if (cp == null)
+                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Course, RefId = firstCourse.CourseId, AssignedDate = DateTime.Now, Status = false });
+
+                var firstUnit = (await _unitRepository.GetAllUnits(firstCourse.CourseId, true)).OrderBy(x => x.OrderIndex).FirstOrDefault();
+                if (firstUnit != null)
+                {
+                    bool exists = await _progressRepository.ExistsProgress(userId, common.Constant.RefType.Unit, firstUnit.UnitId);
+                    if (!exists)
+                        await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Unit, RefId = firstUnit.UnitId, AssignedDate = DateTime.Now, Status = false });
+                }
+            }
+
+            await _progressRepository.Save();
         }
 
         /* xem lịch sửa đáp án đã chọn

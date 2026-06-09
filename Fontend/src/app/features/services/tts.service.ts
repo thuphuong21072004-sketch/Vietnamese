@@ -25,4 +25,10 @@ export class TtsService {
     audio.play();
     return audio;
   }
+
+  deleteAudio(audioUrl: string): void {
+    const fileName = audioUrl.split('/').pop();
+    if (!fileName) return;
+    this.http.delete(`${this.url}?file=${fileName}`).subscribe({ error: () => {} });
+  }
 }

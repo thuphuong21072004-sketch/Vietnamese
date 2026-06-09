@@ -14,5 +14,7 @@
 
         public bool IsPassed { get; set; }
 
+        public string? AssignedLevelName { get; set; }
+
     }
 }

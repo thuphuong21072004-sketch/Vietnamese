@@ -68,6 +68,14 @@ namespace Backend.Controllers
          * thuphuong21072004
          */
         [Authorize]
+        [HttpPost("startLearning")]
+        public async Task<IActionResult> StartLearning([FromQuery] int quizId)
+        {
+            await _testService.StartLearning(quizId);
+            return Ok();
+        }
+
+        [Authorize]
         [HttpGet("my-quiz-result")]
         public async Task<IActionResult> GetMyQuizResult(int quizId)
         {

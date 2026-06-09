@@ -1,1 +1,5 @@
 gTTS==2.5.4
+torch
+torchaudio
+transformers
+librosa

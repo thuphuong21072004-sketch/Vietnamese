@@ -56,6 +56,16 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
   showResult = false;
 
+  showResultSummary = false;
+
+  placementLevel = '';       // assessed level name, e.g. "B2"
+  showPlacementModal = false;
+  isStartingLearning = false;
+
+  activePart = 0;
+
+  flaggedQuestions = new Set<number>();
+
   correctCount = 0;
 
   timeLeft = 0;
@@ -70,7 +80,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private learningService: LearningService,
     private testService: TestService,
-    private router: Router,
+    public router: Router,
   ) {}
 
   ngOnInit() {
@@ -203,6 +213,51 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
   selectAnswer(qId: number, aId: number) {
     this.selectedAnswers[qId] = aId;
   }
+
+  selectPart(index: number) {
+    this.activePart = index;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  toggleFlag(qId: number) {
+    if (this.flaggedQuestions.has(qId)) this.flaggedQuestions.delete(qId);
+    else this.flaggedQuestions.add(qId);
+  }
+
+  goToQuestion(partIndex: number, qId: number) {
+    if (this.activePart !== partIndex) {
+      this.activePart = partIndex;
+      setTimeout(() => document.getElementById('q-' + qId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
+    } else {
+      document.getElementById('q-' + qId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  goToFlatQuestion(qId: number) {
+    document.getElementById('q-' + qId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  getPartQuestionsFlat(part: any): any[] {
+    return this.getPartQuestions(part);
+  }
+
+  answeredInPart(part: any): number {
+    const questions = this.getPartQuestions(part);
+    return questions.filter((q: any) => this.selectedAnswers[q.questionId] !== undefined).length;
+  }
+
+  totalInPart(part: any): number {
+    return this.getPartQuestions(part).length;
+  }
+
+  getPartQuestions(part: any): any[] {
+    const qs: any[] = [];
+    if (part.questions?.length) qs.push(...part.questions);
+    if (part.passages?.length) {
+      part.passages.forEach((p: any) => { if (p.questions?.length) qs.push(...p.questions); });
+    }
+    return qs;
+  }
   submitQuiz() {
     if (!this.quiz) {
       return;
@@ -285,17 +340,24 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
           }
         });
 
-        if (this.refType === 'PLACEMENT') {
-          this.isPassed = true;
-        } else {
-          this.isPassed = rs.isPassed;
-        }
-
+        this.isPassed = this.refType === 'PLACEMENT' ? true : rs.isPassed;
+        this.showResultSummary = true;
         this.showResult = true;
-
         this.isSubmitted = true;
-
         this.hasDoneQuiz = true;
+
+        if (this.refType === 'PLACEMENT') {
+          const levelName = rs.assignedLevelName || 'A1';
+          this.placementLevel = levelName;
+          setTimeout(() => {
+            const proceed = window.confirm(
+              `🎉 Great Job!\n\nYour English proficiency has been assessed as: ${levelName}\n\nWe recommend starting from this level.\n\nClick OK to Start Learning.`
+            );
+            if (proceed) {
+              this.startLearning();
+            }
+          }, 200);
+        }
       },
     });
   }
@@ -351,12 +413,17 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
           this.showResult = true;
 
           this.isSubmitted = true;
+
+          this.showResultSummary = true;
         });
     });
   }
   retryQuiz() {
     localStorage.removeItem(`quiz_end_time_${this.quiz?.quizId}`);
     this.selectedAnswers = {};
+    this.activePart = 0;
+    this.showResultSummary = false;
+    this.flaggedQuestions = new Set<number>();
 
     this.showResult = false;
 
@@ -533,6 +600,18 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
   goBackCourse() {
     this.router.navigate(['/user/units']);
+  }
+
+  startLearning() {
+    if (!this.quiz || this.isStartingLearning) return;
+    this.isStartingLearning = true;
+    this.testService.startLearning(this.quiz.quizId).subscribe({
+      next: () => this.router.navigate(['/user/units']),
+      error: () => {
+        this.isStartingLearning = false;
+        alert('Có lỗi xảy ra. Vui lòng thử lại.');
+      }
+    });
   }
   ngOnDestroy(): void {
     if (this.timerInterval) {

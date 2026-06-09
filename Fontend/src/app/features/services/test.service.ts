@@ -59,6 +59,14 @@ export class TestService {
     ) as Observable<string>;
   }
 
+  startLearning(quizId: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/startLearning?quizId=${quizId}`,
+      null,
+      this.getOptions(true),
+    );
+  }
+
   // RESULT
   getMyQuizResult(quizId: number): Observable<any> {
     return this.http.get<any>(

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+using System.Diagnostics;
+using System.Text.Json;
 using Backend.Common;
 using Backend.Data;
 using Backend.Models;
@@ -9,50 +10,100 @@ namespace Backend.Repository.impl
 {
     public class VideoRepositoryImpl : VideoRepository
     {
-        private readonly HttpClient _http;
         private readonly AppDbContext _context;
         private readonly UserContextUtil _userContext;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
         public VideoRepositoryImpl(
-            HttpClient http,
             AppDbContext context,
-            IHttpContextAccessor httpContextAccessor,
-            UserContextUtil userContext)
+            UserContextUtil userContext,
+            IConfiguration configuration,
+            IWebHostEnvironment environment)
         {
-            _http = http;
             _context = context;
             _userContext = userContext;
+            _configuration = configuration;
+            _environment = environment;
         }
 
-        /*
-         * Import video từ Youtube vào hệ thống
-         * O(1)
-         * thuphuong21072004
-         */
         public async Task ImportVideo(string youtubeId)
         {
-            await _http.PostAsJsonAsync(
-                "http://localhost:5001/crawl",
-                new
+            var python = _configuration["TextToSpeech:PythonExecutable"] ?? "python";
+            var script = Path.Combine(_environment.ContentRootPath, "Scripts", "crawl.py");
+
+            var info = new ProcessStartInfo
+            {
+                FileName = python,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            info.ArgumentList.Add(script);
+            info.ArgumentList.Add(youtubeId);
+
+            using var process = new Process { StartInfo = info };
+            process.Start();
+            var stdout = await process.StandardOutput.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            if (string.IsNullOrWhiteSpace(stdout))
+                throw new InvalidOperationException("crawl.py returned no output.");
+
+            var result = JsonSerializer.Deserialize<CrawlResult>(stdout, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (result == null || !string.IsNullOrEmpty(result.Error))
+                throw new InvalidOperationException(result?.Error ?? "Failed to parse crawl output.");
+
+            var createdBy = _userContext.GetEmail();
+            var existing = await _context.Videos.FirstOrDefaultAsync(v => v.YoutubeId == youtubeId);
+
+            int videoId;
+            if (existing == null)
+            {
+                var video = new Video
                 {
-                    youtubeId,
-                    createdBy = _userContext.GetEmail()
-                });
+                    YoutubeId = youtubeId,
+                    Title = result.Title ?? youtubeId,
+                    CreatedBy = createdBy,
+                    Status = 1
+                };
+                _context.Videos.Add(video);
+                await _context.SaveChangesAsync();
+                videoId = video.VideoId;
+            }
+            else
+            {
+                videoId = existing.VideoId;
+            }
+
+            var old = _context.Transcripts.Where(t => t.VideoId == videoId);
+            _context.Transcripts.RemoveRange(old);
+
+            if (result.Transcripts?.Count > 0)
+            {
+                var rows = result.Transcripts.Select(t => new Transcript
+                {
+                    VideoId = videoId,
+                    Sentence = t.Text,
+                    StartTime = t.Start
+                }).ToList();
+                _context.Transcripts.AddRange(rows);
+            }
+
+            await _context.SaveChangesAsync();
         }
 
-        /*
-         * Lấy danh sách video theo trạng thái
-         * O(n)
-         * thuphuong21072004
-         */
         public async Task<List<Video>> GetAllVideos(int? status, int page, int pageSize)
         {
             IQueryable<Video> query = _context.Videos;
 
             if (status.HasValue)
-            {
                 query = query.Where(v => v.Status == status.Value);
-            }
 
             return await query
                 .OrderByDescending(v => v.VideoId)
@@ -61,11 +112,6 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
-        /*
-         * Tìm kiếm transcript theo từ khóa
-         * O(n)
-         * thuphuong21072004
-         */
         public async Task<List<Transcript>> Search(string keyword, int page, int pageSize)
         {
             return await _context.Transcripts
@@ -81,34 +127,31 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
-        /*
-         * Cập nhật trạng thái video
-         * O(1)
-         * thuphuong21072004
-         */
         public async Task UpdateVideo(int videoId, int status)
         {
             var video = await _context.Videos.FindAsync(videoId);
-
-            if (video == null)
-            {
-                return;
-            }
-
+            if (video == null) return;
             video.Status = status;
-
             await _context.SaveChangesAsync();
         }
 
-        /*
-         * Tìm kiếm video theo YoutubeId
-         * O(n)
-         * thuphuong21072004
-         */
         public async Task<Video?> SearchVideo(string youtubeId)
         {
             return await _context.Videos
                 .FirstOrDefaultAsync(v => v.YoutubeId == youtubeId);
+        }
+
+        private sealed class CrawlResult
+        {
+            public string? Title { get; set; }
+            public List<TranscriptLine>? Transcripts { get; set; }
+            public string? Error { get; set; }
+        }
+
+        private sealed class TranscriptLine
+        {
+            public string Text { get; set; } = string.Empty;
+            public double Start { get; set; }
         }
     }
 }

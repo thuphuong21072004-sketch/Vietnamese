@@ -67,7 +67,6 @@ builder.Services.AddScoped<TestService, TestServiceImpl>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserContextUtil>();
 builder.Services.AddScoped<UserRepository, UserRepositoryImpl>();
-builder.Services.AddHttpClient<VideoRepositoryImpl>();
 builder.Services.AddScoped<VideoRepository, VideoRepositoryImpl>();
 builder.Services.AddScoped<LevelRepository, LevelRepositoryImpl>();
 builder.Services.AddScoped<CourseRepository, CourseRepositoryImpl>();
@@ -139,6 +138,9 @@ builder.Services.AddScoped<
 >();
 
 builder.Services.AddScoped<TextToSpeechService, GttsTextToSpeechService>();
+builder.Services.AddSingleton<SpeechToTextService, Wav2VecSpeechToTextService>();
+builder.Services.AddHttpClient("asr")
+    .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(120));
 
 builder.Services.AddScoped<StripeService>();
 
