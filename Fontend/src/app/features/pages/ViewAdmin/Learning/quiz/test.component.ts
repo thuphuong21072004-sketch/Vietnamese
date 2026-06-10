@@ -2,8 +2,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-
 import { TestService } from '../../../../services/test.service';
 import { BaseService } from '../../../../services/base.service';
 import { LearningService } from '../../../../services/learning.service';
@@ -28,7 +26,6 @@ export class QuizComponent implements OnChanges {
     private testService: TestService,
     private learningService: LearningService,
     private baseService: BaseService,
-    private router: Router,
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -144,34 +141,40 @@ export class QuizComponent implements OnChanges {
   createQuestion(partId: number | null, passageId: number | null) {
     return {
       questionId: 0,
-
       quizId: this.quiz.quizId,
-
       partId,
-
       passageId,
-
       questionText: '',
-
       imageUrl: null,
-
       audioUrl: null,
-
       orderIndex: 1,
-
       score: 1,
-
       isDelete: false,
-
+      questionType: 'MULTIPLE_CHOICE',
       answers: [this.createAnswer(0), this.createAnswer(1)],
     };
   }
 
-  deleteQuestion(question: any, list: any[]) {
-    const index = list.indexOf(question);
+  onQuestionTypeChange(question: any) {
+    if (question.questionType === 'PRONUNCIATION') {
+      question.answers = [];
+    } else if (question.questionType === 'WRITING') {
+      const existing = question.answers?.find((a: any) => a.isCorrect && !a.isDelete);
+      question.answers = [existing ?? this.createAnswer(0)];
+      question.answers[0].isCorrect = true;
+    } else {
+      if (!question.answers?.filter((a: any) => !a.isDelete).length) {
+        question.answers = [this.createAnswer(0), this.createAnswer(1)];
+      }
+    }
+  }
 
-    if (index >= 0) {
-      list.splice(index, 1);
+  deleteQuestion(question: any, list: any[]) {
+    if (question.questionId > 0) {
+      question.isDelete = true;
+    } else {
+      const index = list.indexOf(question);
+      if (index >= 0) list.splice(index, 1);
     }
   }
 
@@ -223,10 +226,14 @@ export class QuizComponent implements OnChanges {
     });
   }
 
-  deleteAnswer(question: any, index: number) {
-    question.answers.splice(index, 1);
-
-    question.answers.forEach((a: any, i: number) => {
+  deleteAnswer(question: any, answer: any) {
+    if (answer.answerId > 0) {
+      answer.isDelete = true;
+    } else {
+      const index = question.answers.indexOf(answer);
+      if (index >= 0) question.answers.splice(index, 1);
+    }
+    question.answers.filter((a: any) => !a.isDelete).forEach((a: any, i: number) => {
       a.answerLabel = String.fromCharCode(65 + i);
     });
   }
@@ -264,10 +271,11 @@ export class QuizComponent implements OnChanges {
   }
 
   deletePart(part: any) {
-    const index = this.quiz.parts.indexOf(part);
-
-    if (index >= 0) {
-      this.quiz.parts.splice(index, 1);
+    if (part.partId > 0) {
+      part.isDelete = true;
+    } else {
+      const index = this.quiz.parts.indexOf(part);
+      if (index >= 0) this.quiz.parts.splice(index, 1);
     }
   }
 
@@ -294,10 +302,11 @@ export class QuizComponent implements OnChanges {
   }
 
   deletePassage(psg: any, part: any) {
-    const index = part.passages.indexOf(psg);
-
-    if (index >= 0) {
-      part.passages.splice(index, 1);
+    if (psg.passageId > 0) {
+      psg.isDelete = true;
+    } else {
+      const index = part.passages.indexOf(psg);
+      if (index >= 0) part.passages.splice(index, 1);
     }
   }
 
@@ -349,7 +358,7 @@ export class QuizComponent implements OnChanges {
     this.testService.saveQuiz(this.quiz).subscribe({
       next: () => {
         alert('Quiz saved successfully');
-
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         this.loadQuiz();
       },
 
@@ -377,43 +386,10 @@ export class QuizComponent implements OnChanges {
     });
   }
 
+  showPreview = false;
+
   previewQuiz() {
-    if (!this.quiz) {
-      return;
-    }
-
-    const refType = this.quiz.refType || this.refType || 'UNIT';
-    const refId = this.quiz.refId || this.refId || 0;
-
-    const encodedRefType = encodeURIComponent(refType);
-    const encodedRefId = encodeURIComponent(refId);
-
-    const queryParams = new URLSearchParams();
-
-    queryParams.set('refType', encodedRefType);
-    queryParams.set('refId', encodedRefId);
-
-    switch (refType) {
-      case 'UNIT':
-        queryParams.set('unitId', encodedRefId);
-        break;
-
-      case 'LEVEL_JUMP':
-        queryParams.set('levelId', encodedRefId);
-        break;
-
-      case 'COURSE_JUMP':
-        queryParams.set('courseId', encodedRefId);
-        break;
-
-      case 'PLACEMENT':
-        queryParams.set('placementId', encodedRefId);
-        break;
-    }
-
-    const url = `${window.location.origin}/user/quiz?${queryParams.toString()}`;
-
-    window.open(url, '_blank');
+    this.showPreview = true;
   }
 
   get totalScore(): number {

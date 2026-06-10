@@ -28,14 +28,15 @@ namespace Backend.Controllers
         {
             try
             {
-                var enrollmentId =
+                var result =
                     await _classEnrollmentService
                         .EnrollAsync(classId);
 
                 return Ok(new
                 {
                     success = true,
-                    enrollmentId
+                    enrollmentId = result.enrollmentId,
+                    status = result.status
                 });
             }
             catch (Exception ex)

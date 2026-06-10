@@ -130,6 +130,12 @@ namespace Backend.Services.impl
                     throw new UnauthorizedAccessException(
                         "No permission");
                 }
+
+                if (enrollment.Status != StatusBooking.PendingPayment)
+                {
+                    throw new InvalidOperationException(
+                        "Enrollment is not pending payment");
+                }
             }
             else
             {

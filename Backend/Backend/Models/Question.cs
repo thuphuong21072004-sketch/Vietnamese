@@ -21,6 +21,8 @@ namespace Backend.Models
 
         public decimal Score { get; set; }
 
+        public string QuestionType { get; set; } = "MULTIPLE_CHOICE";
+
         public Quiz? Quiz { get; set; }
 
         public Part? Part { get; set; }

@@ -146,20 +146,10 @@
             
                 </div>
             
-                <div class="schedule-days" *ngIf="
-                        item.scheduleDays &&
-                        item.scheduleDays.length > 0
-                    ">
-            
-                    <span *ngFor="
-                            let day
-                            of item.scheduleDays
-                        " class="day-badge">
-            
-                        {{ day }}
-            
+                <div class="schedule-days" *ngIf="item.scheduleDays && item.scheduleDays.length > 0">
+                    <span *ngFor="let day of item.scheduleDays" class="day-badge">
+                        {{ day.dayOfWeek }}
                     </span>
-            
                 </div>
             
                 <div class="enrolled-date">
@@ -172,6 +162,7 @@
                     }}
             
                 </div>
+                
             <div class="status-section">
             
                 <span class="status pending" *ngIf="item.status === 0">
@@ -207,46 +198,62 @@
     <button
         class="detail-btn"
         (click)="viewClass(item.classId)">
-
         View Class
-
     </button>
 
+    <!-- Chờ thanh toán -->
     <button
         *ngIf="item.status === 0"
         class="payment-btn"
         [routerLink]="['/payment', item.enrollmentId]"
         [queryParams]="{ type: 'CLASS' }">
-
         Pay Now
-
     </button>
 
+    <!-- Đã xác nhận -->
     <button
         *ngIf="item.status === 1"
         class="cancel-btn"
         (click)="cancel(item.enrollmentId)">
+        Cancel Enrollment
+    </button>
 
-        Cancel
+    <!-- Đang học -->
+    <button
+        *ngIf="item.status === 2"
+        class="detail-btn"
+        (click)="viewClass(item.classId)">
+        Enter Class
+    </button>
 
+    <!-- Đã hủy -->
+    <button
+        *ngIf="item.status === 4"
+        class="enroll-btn"
+        (click)="enroll(item.classId)">
+        Enroll Again
+    </button>
+
+    <!-- Hoàn tiền -->
+    <button
+        *ngIf="item.status === 5"
+        class="enroll-btn"
+        (click)="enroll(item.classId)">
+        Enroll Again
     </button>
 
     <button
         *ngIf="canReview(item)"
         class="review-btn"
         (click)="writeReview(item)">
-
         Review Teacher
-
     </button>
 
     <button
         *ngIf="hasReviewed(item)"
         class="view-review-btn"
         (click)="viewReview(item)">
-
         View Review
-
     </button>
 
 </div>

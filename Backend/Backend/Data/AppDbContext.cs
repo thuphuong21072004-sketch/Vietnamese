@@ -32,6 +32,9 @@ namespace Backend.Data
         public DbSet<UserQuiz> UserQuiz { get; set; }
         
         public DbSet<UserAnswer> UserAnswer { get; set; }
+
+        public DbSet<UserSpecialAnswer> UserSpecialAnswers { get; set; }
+
         public DbSet<PlacementTest> PlacementTests { get; set; }
         
         public DbSet<TeacherProfile> TeacherProfiles { get; set; }
@@ -183,6 +186,18 @@ namespace Backend.Data
             modelBuilder.Entity<Answer>()
                 .HasIndex(x => new { x.QuestionId, x.OrderIndex })
                 .IsUnique();
+
+            modelBuilder.Entity<UserSpecialAnswer>()
+                .HasOne(x => x.UserQuiz)
+                .WithMany()
+                .HasForeignKey(x => x.UserQuizId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserSpecialAnswer>()
+                .HasOne(x => x.Question)
+                .WithMany()
+                .HasForeignKey(x => x.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Part>()
                 .HasIndex(x => new { x.QuizId, x.PartNumber })

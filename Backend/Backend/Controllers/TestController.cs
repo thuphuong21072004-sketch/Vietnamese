@@ -59,7 +59,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> SubmitQuiz([FromBody] SubmitQuizDTO dto)
         {
             
-            await _testService.SubmitQuiz(dto.QuizId, dto.AnswerIds);
+            await _testService.SubmitQuiz(dto);
             return Ok("Submit quiz success");
         }
         /*

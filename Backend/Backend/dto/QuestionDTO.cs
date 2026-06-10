@@ -19,6 +19,8 @@
 
         public bool IsDelete { get; set; }
 
+        public string QuestionType { get; set; } = "MULTIPLE_CHOICE";
+
         public List<AnswerDTO>? Answers { get; set; }
     }
 }

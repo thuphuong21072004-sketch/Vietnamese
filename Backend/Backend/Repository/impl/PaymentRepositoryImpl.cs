@@ -58,9 +58,17 @@ namespace Backend.Repository.impl
         public async Task<Payment?> GetByRef( string refName, int refId)
         {
             return await _context.Payments
-                .FirstOrDefaultAsync(x =>
-                    x.RefName == refName
-                    && x.RefId == refId);
+                .Where(x => x.RefName == refName && x.RefId == refId)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Payment?> GetSuccessPaymentByRef(string refName, int refId)
+        {
+            return await _context.Payments
+                .Where(x => x.RefName == refName && x.RefId == refId && x.Status == Backend.common.Constant.StatusPayment.Success)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Payment>> GetPendingBankTransfers()

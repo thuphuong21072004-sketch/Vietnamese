@@ -50,7 +50,7 @@ namespace Backend.Services.impl
             _paymentRepository = paymentRepository;
         }
 
-        public async Task<int> EnrollAsync(int classId)
+        public async Task<(int enrollmentId, int status)> EnrollAsync(int classId)
         {
             string email =
                 _userContext.GetEmail();
@@ -62,7 +62,7 @@ namespace Backend.Services.impl
 
             var teacherClass =
                 await _teacherClassRepository
-                    .GetById(classId);
+                    .GetByIdAsync(classId);
 
             if (teacherClass == null)
             {
@@ -78,6 +78,37 @@ namespace Backend.Services.impl
             {
                 throw new Exception(
                     "This class is full");
+            }
+
+            // Schedule conflict check
+            var existingEnrollments =
+                await _enrollmentRepository
+                    .GetStudentEnrollmentsAsync(userId);
+
+            var gap = TimeSpan.FromMinutes(15);
+
+            foreach (var newSession in teacherClass.ClassSessions)
+            {
+                foreach (var enrolled in existingEnrollments
+                    .Where(e =>
+                        e.ClassId != classId &&
+                        (e.Status == common.Constant.StatusBooking.Confirmed ||
+                         e.Status == common.Constant.StatusBooking.InProgress)))
+                {
+                    var conflict = enrolled.TeacherClass?.ClassSessions
+                        .FirstOrDefault(s =>
+                            s.StudyDate == newSession.StudyDate &&
+                            newSession.StartTime < s.EndTime + gap &&
+                            s.StartTime < newSession.EndTime + gap);
+
+                    if (conflict != null)
+                    {
+                        throw new Exception(
+                            $"Schedule conflict with class \"{enrolled.TeacherClass!.Title}\" on {newSession.StudyDate:dd/MM/yyyy} " +
+                            $"({newSession.StartTime:hh\\:mm}–{newSession.EndTime:hh\\:mm}). " +
+                            $"Sessions must be at least 15 minutes apart.");
+                    }
+                }
             }
 
             var existed =
@@ -114,6 +145,27 @@ namespace Backend.Services.impl
 
                 if (existed.Status == common.Constant.StatusBooking.Cancelled)
                 {
+                    var alreadyPaid = await _paymentRepository
+                        .GetSuccessPaymentByRef(
+                            common.Constant.RefName.Class,
+                            existed.EnrollmentId);
+
+                    if (alreadyPaid != null)
+                    {
+                        existed.Status = common.Constant.StatusBooking.Confirmed;
+                        existed.EnrolledDate = DateTime.Now;
+                        await _enrollmentRepository.UpdateAsync(existed);
+
+                        var cls = await _teacherClassRepository.GetByIdAsync(existed.ClassId);
+                        if (cls != null)
+                        {
+                            cls.CurrentStudents++;
+                            await _teacherClassRepository.SaveChangesAsync();
+                        }
+
+                        return (existed.EnrollmentId, existed.Status);
+                    }
+
                     existed.Status =
                         common.Constant.StatusBooking.PendingPayment;
 
@@ -123,7 +175,7 @@ namespace Backend.Services.impl
                     await _enrollmentRepository
                         .UpdateAsync(existed);
 
-                    return existed.EnrollmentId;
+                    return (existed.EnrollmentId, existed.Status);
                 }
             }
 
@@ -138,7 +190,7 @@ namespace Backend.Services.impl
 
             await _enrollmentRepository.CreateAsync(enrollment);
 
-            return enrollment.EnrollmentId;
+            return (enrollment.EnrollmentId, enrollment.Status);
         }
         public async Task CancelAsync( int enrollmentId)
         {
@@ -329,9 +381,14 @@ namespace Backend.Services.impl
             ScheduleDays =
     x.TeacherClass != null
         ? x.TeacherClass.ClassScheduleDays
-            .Select(d => d.DayOfWeek)
+            .Select(d => new ClassScheduleDayDto
+            {
+                Id = d.Id,
+                ClassId = d.ClassId,
+                DayOfWeek = d.DayOfWeek
+            })
             .ToList()
-        : new List<string>()
+        : new List<ClassScheduleDayDto>()
 
         })
     .ToList();
@@ -400,9 +457,7 @@ namespace Backend.Services.impl
                     .GetStudentEnrollmentsAsync(
                         userId);
 
-            var today =
-                DateOnly.FromDateTime(
-                    DateTime.Today);
+            var cutoff = DateTime.Now.AddMinutes(-15);
 
             return enrollments
                 .Where(x =>
@@ -412,7 +467,7 @@ namespace Backend.Services.impl
                     x.TeacherClass!
                      .ClassSessions
                      .Where(s =>
-                        s.StudyDate >= today)
+                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) > cutoff)
                      .Select(s =>
                         new UpcomingScheduleDto
                         {
@@ -446,9 +501,7 @@ namespace Backend.Services.impl
             : "",
                         }))
                 .OrderBy(x =>
-                    x.StudyDate)
-                .ThenBy(x =>
-                    x.StartTime)
+                    x.StudyDate.ToDateTime(TimeOnly.MinValue).Add(x.StartTime))
                 .Take(10)
                 .ToList();
         }
@@ -479,9 +532,7 @@ namespace Backend.Services.impl
                     .GetTeacherClassesAsync(
                         teacher.TeacherProfileId);
 
-            var today =
-                DateOnly.FromDateTime(
-                    DateTime.Today);
+            var cutoff = DateTime.Now.AddMinutes(-15);
 
             return classes
                 .Where(x =>
@@ -489,7 +540,7 @@ namespace Backend.Services.impl
                 .SelectMany(x =>
                     x.ClassSessions
                      .Where(s =>
-                        s.StudyDate >= today)
+                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) > cutoff)
                      .Select(s =>
                         new UpcomingScheduleDto
                         {
@@ -518,9 +569,7 @@ namespace Backend.Services.impl
                                 s.EndTime
                         }))
                 .OrderBy(x =>
-                    x.StudyDate)
-                .ThenBy(x =>
-                    x.StartTime)
+                    x.StudyDate.ToDateTime(TimeOnly.MinValue).Add(x.StartTime))
                 .Take(10)
                 .ToList();
         }

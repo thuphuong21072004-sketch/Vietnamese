@@ -272,6 +272,11 @@ export class ClassListComponent implements OnInit {
   enroll(classId: number): void {
     this.classEnrollmentService.enroll(classId).subscribe({
       next: (res: any) => {
+        if (res.status === 1) {
+          this.loadMyEnrollments();
+          this.searchClasses();
+          return;
+        }
         this.router.navigate(['/payment', res.enrollmentId], {
           queryParams: {
             type: 'CLASS',

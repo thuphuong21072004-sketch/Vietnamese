@@ -143,14 +143,34 @@
   font-weight: 700;
 }
 
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .status.active {
   background: #dcfce7;
   color: #166534;
 }
 
+.status.progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status.completed {
+  background: #f3f4f6;
+  color: #374151;
+}
+
 .status.cancelled {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.status.refunded {
+  background: #f5f3ff;
+  color: #6d28d9;
 }
 
 .actions {
@@ -160,7 +180,11 @@
 }
 
 .detail-btn,
-.cancel-btn {
+.cancel-btn,
+.payment-btn,
+.enroll-btn,
+.review-btn,
+.view-review-btn {
   flex: 1;
   border: none;
   border-radius: 14px;
@@ -169,6 +193,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
+  text-align: center;
+  text-decoration: none;
 }
 
 .detail-btn {
@@ -187,6 +213,42 @@
 
 .cancel-btn:hover {
   background: #dc2626;
+}
+
+.payment-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.payment-btn:hover {
+  background: #d97706;
+}
+
+.enroll-btn {
+  background: #10b981;
+  color: white;
+}
+
+.enroll-btn:hover {
+  background: #059669;
+}
+
+.review-btn {
+  background: #8b5cf6;
+  color: white;
+}
+
+.review-btn:hover {
+  background: #7c3aed;
+}
+
+.view-review-btn {
+  background: #e9d5ff;
+  color: #6d28d9;
+}
+
+.view-review-btn:hover {
+  background: #ddd6fe;
 }
 
 @media (max-width: 768px) {
@@ -253,4 +315,29 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
+}
+
+.week-grid {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.week-day {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f3f4f6;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.week-day.day-active {
+  background: #4f46e5;
+  color: #fff;
 }

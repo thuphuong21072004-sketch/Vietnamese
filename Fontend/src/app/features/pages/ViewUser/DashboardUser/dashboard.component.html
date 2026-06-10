@@ -1,150 +1,80 @@
-
 <div class="dashboard-container">
 
   <div class="dashboard-header">
     <h2>Student Dashboard</h2>
-
     <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" />
   </div>
 
-  <div class="stats-grid">
+  <div *ngIf="loading" class="loading-row">Loading...</div>
 
-    <div class="stat-card">
-      <div class="stat-title">Total Lessons</div>
-      <div class="stat-value">
-        {{ statistics.totalBookings }}
+  <ng-container *ngIf="!loading">
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="stat-title">Total Paid</div>
+        <div class="stat-value money">{{ stats.totalPaid | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">{{ year }}/{{ month < 10 ? '0'+month : month }}</div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-title">Completed Learning</div>
+        <div class="stat-value money">{{ stats.completedLearning | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">Finished sessions</div>
+      </div>
+
+      <div class="stat-card blue">
+        <div class="stat-title">Active Learning</div>
+        <div class="stat-value money">{{ stats.activeLearning | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">Confirmed / In progress</div>
+      </div>
+
+      <div class="stat-card orange">
+        <div class="stat-title">Cancelled (Pending Refund)</div>
+        <div class="stat-value money">{{ stats.cancelledUnrefunded | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">Awaiting refund</div>
+      </div>
+
+      <div class="stat-card red">
+        <div class="stat-title">Refunded</div>
+        <div class="stat-value money">{{ stats.refunded | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">Returned to you</div>
+      </div>
+
+    </div>
+
+    <div class="history-section" *ngIf="stats.monthlyBreakdown.length > 0">
+      <div class="section-header"><h3>Monthly Payment Breakdown</h3></div>
+      <div class="table-wrapper">
+        <table class="payment-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total Paid</th>
+              <th>Completed</th>
+              <th>Active</th>
+              <th>Cancelled</th>
+              <th>Refunded</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of stats.monthlyBreakdown">
+              <td>{{ monthLabel(row) }}</td>
+              <td class="money-cell">{{ row.totalPaid | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="money-cell green">{{ row.completedLearning | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="money-cell">{{ row.activeLearning | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="money-cell orange">{{ row.cancelledUnrefunded | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="money-cell refund">{{ row.refunded | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-title">Completed Lessons</div>
-      <div class="stat-value">
-        {{ statistics.completedBookings }}
-      </div>
+    <div class="empty-state" *ngIf="stats.monthlyBreakdown.length === 0">
+      No payment records found.
     </div>
 
-    <div class="stat-card">
-      <div class="stat-title">Upcoming Lessons</div>
-      <div class="stat-value">
-        {{ statistics.upcomingBookings }}
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-title">Cancelled Lessons</div>
-      <div class="stat-value">
-        {{ statistics.cancelledBookings }}
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-title">Total Paid</div>
-      <div class="stat-value money">
-        {{ paymentStatistics.totalPaid | currency:'USD':'symbol':'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-title">Refunded Amount</div>
-      <div class="stat-value money">
-        {{ paymentStatistics.refundedAmount | currency:'USD':'symbol':'1.2-2' }}
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-title">Pending Refund</div>
-      <div class="stat-value money">
-        {{ paymentStatistics.pendingRefundAmount | currency:'USD':'symbol':'1.2-2' }}
-      </div>
-    </div>
-
-  </div>
-
-  <div class="history-section">
-
-    <div class="section-header">
-      <h3>Payment History</h3>
-    </div>
-
-    <div class="table-wrapper">
-
-      <table class="payment-table">
-
-        <thead>
-          <tr>
-            <th>Transaction ID</th>
-            <th>Teacher</th>
-            <th>Study Date</th>
-            <th>Duration</th>
-            <th>Amount</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          <tr *ngIf="paymentHistory.length === 0">
-            <td colspan="6" class="empty-row">
-              No payment records found
-            </td>
-          </tr>
-
-          <tr *ngFor="let item of paymentHistory">
-
-            <td>
-              #{{ item.paymentId }}
-            </td>
-
-            <td>
-              {{ item.teacherName }}
-            </td>
-
-            <td>
-              {{ item.studyDate }}
-            </td>
-
-            <td>
-              {{ item.hours }} hrs
-            </td>
-
-            <td>
-              {{ item.amount | currency:'USD':'symbol':'1.2-2' }}
-            </td>
-
-            <td>
-
-              <span class="status success" *ngIf="item.paymentStatus === 1">
-                Paid
-              </span>
-
-              <span class="status refund" *ngIf="item.paymentStatus === 3">
-                Refunded
-              </span>
-
-              <span class="status pending" *ngIf="item.paymentStatus !== 1 && item.paymentStatus !== 3">
-                Other
-              </span>
-
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-    <div class="pagination" *ngIf="totalPayments > pageSize">
-
-
-      <span>
-        Page {{ page }}
-      </span>
-
-
-    </div>
-
-  </div>
+  </ng-container>
 
 </div>

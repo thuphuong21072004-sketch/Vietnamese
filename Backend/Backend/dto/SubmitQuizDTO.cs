@@ -4,7 +4,8 @@
     {
         public int QuizId { get; set; }
 
-        public List<int> AnswerIds
-        { get; set; } = new();
+        public List<int> AnswerIds { get; set; } = new();
+
+        public List<SpecialAnswerDTO> SpecialAnswers { get; set; } = new();
     }
 }

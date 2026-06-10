@@ -19,6 +19,7 @@ namespace Backend.Services.impl
         private readonly AnswerRepository _answerRepository;
         private readonly ProgressRepository _progressRepository;
         private readonly UserAnswerRepository _userAnswerRepository;
+        private readonly UserSpecialAnswerRepository _userSpecialAnswerRepository;
         private readonly UserQuizRepository _userQuizRepository;
         private readonly LevelRepository _levelRepository;
         private readonly CourseRepository _courseRepository;
@@ -34,6 +35,7 @@ namespace Backend.Services.impl
             QuestionRepository questionRepository,
             AnswerRepository answerRepository,
             UserAnswerRepository userAnswerRepository,
+            UserSpecialAnswerRepository userSpecialAnswerRepository,
             UserQuizRepository userQuizRepository,
             ProgressRepository progressRepository,
             LevelRepository levelRepository,
@@ -50,6 +52,7 @@ namespace Backend.Services.impl
             _questionRepository = questionRepository;
             _answerRepository = answerRepository;
             _userAnswerRepository = userAnswerRepository;
+            _userSpecialAnswerRepository = userSpecialAnswerRepository;
             _userQuizRepository = userQuizRepository;
             _progressRepository = progressRepository;
             _levelRepository = levelRepository;
@@ -616,6 +619,7 @@ namespace Backend.Services.impl
             question.AudioUrl = dto.AudioUrl;
             question.OrderIndex = dto.OrderIndex ?? 0;
             question.Score = dto.Score;
+            question.QuestionType = dto.QuestionType ?? "MULTIPLE_CHOICE";
             await _questionRepository.Save();
 
             foreach (var aDto in dto.Answers.Where(x => !x.IsDelete)) await SaveAnswer(aDto, question.QuestionId);
@@ -664,20 +668,30 @@ namespace Backend.Services.impl
         }
 
 
-        private QuizResult CalculateQuizResult(List<Question> questions, List<int> answerIds, decimal? passScore)
+        private QuizResult CalculateQuizResult(List<Question> questions, List<int> answerIds, List<SpecialAnswerDTO> specialAnswers, decimal? passScore)
         {
             decimal totalScore = questions.Sum(x => x.Score);
+            if (totalScore == 0) return new QuizResult { FinalScore = 0, IsPassed = false };
 
             var answerSet = answerIds.ToHashSet();
+            var specialMap = specialAnswers.ToDictionary(x => x.QuestionId);
 
-            decimal earnedScore = questions
-                .Where(q => q.Answers != null && q.Answers.Any(a => a.IsCorrect && answerSet.Contains(a.AnswerId)))
-                .Sum(q => q.Score);
+            decimal earnedScore = 0;
+            foreach (var q in questions)
+            {
+                if (q.QuestionType == "PRONUNCIATION" || q.QuestionType == "WRITING")
+                {
+                    if (specialMap.TryGetValue(q.QuestionId, out var sa) && sa.SpeakScore.HasValue)
+                        earnedScore += sa.SpeakScore.Value >= 80 ? q.Score : 0;
+                }
+                else
+                {
+                    if (q.Answers != null && q.Answers.Any(a => a.IsCorrect && answerSet.Contains(a.AnswerId)))
+                        earnedScore += q.Score;
+                }
+            }
 
-            decimal finalScore = totalScore == 0
-                ? 0
-                : Math.Round(earnedScore / totalScore * 100, 2);
-
+            decimal finalScore = Math.Round(earnedScore / totalScore * 100, 2);
             return new QuizResult
             {
                 FinalScore = finalScore,
@@ -689,15 +703,19 @@ namespace Backend.Services.impl
          * O(q + a )
          * thuphuong21072004
          */
-        public async Task SubmitQuiz(int quizId, List<int> answerIds)
+        public async Task SubmitQuiz(SubmitQuizDTO dto)
         {
+            var quizId = dto.QuizId;
+            var answerIds = dto.AnswerIds;
+            var specialAnswers = dto.SpecialAnswers ?? new();
+
             var email = _userContext.GetEmail();
             int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             var quiz = await _quizRepository.GetQuizById(quizId);
 
             var questions = await _questionRepository.GetQuestionsByQuiz(quizId);
 
-            var result = CalculateQuizResult( questions, answerIds, quiz.PassScore);
+            var result = CalculateQuizResult(questions, answerIds, specialAnswers, quiz.PassScore);
 
             var userQuiz =
                 await _userQuizRepository.GetUserQuiz(userId, quizId);
@@ -705,14 +723,11 @@ namespace Backend.Services.impl
             if (userQuiz != null)
             {
                 userQuiz.Score = result.FinalScore;
-
                 userQuiz.CompletedDate = DateTime.Now;
-
                 userQuiz.IsPassed = result.IsPassed;
 
-                await _userAnswerRepository.DeleteByUserQuizId(
-                    userQuiz.UserQuizId
-                );
+                await _userAnswerRepository.DeleteByUserQuizId(userQuiz.UserQuizId);
+                await _userSpecialAnswerRepository.DeleteByUserQuizIdAsync(userQuiz.UserQuizId);
             }
             else
             {
@@ -731,30 +746,45 @@ namespace Backend.Services.impl
             await _userQuizRepository.Save();
 
             var answers = await _answerRepository.GetAnswersByIds(answerIds);
-
-            var answerDict = answers
-                .ToDictionary(x => x.AnswerId);
+            var answerDict = answers.ToDictionary(x => x.AnswerId);
 
             foreach (var answerId in answerIds)
             {
-                if (!answerDict.TryGetValue(
-                    answerId,
-                    out var answer))
+                if (!answerDict.TryGetValue(answerId, out var answer)) continue;
+                await _userAnswerRepository.SaveUserAnswer(new UserAnswer
                 {
-                    continue;
-                }
-
-                await _userAnswerRepository.SaveUserAnswer(
-                    new UserAnswer
-                    {
-                        UserQuizId = userQuiz.UserQuizId,
-                        QuestionId = answer.QuestionId,
-                        AnswerId = answerId
-                    }
-                );
+                    UserQuizId = userQuiz.UserQuizId,
+                    QuestionId = answer.QuestionId,
+                    AnswerId = answerId
+                });
             }
 
             await _userAnswerRepository.Save();
+
+            var questionMap = questions.ToDictionary(q => q.QuestionId);
+            foreach (var sa in specialAnswers)
+            {
+                if (!questionMap.TryGetValue(sa.QuestionId, out var q)) continue;
+
+                bool isCorrect = false;
+                decimal score = 0;
+
+                if ((q.QuestionType == "PRONUNCIATION" || q.QuestionType == "WRITING") && sa.SpeakScore.HasValue)
+                {
+                    isCorrect = sa.SpeakScore.Value >= 80;
+                    score = isCorrect ? q.Score : 0;
+                }
+
+                await _userSpecialAnswerRepository.SaveAsync(new UserSpecialAnswer
+                {
+                    UserQuizId = userQuiz.UserQuizId,
+                    QuestionId = sa.QuestionId,
+                    WrittenText = sa.Text,
+                    SpeakScore = sa.SpeakScore,
+                    IsCorrect = isCorrect,
+                    Score = score
+                });
+            }
 
             if (!result.IsPassed)
             {

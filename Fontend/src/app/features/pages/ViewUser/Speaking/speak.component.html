@@ -59,14 +59,6 @@
         <!-- Practice card -->
         <div class="card practice-card" *ngIf="vietnameseText && !isLoading">
 
-            <div class="target-row">
-                <span class="target-label">Say this:</span>
-                <span class="target-text">{{ vietnameseText }}</span>
-                <button class="mini-listen" (click)="speakVietnamese()" [disabled]="isSpeakingVi" title="Listen">
-                    {{ isSpeakingVi ? '⏳' : '🔊' }}
-                </button>
-            </div>
-
             <div class="record-zone">
                 <button class="record-btn" [class.active]="isRecording" (click)="toggleRecording()">
                     <span class="btn-icon">{{ isRecording ? '⏹' : '🎤' }}</span>
@@ -88,6 +80,57 @@
                 <span class="result-label">You said:</span>
                 <span class="result-text">{{ transcribedText }}</span>
                 <button class="playback-btn" *ngIf="recordedBlobUrl" (click)="playRecording()" title="Play back">🔊</button>
+            </div>
+
+            <!-- ===== GRADE RESULT ===== -->
+            <div class="grade-box" *ngIf="gradeResult && !isTranscribing">
+
+                <!-- Score row -->
+                <div class="grade-score-row">
+                    <span class="grade-score-label">Pronunciation Score</span>
+                    <span class="grade-score-pill"
+                        [class.gp-excellent]="gradeResult.score >= 85"
+                        [class.gp-good]="gradeResult.score >= 60 && gradeResult.score < 85"
+                        [class.gp-poor]="gradeResult.score < 60">
+                        {{ gradeResult.score | number:'1.0-0' }}%
+                    </span>
+                </div>
+
+                <!-- Word-by-word reference highlight -->
+                <div class="grade-words-row">
+                    <span class="grade-ref-label">Reference</span>
+                    <div class="grade-words">
+                        <span *ngFor="let w of wordResults"
+                            class="gw"
+                            [class.gw-correct]="w.status === 'correct'"
+                            [class.gw-accent]="w.status === 'accent'"
+                            [class.gw-character]="w.status === 'character'"
+                            [class.gw-wrong]="w.status === 'wrong'"
+                            [class.gw-missing]="w.status === 'missing'">
+                            {{ w.word }}
+                            <span class="gw-actual" *ngIf="w.actual">→ {{ w.actual }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Extra words spoken -->
+                <div class="grade-extra-row" *ngIf="gradeResult.extraWords?.length">
+                    <span class="grade-ref-label">Extra</span>
+                    <div class="grade-words">
+                        <span *ngFor="let w of gradeResult.extraWords" class="gw gw-extra">{{ w }}</span>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="grade-legend">
+                    <span class="gl-item"><span class="gl-dot gw-correct"></span> Correct</span>
+                    <span class="gl-item"><span class="gl-dot gw-accent"></span> Tone/accent</span>
+                    <span class="gl-item"><span class="gl-dot gw-character"></span> Similar</span>
+                    <span class="gl-item"><span class="gl-dot gw-wrong"></span> Wrong</span>
+                    <span class="gl-item"><span class="gl-dot gw-missing"></span> Missing</span>
+                    <span class="gl-item"><span class="gl-dot gw-extra"></span> Extra</span>
+                </div>
+
             </div>
 
         </div>

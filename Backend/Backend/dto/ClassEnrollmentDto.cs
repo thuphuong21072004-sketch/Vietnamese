@@ -1,4 +1,6 @@
-﻿public class ClassEnrollmentDto
+﻿using Backend.dto;
+
+public class ClassEnrollmentDto
 {
     public int EnrollmentId { get; set; }
 
@@ -42,5 +44,5 @@
 
     public TimeSpan EndTime { get; set; }
 
-    public List<string> ScheduleDays { get; set; } = new();
+    public List<ClassScheduleDayDto> ScheduleDays { get; set; } = new();
 }

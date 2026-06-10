@@ -21,5 +21,7 @@ export interface QuestionDTO {
 
   isDelete: boolean;
 
+  questionType: 'MULTIPLE_CHOICE' | 'PRONUNCIATION' | 'WRITING';
+
   answers: AnswerDTO[];
 }

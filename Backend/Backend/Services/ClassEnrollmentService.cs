@@ -5,7 +5,7 @@ namespace Backend.Services
 {
     public interface ClassEnrollmentService
     {
-        Task<int> EnrollAsync(int classId);
+        Task<(int enrollmentId, int status)> EnrollAsync(int classId);
 
         Task CancelAsync(
             int enrollmentId);

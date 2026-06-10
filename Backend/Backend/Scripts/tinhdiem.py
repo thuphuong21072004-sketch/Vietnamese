@@ -103,118 +103,96 @@ def score_text(reference: str,
     ref_words = reference.split()
     hyp_words = transcript.split()
 
-    matcher = difflib.SequenceMatcher(
-        None,
-        ref_words,
-        hyp_words
-    )
+    matcher = difflib.SequenceMatcher(None, ref_words, hyp_words)
 
     scores = []
-
     errors = []
+    words = []        # per-word result for every word in reference
+    extra_words = []  # words spoken but not in reference
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
 
         if tag == "equal":
-
             for word in ref_words[i1:i2]:
-
                 scores.append(100)
+                words.append({"word": word, "status": "correct"})
 
         elif tag == "delete":
-
             for word in ref_words[i1:i2]:
-
                 scores.append(0)
-
-                errors.append({
-                    "type": "missing_word",
-                    "expected": word
-                })
+                errors.append({"type": "missing_word", "expected": word})
+                words.append({"word": word, "status": "missing"})
 
         elif tag == "insert":
-
             for word in hyp_words[j1:j2]:
-
                 scores.append(0)
-
-                errors.append({
-                    "type": "extra_word",
-                    "actual": word
-                })
+                errors.append({"type": "extra_word", "actual": word})
+                extra_words.append(word)
 
         elif tag == "replace":
-
             ref_chunk = ref_words[i1:i2]
             hyp_chunk = hyp_words[j1:j2]
-
-            pair_count = min(
-                len(ref_chunk),
-                len(hyp_chunk)
-            )
+            pair_count = min(len(ref_chunk), len(hyp_chunk))
 
             for idx in range(pair_count):
-
                 expected = ref_chunk[idx]
                 actual = hyp_chunk[idx]
-
-                word_score, error_type = (
-                    classify_word(
-                        expected,
-                        actual
-                    )
-                )
-
+                word_score, error_type = classify_word(expected, actual)
                 scores.append(word_score)
 
-                if error_type != "correct":
+                if error_type == "correct":
+                    words.append({"word": expected, "status": "correct"})
+                elif error_type in ("accent_error", "missing_diacritic"):
+                    words.append({"word": expected, "status": "accent",
+                                  "actual": actual, "score": word_score})
+                    errors.append({"type": error_type, "expected": expected,
+                                   "actual": actual, "score": word_score})
+                elif error_type == "character_error":
+                    words.append({"word": expected, "status": "character",
+                                  "actual": actual, "score": word_score})
+                    errors.append({"type": error_type, "expected": expected,
+                                   "actual": actual, "score": word_score})
+                else:
+                    words.append({"word": expected, "status": "wrong",
+                                  "actual": actual, "score": word_score})
+                    errors.append({"type": error_type, "expected": expected,
+                                   "actual": actual, "score": word_score})
 
-                    errors.append({
-                        "type": error_type,
-                        "expected": expected,
-                        "actual": actual,
-                        "score": word_score
-                    })
+            for word in ref_chunk[pair_count:]:
+                scores.append(0)
+                errors.append({"type": "missing_word", "expected": word})
+                words.append({"word": word, "status": "missing"})
 
-            if len(ref_chunk) > pair_count:
-
-                for word in ref_chunk[pair_count:]:
-
-                    scores.append(0)
-
-                    errors.append({
-                        "type": "missing_word",
-                        "expected": word
-                    })
-
-            if len(hyp_chunk) > pair_count:
-
-                for word in hyp_chunk[pair_count:]:
-
-                    scores.append(0)
-
-                    errors.append({
-                        "type": "extra_word",
-                        "actual": word
-                    })
+            for word in hyp_chunk[pair_count:]:
+                scores.append(0)
+                errors.append({"type": "extra_word", "actual": word})
+                extra_words.append(word)
 
     final_score = (
-        round(sum(scores) / len(scores), 2)
-        if scores
-        else 0
+        round(sum(scores) / len(scores), 2) if scores else 0
     )
 
     return {
         "score": final_score,
+        "words": words,
+        "extra_words": extra_words,
         "errors": errors
     }
 
 
-# TEST
+if __name__ == "__main__":
+    import json
+    import sys
 
-result = score_text(
-    "Hôm nay trời rất đẹp",
-    "Hôm nay troi dep dep"
-)
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
-print(result)
+    if len(sys.argv) < 3:
+        print(json.dumps({"error": "Usage: tinhdiem.py <reference> <transcript>"}))
+        sys.exit(1)
+
+    reference_arg = sys.argv[1]
+    transcript_arg = sys.argv[2]
+
+    output = score_text(reference_arg, transcript_arg)
+    print(json.dumps(output, ensure_ascii=False))

@@ -19,6 +19,7 @@ export class MyClassesComponent implements OnInit {
 
   loading = false;
 
+
   constructor(
   private enrollmentService: ClassEnrollmentService,
   private reviewService: ReviewService,
@@ -29,6 +30,15 @@ reviewStatusMap: Record<number, boolean> = {};
   ngOnInit(): void {
     this.loadData();
   }
+  weekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
   loadData(): void {
     this.loading = true;
@@ -115,6 +125,23 @@ viewReview(item: ClassEnrollmentDto): void {
 
     this.enrollmentService.cancel(enrollmentId).subscribe(() => {
       this.loadData();
+    });
+  }
+
+  enroll(classId: number): void {
+    this.enrollmentService.enroll(classId).subscribe({
+      next: (res: any) => {
+        if (res.status === 1) {
+          this.loadData();
+          return;
+        }
+        this.router.navigate(['/payment', res.enrollmentId], {
+          queryParams: { type: 'CLASS' },
+        });
+      },
+      error: (err: any) => {
+        alert(err.error?.message || 'Failed to enroll');
+      },
     });
   }
   viewSchedule(): void {

@@ -72,6 +72,9 @@ namespace Backend.Repository.impl
     .Include(x => x.TeacherClass)
         .ThenInclude(x => x.ClassSessions)
 
+    .Include(x => x.TeacherClass)
+        .ThenInclude(x => x.ClassScheduleDays)
+
     .Where(x => x.StudentId == studentId)
 
     .ToListAsync();

@@ -7,7 +7,7 @@ namespace Backend.Services
         Task<QuizDTO?> GetQuiz(int refId, string refType);
         Task SaveQuiz(QuizDTO dto);
         Task DeleteQuiz(int quizId);
-        Task SubmitQuiz(int quizId, List<int> answerIds);
+        Task SubmitQuiz(SubmitQuizDTO dto);
         Task StartLearning(int quizId);
         Task<UserQuizDTO?> GetMyQuizResult(int quizId);
         Task<List<UserAnswerDTO>> GetUserAnswerRaw(int quizId);

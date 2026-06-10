@@ -1,8 +1,12 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, NgZone } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { forkJoin, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 
 import { LearningService } from '../../../../services/learning.service';
 
@@ -10,16 +14,36 @@ import { TestService } from '../../../../services/test.service';
 
 import { QuizDTO } from '../../../../models/quiz.model';
 
-import { SubmitQuizDTO } from '../../../../models/submit-quiz.model';
+import { SubmitQuizDTO, SpecialAnswerDTO } from '../../../../models/submit-quiz.model';
 
 import { UnitDTO } from '../../../../models/unit.model';
 
 import { environment } from '../../../../../../environments/environment';
 
+import { AsrService, WordResult } from '../../../../services/asr.service';
+import { TtsService } from '../../../../services/tts.service';
+
+interface PronunciationState {
+  isRecording: boolean;
+  isTranscribing: boolean;
+  score?: number;
+  wordResults: WordResult[];
+  mediaRecorder?: MediaRecorder;
+  audioChunks: Blob[];
+  recordedAudioUrl?: string;
+  ttsAudioUrl?: string;
+}
+
+interface WritingState {
+  isChecking: boolean;
+  score?: number;
+  wordResults: WordResult[];
+}
+
 @Component({
   selector: 'app-unit',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './quiz.component.html',
   styleUrls: ['./quiz.component.css'],
 })
@@ -50,19 +74,24 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
   hasDoneQuiz = false;
   private hasSubmitted = false;
 
-  selectedAnswers: {
-    [key: number]: number;
-  } = {};
+  selectedAnswers: { [key: number]: number } = {};
+
+  pronunciationStates: { [qId: number]: PronunciationState } = {};
+
+  writingAnswers: { [qId: number]: string | undefined } = {};
+
+  writingStates: { [qId: number]: WritingState } = {};
 
   showResult = false;
 
   showResultSummary = false;
 
-  placementLevel = '';       // assessed level name, e.g. "B2"
+  placementLevel = '';
   showPlacementModal = false;
   isStartingLearning = false;
 
   activePart = 0;
+  activeQuestion = 0;
 
   flaggedQuestions = new Set<number>();
 
@@ -81,6 +110,9 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     private learningService: LearningService,
     private testService: TestService,
     public router: Router,
+    private asr: AsrService,
+    private tts: TtsService,
+    private zone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -140,52 +172,6 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       next: (quizRes) => {
         this.quiz = quizRes;
 
-        console.log('Quiz loaded for user view', this.quiz);
-        if (this.quiz?.questions) {
-          this.quiz.questions.forEach((q) => {
-            console.log(
-              'question audio',
-              q.questionId,
-              q.audioUrl,
-              this.getAudioUrl(q.audioUrl),
-            );
-          });
-        }
-        if (this.quiz?.parts) {
-          this.quiz.parts.forEach((part) => {
-            if (part.questions) {
-              part.questions.forEach((q) => {
-                console.log(
-                  'part question audio',
-                  q.questionId,
-                  q.audioUrl,
-                  this.getAudioUrl(q.audioUrl),
-                );
-              });
-            }
-            if (part.passages) {
-              part.passages.forEach((psg) => {
-                console.log(
-                  'passage audio',
-                  psg.passageId,
-                  psg.audioUrl,
-                  this.getAudioUrl(psg.audioUrl),
-                );
-                if (psg.questions) {
-                  psg.questions.forEach((q) => {
-                    console.log(
-                      'passage question audio',
-                      q.questionId,
-                      q.audioUrl,
-                      this.getAudioUrl(q.audioUrl),
-                    );
-                  });
-                }
-              });
-            }
-          });
-        }
-
         if (!this.quiz) {
           return;
         }
@@ -216,7 +202,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
   selectPart(index: number) {
     this.activePart = index;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => document.querySelector('.part-box')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
 
   toggleFlag(qId: number) {
@@ -234,7 +220,13 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
   }
 
   goToFlatQuestion(qId: number) {
-    document.getElementById('q-' + qId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const idx = this.quiz?.questions?.findIndex((q: any) => q.questionId === qId) ?? -1;
+    if (idx >= 0) this.activeQuestion = idx;
+  }
+
+  selectQuestion(index: number) {
+    this.activeQuestion = index;
+    setTimeout(() => document.querySelector('.part-box')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
 
   getPartQuestionsFlat(part: any): any[] {
@@ -243,7 +235,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
   answeredInPart(part: any): number {
     const questions = this.getPartQuestions(part);
-    return questions.filter((q: any) => this.selectedAnswers[q.questionId] !== undefined).length;
+    return questions.filter((q: any) => this.isQuestionAnswered(q)).length;
   }
 
   totalInPart(part: any): number {
@@ -258,81 +250,292 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     }
     return qs;
   }
-  submitQuiz() {
-    if (!this.quiz) {
-      return;
+
+  isQuestionAnswered(q: any): boolean {
+    if (q.questionType === 'PRONUNCIATION') {
+      return this.pronunciationStates[q.questionId]?.score !== undefined;
     }
-    this.hasSubmitted = true;
-    const allQuestions = this.getAllQuestions();
+    if (q.questionType === 'WRITING') {
+      return !!(this.writingAnswers[q.questionId] || '').trim();
+    }
+    return this.selectedAnswers[q.questionId] !== undefined;
+  }
 
-    const dto: SubmitQuizDTO = {
-      quizId: this.quiz.quizId,
+  isUnanswered(q: any): boolean {
+    return this.showResult && !this.isQuestionAnswered(q);
+  }
 
-      answerIds: Object.values(this.selectedAnswers),
-    };
+  getCorrectAnswerText(q: any): string {
+    return q.answers?.find((a: any) => a.isCorrect)?.answerText || '';
+  }
 
-    clearInterval(this.timerInterval);
-    localStorage.removeItem(`quiz_end_time_${this.quiz?.quizId}`);
-    this.testService.submitQuiz(dto).subscribe({
-      next: () => {
-        this.loadResult();
+  isWritingCorrect(q: any): boolean {
+    const state = this.writingStates[q.questionId];
+    return !!state && state.score !== undefined && state.score >= 80;
+  }
+
+  isPronunciationCorrect(q: any): boolean {
+    const state = this.pronunciationStates[q.questionId];
+    return !!state && state.score !== undefined && state.score >= 80;
+  }
+
+  /* ── Pronunciation TTS for review ──────────── */
+  private fetchPronTts(q: any) {
+    const state = this.getPronState(q.questionId);
+    if (state.ttsAudioUrl || !q.questionText) return;
+    this.tts.synthesize(q.questionText).subscribe({
+      next: (res) => {
+        const base = environment.apiBaseUrl.replace(/\/api$/, '');
+        state.ttsAudioUrl = `${base}${res.audioUrl}`;
       },
+      error: () => {}
     });
   }
-  forceSubmitQuiz() {
-    if (!this.quiz) {
-      return;
+
+  /* ── Writing check ──────────────────────────── */
+  getWritingState(qId: number): WritingState {
+    if (!this.writingStates[qId]) {
+      this.writingStates[qId] = { isChecking: false, wordResults: [] };
     }
+    return this.writingStates[qId];
+  }
+
+  checkWriting(q: any) {
+    const text = (this.writingAnswers[q.questionId] || '').trim();
+    if (!text) return;
+    const ref: string = q.answers?.find((a: any) => a.isCorrect)?.answerText || '';
+    const state = this.getWritingState(q.questionId);
+    state.isChecking = true;
+    state.score = undefined;
+    state.wordResults = [];
+    this.asr.compareText(text, ref).subscribe({
+      next: (res) => {
+        state.score = res.score;
+        state.wordResults = res.words ?? [];
+        state.isChecking = false;
+      },
+      error: () => { state.isChecking = false; }
+    });
+  }
+
+  /* ── Pronunciation recording ──────────────────── */
+  getPronState(qId: number): PronunciationState {
+    if (!this.pronunciationStates[qId]) {
+      this.pronunciationStates[qId] = { isRecording: false, isTranscribing: false, wordResults: [], audioChunks: [] };
+    }
+    return this.pronunciationStates[qId];
+  }
+
+  togglePronunciationRecording(q: any) {
+    const state = this.getPronState(q.questionId);
+    if (state.isRecording) {
+      this.stopPronunciationRecording(q);
+    } else {
+      this.startPronunciationRecording(q);
+    }
+  }
+
+  private startPronunciationRecording(q: any) {
+    const state = this.getPronState(q.questionId);
+    state.audioChunks = [];
+    state.score = undefined;
+    state.wordResults = [];
+
+    const mime = ['audio/webm;codecs=opus', 'audio/webm', '']
+      .find(t => !t || MediaRecorder.isTypeSupported(t)) ?? '';
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+      state.mediaRecorder = recorder;
+
+      recorder.addEventListener('dataavailable', (e: BlobEvent) => {
+        if (e.data?.size > 0) state.audioChunks.push(e.data);
+      });
+
+      recorder.addEventListener('stop', () => {
+        stream.getTracks().forEach(t => t.stop());
+        this.zone.run(async () => {
+          if (!state.audioChunks.length) return;
+          const webmBlob = new Blob(state.audioChunks, { type: recorder.mimeType || 'audio/webm' });
+          try {
+            const wavBlob = await this.convertToWav(webmBlob);
+            if (state.recordedAudioUrl) URL.revokeObjectURL(state.recordedAudioUrl);
+            state.recordedAudioUrl = URL.createObjectURL(wavBlob);
+            state.isTranscribing = true;
+            const refText: string = q.questionText || '';
+            this.asr.grade(wavBlob, refText, 'wav').subscribe({
+              next: (res) => {
+                state.score = res.score;
+                state.wordResults = res.words ?? [];
+                state.isTranscribing = false;
+              },
+              error: () => {
+                state.isTranscribing = false;
+              }
+            });
+          } catch {
+            state.isTranscribing = false;
+          }
+        });
+      });
+
+      recorder.start(100);
+      this.zone.run(() => { state.isRecording = true; });
+    }).catch(() => {
+      alert('Cannot access microphone. Please check your browser permissions.');
+    });
+  }
+
+  private stopPronunciationRecording(q: any) {
+    const state = this.pronunciationStates[q.questionId];
+    if (!state) return;
+    if (state.mediaRecorder?.state !== 'inactive') {
+      state.mediaRecorder?.requestData();
+      state.mediaRecorder?.stop();
+    }
+    state.isRecording = false;
+  }
+
+  private async convertToWav(blob: Blob): Promise<Blob> {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new AudioContext({ sampleRate: 16000 });
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    await audioCtx.close();
+
+    const numSamples = audioBuffer.length;
+    const pcm = audioBuffer.getChannelData(0);
+    const wavBuffer = new ArrayBuffer(44 + numSamples * 2);
+    const view = new DataView(wavBuffer);
+    const write = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+
+    write(0, 'RIFF'); view.setUint32(4, 36 + numSamples * 2, true);
+    write(8, 'WAVE'); write(12, 'fmt ');
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);  view.setUint32(24, 16000, true);
+    view.setUint32(28, 32000, true); view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true); write(36, 'data');
+    view.setUint32(40, numSamples * 2, true);
+
+    let off = 44;
+    for (let i = 0; i < numSamples; i++) {
+      const s = Math.max(-1, Math.min(1, pcm[i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+
+  /* ── Submit ──────────────────────────────────── */
+  submitQuiz() {
+    if (!this.quiz) return;
     this.hasSubmitted = true;
+
+    const unchecked = this.getAllQuestions().filter(q =>
+      q.questionType === 'WRITING' &&
+      (this.writingAnswers[q.questionId] || '').trim() &&
+      this.writingStates[q.questionId]?.score === undefined
+    );
+
+    if (unchecked.length) {
+      const checks = unchecked.map(q => {
+        const text = (this.writingAnswers[q.questionId] || '').trim();
+        const ref = q.answers?.find((a: any) => a.isCorrect)?.answerText || '';
+        return this.asr.compareText(text, ref).pipe(
+          tap(res => {
+            const state = this.getWritingState(q.questionId);
+            state.score = res.score;
+            state.wordResults = res.words ?? [];
+          }),
+          catchError(() => of(null))
+        );
+      });
+      forkJoin(checks).subscribe(() => this._doSubmit());
+    } else {
+      this._doSubmit();
+    }
+  }
+
+  forceSubmitQuiz() {
+    if (!this.quiz) return;
+    this.hasSubmitted = true;
+    this._doSubmit();
+  }
+
+  private _doSubmit() {
+    if (!this.quiz) return;
+    const specialAnswers = this.buildSpecialAnswers();
     const dto: SubmitQuizDTO = {
       quizId: this.quiz.quizId,
-
       answerIds: Object.values(this.selectedAnswers),
+      specialAnswers,
     };
-
     clearInterval(this.timerInterval);
     localStorage.removeItem(`quiz_end_time_${this.quiz?.quizId}`);
-
     this.testService.submitQuiz(dto).subscribe({
-      next: () => {
-        this.loadResult();
-      },
+      next: () => { this.loadResult(); },
     });
+  }
+
+  private buildSpecialAnswers(): SpecialAnswerDTO[] {
+    const result: SpecialAnswerDTO[] = [];
+    for (const [qId, state] of Object.entries(this.pronunciationStates)) {
+      if (state.score !== undefined) {
+        result.push({ questionId: +qId, speakScore: state.score });
+      }
+    }
+    for (const [qId, state] of Object.entries(this.writingStates)) {
+      if (state.score !== undefined) {
+        result.push({ questionId: +qId, speakScore: state.score });
+      }
+    }
+    return result;
   }
 
   loadResult() {
-    if (!this.quiz) {
-      return;
-    }
+    if (!this.quiz) return;
 
     this.testService.getMyQuizResult(this.quiz.quizId).subscribe({
       next: (rs) => {
-        if (!rs) {
-          return;
-        }
+        if (!rs) return;
 
         this.currentScore = rs.score;
-
         this.previousScore = rs.previousScore || rs.score;
         const allQuestions = this.getAllQuestions();
 
         this.correctCount = 0;
-
         this.wrongCount = 0;
-
         this.unansweredCount = 0;
 
         allQuestions.forEach((q: any) => {
-          const selectedId = this.selectedAnswers[q.questionId];
-
-          if (selectedId === undefined || selectedId === null) {
-            this.unansweredCount++;
-
+          if (q.questionType === 'PRONUNCIATION') {
+            const state = this.pronunciationStates[q.questionId];
+            if (!state || state.score === undefined) {
+              this.unansweredCount++;
+            } else if (state.score >= 80) {
+              this.correctCount++;
+            } else {
+              this.wrongCount++;
+            }
+            return;
+          }
+          if (q.questionType === 'WRITING') {
+            const state = this.writingStates[q.questionId];
+            if (!state || state.score === undefined) {
+              this.unansweredCount++;
+            } else if (state.score >= 80) {
+              this.correctCount++;
+            } else {
+              this.wrongCount++;
+            }
             return;
           }
 
+          const selectedId = this.selectedAnswers[q.questionId];
+          if (selectedId === undefined || selectedId === null) {
+            this.unansweredCount++;
+            return;
+          }
           const correctAnswer = q.answers.find((a: any) => a.isCorrect);
-
           if (correctAnswer && selectedId === correctAnswer.answerId) {
             this.correctCount++;
           } else {
@@ -345,6 +548,10 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
         this.showResult = true;
         this.isSubmitted = true;
         this.hasDoneQuiz = true;
+
+        this.getAllQuestions()
+          .filter(q => q.questionType === 'PRONUNCIATION')
+          .forEach(q => this.fetchPronTts(q));
 
         if (this.refType === 'PLACEMENT') {
           const levelName = rs.assignedLevelName || 'A1';
@@ -421,7 +628,14 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
   retryQuiz() {
     localStorage.removeItem(`quiz_end_time_${this.quiz?.quizId}`);
     this.selectedAnswers = {};
+    for (const state of Object.values(this.pronunciationStates)) {
+      if (state.recordedAudioUrl) URL.revokeObjectURL(state.recordedAudioUrl);
+    }
+    this.pronunciationStates = {};
+    this.writingAnswers = {};
+    this.writingStates = {};
     this.activePart = 0;
+    this.activeQuestion = 0;
     this.showResultSummary = false;
     this.flaggedQuestions = new Set<number>();
 
@@ -582,7 +796,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     );
   }
 
-  isCorrectAnswer(q: any, a: any): boolean {
+  isCorrectAnswer(_q: any, a: any): boolean {
     return a.isCorrect;
   }
 
@@ -592,10 +806,6 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
   isWrong(q: any, a: any): boolean {
     return this.showResult && this.isSelected(q, a) && !a.isCorrect;
-  }
-
-  isUnanswered(q: any): boolean {
-    return this.showResult && !this.selectedAnswers[q.questionId];
   }
 
   goBackCourse() {
@@ -609,7 +819,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
       next: () => this.router.navigate(['/user/units']),
       error: () => {
         this.isStartingLearning = false;
-        alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        alert('Something went wrong. Please try again.');
       }
     });
   }
@@ -617,9 +827,15 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+    for (const state of Object.values(this.pronunciationStates)) {
+      if (state.mediaRecorder?.state !== 'inactive') {
+        state.mediaRecorder?.stop();
+      }
+      if (state.recordedAudioUrl) URL.revokeObjectURL(state.recordedAudioUrl);
+    }
   }
   @HostListener('window:beforeunload', ['$event'])
-  handleBeforeUnload($event: any) {
+  handleBeforeUnload(_$event: any) {
     if (!this.isSubmitted && this.quiz && !this.hasSubmitted) {
       this.hasSubmitted = true;
 
@@ -630,6 +846,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
             JSON.stringify({
               quizId: this.quiz.quizId,
               answerIds: Object.values(this.selectedAnswers),
+              specialAnswers: this.buildSpecialAnswers(),
             }),
           ],
           {

@@ -201,3 +201,24 @@
     font-size: 13px;
   }
 }
+
+/* ── Payment stats additions ── */
+.stat-card.green  { border-left: 4px solid #16a34a; }
+.stat-card.blue   { border-left: 4px solid #2563eb; }
+.stat-card.orange { border-left: 4px solid #ea580c; }
+.stat-card.red    { border-left: 4px solid #dc2626; }
+
+.stat-subtitle { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+.money-cell        { font-weight: 600; color: #16a34a; }
+.money-cell.refund { color: #2563eb; }
+.money-cell.orange { color: #ea580c; }
+.money-cell.green  { color: #16a34a; }
+.money-cell.highlight { color: #7c3aed; }
+
+.section-note { font-size: 13px; color: #9ca3af; margin-left: 10px; }
+
+.loading-row  { text-align: center; padding: 40px; color: #9ca3af; font-size: 15px; }
+.empty-state  { text-align: center; padding: 48px 24px; color: #9ca3af; font-size: 15px; }
+
+.history-section + .history-section { margin-top: 24px; }

@@ -1,9 +1,7 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { PaymentService } from '../../../services/payment.service';
+import { StatsService, AdminPaymentStats, MonthlyAdminBreakdown } from '../../../services/stats.service';
 
 @Component({
   selector: 'admin-dashboard',
@@ -13,63 +11,36 @@ import { PaymentService } from '../../../services/payment.service';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardAdminComponent implements OnInit {
-  financialOverview = {
-    totalPaid: 0,
-
-    refundedAmount: 0,
-
-    pendingRefundAmount: 0,
-
-    teacherSalary: 0,
-
-    totalHours: 0,
-
-    netProfit: 0,
+  stats: AdminPaymentStats = {
+    totalStudentPayments: 0, totalCompletedLearning: 0, totalActiveLearning: 0,
+    totalCancelledUnrefunded: 0, totalRefunded: 0,
+    monthlyBreakdown: [], teacherPayouts: [], studentSummaries: [],
   };
 
-  teacherFinance: any[] = [];
-
-  studentFinance: any[] = [];
-
-  teacherTotal = 0;
-
-  studentTotal = 0;
-
   loading = false;
-
-  month = new Date().getMonth() + 1;
-
   year = new Date().getFullYear();
-
+  month = new Date().getMonth() + 1;
   selectedMonth = new Date().toISOString().substring(0, 7);
 
-  constructor(
-    private paymentService: PaymentService,
-  ) {}
+  constructor(private statsService: StatsService) {}
 
-  ngOnInit(): void {
-    this.loadData();
-  }
+  ngOnInit(): void { this.loadData(); }
 
   loadData(): void {
     this.loading = true;
-
-    Promise.all([
-    ]).finally(() => {
-      this.loading = false;
+    this.statsService.getAdminStats(this.year, this.month).subscribe({
+      next: res => { this.stats = res; this.loading = false; },
+      error: () => { this.loading = false; },
     });
   }
 
   onMonthChange(): void {
-    const [year, month] =
-      this.selectedMonth
-        .split('-')
-        .map(Number);
-
-    this.year = year;
-
-    this.month = month;
-
+    const [y, m] = this.selectedMonth.split('-').map(Number);
+    this.year = y; this.month = m;
     this.loadData();
+  }
+
+  monthLabel(row: MonthlyAdminBreakdown): string {
+    return `${new Date(row.year, row.month - 1).toLocaleString('en', { month: 'short' })} ${row.year}`;
   }
 }

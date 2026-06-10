@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TtsService } from '../../../../features/services/tts.service';
-import { AsrService } from '../../../../features/services/asr.service';
+import { AsrService, PronunciationGradeResponse, WordResult } from '../../../../features/services/asr.service';
 
 @Component({
   selector: 'app-speak',
@@ -27,6 +27,8 @@ export class SpeakComponent implements OnDestroy {
   isTranscribing = false;
   transcribedText = '';
   recordedBlobUrl = '';
+  gradeResult: PronunciationGradeResponse | null = null;
+  wordResults: WordResult[] = [];
 
   private ttsAudioUrl: string | null = null;
   private mediaRecorder: MediaRecorder | null = null;
@@ -145,20 +147,38 @@ export class SpeakComponent implements OnDestroy {
           if (this.recordedBlobUrl) URL.revokeObjectURL(this.recordedBlobUrl);
           this.recordedBlobUrl = URL.createObjectURL(webmBlob);
 
-          // Convert to WAV and send to backend ASR model
+          // Convert to WAV → grade against reference text
           try {
             const wavBlob = await this.convertToWav(webmBlob);
             this.isTranscribing = true;
-            this.asr.transcribe(wavBlob, 'wav').subscribe({
-              next: (res) => {
-                this.transcribedText = res.text || '(Không nhận dạng được)';
-                this.isTranscribing = false;
-              },
-              error: () => {
-                this.transcribedText = 'Lỗi kết nối tới máy chủ.';
-                this.isTranscribing = false;
-              }
-            });
+            this.gradeResult = null;
+            this.wordResults = [];
+
+            if (this.vietnameseText.trim()) {
+              this.asr.grade(wavBlob, this.vietnameseText, 'wav').subscribe({
+                next: (res) => {
+                  this.transcribedText = res.transcript || '(Không nhận dạng được)';
+                  this.gradeResult = res;
+                  this.wordResults = res.words ?? [];
+                  this.isTranscribing = false;
+                },
+                error: () => {
+                  this.transcribedText = 'Lỗi kết nối tới máy chủ.';
+                  this.isTranscribing = false;
+                }
+              });
+            } else {
+              this.asr.transcribe(wavBlob, 'wav').subscribe({
+                next: (res) => {
+                  this.transcribedText = res.text || '(Không nhận dạng được)';
+                  this.isTranscribing = false;
+                },
+                error: () => {
+                  this.transcribedText = 'Lỗi kết nối tới máy chủ.';
+                  this.isTranscribing = false;
+                }
+              });
+            }
           } catch {
             this.transcribedText = 'Lỗi chuyển đổi âm thanh.';
           }
@@ -218,6 +238,8 @@ export class SpeakComponent implements OnDestroy {
     if (this.recordedBlobUrl) { URL.revokeObjectURL(this.recordedBlobUrl); this.recordedBlobUrl = ''; }
     this.transcribedText = '';
     this.isTranscribing = false;
+    this.gradeResult = null;
+    this.wordResults = [];
   }
 
   private deleteTtsAudio() {

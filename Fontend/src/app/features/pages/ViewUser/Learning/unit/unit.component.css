@@ -253,28 +253,20 @@
 }
 
 .duo-label {
-    padding: 8px 14px;
-
-    border-radius: 16px;
-
-    background: white;
-
-    box-shadow:
-        0 4px 10px rgba(15,23,42,0.05);
-
-    color: #111827;
-
+    color: #374151;
     font-size: 13px;
-    font-weight: 800;
-
-    line-height: 1.4;
-
-    width: auto;
-    height: auto;
-
+    font-weight: 700;
     white-space: nowrap;
+    display: inline-block;
 
-    flex: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.duo-node-wrapper:hover .duo-label {
+    opacity: 1;
+    visibility: visible;
 }
 /* TEST BUTTON */
 
@@ -500,8 +492,7 @@ video {
     }
 
     .duo-label {
-        min-width: 120px;
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .info-grid {

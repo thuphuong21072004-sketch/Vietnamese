@@ -25,22 +25,32 @@
                     <span *ngIf="refType === 'PLACEMENT'">Placement Test</span>
                 </div>
                 <div class="quiz-pass-score" *ngIf="refType !== 'PLACEMENT'">Pass Score: <span>{{ quiz.passScore || 70 }}%</span></div>
-                <!-- Timer: visible on mobile (sidebar hidden on mobile) -->
                 <div class="timer-box timer-mobile" *ngIf="quiz?.timeLimit && !showResult && !hasDoneQuiz">
                     <div class="timer-label">Time Remaining</div>
                     <div class="timer-text" [class.warning]="timeLeft <= 300 && timeLeft > 60" [class.danger]="timeLeft <= 60">{{ timerText }}</div>
                 </div>
             </div>
 
-            <!-- ===== QUESTIONS (hidden while showing result summary or placement modal) ===== -->
+            <!-- ===== QUESTIONS ===== -->
             <ng-container *ngIf="!showResultSummary && !showPlacementModal">
 
-            <!-- Flat questions (no parts) -->
-            <div *ngIf="quiz.questions?.length && !quiz.parts?.length">
-                <div *ngFor="let q of quiz.questions; let i = index"
-                    class="question-box" [id]="'q-' + q.questionId">
+            <!-- Flat questions (one at a time) -->
+            <div *ngIf="quiz.questions?.length && !quiz.parts?.length" class="parts-wrapper">
+
+                <div class="part-tabs">
+                    <button *ngFor="let q of quiz.questions; let i = index"
+                        class="part-tab"
+                        [class.active]="activeQuestion === i"
+                        [class.done]="!isSubmitted && isQuestionAnswered(q)"
+                        (click)="selectQuestion(i)">
+                        {{ i + 1 }}
+                    </button>
+                </div>
+
+                <ng-container *ngFor="let q of quiz.questions; let i = index">
+                <div *ngIf="activeQuestion === i" class="part-box" [id]="'q-' + q.questionId">
                     <div class="question-title">
-                        <span class="question-label">Question {{ i + 1 }}.</span>
+                        <span class="question-label">Câu {{ i + 1 }}.</span>
                         <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
                         <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
                         <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
@@ -50,25 +60,42 @@
                             {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
                         </button>
                     </div>
-                    <div *ngFor="let a of q.answers; let ai = index" class="answer-option"
-                        [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
-                        <label class="answer-label">
-                            <input type="radio" class="answer-radio"
-                                [name]="'q' + q.questionId"
-                                [disabled]="showResult"
-                                [checked]="selectedAnswers[q.questionId] === a.answerId"
-                                (change)="selectAnswer(q.questionId, a.answerId)" />
-                            <div class="answer-content">
-                                <span *ngIf="a.answerText" class="answer-text">{{ a.answerText }}</span>
-                                <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
-                                <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
-                            </div>
-                        </label>
+
+                    <ng-container *ngIf="!q.questionType || q.questionType === 'MULTIPLE_CHOICE'">
+                        <div *ngFor="let a of q.answers" class="answer-option"
+                            [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
+                            <label class="answer-label">
+                                <input type="radio" class="answer-radio"
+                                    [name]="'q' + q.questionId"
+                                    [disabled]="showResult"
+                                    [checked]="selectedAnswers[q.questionId] === a.answerId"
+                                    (change)="selectAnswer(q.questionId, a.answerId)" />
+                                <div class="answer-content">
+                                    <span *ngIf="a.answerText" class="answer-text">{{ a.answerText }}</span>
+                                    <img *ngIf="!a.answerText && a.imageUrl" class="answer-image" [src]="getImageUrl(a.imageUrl)">
+                                    <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls class="answer-audio" [src]="getAudioUrl(a.audioUrl)"></audio>
+                                </div>
+                            </label>
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngTemplateOutlet="pronBlock; context: { q: q }"></ng-container>
+                    <ng-container *ngTemplateOutlet="writingBlock; context: { q: q }"></ng-container>
+
+                    <div class="part-nav">
+                        <button class="part-nav-btn" *ngIf="activeQuestion > 0" (click)="selectQuestion(activeQuestion - 1)">
+                            ← Câu {{ activeQuestion }}
+                        </button>
+                        <span></span>
+                        <button class="part-nav-btn next" *ngIf="activeQuestion < quiz.questions.length - 1" (click)="selectQuestion(activeQuestion + 1)">
+                            Câu {{ activeQuestion + 2 }} →
+                        </button>
                     </div>
                 </div>
+                </ng-container>
             </div>
 
-            <!-- Parts -->
+            <!-- Parts (one part at a time, tabs switch part) -->
             <div *ngIf="quiz.parts?.length" class="parts-wrapper">
 
                 <div class="part-tabs">
@@ -77,7 +104,7 @@
                         [class.active]="activePart === pi"
                         [class.done]="!isSubmitted && answeredInPart(part) === totalInPart(part) && totalInPart(part) > 0"
                         (click)="selectPart(pi)">
-                        Part {{ part.partNumber }}
+                        Phần {{ part.partNumber }}
                         <span class="tab-progress" *ngIf="!isSubmitted && totalInPart(part) > 0">
                             {{ answeredInPart(part) }}/{{ totalInPart(part) }}
                         </span>
@@ -85,27 +112,28 @@
                 </div>
 
                 <ng-container *ngFor="let part of quiz.parts; let pi = index">
-                    <div *ngIf="activePart === pi" class="part-box">
+                <div *ngIf="activePart === pi" class="part-box">
 
-                        <div class="part-header">
-                            <div class="part-number">Part {{ part.partNumber }}</div>
-                            <div class="part-name">{{ part.partName }}</div>
-                        </div>
-                        <div *ngIf="part.instruction" class="part-instruction">{{ part.instruction }}</div>
+                    <div class="part-header">
+                        <div class="part-number">Phần {{ part.partNumber }}</div>
+                        <div class="part-name">{{ part.partName }}</div>
+                    </div>
+                    <div *ngIf="part.instruction" class="part-instruction">{{ part.instruction }}</div>
 
-                        <div *ngIf="part.questions?.length">
-                            <div *ngFor="let q of part.questions" class="question-box" [id]="'q-' + q.questionId">
-                                <div class="question-title">
-                                    <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
-                                    <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
-                                    <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
-                                    <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
-                                    <span class="question-score">({{ q.score }} pts)</span>
-                                    <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                                        {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
-                                    </button>
-                                </div>
+                    <div *ngIf="part.questions?.length">
+                        <div *ngFor="let q of part.questions" class="question-box" [id]="'q-' + q.questionId">
+                            <div class="question-title">
+                                <span class="question-label">Câu {{ getQuestionIndex(q) }}.</span>
+                                <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
+                                <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                                <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
+                                <span class="question-score">({{ q.score }} pts)</span>
+                                <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                    {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
+                                </button>
+                            </div>
+                            <ng-container *ngIf="!q.questionType || q.questionType === 'MULTIPLE_CHOICE'">
                                 <div *ngFor="let a of q.answers" class="answer-option"
                                     [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
                                     <label class="answer-label">
@@ -121,28 +149,32 @@
                                         </div>
                                     </label>
                                 </div>
-                            </div>
+                            </ng-container>
+                            <ng-container *ngTemplateOutlet="pronBlock; context: { q: q }"></ng-container>
+                            <ng-container *ngTemplateOutlet="writingBlock; context: { q: q }"></ng-container>
                         </div>
+                    </div>
 
-                        <div *ngIf="part.passages?.length">
-                            <div *ngFor="let psg of part.passages" class="passage-box">
-                                <div *ngIf="psg.content" class="passage-text">{{ psg.content }}</div>
-                                <div class="passage-content">
-                                    <img *ngIf="!psg.content && psg.imageUrl" class="passage-image" [src]="getImageUrl(psg.imageUrl)">
-                                    <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls class="passage-audio" [src]="getAudioUrl(psg.audioUrl)"></audio>
+                    <div *ngIf="part.passages?.length">
+                        <div *ngFor="let psg of part.passages" class="passage-box">
+                            <div *ngIf="psg.content" class="passage-text">{{ psg.content }}</div>
+                            <div class="passage-content">
+                                <img *ngIf="!psg.content && psg.imageUrl" class="passage-image" [src]="getImageUrl(psg.imageUrl)">
+                                <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls class="passage-audio" [src]="getAudioUrl(psg.audioUrl)"></audio>
+                            </div>
+                            <div *ngFor="let q of psg.questions" class="question-box" [id]="'q-' + q.questionId">
+                                <div class="question-title">
+                                    <span class="question-label">Câu {{ getQuestionIndex(q) }}.</span>
+                                    <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
+                                    <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
+                                    <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
+                                    <span class="question-score">({{ q.score }} pts)</span>
+                                    <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                        {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
+                                    </button>
                                 </div>
-                                <div *ngFor="let q of psg.questions" class="question-box" [id]="'q-' + q.questionId">
-                                    <div class="question-title">
-                                        <span class="question-label">Question {{ getQuestionIndex(q) }}.</span>
-                                        <span *ngIf="q.questionText" class="question-text-inline">{{ q.questionText }}</span>
-                                        <img *ngIf="!q.questionText && q.imageUrl" class="question-image-inline" [src]="getImageUrl(q.imageUrl)">
-                                        <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls class="question-audio" [src]="getAudioUrl(q.audioUrl)"></audio>
-                                        <span class="question-score">({{ q.score }} pts)</span>
-                                        <button *ngIf="!showResult" class="flag-btn" [class.is-flagged]="flaggedQuestions.has(q.questionId)" (click)="toggleFlag(q.questionId)">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                                            {{ flaggedQuestions.has(q.questionId) ? 'Marked' : 'Mark for Review' }}
-                                        </button>
-                                    </div>
+                                <ng-container *ngIf="!q.questionType || q.questionType === 'MULTIPLE_CHOICE'">
                                     <div *ngFor="let a of q.answers" class="answer-option"
                                         [ngClass]="{ 'correct': showResult && a.isCorrect, 'wrong': isWrong(q, a), 'unanswered': isUnanswered(q) }">
                                         <label class="answer-label">
@@ -158,21 +190,24 @@
                                             </div>
                                         </label>
                                     </div>
-                                </div>
+                                </ng-container>
+                                <ng-container *ngTemplateOutlet="pronBlock; context: { q: q }"></ng-container>
+                                <ng-container *ngTemplateOutlet="writingBlock; context: { q: q }"></ng-container>
                             </div>
                         </div>
-
-                        <div class="part-nav">
-                            <button class="part-nav-btn" *ngIf="activePart > 0" (click)="selectPart(activePart - 1)">
-                                ← Part {{ quiz.parts[activePart - 1].partNumber }}
-                            </button>
-                            <span></span>
-                            <button class="part-nav-btn next" *ngIf="activePart < quiz.parts.length - 1" (click)="selectPart(activePart + 1)">
-                                Part {{ quiz.parts[activePart + 1].partNumber }} →
-                            </button>
-                        </div>
-
                     </div>
+
+                    <div class="part-nav">
+                        <button class="part-nav-btn" *ngIf="activePart > 0" (click)="selectPart(activePart - 1)">
+                            ← Phần {{ quiz.parts[activePart - 1].partNumber }}
+                        </button>
+                        <span></span>
+                        <button class="part-nav-btn next" *ngIf="activePart < quiz.parts.length - 1" (click)="selectPart(activePart + 1)">
+                            Phần {{ quiz.parts[activePart + 1].partNumber }} →
+                        </button>
+                    </div>
+
+                </div>
                 </ng-container>
 
             </div>
@@ -209,7 +244,7 @@
                         </div>
                         <div class="rs-label correct">Correct Answers</div>
                         <div class="rs-count">{{ correctCount }}</div>
-                        <div class="rs-unit">questions</div>
+                        <div class="rs-unit">Câu</div>
                     </div>
 
                     <div class="rs-card">
@@ -218,7 +253,7 @@
                         </div>
                         <div class="rs-label wrong">Wrong Answers</div>
                         <div class="rs-count">{{ wrongCount }}</div>
-                        <div class="rs-unit">questions</div>
+                        <div class="rs-unit">Câu</div>
                     </div>
 
                     <div class="rs-card">
@@ -227,7 +262,7 @@
                         </div>
                         <div class="rs-label skip">Skipped</div>
                         <div class="rs-count">{{ unansweredCount }}</div>
-                        <div class="rs-unit">questions</div>
+                        <div class="rs-unit">Câu</div>
                     </div>
 
                     <div class="rs-card">
@@ -245,7 +280,7 @@
                 </div>
 
                 <div class="rs-actions">
-                    <button class="rs-ok-btn" (click)="showResultSummary = false; selectPart(0)">
+                    <button class="rs-ok-btn" (click)="showResultSummary = false">
                         Review Answers
                     </button>
                     <button *ngIf="isPassed && refType !== 'PLACEMENT'" class="next-btn" (click)="goBackCourse()">Continue</button>
@@ -280,17 +315,17 @@
 
             <!-- Note -->
             <div class="sb-note">
-                Click a number to jump to that question. Click <b>Question X.</b> to flag for review.
+                Click a number to jump to that question. Click the bookmark icon to flag for review.
             </div>
 
             <!-- Navigator: parts -->
             <ng-container *ngIf="quiz.parts?.length">
                 <ng-container *ngFor="let part of quiz.parts; let pi = index">
-                    <div class="sb-part-label">Part {{ part.partNumber }}</div>
+                    <div class="sb-part-label">Phần {{ part.partNumber }}</div>
                     <div class="sb-q-grid">
                         <button *ngFor="let q of getPartQuestionsFlat(part)"
                             class="sb-q-btn"
-                            [class.sb-answered]="selectedAnswers[q.questionId] !== undefined"
+                            [class.sb-answered]="isQuestionAnswered(q)"
                             [class.sb-flagged]="flaggedQuestions.has(q.questionId)"
                             (click)="goToQuestion(pi, q.questionId)">
                             {{ getQuestionIndex(q) }}
@@ -303,9 +338,10 @@
             <div class="sb-q-grid" *ngIf="quiz.questions?.length && !quiz.parts?.length">
                 <button *ngFor="let q of quiz.questions; let i = index"
                     class="sb-q-btn"
-                    [class.sb-answered]="selectedAnswers[q.questionId] !== undefined"
+                    [class.sb-answered]="isQuestionAnswered(q)"
                     [class.sb-flagged]="flaggedQuestions.has(q.questionId)"
-                    (click)="goToFlatQuestion(q.questionId)">
+                    [class.sb-active]="activeQuestion === i"
+                    (click)="selectQuestion(i)">
                     {{ i + 1 }}
                 </button>
             </div>
@@ -316,3 +352,80 @@
 
 </div>
 
+<!-- ===== REUSABLE QUESTION TYPE BLOCKS ===== -->
+<ng-template #pronBlock let-q="q">
+    <div *ngIf="q.questionType === 'PRONUNCIATION'" class="pron-zone" [class.pron-unanswered]="isUnanswered(q)">
+
+        <!-- During the quiz: mic button only -->
+        <ng-container *ngIf="!showResult">
+            <button class="pron-record-btn"
+                    [class.pron-recording]="getPronState(q.questionId).isRecording"
+                    [disabled]="getPronState(q.questionId).isTranscribing"
+                    (click)="togglePronunciationRecording(q)">
+                {{ getPronState(q.questionId).isRecording ? '⏹ Stop' : '🎤 Record' }}
+            </button>
+            <div *ngIf="getPronState(q.questionId).isTranscribing" class="pron-wait">
+                <span class="dot-spin-sm"></span> Processing...
+            </div>
+            <span *ngIf="getPronState(q.questionId).score !== undefined && !getPronState(q.questionId).isTranscribing"
+                  class="pron-recorded-badge">✓ Recorded</span>
+        </ng-container>
+
+        <!-- Review mode: recorded audio + reference audio + score -->
+        <ng-container *ngIf="showResult">
+            <div *ngIf="getPronState(q.questionId).recordedAudioUrl" class="pron-review-row">
+                <span class="pron-review-label">Your recording:</span>
+                <audio controls [src]="getPronState(q.questionId).recordedAudioUrl" class="pron-audio"></audio>
+            </div>
+            <div *ngIf="getPronState(q.questionId).ttsAudioUrl" class="pron-review-row">
+                <span class="pron-review-label">Reference:</span>
+                <audio controls [src]="getPronState(q.questionId).ttsAudioUrl" class="pron-audio"></audio>
+            </div>
+            <div *ngIf="getPronState(q.questionId).score !== undefined" class="pron-result-row">
+                <span class="pron-score-pill"
+                      [class.pron-pass]="getPronState(q.questionId).score! >= 80"
+                      [class.pron-fail]="getPronState(q.questionId).score! < 80">
+                    {{ getPronState(q.questionId).score | number:'1.0-0' }}%
+                    {{ getPronState(q.questionId).score! >= 80 ? '✓ Passed' : '✗ Failed' }}
+                </span>
+            </div>
+            <div *ngIf="getPronState(q.questionId).score === undefined" class="pron-no-answer">
+                Not recorded
+            </div>
+        </ng-container>
+
+    </div>
+</ng-template>
+
+<ng-template #writingBlock let-q="q">
+    <div *ngIf="q.questionType === 'WRITING'" class="writing-zone" [class.writing-unanswered]="isUnanswered(q)">
+
+        <!-- During the quiz: textarea only -->
+        <textarea *ngIf="!showResult"
+                  class="writing-input"
+                  rows="3"
+                  [(ngModel)]="writingAnswers[q.questionId]"
+                  placeholder="Type your answer here..."></textarea>
+
+        <!-- Review mode: student's answer + correct answer -->
+        <div *ngIf="showResult" class="writing-review">
+            <div class="writing-review-row">
+                <span class="writing-review-label">Your answer:</span>
+                <span class="writing-review-text" [class.writing-empty]="!writingAnswers[q.questionId]">
+                    {{ writingAnswers[q.questionId] || '(Not answered)' }}
+                </span>
+            </div>
+            <div class="writing-review-row">
+                <span class="writing-review-label">Correct answer:</span>
+                <span class="writing-review-text writing-correct-text">{{ getCorrectAnswerText(q) }}</span>
+            </div>
+            <span class="writing-verdict"
+                  [class.writing-pass]="isWritingCorrect(q)"
+                  [class.writing-fail]="!isWritingCorrect(q) && !!writingAnswers[q.questionId]"
+                  [class.writing-skip]="!writingAnswers[q.questionId]">
+                {{ !writingAnswers[q.questionId] ? 'Not answered' : (isWritingCorrect(q) ? '✓ Correct' : '✗ Incorrect') }}
+            </span>
+        </div>
+
+    </div>
+</ng-template>

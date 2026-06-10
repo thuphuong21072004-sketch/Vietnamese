@@ -88,6 +88,8 @@ builder.Services.AddScoped<AnswerRepository, AnswerRepositoryImpl>();
 
 builder.Services.AddScoped<UserAnswerRepository, UserAnswerRepositoryImpl>();
 
+builder.Services.AddScoped<UserSpecialAnswerRepository, UserSpecialAnswerRepositoryImpl>();
+
 builder.Services.AddScoped<UserQuizRepository, UserQuizRepositoryImpl>();
 
 builder.Services.AddScoped<
@@ -172,6 +174,8 @@ builder.Services.AddScoped<
 builder.Services.Configure<Backend.Common.BankConfig>(
     builder.Configuration.GetSection("BankTransfer"));
 builder.Services.AddHostedService<Backend.Services.impl.AutoCancelService>();
+
+builder.Services.AddScoped<Backend.Services.StatsService, Backend.Services.impl.StatsServiceImpl>();
 
 var app = builder.Build();
 

@@ -33,5 +33,5 @@ export interface ClassEnrollmentDto {
 
   endTime?: string;
 
-  scheduleDays?: string[];
+  scheduleDays?: { id: number; classId: number; dayOfWeek: string }[];
 }
