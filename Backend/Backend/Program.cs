@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,8 +56,8 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler =
-            ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
     });
 
 builder.Services.AddScoped<UserService, UserServiceImpl>();
@@ -176,6 +177,12 @@ builder.Services.Configure<Backend.Common.BankConfig>(
 builder.Services.AddHostedService<Backend.Services.impl.AutoCancelService>();
 
 builder.Services.AddScoped<Backend.Services.StatsService, Backend.Services.impl.StatsServiceImpl>();
+
+builder.Services.AddScoped<TeacherScheduleRepository, TeacherScheduleRepositoryImpl>();
+builder.Services.AddScoped<StudentTripRepository, StudentTripRepositoryImpl>();
+builder.Services.AddScoped<MatchRequestRepository, MatchRequestRepositoryImpl>();
+builder.Services.AddScoped<TravelBookingRepository, TravelBookingRepositoryImpl>();
+builder.Services.AddScoped<TravelService, TravelServiceImpl>();
 
 var app = builder.Build();
 

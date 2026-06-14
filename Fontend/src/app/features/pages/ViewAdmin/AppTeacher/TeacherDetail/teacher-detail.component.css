@@ -162,6 +162,53 @@
     border-radius: 12px;
 }
 
+.reviews-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.reviews-header h2 {
+    margin: 0;
+}
+
+.avg-rating {
+    font-size: 14px;
+    font-weight: 600;
+    color: #7c3aed;
+}
+
+.rating-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    border: 1.5px solid #e2e8f0;
+    background: white;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.filter-btn:hover {
+    border-color: #8b5cf6;
+    color: #7c3aed;
+}
+
+.filter-btn.active {
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: white;
+}
+
 .review-summary {
     display: flex;
     align-items: center;

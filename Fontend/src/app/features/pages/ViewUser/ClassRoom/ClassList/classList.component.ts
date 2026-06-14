@@ -15,6 +15,7 @@ import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
 import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 import { ReviewService } from '../../../../services/review.service';
+import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
 
 @Component({
   selector: 'app-class-list',
@@ -158,6 +159,8 @@ export class ClassListComponent implements OnInit {
   };
 
   filter: ClassFilterDto = {
+    title: '',
+
     country: '',
 
     minRating: 0,
@@ -182,6 +185,54 @@ export class ClassListComponent implements OnInit {
   };
 
   reviewStatusMap: Record<number, boolean> = {};
+
+  myStatusFilter: number | '' = '';
+  studyDateFilter: string = '';
+  filterProvince: string = '';
+  filterSpecificLocation: string = '';
+
+  readonly destinationGroups = VIETNAM_DESTINATIONS;
+
+  get availableFilterSpots(): string[] {
+    return VIETNAM_DESTINATIONS.find(g => g.province === this.filterProvince)?.spots ?? [];
+  }
+
+  onFilterProvinceChange(): void {
+    this.filterSpecificLocation = '';
+  }
+
+  get filteredClasses(): TeacherClassDto[] {
+    let list = this.classes;
+
+    if (this.myStatusFilter !== '') {
+      const statusNum = Number(this.myStatusFilter);
+      const enrolledIds = new Set(
+        this.enrolledClasses
+          .filter(e => e.status === statusNum)
+          .map(e => e.classId)
+      );
+      list = list.filter(c => enrolledIds.has(c.classId));
+    }
+
+    if (
+      this.studyDateFilter &&
+      (this.myStatusFilter === 1 || this.myStatusFilter === 2 || this.myStatusFilter === 3)
+    ) {
+      list = list.filter(c =>
+        c.sessions?.some(s => s.studyDate === this.studyDateFilter)
+      );
+    }
+
+    if (this.filterProvince) {
+      list = list.filter(c => c.province === this.filterProvince);
+    }
+
+    if (this.filterSpecificLocation) {
+      list = list.filter(c => c.specificLocation === this.filterSpecificLocation);
+    }
+
+    return list;
+  }
 
   constructor(
     private teacherClassService: TeacherClassService,
@@ -240,7 +291,10 @@ export class ClassListComponent implements OnInit {
 
   clearFilter(): void {
     this.filter = {
+      title: '',
+
       country: '',
+
       minRating: 0,
 
       mainTopic: '',
@@ -261,6 +315,9 @@ export class ClassListComponent implements OnInit {
 
       daysOfWeek: [],
     };
+
+    this.filterProvince = '';
+    this.filterSpecificLocation = '';
 
     this.searchClasses();
   }
@@ -386,5 +443,15 @@ export class ClassListComponent implements OnInit {
     const enrollment = this.getEnrollment(classId);
 
     return enrollment ? enrollment.status : null;
+  }
+
+  canEnrollAgainRefunded(classId: number): boolean {
+    const cls = this.classes.find((c) => c.classId === classId);
+    if (!cls?.sessions?.length) return true;
+    const first = cls.sessions.reduce((a, b) =>
+      a.sessionNumber < b.sessionNumber ? a : b
+    );
+    const firstStart = new Date(`${first.studyDate}T${first.startTime}`);
+    return new Date() < firstStart;
   }
 }

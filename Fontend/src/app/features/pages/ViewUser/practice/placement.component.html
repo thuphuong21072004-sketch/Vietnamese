@@ -1,25 +1,88 @@
 <div class="placement-page">
-    <div class="page-header">
-        <p class="eyebrow">Practice</p>
-        <h1>Placement Tests</h1>
-        <p>Find the right level before starting your learning path.</p>
+
+    <div class="hero">
+        <div class="hero-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+        </div>
+        <p class="eyebrow">VietPhuong</p>
+        <h1>Entrance Placement Test</h1>
+        <p class="hero-sub">
+            Complete the test to receive your Vietnamese proficiency score.
+            Your level will be determined automatically based on your results.
+        </p>
+        <div class="hero-chips" *ngIf="!loading">
+            <span class="chip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {{ placements.length }} exam papers
+            </span>
+            <span class="chip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Scored automatically
+            </span>
+            <span class="chip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Level assigned after completion
+            </span>
+        </div>
     </div>
 
-    <div *ngIf="loading" class="loading">Loading tests...</div>
-
-    <div *ngIf="!loading" class="placement-grid">
-        <div class="placement-card random-card" (click)="openRandom()">
-            <div class="placement-number">Mix</div>
-            <h2>Random Test</h2>
-            <p>Start a quick placement test selected for you.</p>
-            <span class="card-action">Start now</span>
-        </div>
-
-        <div *ngFor="let p of placements; let i = index" class="placement-card">
-            <div class="placement-number">{{ i + 1 }}</div>
-            <h2>{{ p.name }}</h2>
-            <p>{{ p.description || 'Placement Test' }}</p>
-            <button class="start-btn" (click)="openPlacement(p)">Start Test</button>
-        </div>
+    <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading exams…</p>
     </div>
+
+    <div *ngIf="!loading" class="test-section">
+
+        <p class="section-label">Available exams — {{ placements.length }} papers</p>
+
+        <div class="test-list">
+
+            <div class="exam-card random-card" (click)="openRandom()">
+                <div class="exam-num random-num">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                        <rect x="1" y="1" width="30" height="30" rx="7" fill="#fff" stroke="#e2e8f0" stroke-width="1.5"/>
+                        <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#diceGrad)"/>
+                        <defs>
+                            <linearGradient id="diceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f97316"/>
+                                <stop offset="100%" stop-color="#ea580c"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="10" cy="10" r="2.4" fill="#fff"/>
+                        <circle cx="22" cy="10" r="2.4" fill="#fff"/>
+                        <circle cx="10" cy="22" r="2.4" fill="#fff"/>
+                        <circle cx="22" cy="22" r="2.4" fill="#fff"/>
+                        <circle cx="16" cy="16" r="2.4" fill="#fff"/>
+                    </svg>
+                </div>
+                <div class="exam-body">
+                    <h3>Random Exam</h3>
+                    <p>A randomly assigned test — all papers are equally valid for placement.</p>
+                </div>
+                <button class="take-btn random-btn" (click)="$event.stopPropagation(); openRandom()">
+                    Start
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+
+            <div *ngFor="let p of placements; let i = index"
+                 class="exam-card"
+                 (click)="openPlacement(p)">
+                <div class="exam-num">{{ i + 1 }}</div>
+                <div class="exam-body">
+                    <h3>{{ p.name }}</h3>
+                    <p>{{ p.description || 'Complete this test to evaluate your Vietnamese language proficiency.' }}</p>
+                </div>
+                <button class="take-btn" (click)="$event.stopPropagation(); openPlacement(p)">
+                    Take Exam
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

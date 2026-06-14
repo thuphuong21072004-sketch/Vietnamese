@@ -97,7 +97,7 @@ namespace Backend.Services.impl
                             .Available,
 
                     CreatedDate =
-                        DateTime.Now,
+                        DateTime.UtcNow,
                     PricePerHour = totalPrice
 
                 };

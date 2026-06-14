@@ -12,5 +12,6 @@ namespace Backend.Services
         Task UpdateUserStatus(string email, int status);
         Task UpdateUserRole(string email, string roleName);
         Task<UserDTO?> GetCurrentUser();
+        Task<object?> GetUserPublicProfile(int userId);
     }
 }

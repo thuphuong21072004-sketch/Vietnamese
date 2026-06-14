@@ -120,7 +120,6 @@ namespace Backend.Controllers
         /*
          * chi tiết lớp học
          */
-        [Authorize]
         [HttpGet("{classId}")]
         public async Task<IActionResult> GetClassDetail(int classId)
         {

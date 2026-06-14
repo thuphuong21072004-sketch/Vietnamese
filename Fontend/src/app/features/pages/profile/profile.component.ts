@@ -16,28 +16,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProfileComponent implements OnInit {
   name: string = '';
-
   email: string = '';
-
   roleName: string = '';
-
   status: number = 0;
-
   country: string = '';
-
   bio: string = '';
-
   avatarUrl: string = '';
+  dateOfBirth: string = '';
+  gender: string = '';
 
   newName: string = '';
-
   newEmail: string = '';
-
   newCountry: string = '';
-
   newBio: string = '';
-
   newAvatarUrl: string = '';
+  newDateOfBirth: string = '';
+  newGender: string = '';
 
   oldPassword: string = '';
 
@@ -65,34 +59,29 @@ export class ProfileComponent implements OnInit {
       this.status = res.status;
 
       this.country = res.country || '';
-
       this.bio = res.bio || '';
-
-      this.avatarUrl = res.avatarUrl
-        ? `http://localhost:5108/uploads/${res.avatarUrl}`
-        : '';
+      this.avatarUrl = res.avatarUrl ? `http://localhost:5108/uploads/${res.avatarUrl}` : '';
+      this.dateOfBirth = res.dateOfBirth || '';
+      this.gender = res.gender || '';
 
       this.newName = this.name;
-
       this.newEmail = this.email;
-
       this.newCountry = this.country;
-
       this.newBio = this.bio;
-
       this.newAvatarUrl = this.avatarUrl;
+      this.newDateOfBirth = this.dateOfBirth;
+      this.newGender = this.gender;
     });
   }
 
   updateProfile() {
     const data = {
       name: this.newName,
-
       country: this.newCountry,
-
       bio: this.newBio,
-
       avatarUrl: this.newAvatarUrl,
+      dateOfBirth: this.newDateOfBirth || null,
+      gender: this.newGender || null,
     };
 
     this.api.updateProfile(data).subscribe({

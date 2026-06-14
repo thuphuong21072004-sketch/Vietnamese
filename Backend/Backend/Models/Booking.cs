@@ -22,7 +22,7 @@
 
         public DateTime? CompletedAt { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
 
 

@@ -16,7 +16,7 @@
 
         public string? Reply { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         public User? Student { get; set; }
 

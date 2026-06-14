@@ -53,7 +53,7 @@ namespace Backend.Repository.impl
 
             var data = await query.ToListAsync();
 
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
 
             return data
                 .OrderBy(x =>
@@ -97,7 +97,7 @@ namespace Backend.Repository.impl
 
             var data = await query.ToListAsync();
 
-            var today = DateTime.Now.Date;
+            var today = DateTime.UtcNow.Date;
 
             return data
                 .OrderBy(x =>

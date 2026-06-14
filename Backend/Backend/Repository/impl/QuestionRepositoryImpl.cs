@@ -106,6 +106,7 @@ namespace Backend.Repository.impl
 
             await _context.UserAnswer.Where(x => answerIds.Contains(x.AnswerId)).ExecuteDeleteAsync();
             await _context.Answers.Where(x => ids.Contains(x.QuestionId)).ExecuteDeleteAsync();
+            await _context.UserSpecialAnswers.Where(x => ids.Contains(x.QuestionId)).ExecuteDeleteAsync();
             await _context.Questions.Where(x => ids.Contains(x.QuestionId)).ExecuteDeleteAsync();
         }
     }

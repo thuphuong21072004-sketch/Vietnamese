@@ -177,10 +177,17 @@ namespace Backend.Services.impl
          */
         public async Task<List<CourseDTO>> GetCourses(int levelId)
         {
-            var email= _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
-
             var courses = await _courseRepository.GetAllCourses(levelId, null);
+
+            string? email = null;
+            try { email = _userContext.GetEmail(); } catch { }
+
+            if (email == null)
+            {
+                return courses.Select(c => _mapper.Map<CourseDTO>(c)).ToList();
+            }
+
+            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
 
             var progresses = await _progressRepository
                 .GetUserCourses(
@@ -373,7 +380,7 @@ namespace Backend.Services.impl
 
                 entity.IsActive = IsAdmin();
                 entity.CreatedBy = currentUser;
-                entity.CreatedDate = DateTime.Now;
+                entity.CreatedDate = DateTime.UtcNow;
 
                 var maxOrder = await _unitRepository
                     .GetMaxOrderIndex(dto.CourseId);
@@ -553,7 +560,7 @@ namespace Backend.Services.impl
                         UserId = userId,
                         RefType = refUnit,
                         RefId = firstUnit.UnitId,
-                        AssignedDate = DateTime.Now,
+                        AssignedDate = DateTime.UtcNow,
                         Status = false
                     });
             }

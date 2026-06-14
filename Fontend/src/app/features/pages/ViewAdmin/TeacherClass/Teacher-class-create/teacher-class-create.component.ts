@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import {
   TeacherClassDto,
   ClassSessionDto} from '../../../../models/teacher-class.model';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TeacherClassService} from '../../../../services/teacher-class.service';
 import { BaseService } from '../../../../services/base.service';
+import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
+import { TravelService } from '../../../../services/travel.service';
 @Component({
   selector: 'app-teacher-class-create',
   standalone: true,
@@ -16,9 +18,26 @@ import { BaseService } from '../../../../services/base.service';
   templateUrl: './teacher-class-create.component.html',
   styleUrls: ['./teacher-class-create.component.css'],
 })
-export class TeacherClassCreateComponent {
+export class TeacherClassCreateComponent implements OnInit {
   ngOnInit(): void {
     this.loadMaxPrice();
+
+    this.route.queryParams.subscribe((params: Record<string, string>) => {
+      if (params['province']) {
+        this.teacherClass.mainTopic = 'Travel';
+        this.selectedProvince = params['province'];
+        this.teacherClass.province = params['province'];
+      }
+      if (params['specificLocation']) {
+        this.teacherClass.specificLocation = params['specificLocation'];
+      }
+      if (params['matchRequestId']) {
+        this.travelMatchRequestId = params['matchRequestId'];
+      }
+      if (params['tripStartDate']) {
+        this.tripStartDate = params['tripStartDate'];
+      }
+    });
   }
   loading = false;
   maxPrice = 0;
@@ -32,6 +51,20 @@ export class TeacherClassCreateComponent {
     'Saturday',
     'Sunday',
   ];
+
+  readonly destinationGroups = VIETNAM_DESTINATIONS;
+  selectedProvince = '';
+  private travelMatchRequestId: string | null = null;
+  private tripStartDate: string | null = null;
+
+  get availableSpots(): string[] {
+    return this.destinationGroups.find(g => g.province === this.selectedProvince)?.spots ?? [];
+  }
+
+  onProvinceChange(): void {
+    this.teacherClass.province = this.selectedProvince;
+    this.teacherClass.specificLocation = '';
+  }
   mainTopics = [
     'Daily Communication',
     'Work',
@@ -189,6 +222,8 @@ export class TeacherClassCreateComponent {
     private teacherClassService: TeacherClassService,
     private baseService: BaseService,
     private router: Router,
+    private route: ActivatedRoute,
+    private travelService: TravelService,
   ) {}
 
   toggleDay(day: string, checked: boolean): void {
@@ -253,8 +288,18 @@ export class TeacherClassCreateComponent {
         console.log('SUCCESS:', response);
 
         this.teacherClass.sessions = response;
-
         this.loading = false;
+
+        if (this.tripStartDate && response.length > 0) {
+          const sorted = [...response].sort((a, b) => a.studyDate.localeCompare(b.studyDate));
+          const lastDate = new Date(sorted[sorted.length - 1].studyDate);
+          const deadline = new Date(this.tripStartDate);
+          deadline.setDate(deadline.getDate() - 3);
+          if (lastDate > deadline) {
+            const dl = deadline.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            alert(`Lịch du lịch: buổi học cuối cùng phải trước ngày khởi hành ít nhất 3 ngày (tức là trước ${dl}). Vui lòng chỉnh lại ngày bắt đầu lớp học.`);
+          }
+        }
       },
 
       error: (err) => {
@@ -271,6 +316,18 @@ export class TeacherClassCreateComponent {
       return;
     }
 
+    if (this.tripStartDate && this.teacherClass.sessions.length > 0) {
+      const sorted = [...this.teacherClass.sessions].sort((a, b) => a.studyDate.localeCompare(b.studyDate));
+      const lastDate = new Date(sorted[sorted.length - 1].studyDate);
+      const deadline = new Date(this.tripStartDate);
+      deadline.setDate(deadline.getDate() - 3);
+      if (lastDate > deadline) {
+        const dl = deadline.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        alert(`Lịch du lịch: buổi học cuối cùng phải trước ngày khởi hành ít nhất 3 ngày (tức là trước ${dl}). Vui lòng chỉnh lại ngày bắt đầu lớp học.`);
+        return;
+      }
+    }
+
     const request = this.buildRequest();
 
     this.loading = true;
@@ -278,6 +335,13 @@ export class TeacherClassCreateComponent {
     this.teacherClassService.createClass(request).subscribe({
       next: (response: any) => {
         this.loading = false;
+
+        if (this.travelMatchRequestId) {
+          this.travelService.linkClassToRequest(
+            Number(this.travelMatchRequestId),
+            response.classId
+          ).subscribe();
+        }
 
         alert('Create class successfully');
 

@@ -40,7 +40,7 @@ namespace Backend.Services.impl
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var cutoff = DateTime.Now - _expireAfter;
+            var cutoff = DateTime.UtcNow - _expireAfter;
 
             // --- Bookings ---
             var expiredBookings = await db.Bookings

@@ -138,98 +138,52 @@ namespace Backend.Repository.impl
         {
             var query =
                 _context.TeacherClasses
+                    .AsNoTracking()
                     .Include(x => x.ClassScheduleDays)
                     .Include(x => x.ClassSessions)
                     .Where(x =>
                         x.TeacherProfileId ==
                         teacherProfileId);
 
+            if (!string.IsNullOrWhiteSpace(filter.Title))
+                query = query.Where(x => x.Title.Contains(filter.Title));
+
             if (!string.IsNullOrWhiteSpace(filter.MainTopic))
-            {
-                query = query.Where(x =>
-                    x.MainTopic ==
-                    filter.MainTopic);
-            }
+                query = query.Where(x => x.MainTopic == filter.MainTopic);
 
             if (!string.IsNullOrWhiteSpace(filter.SubTopic))
-            {
-                query = query.Where(x =>
-                    x.SubTopic ==
-                    filter.SubTopic);
-            }
+                query = query.Where(x => x.SubTopic == filter.SubTopic);
 
-            if (
-                filter.StartTime != null &&
-                filter.EndTime != null
-            )
-            {
+            if (filter.StartTime != null && filter.EndTime != null)
                 query = query.Where(x =>
-                    x.StartTime <= filter.EndTime
-                    &&
+                    x.StartTime <= filter.EndTime &&
                     x.EndTime >= filter.StartTime);
-            }
 
-            if (
-                filter.DaysOfWeek != null &&
-                filter.DaysOfWeek.Any()
-            )
-            {
+            if (filter.DaysOfWeek != null && filter.DaysOfWeek.Any())
                 query = query.Where(x =>
-                    x.ClassScheduleDays.Any(
-                        d =>
-                            filter.DaysOfWeek.Contains(
-                                d.DayOfWeek)));
-            }
+                    x.ClassScheduleDays.Any(d =>
+                        filter.DaysOfWeek.Contains(d.DayOfWeek)));
 
-            var result =
-                await query.ToListAsync();
-
-            if (
-                filter.StartDate != null ||
-                filter.EndDate != null
-            )
+            if (filter.StartDate != null || filter.EndDate != null)
             {
-                var filterStart =
-                    DateOnly.FromDateTime(
-                        filter.StartDate ??
-                        DateTime.MinValue);
+                var filterStart = filter.StartDate != null
+                    ? DateOnly.FromDateTime(filter.StartDate.Value)
+                    : DateOnly.MinValue;
+                var filterEnd = filter.EndDate ?? DateOnly.MaxValue;
 
-                var filterEnd =
-                    filter.EndDate ??
-                    DateOnly.MaxValue;
-
-                result = result
-                    .Where(x =>
-                    {
-                        if (!x.ClassSessions.Any())
-                        {
-                            return false;
-                        }
-
-                        var classStart =
-                            x.ClassSessions
-                                .Min(s => s.StudyDate);
-
-                        var classEnd =
-                            x.ClassSessions
-                                .Max(s => s.StudyDate);
-
-                        return
-                            classStart <= filterEnd
-                            &&
-                            classEnd >= filterStart;
-                    })
-                    .ToList();
+                query = query.Where(x =>
+                    x.ClassSessions.Any() &&
+                    x.ClassSessions.Min(s => s.StudyDate) <= filterEnd &&
+                    x.ClassSessions.Max(s => s.StudyDate) >= filterStart);
             }
 
-            return result
+            return await query
                 .OrderBy(x =>
                     x.ClassSessions.Any()
-                        ? x.ClassSessions.Min(
-                            s => s.StudyDate)
+                        ? x.ClassSessions.Min(s => s.StudyDate)
                         : DateOnly.MaxValue)
                 .ThenBy(x => x.StartTime)
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<List<TeacherClass>>SearchClassesAsync(
@@ -237,6 +191,7 @@ namespace Backend.Repository.impl
         {
             var query =
     _context.TeacherClasses
+        .AsNoTracking()
         .Include(x => x.TeacherProfile)
             .ThenInclude(x => x.User)
         .Include(x => x.ClassScheduleDays)
@@ -287,6 +242,13 @@ namespace Backend.Repository.impl
                 );
             }
 
+
+            if (!string.IsNullOrWhiteSpace(
+                filter.Title))
+            {
+                query = query.Where(x =>
+                    x.Title.Contains(filter.Title));
+            }
 
             if (!string.IsNullOrWhiteSpace(
                 filter.MainTopic))
@@ -374,72 +336,26 @@ namespace Backend.Repository.impl
                 );
             }
 
-            var result =
-                await query.ToListAsync();
-
-            /*
-             * Date range filter
-             * Entire course duration must be
-             * inside selected date range
-             */
-            if (
-                filter.StartDate != null
-                ||
-                filter.EndDate != null
-            )
+            if (filter.StartDate != null || filter.EndDate != null)
             {
-                var filterStart =
-                    DateOnly.FromDateTime(
-                        filter.StartDate ??
-                        DateTime.MinValue);
+                var filterStart = filter.StartDate != null
+                    ? DateOnly.FromDateTime(filter.StartDate.Value)
+                    : DateOnly.MinValue;
+                var filterEnd = filter.EndDate ?? DateOnly.MaxValue;
 
-                var filterEnd =
-                    filter.EndDate ??
-                    DateOnly.MaxValue;
-
-                result = result
-                    .Where(x =>
-                    {
-                        if (
-                            !x.ClassSessions.Any()
-                        )
-                        {
-                            return false;
-                        }
-
-                        var classStart =
-                            x.ClassSessions
-                                .Min(
-                                    s =>
-                                    s.StudyDate);
-
-                        var classEnd =
-                            x.ClassSessions
-                                .Max(
-                                    s =>
-                                    s.StudyDate);
-
-                        return
-                            classStart >=
-                            filterStart
-                            &&
-                            classEnd <=
-                            filterEnd;
-                    })
-                    .ToList();
+                query = query.Where(x =>
+                    x.ClassSessions.Any() &&
+                    x.ClassSessions.Min(s => s.StudyDate) <= filterEnd &&
+                    x.ClassSessions.Max(s => s.StudyDate) >= filterStart);
             }
 
-            return result
+            return await query
                 .OrderBy(x =>
                     x.ClassSessions.Any()
-                        ? x.ClassSessions
-                            .Min(
-                                s =>
-                                s.StudyDate)
+                        ? x.ClassSessions.Min(s => s.StudyDate)
                         : DateOnly.MaxValue)
-                .ThenBy(x =>
-                    x.StartTime)
-                .ToList();
+                .ThenBy(x => x.StartTime)
+                .ToListAsync();
         }
 
         public async Task<TeacherClass?> GetClassWithSessionsAsync( int classId)

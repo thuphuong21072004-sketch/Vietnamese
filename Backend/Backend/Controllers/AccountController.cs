@@ -103,6 +103,13 @@ namespace Backend.Controllers
             return Ok(new { message = "Updated role" });
         }
 
+        [Authorize]
+        [HttpGet("users/{id:int}")]
+        public async Task<IActionResult> GetUserPublicProfile(int id)
+        {
+            return Ok(await _userService.GetUserPublicProfile(id));
+        }
+
         /* * up ảnh (thuphuong21072004) */
         [Authorize]
         [HttpPost("upload-avatar")]

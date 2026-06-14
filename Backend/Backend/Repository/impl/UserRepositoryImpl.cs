@@ -53,6 +53,7 @@ namespace Backend.Repository.impl
         {
             return await _context.Users
                 .Include(x => x.Role)
+                .Include(x => x.TeacherProfile)
                 .FirstOrDefaultAsync(x => x.UserId == id);
         }
 

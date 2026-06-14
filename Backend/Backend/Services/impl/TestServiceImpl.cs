@@ -113,7 +113,7 @@ namespace Backend.Services.impl
 
             var userLevel = await _progressRepository.GetUserLevel(userId, level.LevelId, refTypeLevel);
             userLevel.Status = true;
-            userLevel.CompletedDate = DateTime.Now;
+            userLevel.CompletedDate = DateTime.UtcNow;
 
             var nextLevel = (await _levelRepository.GetAllLevels(true)).FirstOrDefault(x => x.OrderIndex == level.OrderIndex + 1);
             if (nextLevel != null)
@@ -135,7 +135,7 @@ namespace Backend.Services.impl
                             RefType =
                                 common.Constant.RefType.Level,
                             RefId = nextLevel.LevelId,
-                            AssignedDate = DateTime.Now,
+                            AssignedDate = DateTime.UtcNow,
                             Status = false
                         }
                     );
@@ -168,7 +168,7 @@ namespace Backend.Services.impl
                                 RefType =
                                     common.Constant.RefType.Course,
                                 RefId = firstCourse.CourseId,
-                                AssignedDate = DateTime.Now,
+                                AssignedDate = DateTime.UtcNow,
                                 Status = false
                             }
                         );
@@ -201,7 +201,7 @@ namespace Backend.Services.impl
                                     RefType =
                                         common.Constant.RefType.Unit,
                                     RefId = firstUnit.UnitId,
-                                    AssignedDate = DateTime.Now,
+                                    AssignedDate = DateTime.UtcNow,
                                     Status = false
                                 }
                             );
@@ -246,7 +246,7 @@ namespace Backend.Services.impl
 
             var userCourse = await _progressRepository.GetUserCourseByCourseId(userId, course.CourseId, refTypeCourse);
             userCourse.Status = true;
-            userCourse.CompletedDate = DateTime.Now;
+            userCourse.CompletedDate = DateTime.UtcNow;
 
             var nextCourse = (await _courseRepository.GetAllCourses(course.LevelId, true)).OrderBy(c => c.OrderIndex).FirstOrDefault(c => c.OrderIndex > course.OrderIndex);
             if (nextCourse != null)
@@ -268,7 +268,7 @@ namespace Backend.Services.impl
                             RefType =
                                 common.Constant.RefType.Course,
                             RefId = nextCourse.CourseId,
-                            AssignedDate = DateTime.Now,
+                            AssignedDate = DateTime.UtcNow,
                             Status = false
                         }
                     );
@@ -301,7 +301,7 @@ namespace Backend.Services.impl
                                 RefType =
                                     common.Constant.RefType.Unit,
                                 RefId = firstUnit.UnitId,
-                                AssignedDate = DateTime.Now,
+                                AssignedDate = DateTime.UtcNow,
                                 Status = false
                             }
                         );
@@ -328,7 +328,7 @@ namespace Backend.Services.impl
             var Unit = await _unitRepository.GetUnitById(UnitId);
             var progress = await _progressRepository.GetUserUnitByUnitId(userId, UnitId, refTypeUnit);
             progress.Status = true;
-            progress.CompletedDate = DateTime.Now;
+            progress.CompletedDate = DateTime.UtcNow;
 
             var Units = await _unitRepository.GetAllUnits(Unit.CourseId, true);
             var nextUnit = Units.FirstOrDefault(x => x.OrderIndex == Unit.OrderIndex + 1);
@@ -338,7 +338,7 @@ namespace Backend.Services.impl
                 var exist = await _progressRepository.GetUserUnitByUnitId(userId, nextUnit.UnitId, refTypeUnit);
                 if (exist == null)
                 {
-                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Unit, RefId = nextUnit.UnitId, AssignedDate = DateTime.Now, Status = false });
+                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Unit, RefId = nextUnit.UnitId, AssignedDate = DateTime.UtcNow, Status = false });
                 }
             }
             else
@@ -495,7 +495,7 @@ namespace Backend.Services.impl
             else
             {
                 quiz = new Quiz {
-                    RefId = dto.RefId, RefType = dto.RefType, QuizName = dto.QuizName, TimeLimit = dto.TimeLimit, PassScore = dto.PassScore, CreatedDate = DateTime.Now,
+                    RefId = dto.RefId, RefType = dto.RefType, QuizName = dto.QuizName, TimeLimit = dto.TimeLimit, PassScore = dto.PassScore, CreatedDate = DateTime.UtcNow,
                     IsActive = ValidateAdmin()
                 };
                 await _quizRepository.AddQuiz(quiz);
@@ -503,8 +503,8 @@ namespace Backend.Services.impl
 
             await _quizRepository.Save();
 
-            foreach (var qDto in dto.Questions) await SaveQuestion(qDto, quiz.QuizId, null, null);
-            foreach (var partDto in dto.Parts) await SavePart(partDto, quiz.QuizId);
+            foreach (var qDto in dto.Questions ?? new()) await SaveQuestion(qDto, quiz.QuizId, null, null);
+            foreach (var partDto in dto.Parts ?? new()) await SavePart(partDto, quiz.QuizId);
         }
 
         /* lưu phần
@@ -590,7 +590,8 @@ namespace Backend.Services.impl
          */
         private async Task SaveQuestion(QuestionDTO dto, int quizId, int? partId, int? passageId)
         {
-            var deleteAnswerIds = dto.Answers.Where(x => x.IsDelete).Select(x => x.AnswerId).ToList();
+            var answers = dto.Answers ?? new List<AnswerDTO>();
+            var deleteAnswerIds = answers.Where(x => x.IsDelete).Select(x => x.AnswerId).ToList();
             if (deleteAnswerIds.Any()) await _answerRepository.DeleteAnswers(deleteAnswerIds);
 
             if (dto.IsDelete)
@@ -622,7 +623,7 @@ namespace Backend.Services.impl
             question.QuestionType = dto.QuestionType ?? "MULTIPLE_CHOICE";
             await _questionRepository.Save();
 
-            foreach (var aDto in dto.Answers.Where(x => !x.IsDelete)) await SaveAnswer(aDto, question.QuestionId);
+            foreach (var aDto in answers.Where(x => !x.IsDelete)) await SaveAnswer(aDto, question.QuestionId);
         }
 
         /* lưu đáp án
@@ -723,7 +724,7 @@ namespace Backend.Services.impl
             if (userQuiz != null)
             {
                 userQuiz.Score = result.FinalScore;
-                userQuiz.CompletedDate = DateTime.Now;
+                userQuiz.CompletedDate = DateTime.UtcNow;
                 userQuiz.IsPassed = result.IsPassed;
 
                 await _userAnswerRepository.DeleteByUserQuizId(userQuiz.UserQuizId);
@@ -736,7 +737,7 @@ namespace Backend.Services.impl
                     UserId = userId,
                     QuizId = quizId,
                     Score = result.FinalScore,
-                    CompletedDate = DateTime.Now,
+                    CompletedDate = DateTime.UtcNow,
                     IsPassed = result.IsPassed
                 };
 
@@ -839,10 +840,10 @@ namespace Backend.Services.impl
                                     RefId = unit.UnitId,
 
                                     AssignedDate =
-                                        DateTime.Now,
+                                        DateTime.UtcNow,
 
                                     CompletedDate =
-                                        DateTime.Now,
+                                        DateTime.UtcNow,
 
                                     Status = true
                                 }
@@ -854,7 +855,7 @@ namespace Backend.Services.impl
                     currentUnitProgress.Status = true;
 
                     currentUnitProgress.CompletedDate =
-                        DateTime.Now;
+                        DateTime.UtcNow;
 
                     await _progressRepository.UpdateUserProgress(
                         currentUnitProgress
@@ -905,7 +906,7 @@ namespace Backend.Services.impl
                                             nextUnit.UnitId,
 
                                         AssignedDate =
-                                            DateTime.Now,
+                                            DateTime.UtcNow,
 
                                         Status = false
                                     }
@@ -941,7 +942,7 @@ namespace Backend.Services.impl
                     currentCourseProgress.Status = true;
 
                     currentCourseProgress.CompletedDate =
-                        DateTime.Now;
+                        DateTime.UtcNow;
 
                     await _progressRepository.UpdateUserProgress(
                         currentCourseProgress
@@ -977,7 +978,7 @@ namespace Backend.Services.impl
                                     RefType =
                                         common.Constant.RefType.Course,
                                     RefId = nextCourse.CourseId,
-                                    AssignedDate = DateTime.Now,
+                                    AssignedDate = DateTime.UtcNow,
                                     Status = false
                                 }
                             );
@@ -1026,7 +1027,7 @@ namespace Backend.Services.impl
                                                 firstUnit.UnitId,
 
                                             AssignedDate =
-                                                DateTime.Now,
+                                                DateTime.UtcNow,
 
                                             Status = false
                                         }
@@ -1068,8 +1069,8 @@ namespace Backend.Services.impl
                             RefType =
                                 common.Constant.RefType.Course,
                             RefId = course.CourseId,
-                            AssignedDate = DateTime.Now,
-                            CompletedDate = DateTime.Now,
+                            AssignedDate = DateTime.UtcNow,
+                            CompletedDate = DateTime.UtcNow,
                             Status = true
                         }
                     );
@@ -1079,7 +1080,7 @@ namespace Backend.Services.impl
                     currentCourseProgress.Status = true;
 
                     currentCourseProgress.CompletedDate =
-                        DateTime.Now;
+                        DateTime.UtcNow;
 
                     await _progressRepository.UpdateUserProgress(
                         currentCourseProgress
@@ -1126,10 +1127,10 @@ namespace Backend.Services.impl
                                         RefId = unit.UnitId,
 
                                         AssignedDate =
-                                            DateTime.Now,
+                                            DateTime.UtcNow,
 
                                         CompletedDate =
-                                            DateTime.Now,
+                                            DateTime.UtcNow,
 
                                         Status = true
                                     }
@@ -1141,7 +1142,7 @@ namespace Backend.Services.impl
                         unitProgress.Status = true;
 
                         unitProgress.CompletedDate =
-                            DateTime.Now;
+                            DateTime.UtcNow;
 
                         await _progressRepository
                             .UpdateUserProgress(
@@ -1182,7 +1183,7 @@ namespace Backend.Services.impl
                                         nextCourse.CourseId,
 
                                     AssignedDate =
-                                        DateTime.Now,
+                                        DateTime.UtcNow,
 
                                     Status = false
                                 }
@@ -1236,7 +1237,7 @@ namespace Backend.Services.impl
                                                 firstUnit.UnitId,
 
                                             AssignedDate =
-                                                DateTime.Now,
+                                                DateTime.UtcNow,
 
                                             Status = false
                                         }
@@ -1275,7 +1276,7 @@ namespace Backend.Services.impl
                 {
                     currentLevelProgress.Status = true;
 
-                    currentLevelProgress.CompletedDate = DateTime.Now;
+                    currentLevelProgress.CompletedDate = DateTime.UtcNow;
                     await _progressRepository.UpdateUserProgress(currentLevelProgress);
 
                 }
@@ -1300,7 +1301,7 @@ namespace Backend.Services.impl
                         courseProgress.Status = true;
 
                         courseProgress.CompletedDate =
-                            DateTime.Now;
+                            DateTime.UtcNow;
 
                         await _progressRepository
                             .UpdateUserProgress(
@@ -1327,7 +1328,7 @@ namespace Backend.Services.impl
                             unitProgress.Status = true;
 
                             unitProgress.CompletedDate =
-                                DateTime.Now;
+                                DateTime.UtcNow;
 
                             await _progressRepository
                                 .UpdateUserProgress(
@@ -1361,7 +1362,7 @@ namespace Backend.Services.impl
                                 RefType =
                                     common.Constant.RefType.Level,
                                 RefId = nextLevel.LevelId,
-                                AssignedDate = DateTime.Now,
+                                AssignedDate = DateTime.UtcNow,
                                 Status = false
                             }
                         );
@@ -1394,7 +1395,7 @@ namespace Backend.Services.impl
                                     RefType =
                                         common.Constant.RefType.Course,
                                     RefId = firstCourse.CourseId,
-                                    AssignedDate = DateTime.Now,
+                                    AssignedDate = DateTime.UtcNow,
                                     Status = false
                                 }
                             );
@@ -1443,7 +1444,7 @@ namespace Backend.Services.impl
                                                     firstUnit.UnitId,
 
                                                 AssignedDate =
-                                                    DateTime.Now,
+                                                    DateTime.UtcNow,
 
                                                 Status = false
                                             }
@@ -1522,14 +1523,14 @@ namespace Backend.Services.impl
                 if (lv.OrderIndex >= assignedLevel.OrderIndex) break;
                 var lp = await _progressRepository.GetUserLevel(userId, lv.LevelId, common.Constant.RefType.Level);
                 if (lp == null)
-                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = lv.LevelId, AssignedDate = DateTime.Now, CompletedDate = DateTime.Now, Status = true });
+                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = lv.LevelId, AssignedDate = DateTime.UtcNow, CompletedDate = DateTime.UtcNow, Status = true });
                 else
-                { lp.Status = true; lp.CompletedDate = DateTime.Now; }
+                { lp.Status = true; lp.CompletedDate = DateTime.UtcNow; }
             }
 
             var currentLp = await _progressRepository.GetUserLevel(userId, assignedLevel.LevelId, common.Constant.RefType.Level);
             if (currentLp == null)
-                await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = assignedLevel.LevelId, AssignedDate = DateTime.Now, Status = false });
+                await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Level, RefId = assignedLevel.LevelId, AssignedDate = DateTime.UtcNow, Status = false });
             else
             { currentLp.Status = false; currentLp.CompletedDate = null; }
 
@@ -1538,14 +1539,14 @@ namespace Backend.Services.impl
             {
                 var cp = await _progressRepository.GetUserCourseByCourseId(userId, firstCourse.CourseId, common.Constant.RefType.Course);
                 if (cp == null)
-                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Course, RefId = firstCourse.CourseId, AssignedDate = DateTime.Now, Status = false });
+                    await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Course, RefId = firstCourse.CourseId, AssignedDate = DateTime.UtcNow, Status = false });
 
                 var firstUnit = (await _unitRepository.GetAllUnits(firstCourse.CourseId, true)).OrderBy(x => x.OrderIndex).FirstOrDefault();
                 if (firstUnit != null)
                 {
                     bool exists = await _progressRepository.ExistsProgress(userId, common.Constant.RefType.Unit, firstUnit.UnitId);
                     if (!exists)
-                        await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Unit, RefId = firstUnit.UnitId, AssignedDate = DateTime.Now, Status = false });
+                        await _progressRepository.AddUserProgress(new UserProgress { UserId = userId, RefType = common.Constant.RefType.Unit, RefId = firstUnit.UnitId, AssignedDate = DateTime.UtcNow, Status = false });
                 }
             }
 

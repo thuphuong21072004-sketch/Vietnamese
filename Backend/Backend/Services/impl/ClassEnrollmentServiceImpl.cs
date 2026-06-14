@@ -24,6 +24,7 @@ namespace Backend.Services.impl
         private readonly TeacherClassRepository
             _teacherClassRepository;
         private readonly PaymentRepository _paymentRepository;
+        private readonly ReviewRepository _reviewRepository;
 
         public ClassEnrollmentServiceImpl(
             ClassEnrollmentRepository enrollmentRepository,
@@ -31,7 +32,8 @@ namespace Backend.Services.impl
             UserContextUtil userContextUtil,
             TeacherProfileRepository teacherProfileRepository,
             TeacherClassRepository teacherClassRepository,
-            PaymentRepository paymentRepository)
+            PaymentRepository paymentRepository,
+            ReviewRepository reviewRepository)
         {
             _enrollmentRepository =
                 enrollmentRepository;
@@ -48,6 +50,7 @@ namespace Backend.Services.impl
             _teacherClassRepository =
                 teacherClassRepository;
             _paymentRepository = paymentRepository;
+            _reviewRepository = reviewRepository;
         }
 
         public async Task<(int enrollmentId, int status)> EnrollAsync(int classId)
@@ -74,7 +77,11 @@ namespace Backend.Services.impl
                 await _enrollmentRepository
                     .GetActiveEnrollmentCountAsync(classId);
 
-            if (activeCount >= teacherClass.MaxStudents)
+            int effectiveMax = teacherClass.MaxStudents;
+            if (teacherClass.ReservedStudentId.HasValue && userId != teacherClass.ReservedStudentId.Value)
+                effectiveMax = teacherClass.MaxStudents - 1;
+
+            if (activeCount >= effectiveMax)
             {
                 throw new Exception(
                     "This class is full");
@@ -153,7 +160,7 @@ namespace Backend.Services.impl
                     if (alreadyPaid != null)
                     {
                         existed.Status = common.Constant.StatusBooking.Confirmed;
-                        existed.EnrolledDate = DateTime.Now;
+                        existed.EnrolledDate = DateTime.UtcNow;
                         await _enrollmentRepository.UpdateAsync(existed);
 
                         var cls = await _teacherClassRepository.GetByIdAsync(existed.ClassId);
@@ -170,7 +177,7 @@ namespace Backend.Services.impl
                         common.Constant.StatusBooking.PendingPayment;
 
                     existed.EnrolledDate =
-                        DateTime.Now;
+                        DateTime.UtcNow;
 
                     await _enrollmentRepository
                         .UpdateAsync(existed);
@@ -185,7 +192,7 @@ namespace Backend.Services.impl
                     ClassId = classId,
                     StudentId = userId,
                     Status = common.Constant.StatusBooking.PendingPayment,
-                    EnrolledDate = DateTime.Now
+                    EnrolledDate = DateTime.UtcNow
                 };
 
             await _enrollmentRepository.CreateAsync(enrollment);
@@ -238,7 +245,7 @@ namespace Backend.Services.impl
             TimeOnly.FromTimeSpan(
                 firstSession.StartTime));
 
-            if (DateTime.Now >=
+            if (DateTime.UtcNow >=
                 firstStudyTime.AddDays(-1))
             {
                 throw new Exception(
@@ -282,10 +289,19 @@ namespace Backend.Services.impl
                 await _enrollmentRepository
                     .GetStudentEnrollmentsAsync(
                         userId);
-            foreach (var enrollment in enrollments)
-            {
-                await AutoUpdateStatus(enrollment);
-            }
+
+            await Task.WhenAll(
+                enrollments.Select(e => AutoUpdateStatus(e)));
+
+            var completedClassIds = enrollments
+                .Where(e => e.Status == StatusBooking.Completed)
+                .Select(e => e.ClassId)
+                .ToList();
+
+            var reviewedIds = completedClassIds.Any()
+                ? await _reviewRepository.GetReviewedRefIdsByStudent(
+                    "CLASS", userId, completedClassIds)
+                : new HashSet<int>();
 
             return enrollments
     .Select(x =>
@@ -388,7 +404,28 @@ namespace Backend.Services.impl
                 DayOfWeek = d.DayOfWeek
             })
             .ToList()
-        : new List<ClassScheduleDayDto>()
+        : new List<ClassScheduleDayDto>(),
+
+            Sessions =
+    x.TeacherClass != null
+        ? x.TeacherClass.ClassSessions
+            .Select(s => new ClassSessionDto
+            {
+                SessionId = s.SessionId,
+                ClassId = s.ClassId,
+                SessionNumber = s.SessionNumber,
+                StudyDate = s.StudyDate,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Topic = s.Topic,
+                Status = s.Status
+            })
+            .OrderBy(s => s.StudyDate)
+            .ThenBy(s => s.StartTime)
+            .ToList()
+        : new List<ClassSessionDto>(),
+
+            HasReview = reviewedIds.Contains(x.ClassId)
 
         })
     .ToList();
@@ -457,17 +494,19 @@ namespace Backend.Services.impl
                     .GetStudentEnrollmentsAsync(
                         userId);
 
-            var cutoff = DateTime.Now.AddMinutes(-15);
+            // Session times stored as Vietnam local (UTC+7); convert to UTC for comparison
+            var vnOffset = TimeSpan.FromHours(7);
+            var cutoff = DateTime.UtcNow.AddMinutes(-15);
 
             return enrollments
                 .Where(x =>
-    x.Status == StatusBooking.Confirmed
-    || x.Status == StatusBooking.InProgress)
+                    x.Status == StatusBooking.Confirmed
+                    || x.Status == StatusBooking.InProgress)
                 .SelectMany(x =>
                     x.TeacherClass!
                      .ClassSessions
                      .Where(s =>
-                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) > cutoff)
+                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) - vnOffset > cutoff)
                      .Select(s =>
                         new UpcomingScheduleDto
                         {
@@ -494,11 +533,12 @@ namespace Backend.Services.impl
 
                             EndTime =
                                 s.EndTime,
+
                             TeacherName =
-        x.TeacherClass.TeacherProfile != null &&
-        x.TeacherClass.TeacherProfile.User != null
-            ? x.TeacherClass.TeacherProfile.User.Name
-            : "",
+                                x.TeacherClass.TeacherProfile != null &&
+                                x.TeacherClass.TeacherProfile.User != null
+                                    ? x.TeacherClass.TeacherProfile.User.Name
+                                    : "",
                         }))
                 .OrderBy(x =>
                     x.StudyDate.ToDateTime(TimeOnly.MinValue).Add(x.StartTime))
@@ -532,7 +572,9 @@ namespace Backend.Services.impl
                     .GetTeacherClassesAsync(
                         teacher.TeacherProfileId);
 
-            var cutoff = DateTime.Now.AddMinutes(-15);
+            // Session times stored as Vietnam local (UTC+7); convert to UTC for comparison
+            var vnOffset = TimeSpan.FromHours(7);
+            var cutoff = DateTime.UtcNow.AddMinutes(-15);
 
             return classes
                 .Where(x =>
@@ -540,7 +582,7 @@ namespace Backend.Services.impl
                 .SelectMany(x =>
                     x.ClassSessions
                      .Where(s =>
-                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) > cutoff)
+                        s.StudyDate.ToDateTime(TimeOnly.MinValue).Add(s.EndTime) - vnOffset > cutoff)
                      .Select(s =>
                         new UpcomingScheduleDto
                         {
@@ -604,7 +646,7 @@ namespace Backend.Services.impl
                     &&
                     payment.CreatedDate
                         .AddMinutes(15)
-                    <= DateTime.Now
+                    <= DateTime.UtcNow
                 )
                 {
                     payment.Status =
@@ -654,7 +696,7 @@ namespace Backend.Services.impl
                         TimeOnly.FromTimeSpan(
                             lastSession.EndTime));
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
 
             if (
                 enrollment.Status == StatusBooking.Confirmed

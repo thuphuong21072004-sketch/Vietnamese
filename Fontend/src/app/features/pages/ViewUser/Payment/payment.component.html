@@ -324,44 +324,4 @@
 
   </div>
 
-  <div *ngIf="showCurrencyModal" class="currency-modal-overlay">
-
-    <div class="currency-modal">
-
-      <h3>
-        Select Currency
-      </h3>
-
-      <p>
-        Choose your payment currency
-      </p>
-
-      <input type="text" class="currency-search" placeholder="Search currency..." [(ngModel)]="searchCurrency">
-
-      <select [(ngModel)]="selectedCurrency" class="currency-select">
-
-        <option *ngFor="let currency of filteredCurrencies" [value]="currency.code">
-          {{ currency.code }}
-          -
-          {{ currency.name }}
-        </option>
-
-      </select>
-
-      <div class="currency-actions">
-
-        <button type="button" (click)="closeCurrencyModal()">
-          Cancel
-        </button>
-
-        <button type="button" (click)="confirmPayment()">
-          Pay Now
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
 </div>

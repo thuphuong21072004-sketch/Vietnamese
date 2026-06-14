@@ -288,6 +288,45 @@ namespace Backend.Migrations
                     b.ToTable("Levels");
                 });
 
+            modelBuilder.Entity("Backend.Models.MatchRequest", b =>
+                {
+                    b.Property<int>("MatchRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MatchRequestId"));
+
+                    b.Property<int?>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte>("RequestType")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("TripId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MatchRequestId");
+
+                    b.HasIndex("TripId");
+
+                    b.HasIndex("ScheduleId", "TripId")
+                        .IsUnique();
+
+                    b.ToTable("MatchRequests");
+                });
+
             modelBuilder.Entity("Backend.Models.Part", b =>
                 {
                     b.Property<int>("PartId")
@@ -437,6 +476,10 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("QuizId")
                         .HasColumnType("int");
 
@@ -554,6 +597,43 @@ namespace Backend.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("Backend.Models.StudentTrip", b =>
+                {
+                    b.Property<int>("TripId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("SpecificLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TripId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("StudentTrips");
+                });
+
             modelBuilder.Entity("Backend.Models.TeacherAvailability", b =>
                 {
                     b.Property<int>("AvailabilityId")
@@ -616,6 +696,15 @@ namespace Backend.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Province")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReservedStudentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SpecificLocation")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -711,6 +800,40 @@ namespace Backend.Migrations
                     b.ToTable("TeacherProfiles");
                 });
 
+            modelBuilder.Entity("Backend.Models.TeacherSchedule", b =>
+                {
+                    b.Property<int>("ScheduleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleId"));
+
+                    b.Property<DateOnly>("AvailableFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("AvailableTo")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ScheduleId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("TeacherSchedules");
+                });
+
             modelBuilder.Entity("Backend.Models.Transcript", b =>
                 {
                     b.Property<int>("TranscriptId")
@@ -734,6 +857,45 @@ namespace Backend.Migrations
                     b.HasIndex("VideoId");
 
                     b.ToTable("Transcripts");
+                });
+
+            modelBuilder.Entity("Backend.Models.TravelBooking", b =>
+                {
+                    b.Property<int>("TravelBookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TravelBookingId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("TripId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TravelBookingId");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("TripId");
+
+                    b.ToTable("TravelBookings");
                 });
 
             modelBuilder.Entity("Backend.Models.Unit", b =>
@@ -801,8 +963,14 @@ namespace Backend.Migrations
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
                     b.Property<string>("Email")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -921,6 +1089,41 @@ namespace Backend.Migrations
                         .IsUnique();
 
                     b.ToTable("UserQuiz");
+                });
+
+            modelBuilder.Entity("Backend.Models.UserSpecialAnswer", b =>
+                {
+                    b.Property<int>("UserSpecialAnswerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserSpecialAnswerId"));
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("SpeakScore")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserQuizId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WrittenText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserSpecialAnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("UserQuizId");
+
+                    b.ToTable("UserSpecialAnswers");
                 });
 
             modelBuilder.Entity("Backend.Models.Video", b =>
@@ -1102,6 +1305,25 @@ namespace Backend.Migrations
                     b.Navigation("Level");
                 });
 
+            modelBuilder.Entity("Backend.Models.MatchRequest", b =>
+                {
+                    b.HasOne("Backend.Models.TeacherSchedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.StudentTrip", "Trip")
+                        .WithMany()
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Trip");
+                });
+
             modelBuilder.Entity("Backend.Models.Part", b =>
                 {
                     b.HasOne("Backend.Models.Quiz", "Quiz")
@@ -1168,6 +1390,17 @@ namespace Backend.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Backend.Models.StudentTrip", b =>
+                {
+                    b.HasOne("Backend.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("Backend.Models.TeacherAvailability", b =>
                 {
                     b.HasOne("Backend.Models.User", "Instructor")
@@ -1201,6 +1434,17 @@ namespace Backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Backend.Models.TeacherSchedule", b =>
+                {
+                    b.HasOne("Backend.Models.User", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("Backend.Models.Transcript", b =>
                 {
                     b.HasOne("Backend.Models.Video", "Video")
@@ -1210,6 +1454,25 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("Backend.Models.TravelBooking", b =>
+                {
+                    b.HasOne("Backend.Models.TeacherSchedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.StudentTrip", "Trip")
+                        .WithMany()
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Trip");
                 });
 
             modelBuilder.Entity("Backend.Models.Unit", b =>
@@ -1289,6 +1552,25 @@ namespace Backend.Migrations
                     b.Navigation("Quiz");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Models.UserSpecialAnswer", b =>
+                {
+                    b.HasOne("Backend.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.UserQuiz", "UserQuiz")
+                        .WithMany()
+                        .HasForeignKey("UserQuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("UserQuiz");
                 });
 
             modelBuilder.Entity("Backend.Models.Answer", b =>

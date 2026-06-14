@@ -37,11 +37,7 @@ export class PaymentComponent implements OnInit {
 
   payment: any = null;
 
-  currencies: Record<string, number> = {};
-
   selectedCurrency = 'USD';
-
-  showCurrencyModal = false;
 
   loading = false;
 
@@ -278,21 +274,7 @@ export class PaymentComponent implements OnInit {
       return;
     }
 
-    this.paymentService.getCurrencies(amount).subscribe({
-      next: (res) => {
-        this.currencies = res;
-
-        this.selectedCurrency = 'USD';
-
-        this.showCurrencyModal = true;
-      },
-
-      error: (err) => {
-        console.error(err);
-
-        alert(err.error?.message || 'Failed to load currencies');
-      },
-    });
+    this.confirmPayment();
   }
 
   loadBankInfo(): void {
@@ -342,72 +324,6 @@ export class PaymentComponent implements OnInit {
     history.back();
   }
 
-  closeCurrencyModal() {
-    this.showCurrencyModal = false;
-  }
-
-  currencyOptions = [
-    { code: 'USD', name: 'US Dollar' },
-    { code: 'EUR', name: 'Euro' },
-    { code: 'GBP', name: 'British Pound' },
-    { code: 'AUD', name: 'Australian Dollar' },
-    { code: 'CAD', name: 'Canadian Dollar' },
-    { code: 'SGD', name: 'Singapore Dollar' },
-    { code: 'NZD', name: 'New Zealand Dollar' },
-    { code: 'JPY', name: 'Japanese Yen' },
-    { code: 'KRW', name: 'South Korean Won' },
-    { code: 'CNY', name: 'Chinese Yuan' },
-    { code: 'HKD', name: 'Hong Kong Dollar' },
-    { code: 'TWD', name: 'Taiwan Dollar' },
-    { code: 'THB', name: 'Thai Baht' },
-    { code: 'MYR', name: 'Malaysian Ringgit' },
-    { code: 'PHP', name: 'Philippine Peso' },
-    { code: 'IDR', name: 'Indonesian Rupiah' },
-    { code: 'INR', name: 'Indian Rupee' },
-    { code: 'VND', name: 'Vietnamese Dong' },
-    { code: 'AED', name: 'UAE Dirham' },
-    { code: 'SAR', name: 'Saudi Riyal' },
-    { code: 'QAR', name: 'Qatari Riyal' },
-    { code: 'KWD', name: 'Kuwaiti Dinar' },
-    { code: 'BHD', name: 'Bahraini Dinar' },
-    { code: 'OMR', name: 'Omani Rial' },
-    { code: 'CHF', name: 'Swiss Franc' },
-    { code: 'SEK', name: 'Swedish Krona' },
-    { code: 'NOK', name: 'Norwegian Krone' },
-    { code: 'DKK', name: 'Danish Krone' },
-    { code: 'PLN', name: 'Polish Zloty' },
-    { code: 'CZK', name: 'Czech Koruna' },
-    { code: 'HUF', name: 'Hungarian Forint' },
-    { code: 'RON', name: 'Romanian Leu' },
-    { code: 'BGN', name: 'Bulgarian Lev' },
-    { code: 'HRK', name: 'Croatian Kuna' },
-    { code: 'TRY', name: 'Turkish Lira' },
-    { code: 'MXN', name: 'Mexican Peso' },
-    { code: 'BRL', name: 'Brazilian Real' },
-    { code: 'ARS', name: 'Argentine Peso' },
-    { code: 'CLP', name: 'Chilean Peso' },
-    { code: 'COP', name: 'Colombian Peso' },
-    { code: 'PEN', name: 'Peruvian Sol' },
-    { code: 'UYU', name: 'Uruguayan Peso' },
-    { code: 'ZAR', name: 'South African Rand' },
-    { code: 'ILS', name: 'Israeli Shekel' },
-  ];
-
-  searchCurrency = '';
-
-  get filteredCurrencies() {
-    if (!this.searchCurrency) {
-      return this.currencyOptions;
-    }
-
-    const keyword = this.searchCurrency.toLowerCase();
-
-    return this.currencyOptions.filter(
-      (x) =>
-        x.code.toLowerCase().includes(keyword) ||
-        x.name.toLowerCase().includes(keyword),
-    );
-  }
   goClassroom() {
     if (this.refName === 'PrivateLesson') {
       this.router.navigate(['/my-bookings']);

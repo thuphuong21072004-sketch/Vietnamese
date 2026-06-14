@@ -253,6 +253,30 @@ textarea {
     height: 16px;
 }
 
+.record-btn {
+    padding: 0;
+    box-sizing: border-box;
+    color: #6b7280;
+}
+
+.record-btn:hover {
+    color: #ef4444;
+    background: #fff1f2;
+    border-color: #fca5a5;
+}
+
+.record-btn.recording {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #ef4444;
+    animation: pulse-rec 1s ease-in-out infinite;
+}
+
+@keyframes pulse-rec {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+}
+
 .btn-primary,
 .btn-save,
 .btn-add,

@@ -64,6 +64,16 @@
                 </span>
             </div>
 
+            <div class="profile-row">
+                <span class="label">Date of Birth</span>
+                <span class="value">{{ dateOfBirth ? (dateOfBirth | date:'dd/MM/yyyy') : 'N/A' }}</span>
+            </div>
+
+            <div class="profile-row">
+                <span class="label">Gender</span>
+                <span class="value">{{ gender || 'N/A' }}</span>
+            </div>
+
             <div class="profile-row bio-row">
                 <span class="label">
                     Bio
@@ -118,6 +128,21 @@
             
                 </select>
             
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" [(ngModel)]="newDateOfBirth" />
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <select [(ngModel)]="newGender">
+                    <option value="">-- Select --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
 
             <div class="form-group">

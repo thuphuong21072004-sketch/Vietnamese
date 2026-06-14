@@ -31,7 +31,6 @@ namespace Backend.Controllers
             return Ok(await _reviewService.GetByTeacherId(teacherId));
         }
 
-        [Authorize]
         [HttpGet("class/{classId}")]
         public async Task<IActionResult> GetByClassId(int classId)
         {

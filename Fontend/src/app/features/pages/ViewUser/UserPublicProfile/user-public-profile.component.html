@@ -1,0 +1,156 @@
+<div class="profile-page">
+
+  <div *ngIf="loading" class="loading-state">Loading profile...</div>
+
+  <div *ngIf="!loading && !profile" class="empty-state">
+    <p>Profile not found.</p>
+    <button class="btn-back" (click)="goBack()">← Back</button>
+  </div>
+
+  <div *ngIf="!loading && profile" class="profile-card">
+
+    <button class="btn-back" (click)="goBack()">← Back</button>
+
+    <!-- Avatar + basic info -->
+    <div class="hero">
+      <div class="avatar-wrap">
+        <img *ngIf="profile.avatarUrl" [src]="avatarUrl(profile.avatarUrl)" class="avatar" alt="avatar">
+        <div *ngIf="!profile.avatarUrl" class="avatar placeholder">
+          {{ profile.name?.charAt(0)?.toUpperCase() }}
+        </div>
+      </div>
+
+      <div class="hero-info">
+        <h1>{{ profile.name }}</h1>
+        <div class="meta">
+          <span class="meta-item" *ngIf="profile.country">🌏 {{ profile.country }}</span>
+          <span class="meta-item" *ngIf="profile.gender">{{ profile.gender === 'Male' ? '♂' : profile.gender === 'Female' ? '♀' : '⚧' }} {{ profile.gender }}</span>
+          <span class="meta-item" *ngIf="profile.dateOfBirth">🎂 {{ profile.dateOfBirth | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <p class="bio" *ngIf="profile.bio">{{ profile.bio }}</p>
+
+        <!-- Teacher rating summary -->
+        <div class="rating-row" *ngIf="profile.teacherProfile && reviews.length">
+          <span class="stars">
+            <span *ngFor="let s of starArray()"
+              class="star" [class.filled]="s <= averageRating">★</span>
+          </span>
+          <span class="rating-num">{{ averageRating | number:'1.1-1' }}</span>
+          <span class="review-count">({{ reviews.length }} reviews)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teacher profile section -->
+    <div *ngIf="profile.teacherProfile" class="section">
+      <h2 class="section-title">Teaching Info</h2>
+
+      <div class="info-grid">
+        <div class="info-item" *ngIf="profile.teacherProfile.specialty">
+          <span class="info-label">Specialty</span>
+          <span class="info-value">{{ profile.teacherProfile.specialty }}</span>
+        </div>
+        <div class="info-item" *ngIf="profile.teacherProfile.experienceYears">
+          <span class="info-label">Experience</span>
+          <span class="info-value">{{ profile.teacherProfile.experienceYears }} years</span>
+        </div>
+        <div class="info-item" *ngIf="profile.teacherProfile.approvedPricePerHour">
+          <span class="info-label">Price / hour</span>
+          <span class="info-value price">{{ profile.teacherProfile.approvedPricePerHour | number }} VND</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Rating</span>
+          <span class="info-value">⭐ {{ profile.teacherProfile.ratingAverage | number:'1.1-1' }} · {{ profile.teacherProfile.totalReviews }} reviews</span>
+        </div>
+      </div>
+
+      <div class="description" *ngIf="profile.teacherProfile.description">
+        <h3>About</h3>
+        <p>{{ profile.teacherProfile.description }}</p>
+      </div>
+    </div>
+
+    <!-- Intro video -->
+    <div *ngIf="profile.teacherProfile?.introVideoUrl" class="section">
+      <h2 class="section-title">Introduction Video</h2>
+      <video class="intro-video" controls>
+        <source [src]="videoUrl(profile.teacherProfile.introVideoUrl)" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Reviews section (teacher only) -->
+    <div *ngIf="profile.teacherProfile" class="section">
+      <div class="reviews-header">
+        <h2 class="section-title" style="margin-bottom:0">Reviews</h2>
+        <span *ngIf="reviews.length" class="avg-badge">
+          ⭐ {{ averageRating | number:'1.1-1' }} · {{ reviews.length }} total
+        </span>
+      </div>
+
+      <div *ngIf="reviewsLoading" class="reviews-loading">Loading reviews...</div>
+
+      <div *ngIf="!reviewsLoading && reviews.length === 0" class="no-reviews">
+        No reviews yet.
+      </div>
+
+      <div *ngIf="!reviewsLoading && reviews.length > 0">
+        <!-- Rating filter -->
+        <div class="filter-bar">
+          <button class="filter-btn" [class.active]="ratingFilter === 0" (click)="setFilter(0)">
+            All ({{ reviews.length }})
+          </button>
+          <button *ngFor="let s of [5,4,3,2,1]"
+            class="filter-btn" [class.active]="ratingFilter === s" (click)="setFilter(s)">
+            {{ s }}★ ({{ countByRating(s) }})
+          </button>
+        </div>
+
+        <!-- Review list -->
+        <div class="review-list">
+          <div *ngFor="let r of filteredReviews" class="review-card">
+            <div class="review-top">
+              <div class="reviewer">
+                <img *ngIf="r.student?.avatarUrl" [src]="avatarUrl(r.student.avatarUrl)" class="reviewer-avatar">
+                <div *ngIf="!r.student?.avatarUrl" class="reviewer-avatar placeholder">
+                  {{ (r.student?.name || 'A').charAt(0).toUpperCase() }}
+                </div>
+                <div class="reviewer-info">
+                  <strong>{{ r.student?.name || 'Anonymous' }}</strong>
+                  <span class="review-date" *ngIf="r.createdDate">{{ r.createdDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              <div class="review-stars">
+                <span *ngFor="let s of starArray()" class="star" [class.filled]="s <= r.rating">★</span>
+              </div>
+            </div>
+            <p class="review-comment" *ngIf="r.comment">{{ r.comment }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No teacher profile (student) -->
+    <div *ngIf="!profile.teacherProfile" class="section">
+      <div class="student-info">
+        <div class="info-item" *ngIf="profile.country">
+          <span class="info-label">Country</span>
+          <span class="info-value">{{ profile.country }}</span>
+        </div>
+        <div class="info-item" *ngIf="profile.gender">
+          <span class="info-label">Gender</span>
+          <span class="info-value">{{ profile.gender }}</span>
+        </div>
+        <div class="info-item" *ngIf="profile.dateOfBirth">
+          <span class="info-label">Date of Birth</span>
+          <span class="info-value">{{ profile.dateOfBirth | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Role</span>
+          <span class="info-value">{{ roleLabel(profile.roleName) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

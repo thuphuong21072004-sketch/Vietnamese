@@ -19,6 +19,8 @@ namespace Backend.Repository
 
         Task<List<Review>> GetByClassId(int classId);
 
+        Task<HashSet<int>> GetReviewedRefIdsByStudent(string refName, int studentId, IEnumerable<int> refIds);
+
         Task Create(Review review);
 
         Task Save();

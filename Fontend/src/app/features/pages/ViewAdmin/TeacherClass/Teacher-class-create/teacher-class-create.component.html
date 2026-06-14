@@ -47,34 +47,37 @@
 
     </div>
 
-    <div class="form-group">
+    <div class="form-group" *ngIf="teacherClass.mainTopic !== 'Travel'">
 
       <label>Sub Topic</label>
 
-      <select
-        [(ngModel)]="teacherClass.subTopic">
-
-        <option value="">
-          Select Sub Topic
-        </option>
-
-        <option
-          *ngFor="
-            let topic of
-            subTopics[
-              teacherClass.mainTopic
-            ] || []
-          "
-          [value]="topic">
-
+      <select [(ngModel)]="teacherClass.subTopic">
+        <option value="">Select Sub Topic</option>
+        <option *ngFor="let topic of subTopics[teacherClass.mainTopic] || []" [value]="topic">
           {{ topic }}
-
         </option>
-
       </select>
 
     </div>
 
+    <div class="form-group" *ngIf="teacherClass.mainTopic === 'Travel'">
+      <label>Province</label>
+      <select [(ngModel)]="selectedProvince" (ngModelChange)="onProvinceChange()">
+        <option value="">-- Select Province --</option>
+        <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="row" *ngIf="teacherClass.mainTopic === 'Travel'">
+    <div class="form-group">
+      <label>Specific Location</label>
+      <select [(ngModel)]="teacherClass.specificLocation" [disabled]="!selectedProvince">
+        <option value="">-- Select Location --</option>
+        <option *ngFor="let spot of availableSpots" [value]="spot">{{ spot }}</option>
+      </select>
+    </div>
   </div>
 
   <div class="row">

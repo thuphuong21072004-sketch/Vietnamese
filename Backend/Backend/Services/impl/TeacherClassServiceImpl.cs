@@ -311,7 +311,7 @@ namespace Backend.Services.impl
             teacherClass.TeacherProfileId =
     teacherProfile.TeacherProfileId;
             teacherClass.CreatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             teacherClass.CurrentStudents = 0;
 
@@ -428,7 +428,7 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             bool anyUpdated = false;
             foreach (var session in teacherClass.ClassSessions)
             {

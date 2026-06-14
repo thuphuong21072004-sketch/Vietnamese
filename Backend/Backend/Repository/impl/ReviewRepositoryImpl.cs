@@ -104,6 +104,23 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
+        public async Task<HashSet<int>> GetReviewedRefIdsByStudent(
+            string refName,
+            int studentId,
+            IEnumerable<int> refIds)
+        {
+            var ids = refIds.ToList();
+            var reviewed = await _context.Reviews
+                .AsNoTracking()
+                .Where(x =>
+                    x.RefName == refName &&
+                    x.StudentId == studentId &&
+                    ids.Contains(x.RefId))
+                .Select(x => x.RefId)
+                .ToListAsync();
+            return reviewed.ToHashSet();
+        }
+
         public async Task Create(Review review)
         {
             await _context.Reviews.AddAsync(review);

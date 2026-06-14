@@ -40,7 +40,7 @@ public class ExceptionMiddleware
             await context.Response.WriteAsJsonAsync(new
             {
                 success = false,
-                message = ex.ToString()
+                message = ex.Message
             });
         }
     }

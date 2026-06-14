@@ -18,7 +18,7 @@ namespace Backend.Models
         public decimal? PassScore { get; set; }
 
         public DateTime CreatedDate { get; set; }
-    = DateTime.Now;
+    = DateTime.UtcNow;
 
         public bool IsActive { get; set; }
 

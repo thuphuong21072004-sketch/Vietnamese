@@ -23,6 +23,10 @@
 
         public string? SubTopic { get; set; }
 
+        public string? Province { get; set; }
+
+        public string? SpecificLocation { get; set; }
+
         public DateTime StartDate { get; set; }
 
         public TimeSpan StartTime { get; set; }
@@ -30,6 +34,8 @@
         public TimeSpan EndTime { get; set; }
 
         public byte Status { get; set; }
+
+        public int? ReservedStudentId { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

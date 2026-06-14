@@ -2,13 +2,15 @@
 
     <div class="page-header">
 
-        <h1>
-            Find Vietnamese Classes
-        </h1>
+        <div>
+            <h1>Find Vietnamese Classes</h1>
+            <p>Search and enroll in Vietnamese classes from qualified teachers.</p>
+        </div>
 
-        <p>
-            Search and enroll in Vietnamese classes from qualified teachers.
-        </p>
+        <div class="header-actions">
+            <button class="btn-my-classes" routerLink="/user/myclass">My Classes</button>
+            <button class="btn-schedule" routerLink="/user/schedule">Upcoming Schedule</button>
+        </div>
 
     </div>
 
@@ -21,7 +23,15 @@
 
         <div class="filter-grid">
             <div class="form-group">
-            
+
+                <label>Class Name</label>
+
+                <input type="text" [(ngModel)]="filter.title" placeholder="Search by class name...">
+
+            </div>
+
+            <div class="form-group">
+
                 <label>
                     Contry
                 </label>
@@ -102,31 +112,33 @@
 
             </div>
 
-            <div class="form-group">
+            <div class="form-group" *ngIf="filter.mainTopic !== 'Travel'">
 
-                <label>
-                    Sub Topic
-                </label>
+                <label>Sub Topic</label>
 
                 <select [(ngModel)]="filter.subTopic">
-
-                    <option value="">
-                        All Sub Topics
-                    </option>
-
-                    <option *ngFor="
-                            let topic
-                            of subTopics[
-                                filter.mainTopic || ''
-                            ] || []
-                        " [value]="topic">
-
+                    <option value="">All Sub Topics</option>
+                    <option *ngFor="let topic of subTopics[filter.mainTopic || ''] || []" [value]="topic">
                         {{ topic }}
-
                     </option>
-
                 </select>
 
+            </div>
+
+            <div class="form-group" *ngIf="filter.mainTopic === 'Travel'">
+                <label>Province</label>
+                <select [(ngModel)]="filterProvince" (ngModelChange)="onFilterProvinceChange()">
+                    <option value="">All Provinces</option>
+                    <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
+                </select>
+            </div>
+
+            <div class="form-group" *ngIf="filter.mainTopic === 'Travel'">
+                <label>Specific Location</label>
+                <select [(ngModel)]="filterSpecificLocation" [disabled]="!filterProvince">
+                    <option value="">All Locations</option>
+                    <option *ngFor="let spot of availableFilterSpots" [value]="spot">{{ spot }}</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -247,7 +259,7 @@
 
     <div *ngIf="
             !loading &&
-            classes.length === 0
+            filteredClasses.length === 0
         " class="empty-state">
 
         No classes found.
@@ -256,12 +268,12 @@
 
     <div *ngIf="
             !loading &&
-            classes.length > 0
+            filteredClasses.length > 0
         " class="class-grid">
 
         <div *ngFor="
                 let item
-                of classes
+                of filteredClasses
             " class="class-card">
 <div class="teacher-header">
 
@@ -299,9 +311,14 @@
         {{ item.title }}
     </h3>
 
-    <span class="price">
-        ${{ item.price }}
-    </span>
+    <div class="card-header-right">
+        <span *ngIf="getStatus(item.classId) === 1" class="enroll-status-badge status-upcoming">Upcoming</span>
+        <span *ngIf="getStatus(item.classId) === 2" class="enroll-status-badge status-ongoing">Ongoing</span>
+        <span *ngIf="getStatus(item.classId) === 3" class="enroll-status-badge status-completed">Completed</span>
+        <span *ngIf="getStatus(item.classId) === 4" class="enroll-status-badge status-cancelled">Cancelled</span>
+        <span *ngIf="getStatus(item.classId) === 5" class="enroll-status-badge status-refunded">Refunded</span>
+        <span class="price">${{ item.price }}</span>
+    </div>
 
 </div>
 
@@ -321,14 +338,19 @@
 
             </div>
 
-            <div class="info-row">
-
-                <strong>
-                    Sub Topic:
-                </strong>
-
+            <div class="info-row" *ngIf="item.mainTopic !== 'Travel'">
+                <strong>Sub Topic:</strong>
                 {{ item.subTopic }}
+            </div>
 
+            <div class="info-row" *ngIf="item.mainTopic === 'Travel'">
+                <strong>Province:</strong>
+                {{ item.province || '—' }}
+            </div>
+
+            <div class="info-row" *ngIf="item.mainTopic === 'Travel' && item.specificLocation">
+                <strong>Location:</strong>
+                {{ item.specificLocation }}
             </div>
 
             <div class="info-row">
@@ -380,7 +402,8 @@
 
             <div class="card-actions">
             
-                <button class="detail-btn" (click)="viewClass(item.classId)">
+                <button *ngIf="!((getStatus(item.classId) === 5 || getStatus(item.classId) === 4) && !canEnrollAgainRefunded(item.classId))"
+                    class="detail-btn" (click)="viewClass(item.classId)">
                     View Details
                 </button>
             
@@ -424,13 +447,15 @@
                     View Review
                 </button>
             
-                <!-- Đã hủy -->
-                <button *ngIf="getStatus(item.classId) === 4" class="enroll-btn" (click)="enroll(item.classId)">
+                <!-- Đã hủy — chỉ cho đăng ký lại nếu chưa qua buổi đầu tiên -->
+                <button *ngIf="getStatus(item.classId) === 4 && canEnrollAgainRefunded(item.classId)"
+                    class="enroll-btn" (click)="enroll(item.classId)">
                     Enroll Again
                 </button>
             
-                <!-- Hoàn tiền -->
-                <button *ngIf="getStatus(item.classId) === 5" class="enroll-btn" (click)="enroll(item.classId)">
+                <!-- Hoàn tiền — chỉ cho đăng ký lại nếu chưa qua buổi đầu tiên -->
+                <button *ngIf="getStatus(item.classId) === 5 && canEnrollAgainRefunded(item.classId)"
+                    class="enroll-btn" (click)="enroll(item.classId)">
                     Enroll Again
                 </button>
             

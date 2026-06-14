@@ -58,6 +58,14 @@ namespace Backend.Data
 
         public DbSet<ClassAttendance> ClassAttendances { get; set; }
 
+        public DbSet<TeacherSchedule> TeacherSchedules { get; set; }
+
+        public DbSet<StudentTrip> StudentTrips { get; set; }
+
+        public DbSet<MatchRequest> MatchRequests { get; set; }
+
+        public DbSet<TravelBooking> TravelBookings { get; set; }
+
 
         /* * Cấu hình các ràng buộc Cascade Delete 
          * thuphuong21072004 
@@ -363,6 +371,54 @@ namespace Backend.Data
                 .WithMany(x => x.ClassEnrollments)
                 .HasForeignKey(x => x.ClassId)
                 .OnDelete(DeleteBehavior.Cascade);
+            /*
+ * teacher schedule
+ */
+            modelBuilder.Entity<TeacherSchedule>()
+                .HasKey(x => x.ScheduleId);
+
+            modelBuilder.Entity<TeacherSchedule>()
+                .HasOne(x => x.Teacher)
+                .WithMany()
+                .HasForeignKey(x => x.TeacherId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * student trip
+             */
+            modelBuilder.Entity<StudentTrip>()
+                .HasKey(x => x.TripId);
+
+            modelBuilder.Entity<StudentTrip>()
+                .HasOne(x => x.Student)
+                .WithMany()
+                .HasForeignKey(x => x.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*
+             * match request
+             */
+            modelBuilder.Entity<MatchRequest>()
+                .HasKey(x => x.MatchRequestId);
+
+            modelBuilder.Entity<MatchRequest>()
+                .HasOne(x => x.Schedule)
+                .WithMany()
+                .HasForeignKey(x => x.ScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MatchRequest>()
+                .HasOne(x => x.Trip)
+                .WithMany()
+                .HasForeignKey(x => x.TripId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MatchRequest>()
+    .HasIndex(x => new
+    {
+        x.ScheduleId,
+        x.TripId
+    })
+    .IsUnique();
         }
     }
 }

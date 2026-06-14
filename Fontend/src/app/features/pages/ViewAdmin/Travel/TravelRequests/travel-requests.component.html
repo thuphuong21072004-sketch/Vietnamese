@@ -1,0 +1,107 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Travel Requests</h1>
+    <a routerLink="/teacher/travel/schedules" class="btn-outline">← My Schedules</a>
+  </div>
+
+  <div *ngIf="!loading" class="filter-bar">
+    <select [(ngModel)]="filterStatus" class="filter-select">
+      <option value="">All Statuses</option>
+      <option value="0">Pending</option>
+      <option value="1">Accepted</option>
+      <option value="2">Rejected</option>
+      <option value="3">Cancelled</option>
+    </select>
+    <input type="date" [(ngModel)]="filterFrom" class="filter-date" placeholder="From">
+    <input type="date" [(ngModel)]="filterTo" class="filter-date" placeholder="To">
+    <button *ngIf="filterStatus || filterFrom || filterTo" class="btn-clear" (click)="clearFilters()">✕ Clear</button>
+  </div>
+
+  <div *ngIf="loading" class="empty-state">Loading...</div>
+
+  <div *ngIf="!loading && filtered.length === 0" class="empty-state">
+    <p>No requests found.</p>
+  </div>
+
+  <div *ngIf="!loading" class="request-list">
+    <div *ngFor="let req of filtered" class="request-card">
+
+      <div class="request-header">
+        <div class="people">
+          <div class="person">
+            <div class="person-avatar" *ngIf="req.teacherAvatarUrl">
+              <img [src]="'http://localhost:5108/uploads/' + req.teacherAvatarUrl">
+            </div>
+            <div class="person-avatar placeholder" *ngIf="!req.teacherAvatarUrl">
+              {{ req.teacherName?.charAt(0) }}
+            </div>
+            <div class="person-info">
+              <span class="person-role">You (Teacher)</span>
+              <strong>{{ req.teacherName }}</strong>
+            </div>
+          </div>
+
+          <span class="connect-icon">↔</span>
+
+          <div class="person">
+            <div class="person-avatar" *ngIf="req.studentAvatarUrl">
+              <img [src]="'http://localhost:5108/uploads/' + req.studentAvatarUrl">
+            </div>
+            <div class="person-avatar placeholder" *ngIf="!req.studentAvatarUrl">
+              {{ req.studentName?.charAt(0) }}
+            </div>
+            <div class="person-info">
+              <span class="person-role">Student</span>
+              <strong>{{ req.studentName }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <span class="status-badge" [ngClass]="statusClass(req.status)">
+          {{ statusLabel(req.status) }}
+        </span>
+      </div>
+
+      <div class="request-detail">
+        <span class="detail-item">📍 {{ req.destination }}<span *ngIf="req.specificLocation"> — {{ req.specificLocation }}</span></span>
+        <span class="detail-item">📅 {{ req.startDate | date:'dd/MM/yyyy' }} – {{ req.endDate | date:'dd/MM/yyyy' }}</span>
+        <span class="detail-item type-label">{{ typeLabel(req.requestType) }}</span>
+      </div>
+
+      <div class="request-actions">
+        <!-- You sent → Cancel -->
+        <ng-container *ngIf="req.status === 0 && iYouSent(req)">
+          <button class="btn-cancel" (click)="cancel(req.matchRequestId)">Cancel</button>
+          <a class="btn-view-detail" [routerLink]="['/user/profile', req.studentId]">View Profile</a>
+        </ng-container>
+
+        <!-- Student sent to you → Accept / Reject / View Profile -->
+        <ng-container *ngIf="req.status === 0 && !iYouSent(req)">
+          <button class="btn-reject" (click)="reject(req.matchRequestId)">Reject</button>
+          <button class="btn-accept" (click)="accept(req.matchRequestId)">Accept</button>
+          <a class="btn-view-detail" [routerLink]="['/user/profile', req.studentId]">View Profile</a>
+        </ng-container>
+
+        <!-- Accepted → Create Class or View Class -->
+        <ng-container *ngIf="req.status === 1">
+          <a *ngIf="req.classId; else createBtn"
+             class="btn-view-class"
+             [routerLink]="['/teacher/detail', req.classId]">
+            View Class Detail
+          </a>
+          <ng-template #createBtn>
+            <a class="btn-create-class"
+               [routerLink]="['/class/create']"
+               [queryParams]="{province: req.destination, specificLocation: req.specificLocation, matchRequestId: req.matchRequestId, tripStartDate: req.startDate}">
+              + Create Class
+            </a>
+          </ng-template>
+          <a class="btn-view-detail" [routerLink]="['/user/profile', req.studentId]">View Profile</a>
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+
+</div>

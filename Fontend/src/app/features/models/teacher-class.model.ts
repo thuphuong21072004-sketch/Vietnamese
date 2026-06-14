@@ -45,6 +45,10 @@ export interface TeacherClassDto {
 
   subTopic: string;
 
+  province?: string;
+
+  specificLocation?: string;
+
   totalSessions: number;
 
   startDate: string;

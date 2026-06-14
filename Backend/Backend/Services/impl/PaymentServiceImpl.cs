@@ -157,7 +157,7 @@ namespace Backend.Services.impl
                     &&
                     exist.CreatedDate
                         .AddMinutes(15)
-                    > DateTime.Now
+                    > DateTime.UtcNow
                 )
                 {
                     throw new InvalidOperationException(
@@ -170,7 +170,7 @@ namespace Backend.Services.impl
                     &&
                     exist.CreatedDate
                         .AddMinutes(15)
-                    <= DateTime.Now
+                    <= DateTime.UtcNow
                 )
                 {
                     exist.Status =
@@ -188,7 +188,7 @@ namespace Backend.Services.impl
                 StatusPayment.Pending;
 
             payment.CreatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             payment.PaidAt = null;
 
@@ -254,7 +254,7 @@ namespace Backend.Services.impl
                 transactionCode;
 
             payment.PaidAt =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             if (payment.RefName == RefName.Booking)
             {
@@ -490,7 +490,7 @@ namespace Backend.Services.impl
                     Amount = dto.Amount,
                     PaymentMethod = 1,
                     Status = StatusPayment.Pending,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.UtcNow
                 };
                 await _paymentRepository.Create(payment);
                 await _paymentRepository.Save();

@@ -48,6 +48,10 @@ export class TeacherClassDetailComponent implements OnInit {
 
   reviews: any[] = [];
 
+  filteredReviews: any[] = [];
+
+  selectedRating = 0;
+
   reviewLoading = false;
 
   ngOnInit(): void {
@@ -161,6 +165,7 @@ export class TeacherClassDetailComponent implements OnInit {
     this.reviewService.getByClassId(this.classId).subscribe({
       next: (res) => {
         this.reviews = res;
+        this.filteredReviews = res;
         this.reviewLoading = false;
       },
 
@@ -170,9 +175,24 @@ export class TeacherClassDetailComponent implements OnInit {
     });
   }
 
+  setRatingFilter(rating: number): void {
+    this.selectedRating = rating;
+    this.filteredReviews = rating === 0
+      ? this.reviews
+      : this.reviews.filter(r => r.rating === rating);
+  }
+
+  getReviewCount(rating: number): number {
+    return this.reviews.filter(r => r.rating === rating).length;
+  }
+
+  getAverageRating(): number {
+    if (!this.reviews.length) return 0;
+    return this.reviews.reduce((s, r) => s + r.rating, 0) / this.reviews.length;
+  }
+
   getReviewAvatar(review: any): string | null {
-    return review.studentAvatarUrl
-      ? `http://localhost:5108/uploads/${review.studentAvatarUrl}`
-      : null;
+    const url = review.student?.avatarUrl;
+    return url ? `http://localhost:5108/uploads/${url}` : null;
   }
 }

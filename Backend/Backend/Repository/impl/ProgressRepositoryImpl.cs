@@ -83,7 +83,7 @@ namespace Backend.Repository.impl
                 RefType = refType,
                 RefId = levelId,
                 Status = false,
-                AssignedDate = DateTime.Now
+                AssignedDate = DateTime.UtcNow
             });
         }
 
@@ -100,7 +100,7 @@ namespace Backend.Repository.impl
                 RefType = refType,
                 RefId = courseId,
                 Status = false,
-                AssignedDate = DateTime.Now
+                AssignedDate = DateTime.UtcNow
             });
         }
 

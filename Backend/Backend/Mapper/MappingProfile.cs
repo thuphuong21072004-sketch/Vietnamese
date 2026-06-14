@@ -411,6 +411,175 @@ namespace Backend.Mapper
 )
 
     .ReverseMap();
+
+            /*
+ * teacher schedule
+ */
+            CreateMap<TeacherSchedule, TeacherScheduleDto>()
+
+                .ForMember(
+                    dest => dest.TeacherName,
+                    opt => opt.MapFrom(src =>
+                        src.Teacher != null
+                            ? src.Teacher.Name
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.TeacherAvatarUrl,
+                    opt => opt.MapFrom(src =>
+                        src.Teacher != null
+                            ? src.Teacher.AvatarUrl
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.TeacherCountry,
+                    opt => opt.MapFrom(src =>
+                        src.Teacher != null
+                            ? src.Teacher.Country
+                            : ""
+                    )
+                )
+
+                .ReverseMap();
+
+            /*
+             * student trip
+             */
+            CreateMap<StudentTrip, StudentTripDto>()
+
+                .ForMember(
+                    dest => dest.StudentName,
+                    opt => opt.MapFrom(src =>
+                        src.Student != null
+                            ? src.Student.Name
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentAvatarUrl,
+                    opt => opt.MapFrom(src =>
+                        src.Student != null
+                            ? src.Student.AvatarUrl
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentCountry,
+                    opt => opt.MapFrom(src =>
+                        src.Student != null
+                            ? src.Student.Country
+                            : ""
+                    )
+                )
+
+                .ReverseMap();
+
+            /*
+             * match request
+             */
+            CreateMap<MatchRequest, MatchRequestDto>()
+
+                .ForMember(
+                    dest => dest.TeacherId,
+                    opt => opt.MapFrom(src =>
+                        src.Schedule != null
+                            ? (int?)src.Schedule.TeacherId
+                            : null
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.TeacherName,
+                    opt => opt.MapFrom(src =>
+                        src.Schedule != null &&
+                        src.Schedule.Teacher != null
+                            ? src.Schedule.Teacher.Name
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.TeacherAvatarUrl,
+                    opt => opt.MapFrom(src =>
+                        src.Schedule != null &&
+                        src.Schedule.Teacher != null
+                            ? src.Schedule.Teacher.AvatarUrl
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentId,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null
+                            ? (int?)src.Trip.StudentId
+                            : null
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentName,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null &&
+                        src.Trip.Student != null
+                            ? src.Trip.Student.Name
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentAvatarUrl,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null &&
+                        src.Trip.Student != null
+                            ? src.Trip.Student.AvatarUrl
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.Destination,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null
+                            ? src.Trip.Destination
+                            : ""
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.SpecificLocation,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null
+                            ? src.Trip.SpecificLocation
+                            : null
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StartDate,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null
+                            ? src.Trip.StartDate
+                            : default
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.EndDate,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null
+                            ? src.Trip.EndDate
+                            : default
+                    )
+                )
+
+                .ReverseMap();
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     public class ClassFilterDto
     {
+        public string? Title { get; set; }
         public string? Country { get; set; }
         public decimal? MinRating { get; set; }
 

@@ -1,0 +1,179 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>My Travel Schedules</h1>
+    <div class="header-actions">
+      <a routerLink="/teacher/travel/requests" class="btn-outline">My Requests</a>
+      <button class="btn-primary" (click)="openCreate()">+ New Schedule</button>
+    </div>
+  </div>
+
+  <!-- Form create / edit -->
+  <div *ngIf="showForm" class="form-card">
+    <h2>{{ editingScheduleId ? 'Edit Schedule' : 'New Schedule' }}</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tỉnh/Thành phố</label>
+        <select [(ngModel)]="selectedProvince" (ngModelChange)="onProvinceChange()">
+          <option value="">-- Chọn tỉnh/thành --</option>
+          <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Available From</label>
+        <input type="date" [(ngModel)]="form.availableFrom">
+      </div>
+      <div class="form-group">
+        <label>Available To</label>
+        <input type="date" [(ngModel)]="form.availableTo">
+      </div>
+      <div class="form-group" *ngIf="editingScheduleId">
+        <label>Status</label>
+        <select [(ngModel)]="form.status">
+          <option [ngValue]="1">Open</option>
+          <option [ngValue]="0">Closed</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save' }}
+      </button>
+      <button class="btn-cancel-form" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="empty-state">Loading schedules...</div>
+
+  <div *ngIf="!loading && schedules.length === 0 && !showForm" class="empty-state">
+    <div class="empty-icon">🗓️</div>
+    <h3>No schedules yet</h3>
+    <p>Create a travel schedule to connect with students planning trips to your destination.</p>
+    <button class="btn-primary" (click)="openCreate()">Create your first schedule</button>
+  </div>
+
+  <div *ngIf="!loading" class="schedule-list">
+    <div *ngFor="let s of schedules" class="schedule-card">
+
+      <div class="sched-header">
+        <div class="sched-destination">
+          <span class="dest-icon">📍</span>
+          <h2>{{ s.destination }}</h2>
+        </div>
+        <span class="status-badge" [ngClass]="statusClass(s.status)">
+          {{ statusLabel(s.status) }}
+        </span>
+      </div>
+
+      <div class="sched-dates">
+        <span class="date-label">{{ s.availableFrom | date:'dd/MM/yyyy' }}</span>
+        <span class="date-arrow">→</span>
+        <span class="date-label">{{ s.availableTo | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="sched-actions">
+        <button class="btn-find"
+          (click)="findStudents(s.scheduleId)"
+          [disabled]="loadingSuggestionsFor === s.scheduleId">
+          <span *ngIf="loadingSuggestionsFor === s.scheduleId">Searching...</span>
+          <span *ngIf="loadingSuggestionsFor !== s.scheduleId">
+            {{ showSuggestionsFor === s.scheduleId ? 'Hide Students' : 'Find Students' }}
+          </span>
+        </button>
+        <button class="btn-outline" (click)="toggleRequests(s.scheduleId)">
+          {{ showRequestsFor === s.scheduleId ? 'Hide Requests' : 'View Requests' }}
+        </button>
+        <button *ngIf="!s.hasActiveRequest" class="btn-edit" (click)="openEdit(s)">Edit</button>
+        <button *ngIf="!s.hasActiveRequest && s.status === 1" class="btn-close" (click)="closeSchedule(s)">Close</button>
+        <button *ngIf="s.status === 0" class="btn-reopen" (click)="reopenSchedule(s)">Mở lại</button>
+        <button *ngIf="!s.hasActiveRequest" class="btn-del" (click)="deleteSchedule(s.scheduleId)">Delete</button>
+      </div>
+
+      <!-- Suggested Students Panel -->
+      <div *ngIf="showSuggestionsFor === s.scheduleId" class="suggestions-panel">
+        <h3>Matching Students <span class="count">({{ suggestions[s.scheduleId]?.length ?? 0 }})</span></h3>
+
+        <div *ngIf="!suggestions[s.scheduleId]?.length" class="no-suggestions">
+          No matching students found for this destination and dates.
+        </div>
+
+        <div *ngFor="let trip of suggestions[s.scheduleId]" class="suggestion-card">
+          <div class="sugg-avatar-wrap">
+            <img *ngIf="trip.studentAvatarUrl"
+              [src]="'http://localhost:5108/uploads/' + trip.studentAvatarUrl"
+              class="sugg-avatar">
+            <div *ngIf="!trip.studentAvatarUrl" class="sugg-avatar placeholder">
+              {{ trip.studentName?.charAt(0) }}
+            </div>
+          </div>
+          <div class="sugg-info">
+            <strong>{{ trip.studentName }}</strong>
+            <span class="sugg-country">{{ trip.studentCountry }}</span>
+            <span class="sugg-destination">📍 {{ trip.destination }}<span *ngIf="trip.specificLocation"> — {{ trip.specificLocation }}</span></span>
+            <span class="sugg-dates">{{ trip.startDate | date:'dd/MM/yyyy' }} – {{ trip.endDate | date:'dd/MM/yyyy' }}</span>
+            <span class="trip-status">{{ tripStatusLabel(trip.status) }}</span>
+          </div>
+          <ng-container *ngIf="getPendingRequest(s.scheduleId, trip.tripId) as pending; else sendBtn">
+            <!-- Teacher sent (requestType=1) → Cancel -->
+            <ng-container *ngIf="pending.requestType === 1">
+              <button class="btn-cancel-invite" (click)="cancelInvite(pending.id, s.scheduleId)">Cancel</button>
+            </ng-container>
+            <!-- Student sent (requestType=0) → Reject + Accept -->
+            <ng-container *ngIf="pending.requestType === 0">
+              <button class="btn-reject" (click)="reject(pending.id, s.scheduleId)">Reject</button>
+              <button class="btn-accept" (click)="accept(pending.id, s.scheduleId)">Accept</button>
+            </ng-container>
+            <a class="btn-view-detail" [routerLink]="['/user/profile', trip.studentId]">View Profile</a>
+          </ng-container>
+          <ng-template #sendBtn>
+            <div class="sugg-btn-group">
+              <button class="btn-invite"
+                (click)="sendInvite(s.scheduleId, trip.tripId)"
+                [disabled]="isSendingInvite(s.scheduleId, trip.tripId)">
+                {{ isSendingInvite(s.scheduleId, trip.tripId) ? 'Sending...' : 'Invite' }}
+              </button>
+              <a class="btn-view-detail" [routerLink]="['/user/profile', trip.studentId]">View profile</a>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Requests Panel -->
+      <div *ngIf="showRequestsFor === s.scheduleId" class="suggestions-panel">
+        <h3>Requests <span class="count">({{ requestsBySchedule[s.scheduleId]?.length ?? 0 }})</span></h3>
+
+        <div *ngIf="!requestsBySchedule[s.scheduleId]?.length" class="no-suggestions">
+          No requests for this schedule yet.
+        </div>
+
+        <div *ngFor="let req of requestsBySchedule[s.scheduleId]" class="suggestion-card">
+          <div class="sugg-avatar-wrap">
+            <img *ngIf="req.studentAvatarUrl"
+              [src]="'http://localhost:5108/uploads/' + req.studentAvatarUrl"
+              class="sugg-avatar">
+            <div *ngIf="!req.studentAvatarUrl" class="sugg-avatar placeholder">
+              {{ req.studentName?.charAt(0) }}
+            </div>
+          </div>
+          <div class="sugg-info">
+            <strong>{{ req.studentName }}</strong>
+            <span class="sugg-destination">📍 {{ req.destination }}<span *ngIf="req.specificLocation"> — {{ req.specificLocation }}</span></span>
+            <span class="sugg-dates">{{ req.startDate | date:'dd/MM/yyyy' }} – {{ req.endDate | date:'dd/MM/yyyy' }}</span>
+            <span class="status-badge" [ngClass]="requestStatusClass(req.status)">
+              {{ requestStatusLabel(req.status) }}
+            </span>
+          </div>
+          <div class="req-actions">
+            <ng-container *ngIf="req.status === 0">
+              <button class="btn-reject" (click)="reject(req.matchRequestId, s.scheduleId)">Reject</button>
+              <button class="btn-accept" (click)="accept(req.matchRequestId, s.scheduleId)">Accept</button>
+            </ng-container>
+            <a class="btn-view-detail" [routerLink]="['/user/profile', req.studentId]">View Profile</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

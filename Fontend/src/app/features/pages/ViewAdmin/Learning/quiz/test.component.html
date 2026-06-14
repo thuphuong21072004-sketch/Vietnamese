@@ -136,15 +136,11 @@
                         
                             </div>
                         
-                            <div *ngIf="q.audioUrl" class="media-preview-inline">
+                            <div *ngIf="q.audioUrl || q._blobUrl" class="media-preview-inline">
                         
-                                <audio controls>
+                                <audio controls [src]="getAudioSrc(q)"></audio>
                         
-                                    <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
-                        
-                                </audio>
-                        
-                                <button class="remove-media" (click)="q.audioUrl = null">
+                                <button class="remove-media" (click)="q.audioUrl = null; q._blobUrl = null">
                         
                                     ×
                         
@@ -202,6 +198,14 @@
 
                                 </label>
 
+                                <button class="upload-btn record-btn" type="button"
+                                    [class.recording]="isRecordingTarget(q)"
+                                    (click)="isRecordingTarget(q) ? stopRecording() : startRecording(q)"
+                                    [title]="isRecordingTarget(q) ? 'Stop recording' : 'Record audio'">
+                                    <svg *ngIf="!isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                    <svg *ngIf="isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                </button>
+
                             </div>
 
                             <button class="btn-danger" (click)="deleteQuestion(q, quiz.questions)">Delete</button>
@@ -250,15 +254,11 @@
 
                                 </div>
 
-                                <div *ngIf="a.audioUrl" class="media-preview small">
+                                <div *ngIf="a.audioUrl || a._blobUrl" class="media-preview small">
 
-                                    <audio controls>
+                                    <audio controls [src]="getAudioSrc(a)"></audio>
 
-                                        <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
-
-                                    </audio>
-
-                                    <button class="remove-media" (click)="a.audioUrl = null">
+                                    <button class="remove-media" (click)="a.audioUrl = null; a._blobUrl = null">
                                         ×
                                     </button>
 
@@ -302,6 +302,14 @@
                                     (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
 
                                 </label>
+
+                                <button class="upload-btn record-btn" type="button"
+                                    [class.recording]="isRecordingTarget(a)"
+                                    (click)="isRecordingTarget(a) ? stopRecording() : startRecording(a)"
+                                    [title]="isRecordingTarget(a) ? 'Stop recording' : 'Record audio'">
+                                    <svg *ngIf="!isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                    <svg *ngIf="isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                </button>
 
                                 <button class="btn-danger" (click)="deleteAnswer(q, a)">
                                     Delete
@@ -387,15 +395,11 @@
                                         
                                             </div>
                                         
-                                            <div *ngIf="q.audioUrl" class="media-preview small">
+                                            <div *ngIf="q.audioUrl || q._blobUrl" class="media-preview small">
                                         
-                                                <audio controls>
-                                                
-                                                    <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
-                                                
-                                                </audio>
+                                                <audio controls [src]="getAudioSrc(q)"></audio>
                                         
-                                                <button class="remove-media" (click)="q.audioUrl = null">
+                                                <button class="remove-media" (click)="q.audioUrl = null; q._blobUrl = null">
                                                     ×
                                                 </button>
                                         
@@ -455,6 +459,14 @@
 
                                                 </label>
 
+                                                <button class="upload-btn record-btn" type="button"
+                                                    [class.recording]="isRecordingTarget(q)"
+                                                    (click)="isRecordingTarget(q) ? stopRecording() : startRecording(q)"
+                                                    [title]="isRecordingTarget(q) ? 'Stop recording' : 'Record audio'">
+                                                    <svg *ngIf="!isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                                    <svg *ngIf="isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                                </button>
+
                                             </div>
 
                                             <button class="btn-danger" (click)="deleteQuestion(q, part.questions)">
@@ -507,15 +519,11 @@
 
                                                 </div>
 
-                                                <div *ngIf="a.audioUrl" class="media-preview small">
+                                                <div *ngIf="a.audioUrl || a._blobUrl" class="media-preview small">
 
-                                                    <audio controls>
+                                                    <audio controls [src]="getAudioSrc(a)"></audio>
 
-                                                        <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
-
-                                                    </audio>
-
-                                                    <button class="remove-media" (click)="a.audioUrl = null">
+                                                    <button class="remove-media" (click)="a.audioUrl = null; a._blobUrl = null">
                                                         ×
                                                     </button>
 
@@ -559,6 +567,14 @@
                                                     (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
 
                                                 </label>
+
+                                                <button class="upload-btn record-btn" type="button"
+                                                    [class.recording]="isRecordingTarget(a)"
+                                                    (click)="isRecordingTarget(a) ? stopRecording() : startRecording(a)"
+                                                    [title]="isRecordingTarget(a) ? 'Stop recording' : 'Record audio'">
+                                                    <svg *ngIf="!isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                                    <svg *ngIf="isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                                </button>
 
                                                 <button class="btn-danger" (click)="deleteAnswer(q, a)">
                                                     Remove
@@ -608,15 +624,11 @@
                                     
                                         </div>
                                     
-                                        <div *ngIf="psg.audioUrl" class="media-preview passage-preview">
+                                        <div *ngIf="psg.audioUrl || psg._blobUrl" class="media-preview passage-preview">
                                     
-                                            <audio controls>
-                                            
-                                                <source [src]="'http://localhost:5108/audios/' + psg.audioUrl" type="audio/mpeg" />
-                                            
-                                            </audio>
+                                            <audio controls [src]="getAudioSrc(psg)"></audio>
                                     
-                                            <button class="remove-media" (click)="psg.audioUrl = null">
+                                            <button class="remove-media" (click)="psg.audioUrl = null; psg._blobUrl = null">
                                                 ×
                                             </button>
                                     
@@ -663,13 +675,21 @@
                                     
                                                 </svg>
                                     
-                                                <input hidden type="file" accept="audio/*" 
+                                                <input hidden type="file" accept="audio/*"
                                                 (change)="psg.imageUrl = null; psg.content = ''; handleMediaUpload($event, psg)" />
-                                    
+
                                             </label>
-                                    
+
+                                            <button class="upload-btn record-btn" type="button"
+                                                [class.recording]="isRecordingTarget(psg)"
+                                                (click)="isRecordingTarget(psg) ? stopRecording() : startRecording(psg)"
+                                                [title]="isRecordingTarget(psg) ? 'Stop recording' : 'Record audio'">
+                                                <svg *ngIf="!isRecordingTarget(psg)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                                <svg *ngIf="isRecordingTarget(psg)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                            </button>
+
                                         </div>
-                                    
+
                                         <button class="btn-danger" (click)="deletePassage(psg, part)">
                                             Delete
                                         </button>
@@ -703,15 +723,11 @@
                                                 
                                                     </div>
                                                 
-                                                    <div *ngIf="q.audioUrl" class="media-preview-inline">
+                                                    <div *ngIf="q.audioUrl || q._blobUrl" class="media-preview-inline">
                                                 
-                                                        <audio controls>
+                                                        <audio controls [src]="getAudioSrc(q)"></audio>
                                                 
-                                                            <source [src]="'http://localhost:5108/audios/' + q.audioUrl" type="audio/mpeg" />
-                                                
-                                                        </audio>
-                                                
-                                                        <button class="remove-media" (click)="q.audioUrl = null">
+                                                        <button class="remove-media" (click)="q.audioUrl = null; q._blobUrl = null">
                                                 
                                                             ×
                                                 
@@ -761,11 +777,19 @@
                                                             </svg>
                                                 
                                                             <input hidden type="file" accept="audio/*" (change)="q.imageUrl = null; handleMediaUpload($event, q)" />
-                                                
+
                                                         </label>
-                                                
+
+                                                        <button class="upload-btn record-btn" type="button"
+                                                            [class.recording]="isRecordingTarget(q)"
+                                                            (click)="isRecordingTarget(q) ? stopRecording() : startRecording(q)"
+                                                            [title]="isRecordingTarget(q) ? 'Stop recording' : 'Record audio'">
+                                                            <svg *ngIf="!isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                                            <svg *ngIf="isRecordingTarget(q)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                                        </button>
+
                                                     </div>
-                                                
+
                                                     <button class="btn-danger" (click)="deleteQuestion(q, psg.questions)">
                                                         Delete
                                                     </button>
@@ -812,14 +836,10 @@
                                                             </button>
                                                         </div>
 
-                                                        <div *ngIf="a.audioUrl" class="media-preview small">
+                                                        <div *ngIf="a.audioUrl || a._blobUrl" class="media-preview small">
 
-                                                            <audio controls>
-
-                                                                <source [src]="'http://localhost:5108/audios/' + a.audioUrl" type="audio/mpeg" />
-
-                                                            </audio>
-                                                            <button class="remove-media" (click)="a.audioUrl = null">
+                                                            <audio controls [src]="getAudioSrc(a)"></audio>
+                                                            <button class="remove-media" (click)="a.audioUrl = null; a._blobUrl = null">
                                                                 ×
                                                             </button>
                                                         </div>
@@ -862,6 +882,14 @@
                                                              (change)="a.imageUrl = null; handleMediaUpload($event, a)" />
 
                                                         </label>
+
+                                                        <button class="upload-btn record-btn" type="button"
+                                                            [class.recording]="isRecordingTarget(a)"
+                                                            (click)="isRecordingTarget(a) ? stopRecording() : startRecording(a)"
+                                                            [title]="isRecordingTarget(a) ? 'Stop recording' : 'Record audio'">
+                                                            <svg *ngIf="!isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                                            <svg *ngIf="isRecordingTarget(a)" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                                        </button>
 
                                                         <button class="btn-danger" (click)="deleteAnswer(q, a)">
                                                             Remove
@@ -1046,7 +1074,7 @@
                         <div class="pv-passage-block" *ngFor="let psg of part.passages">
                             <div class="pv-passage-text" *ngIf="psg.content">{{ psg.content }}</div>
                             <img *ngIf="!psg.content && psg.imageUrl" class="pv-psg-img" [src]="'http://localhost:5108/images/' + psg.imageUrl">
-                            <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls [src]="'http://localhost:5108/audios/' + psg.audioUrl"></audio>
+                            <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls [src]="getAudioSrc(psg)"></audio>
                             <ng-container *ngFor="let q of psg.questions; let i = index">
                                 <ng-container *ngTemplateOutlet="pvQuestion; context: { q: q, idx: getQuestionIndex(q) }"></ng-container>
                             </ng-container>
@@ -1066,14 +1094,14 @@
             <span class="pv-q-num">Câu {{ idx }}.</span>
             <span class="pv-q-text" *ngIf="q.questionText">{{ q.questionText }}</span>
             <img *ngIf="!q.questionText && q.imageUrl" class="pv-q-img" [src]="'http://localhost:5108/images/' + q.imageUrl">
-            <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls [src]="'http://localhost:5108/audios/' + q.audioUrl"></audio>
+            <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls [src]="getAudioSrc(q)"></audio>
         </div>
         <div *ngIf="!q.questionType || q.questionType === 'MULTIPLE_CHOICE'" class="pv-answers">
             <div class="pv-a" *ngFor="let a of q.answers">
                 <span class="pv-a-lbl">{{ a.answerLabel }}.</span>
                 <span *ngIf="a.answerText">{{ a.answerText }}</span>
                 <img *ngIf="!a.answerText && a.imageUrl" class="pv-a-img" [src]="'http://localhost:5108/images/' + a.imageUrl">
-                <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls [src]="'http://localhost:5108/audios/' + a.audioUrl"></audio>
+                <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls [src]="getAudioSrc(a)"></audio>
             </div>
         </div>
         <div class="pv-type-tag pv-writing" *ngIf="q.questionType === 'WRITING'">Written Answer</div>

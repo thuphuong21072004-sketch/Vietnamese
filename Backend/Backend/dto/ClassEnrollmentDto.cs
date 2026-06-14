@@ -45,4 +45,8 @@ public class ClassEnrollmentDto
     public TimeSpan EndTime { get; set; }
 
     public List<ClassScheduleDayDto> ScheduleDays { get; set; } = new();
+
+    public List<ClassSessionDto> Sessions { get; set; } = new();
+
+    public bool HasReview { get; set; }
 }

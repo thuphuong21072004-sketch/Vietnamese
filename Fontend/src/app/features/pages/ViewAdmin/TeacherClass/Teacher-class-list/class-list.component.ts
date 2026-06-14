@@ -10,6 +10,7 @@ import { ClassFilterDto } from '../../../../models/class-filter.model';
 
 import { TeacherClassService } from '../../../../services/teacher-class.service';
 import { RouterModule } from '@angular/router';
+import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
 import { Router } from '@angular/router'
 @Component({
   selector: 'app-class-search',
@@ -155,6 +156,8 @@ export class TeacherClassListComponent implements OnInit {
   
 
   filter: ClassFilterDto = {
+    title: '',
+
     mainTopic: '',
 
     subTopic: '',
@@ -169,6 +172,58 @@ export class TeacherClassListComponent implements OnInit {
 
     daysOfWeek: [],
   };
+
+  classStatusFilter: string = '';
+  studyDateFilter: string = '';
+  filterProvince: string = '';
+  filterSpecificLocation: string = '';
+
+  readonly destinationGroups = VIETNAM_DESTINATIONS;
+
+  get availableFilterSpots(): string[] {
+    return VIETNAM_DESTINATIONS.find(g => g.province === this.filterProvince)?.spots ?? [];
+  }
+
+  onFilterProvinceChange(): void {
+    this.filterSpecificLocation = '';
+  }
+
+  getClassStatus(item: TeacherClassDto): string {
+    if (!item.sessions?.length) return 'Upcoming';
+    const now = new Date();
+    const sorted = [...item.sessions].sort((a, b) =>
+      a.studyDate.localeCompare(b.studyDate) || a.startTime.localeCompare(b.startTime)
+    );
+    const firstStart = new Date(`${sorted[0].studyDate}T${sorted[0].startTime}`);
+    const lastEnd = new Date(`${sorted[sorted.length - 1].studyDate}T${sorted[sorted.length - 1].endTime}`);
+    if (now < firstStart) return 'Upcoming';
+    if (now > lastEnd) return 'Completed';
+    return 'Ongoing';
+  }
+
+  get filteredClasses(): TeacherClassDto[] {
+    let list = this.classes;
+
+    if (this.classStatusFilter) {
+      list = list.filter(c => this.getClassStatus(c) === this.classStatusFilter);
+    }
+
+    if (this.studyDateFilter && this.classStatusFilter) {
+      list = list.filter(c =>
+        c.sessions?.some(s => s.studyDate === this.studyDateFilter)
+      );
+    }
+
+    if (this.filterProvince) {
+      list = list.filter(c => c.province === this.filterProvince);
+    }
+
+    if (this.filterSpecificLocation) {
+      list = list.filter(c => c.specificLocation === this.filterSpecificLocation);
+    }
+
+    return list;
+  }
 
   constructor(
     private teacherClassService: TeacherClassService,
@@ -225,6 +280,8 @@ export class TeacherClassListComponent implements OnInit {
 
   clearFilter(): void {
     this.filter = {
+      title: '',
+
       mainTopic: '',
 
       subTopic: '',
@@ -243,6 +300,11 @@ export class TeacherClassListComponent implements OnInit {
 
       daysOfWeek: [],
     };
+
+    this.classStatusFilter = '';
+    this.studyDateFilter = '';
+    this.filterProvince = '';
+    this.filterSpecificLocation = '';
 
     this.searchClasses();
   }

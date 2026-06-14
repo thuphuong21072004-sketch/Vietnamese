@@ -43,6 +43,13 @@ import { ClassListComponent } from './features/pages/ViewUser/ClassRoom/ClassLis
 import { StudentCourseDetailComponent } from './features/pages/ViewUser/ClassRoom/ClassDetail/classDetail.component'
 import { MyClassesComponent } from './features/pages/ViewUser/ClassRoom/MyClasses/my-classes.component'
 import { StudentScheduleComponent } from './features/pages/ViewUser/ClassRoom/StudentUpcoming/student-upcoming.component'
+import { MyTripsComponent } from './features/pages/ViewUser/Travel/MyTrips/my-trips.component'
+import { UserTravelRequestsComponent } from './features/pages/ViewUser/Travel/TravelRequests/travel-requests.component'
+import { UserTravelHomeComponent } from './features/pages/ViewUser/Travel/TravelHome/travel-home.component'
+import { MySchedulesComponent } from './features/pages/ViewAdmin/Travel/MySchedules/my-schedules.component'
+import { TeacherTravelRequestsComponent } from './features/pages/ViewAdmin/Travel/TravelRequests/travel-requests.component'
+import { TeacherTravelHomeComponent } from './features/pages/ViewAdmin/Travel/TravelHome/travel-home.component'
+import { UserPublicProfileComponent } from './features/pages/ViewUser/UserPublicProfile/user-public-profile.component'
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -99,4 +106,14 @@ export const routes: Routes = [
 
   { path: 'review/:id', component: ReviewComponent },
   { path: 'user/speaking', component: SpeakComponent },
+
+  { path: 'user/travel', component: UserTravelHomeComponent },
+  { path: 'user/travel/trips', component: MyTripsComponent },
+  { path: 'user/travel/requests', component: UserTravelRequestsComponent },
+
+  { path: 'teacher/travel', component: TeacherTravelHomeComponent },
+  { path: 'teacher/travel/schedules', component: MySchedulesComponent },
+  { path: 'teacher/travel/requests', component: TeacherTravelRequestsComponent },
+
+  { path: 'user/profile/:id', component: UserPublicProfileComponent },
 ];

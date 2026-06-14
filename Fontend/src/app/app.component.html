@@ -1,48 +1,84 @@
 <header class="top-header">
     <div class="header-container">
-        <div class="logo-section" routerLink="/home">
-            <img src="logo.png" alt="logo">
-            <div class="site-title">
-                <h1>VIETNAMESE LEARNING</h1>
-                <p>Start your Vietnamese journey easily and confidently with VietPhuong.</p>
+
+        <!-- Logo -->
+        <a class="logo-section" routerLink="/home">
+            <img class="logo-img" src="logo.png" alt="VietPhuong">
+            <div class="brand-block">
+                <span class="brand-name">VietPhuong</span>
+                <span class="brand-tagline">Learn Vietnamese with us, every day.</span>
             </div>
+        </a>
+
+        <!-- Center nav (visible when logged out) -->
+        <nav class="header-nav" *ngIf="!isLogin">
+            <a class="nav-link" routerLink="/user/units">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Courses
+            </a>
+            <a class="nav-link" routerLink="/user/speaking">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                Speaking
+            </a>
+            <a class="nav-link" routerLink="/user/learnOnline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Tutoring
+            </a>
+            <a class="nav-link" routerLink="/teacher/class">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Live Classes
+            </a>
+        </nav>
+
+        <!-- Center greeting (visible when logged in) -->
+        <div class="header-greeting" *ngIf="isLogin">
+            <span class="greeting-text">Hello, <strong>{{ name || 'there' }}</strong></span>
+            <span class="greeting-sub">Keep up the great work today!</span>
         </div>
 
-        <div class="account-area">
-            <button class="avatar-btn" (click)="toggleMenu()" aria-label="Account menu">
-                <ng-container *ngIf="avatarUrl; else initialsOrGuest">
-                    <img [src]="avatarUrl" alt="User avatar">
-                </ng-container>
-                <ng-template #initialsOrGuest>
-                    <span *ngIf="isLogin; else guestIcon">{{ userInitial }}</span>
-                </ng-template>
-                <ng-template #guestIcon>
-                    <span class="person-icon"></span>
-                </ng-template>
-            </button>
+        <!-- Right side -->
+        <div class="header-right">
 
-            <div class="account-dropdown" *ngIf="showAccountMenu">
-                <div class="account-summary" *ngIf="isLogin; else guestSummary">
-                    <div class="account-avatar" *ngIf="avatarUrl">
-                        <img [src]="avatarUrl" [alt]="name || 'User'">
+            <!-- Logged out: show buttons -->
+            <ng-container *ngIf="!isLogin">
+                <a class="btn-ghost" routerLink="/login">Đăng nhập</a>
+                <a class="btn-primary" routerLink="user/register">Đăng ký miễn phí</a>
+            </ng-container>
+
+            <!-- Logged in: avatar + dropdown -->
+            <div class="account-area" *ngIf="isLogin">
+                <button class="avatar-btn" (click)="toggleMenu()" aria-label="Account menu">
+                    <img *ngIf="avatarUrl" [src]="avatarUrl" alt="avatar">
+                    <span *ngIf="!avatarUrl" class="avatar-initial">{{ userInitial }}</span>
+                </button>
+
+                <div class="account-dropdown" *ngIf="showAccountMenu">
+                    <div class="dd-user">
+                        <div class="dd-avatar">
+                            <img *ngIf="avatarUrl" [src]="avatarUrl" alt="avatar">
+                            <span *ngIf="!avatarUrl">{{ userInitial }}</span>
+                        </div>
+                        <div class="dd-info">
+                            <strong>{{ name || 'User' }}</strong>
+                            <span>{{ role || 'Member' }}</span>
+                        </div>
                     </div>
-                    <strong>{{ name || 'User' }}</strong>
-                    <span>{{ role || 'Member' }}</span>
+
+                    <div class="dd-divider"></div>
+
+                    <button class="dd-item" routerLink="/profile" (click)="showAccountMenu = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Profile
+                    </button>
+                    <button class="dd-item dd-logout" (click)="logout()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Log out
+                    </button>
                 </div>
-
-                <ng-template #guestSummary>
-                    <div class="account-summary">
-                        <strong>Guest</strong>
-                        <span>Please log in to continue</span>
-                    </div>
-                </ng-template>
-
-                <button *ngIf="isLogin" routerLink="/profile" (click)="showAccountMenu = false">Profile</button>
-                <button *ngIf="isLogin" (click)="logout()">Logout</button>
-                <button *ngIf="!isLogin" routerLink="/login" (click)="showAccountMenu = false">Login</button>
-                <button *ngIf="!isLogin" routerLink="user/register" (click)="showAccountMenu = false">Register</button>
             </div>
+
         </div>
+
     </div>
 </header>
 
@@ -62,7 +98,7 @@
             </ng-template>
         </div>
         <div class="profile-details">
-            <p class="profile-label">Xin chào việt nam</p>
+            
             <h3>{{ name || 'Guest' }}</h3>
             <span class="role-chip">{{ role === 'User' ? 'Student' : role === 'Admin' ? 'Administrator' : role || 'Guest' }}</span>
         </div>
@@ -88,13 +124,15 @@
             <li>
                 <button class="menu-btn" routerLink="/user/tests">Practice Tests</button>
             </li>
-            <li><button class="menu-btn" routerLink="/user/learnOnline">1-on-1 Tutoring</button></li>
-            <li><button class="menu-btn" routerLink="/my-bookings">My Bookings</button></li>
+            
             <li><button class="menu-btn" routerLink="/user/speaking">Practice Speaking</button></li>
             <li><button class="menu-btn" routerLink="/teacher/class">Group Classes</button></li>
             <li><button class="menu-btn" routerLink="/user/myclass">My Classes</button></li>
             <li><button class="menu-btn teacher-register" routerLink="/user/become-teacher">✨ Become a Teacher</button></li>
-            
+            <li><button class="menu-btn" routerLink="/user/learnOnline">1-on-1 Tutoring</button></li>
+            <li><button class="menu-btn" routerLink="/my-bookings">My Bookings</button></li>
+            <li><button class="menu-btn" routerLink="/user/travel">✈️ Travel Plans</button></li>
+
         </ul>
     </div>
 
@@ -137,12 +175,14 @@
             <li><button class="menu-btn" routerLink="/home">Home</button></li>
             <li><button class="menu-btn" routerLink="/teacher/dashboard">Dashboard</button></li>
             <li *ngIf="role === 'Admin'"><button class="menu-btn" routerLink="/admin/teachers">Teacher Applications</button></li>
-            <li><button class="menu-btn" routerLink="/admin/schedule">My Availability</button></li>
-            <li><button class="menu-btn" routerLink="/admin/classrooms">Student Bookings</button></li>
             
             <li><button class="menu-btn" routerLink="/teacher/listclass">My Group Classes</button></li>
             <li><button class="menu-btn" routerLink="/user/become-teacher">Teacher Profile</button></li>
             
+            <li><button class="menu-btn" routerLink="/admin/schedule">My Availability</button></li>
+            <li><button class="menu-btn" routerLink="/admin/classrooms">Student Bookings</button></li>
+            <li><button class="menu-btn" routerLink="/teacher/travel">✈️ Travel Schedules</button></li>
+
         </ul>
     </div>
 </aside>

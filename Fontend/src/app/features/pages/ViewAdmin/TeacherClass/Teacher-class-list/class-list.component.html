@@ -42,6 +42,14 @@
 
             <div class="form-group">
 
+                <label>Class Name</label>
+
+                <input type="text" [(ngModel)]="filter.title" placeholder="Search by class name...">
+
+            </div>
+
+            <div class="form-group">
+
                 <label>
                     Main Topic
                 </label>
@@ -65,30 +73,57 @@
 
             </div>
 
-            <div class="form-group">
+            <div class="form-group" *ngIf="filter.mainTopic !== 'Travel'">
 
-                <label>
-                    Sub Topic
-                </label>
+                <label>Sub Topic</label>
 
                 <select [(ngModel)]="filter.subTopic">
-
-                    <option value="">
-                        All Sub Topics
-                    </option>
-
-                    <option *ngFor="
-              let topic of
-              subTopics[
-                filter.mainTopic || ''
-              ] || []
-            " [value]="topic">
-
+                    <option value="">All Sub Topics</option>
+                    <option *ngFor="let topic of subTopics[filter.mainTopic || ''] || []" [value]="topic">
                         {{ topic }}
-
                     </option>
-
                 </select>
+
+            </div>
+
+            <div class="form-group" *ngIf="filter.mainTopic === 'Travel'">
+                <label>Province</label>
+                <select [(ngModel)]="filterProvince" (ngModelChange)="onFilterProvinceChange()">
+                    <option value="">All Provinces</option>
+                    <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
+                </select>
+            </div>
+
+            <div class="form-group" *ngIf="filter.mainTopic === 'Travel'">
+                <label>Specific Location</label>
+                <select [(ngModel)]="filterSpecificLocation" [disabled]="!filterProvince">
+                    <option value="">All Locations</option>
+                    <option *ngFor="let spot of availableFilterSpots" [value]="spot">{{ spot }}</option>
+                </select>
+            </div>
+
+                <div class="form-group">
+
+                <label>
+                    Class Status
+                </label>
+
+                <select [(ngModel)]="classStatusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                </select>
+
+            </div>
+
+            <div class="form-group" *ngIf="classStatusFilter">
+
+                <label>
+                    Study Date
+                </label>
+
+                <input type="date" [(ngModel)]="studyDateFilter">
 
             </div>
 
@@ -190,7 +225,7 @@
 
     <div *ngIf="
       !loading &&
-      classes.length === 0
+      filteredClasses.length === 0
     " class="empty-state">
 
         No classes found.
@@ -199,12 +234,12 @@
 
     <div *ngIf="
       !loading &&
-      classes.length > 0
+      filteredClasses.length > 0
     " class="class-grid">
 
         <div *ngFor="
         let item
-        of classes
+        of filteredClasses
       " class="class-card">
 
             <div class="card-header">
@@ -213,11 +248,15 @@
                     {{ item.title }}
                 </h3>
 
-                <span class="price">
-
-                    ${{ item.price }}
-
-                </span>
+                <div class="card-header-right">
+                    <span class="class-status-badge"
+                        [class.status-upcoming]="getClassStatus(item) === 'Upcoming'"
+                        [class.status-ongoing]="getClassStatus(item) === 'Ongoing'"
+                        [class.status-completed]="getClassStatus(item) === 'Completed'">
+                        {{ getClassStatus(item) }}
+                    </span>
+                    <span class="price">${{ item.price }}</span>
+                </div>
 
             </div>
 
@@ -237,14 +276,19 @@
 
             </div>
 
-            <div class="info-row">
-
-                <strong>
-                    Sub Topic:
-                </strong>
-
+            <div class="info-row" *ngIf="item.mainTopic !== 'Travel'">
+                <strong>Sub Topic:</strong>
                 {{ item.subTopic }}
+            </div>
 
+            <div class="info-row" *ngIf="item.mainTopic === 'Travel'">
+                <strong>Province:</strong>
+                {{ item.province || '—' }}
+            </div>
+
+            <div class="info-row" *ngIf="item.mainTopic === 'Travel' && item.specificLocation">
+                <strong>Location:</strong>
+                {{ item.specificLocation }}
             </div>
 
             <div class="info-row">

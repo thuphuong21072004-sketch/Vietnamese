@@ -115,6 +115,10 @@ export class AccountService {
     return this.http.post(`${this.apiUrl}/upload-avatar`, formData);
   }
 
+  getUserPublicProfile(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/users/${id}`, this.getOptions());
+  }
+
   getCountries() {
     return this.http.get<any[]>(
       'https://restcountries.com/v3.1/all?fields=name',

@@ -93,7 +93,7 @@ namespace Backend.Services.impl
                 common.Constant
                     .StatusTeacherProfile.Created;
 
-            teacher.CreatedDate = DateTime.Now;
+            teacher.CreatedDate = DateTime.UtcNow;
 
             await _teacherRepository.Create(teacher);
 
@@ -176,7 +176,7 @@ namespace Backend.Services.impl
                 teacher.AdminNote = null;
                 teacher.ApprovedPricePerHour = null;
                 teacher.ApprovedBy = null;
-                teacher.CreatedDate = DateTime.Now;
+                teacher.CreatedDate = DateTime.UtcNow;
                 teacher.UpdatedDate = null;
             }
 
@@ -269,7 +269,7 @@ namespace Backend.Services.impl
                 _userContext.GetEmail();
 
             teacher.UpdatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             await _teacherRepository.Save();
 
@@ -316,7 +316,7 @@ namespace Backend.Services.impl
                 _userContext.GetEmail();
 
             teacher.UpdatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             await _teacherRepository.Save();
         }
@@ -353,7 +353,7 @@ namespace Backend.Services.impl
                 common.Constant
                     .StatusTeacherProfile.ApprovedTeacher;
 
-            teacher.UpdatedDate = DateTime.Now;
+            teacher.UpdatedDate = DateTime.UtcNow;
             var user = await _userRepository.GetUserById(userId);
             var role = await _roleRepository.GetByName(
         common.Constant.Role.Teacher);
@@ -395,7 +395,7 @@ namespace Backend.Services.impl
                     .StatusTeacherProfile.RejectedTeacher;
 
             teacher.UpdatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
 
             await _teacherRepository.Save();
         }
@@ -436,7 +436,7 @@ namespace Backend.Services.impl
                 _userContext.GetEmail();
 
             teacher.UpdatedDate =
-                DateTime.Now;
+                DateTime.UtcNow;
             teacher.User.Status = 0;
 
             await _teacherRepository.Save();

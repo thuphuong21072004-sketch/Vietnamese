@@ -166,7 +166,7 @@ namespace Backend.Controllers
             {
                 folder = "images";
             }
-            else if (extension == ".mp3" || extension == ".wav")
+            else if (extension == ".mp3" || extension == ".wav" || extension == ".webm" || extension == ".ogg" || extension == ".m4a")
             {
                 folder = "audios";
             }

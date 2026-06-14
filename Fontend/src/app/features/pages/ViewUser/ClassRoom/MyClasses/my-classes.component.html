@@ -12,31 +12,58 @@
 
     </div>
 
+    <div class="filter-card">
+
+        <div class="filter-row">
+
+            <div class="filter-group">
+                <label>Class Name</label>
+                <input type="text" [(ngModel)]="titleFilter" placeholder="Search by class name...">
+            </div>
+
+            <div class="filter-group">
+                <label>Status</label>
+                <select [(ngModel)]="statusFilter">
+                    <option [ngValue]="''">All</option>
+                    <option [ngValue]="0">Pending Payment</option>
+                    <option [ngValue]="1">Upcoming</option>
+                    <option [ngValue]="2">Ongoing</option>
+                    <option [ngValue]="3">Completed</option>
+                    <option [ngValue]="4">Cancelled</option>
+                    <option [ngValue]="5">Refunded</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Study Date</label>
+                <input type="date" [(ngModel)]="studyDateFilter">
+            </div>
+
+            <div class="filter-group filter-actions">
+                <button class="clear-btn" (click)="clearFilters()">Clear</button>
+            </div>
+
+        </div>
+
+    </div>
+
     <div *ngIf="loading" class="loading">
 
         Loading classes...
 
     </div>
 
-    <div *ngIf="
-      !loading &&
-      enrollments.length === 0
-    " class="empty-state">
+    <div *ngIf="!loading && filteredEnrollments.length === 0" class="empty-state">
 
         <h3>No enrolled classes</h3>
 
-        <p>
-            Start learning by joining a class.
-        </p>
+        <p>Start learning by joining a class.</p>
 
     </div>
 
-    <div *ngIf="
-      !loading &&
-      enrollments.length > 0
-    " class="class-grid">
+    <div *ngIf="!loading && filteredEnrollments.length > 0" class="class-grid">
 
-        <div *ngFor="let item of enrollments" class="class-card">
+        <div *ngFor="let item of filteredEnrollments" class="class-card">
 
             <div class="teacher-section">
 
@@ -196,6 +223,7 @@
             <div class="actions">
 
     <button
+        *ngIf="!((item.status === 4 || item.status === 5) && !canEnrollAgain(item))"
         class="detail-btn"
         (click)="viewClass(item.classId)">
         View Class
@@ -218,17 +246,9 @@
         Cancel Enrollment
     </button>
 
-    <!-- Đang học -->
-    <button
-        *ngIf="item.status === 2"
-        class="detail-btn"
-        (click)="viewClass(item.classId)">
-        Enter Class
-    </button>
-
     <!-- Đã hủy -->
     <button
-        *ngIf="item.status === 4"
+        *ngIf="item.status === 4 && canEnrollAgain(item)"
         class="enroll-btn"
         (click)="enroll(item.classId)">
         Enroll Again
@@ -236,7 +256,7 @@
 
     <!-- Hoàn tiền -->
     <button
-        *ngIf="item.status === 5"
+        *ngIf="item.status === 5 && canEnrollAgain(item)"
         class="enroll-btn"
         (click)="enroll(item.classId)">
         Enroll Again

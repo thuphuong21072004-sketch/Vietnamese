@@ -141,9 +141,8 @@ export class StudentCourseDetailComponent implements OnInit {
   }
 
   getReviewAvatar(review: any): string | null {
-    return review.studentAvatarUrl
-      ? `http://localhost:5108/uploads/${review.studentAvatarUrl}`
-      : null;
+    const url = review.student?.avatarUrl;
+    return url ? `http://localhost:5108/uploads/${url}` : null;
   }
 
   selectSession(session: ClassSessionDto): void {

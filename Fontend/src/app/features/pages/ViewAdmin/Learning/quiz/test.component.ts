@@ -1,7 +1,8 @@
 
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TestService } from '../../../../services/test.service';
 import { BaseService } from '../../../../services/base.service';
 import { LearningService } from '../../../../services/learning.service';
@@ -26,6 +27,8 @@ export class QuizComponent implements OnChanges {
     private testService: TestService,
     private learningService: LearningService,
     private baseService: BaseService,
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -56,9 +59,7 @@ export class QuizComponent implements OnChanges {
             this.quiz.quizMode = 'question';
           }
 
-          this.quiz.questions.forEach((q: any) => {
-            q.answers ??= [];
-          });
+          this.quiz.questions.forEach((q: any) => { this.initQuestion(q); });
           this.quiz.parts.forEach((part: any) => {
             part.questions ??= [];
 
@@ -70,23 +71,14 @@ export class QuizComponent implements OnChanges {
             } else {
               part.mode = null;
             }
-            part.questions.forEach((q: any) => {
-              q.answers ??= [];
-            });
+            part.questions.forEach((q: any) => { this.initQuestion(q); });
             part.passages.forEach((psg: any) => {
               psg.questions ??= [];
-
-              psg.questions.forEach((q: any) => {
-                q.answers ??= [];
-              });
+              psg.questions.forEach((q: any) => { this.initQuestion(q); });
             });
           });
         } else {
           this.quiz = null;
-          this.baseService.handleError(
-            null,
-            'Quiz not found or failed to load',
-          );
         }
       },
 
@@ -96,6 +88,15 @@ export class QuizComponent implements OnChanges {
         this.baseService.handleError(err, 'Failed to load quiz');
       },
     });
+  }
+
+  private initQuestion(q: any) {
+    q.answers ??= [];
+    q.isDelete ??= false;
+    if (q.questionType === 'WRITING' && q.answers.filter((a: any) => !a.isDelete).length === 0) {
+      q.answers = [this.createAnswer(0)];
+      q.answers[0].isCorrect = true;
+    }
   }
 
   addQuiz() {
@@ -333,14 +334,16 @@ export class QuizComponent implements OnChanges {
           return;
         }
 
+        const isAudio = file.type.startsWith('audio/') || file.type === 'video/webm'
+          || /\.(mp3|wav|webm|ogg|m4a)$/i.test(file.name);
         if (file.type.startsWith('image/')) {
           target.imageUrl = fileName;
-
           target.audioUrl = null;
-        } else if (file.type.startsWith('audio/')) {
+          target._blobUrl = null;
+        } else if (isAudio) {
           target.audioUrl = fileName;
-
           target.imageUrl = null;
+          // Keep _blobUrl alive for preview; cleared on × or after save+reload
         }
 
         console.log('AFTER UPDATE', target);
@@ -352,6 +355,11 @@ export class QuizComponent implements OnChanges {
         this.baseService.handleError(err, 'Media upload failed');
       },
     });
+  }
+
+  getAudioSrc(target: any): SafeUrl | string {
+    if (target._blobUrl) return this.sanitizer.bypassSecurityTrustUrl(target._blobUrl);
+    return 'http://localhost:5108/audios/' + target.audioUrl;
   }
 
   saveQuiz() {
@@ -390,6 +398,57 @@ export class QuizComponent implements OnChanges {
 
   previewQuiz() {
     this.showPreview = true;
+  }
+
+  recordingTarget: any = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
+  isRecording = false;
+
+  isRecordingTarget(target: any): boolean {
+    return this.isRecording && this.recordingTarget === target;
+  }
+
+  startRecording(target: any): void {
+    if (this.isRecording) return;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      this.recordingTarget = target;
+      this.audioChunks = [];
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus') ? 'audio/ogg;codecs=opus'
+        : '';
+      this.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      this.mediaRecorder.ondataavailable = (e: BlobEvent) => {
+        if (e.data.size > 0) this.audioChunks.push(e.data);
+      };
+      this.mediaRecorder.onstop = () => {
+        const actualMime = this.mediaRecorder?.mimeType || 'audio/webm';
+        const ext = actualMime.includes('ogg') ? '.ogg' : '.webm';
+        const blob = new Blob(this.audioChunks, { type: actualMime });
+        // Show preview immediately via blob URL before upload completes
+        if (target._blobUrl) URL.revokeObjectURL(target._blobUrl);
+        target._blobUrl = URL.createObjectURL(blob);
+        target.audioUrl = '__preview__';
+        target.imageUrl = null;
+        this.cdr.detectChanges();
+        const file = new File([blob], `recording${ext}`, { type: actualMime });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        this.handleMediaUpload({ target: { files: dt.files } } as any, target);
+        stream.getTracks().forEach((t: MediaStreamTrack) => t.stop());
+      };
+      this.mediaRecorder.start();
+      this.isRecording = true;
+    }).catch(() => alert('Microphone access denied'));
+  }
+
+  stopRecording(): void {
+    if (this.mediaRecorder && this.isRecording) {
+      this.mediaRecorder.stop();
+      this.isRecording = false;
+      this.recordingTarget = null;
+    }
   }
 
   get totalScore(): number {

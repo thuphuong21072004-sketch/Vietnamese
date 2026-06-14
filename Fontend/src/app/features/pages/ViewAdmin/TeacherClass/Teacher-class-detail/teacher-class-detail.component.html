@@ -183,7 +183,27 @@
 
     <div class="reviews-card">
 
-        <h2>Student Reviews ({{ reviews.length }})</h2>
+        <div class="reviews-header">
+            <h2>Student Reviews ({{ reviews.length }})</h2>
+            <span *ngIf="reviews.length > 0" class="avg-rating">
+                ⭐ {{ getAverageRating() | number:'1.1-1' }} average
+            </span>
+        </div>
+
+        <div *ngIf="reviews.length > 0" class="rating-filters">
+            <button
+                class="filter-btn"
+                [class.active]="selectedRating === 0"
+                (click)="setRatingFilter(0)">
+                All ({{ reviews.length }})
+            </button>
+            <button *ngFor="let s of [5,4,3,2,1]"
+                class="filter-btn"
+                [class.active]="selectedRating === s"
+                (click)="setRatingFilter(s)">
+                {{ s }}★ ({{ getReviewCount(s) }})
+            </button>
+        </div>
 
         <div *ngIf="reviewLoading" class="review-empty">Loading reviews...</div>
 
@@ -191,7 +211,7 @@
             No reviews yet.
         </div>
 
-        <div *ngFor="let review of reviews" class="review-item">
+        <div *ngFor="let review of filteredReviews" class="review-item">
 
             <div class="review-header">
 

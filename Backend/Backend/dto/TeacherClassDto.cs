@@ -25,6 +25,10 @@ namespace Backend.dto
 
         public string? SubTopic { get; set; }
 
+        public string? Province { get; set; }
+
+        public string? SpecificLocation { get; set; }
+
         public int TotalSessions { get; set; }
 
         public DateTime StartDate { get; set; }

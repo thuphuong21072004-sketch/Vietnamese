@@ -245,26 +245,26 @@
 
         <div class="review-section">
 
-            <h2>
-                Teacher Reviews
-            </h2>
+            <div class="reviews-header">
+                <h2>Teacher Reviews</h2>
+                <span *ngIf="hasReviews()" class="avg-rating">
+                    ⭐ {{ getAverageRating() | number:'1.1-1' }} &nbsp;·&nbsp; {{ reviews.length }} reviews
+                </span>
+            </div>
 
-            <div *ngIf="!reviewLoading && hasReviews()" class="review-summary">
-
-                <div>
-                    <strong>
-                        {{ reviews.length }}
-                    </strong>
-                    reviews
-                </div>
-
-                <div>
-                    Average:
-                    <strong>
-                        {{ getAverageRating() | number:'1.1-1' }}
-                    </strong>
-                </div>
-
+            <div *ngIf="hasReviews()" class="rating-filters">
+                <button
+                    class="filter-btn"
+                    [class.active]="selectedRatingFilter === 0"
+                    (click)="setRatingFilter(0)">
+                    All ({{ reviews.length }})
+                </button>
+                <button *ngFor="let s of [5,4,3,2,1]"
+                    class="filter-btn"
+                    [class.active]="selectedRatingFilter === s"
+                    (click)="setRatingFilter(s)">
+                    {{ s }}★ ({{ getReviewCount(s) }})
+                </button>
             </div>
 
             <div *ngIf="reviewLoading" class="info-note">
@@ -301,12 +301,12 @@
                         <div class="review-left">
 
                             <img
-                                *ngIf="review.studentAvatarUrl"
-                                [src]="getImageUrl(review.studentAvatarUrl)"
+                                *ngIf="review.student?.avatarUrl"
+                                [src]="getImageUrl(review.student.avatarUrl)"
                                 class="review-avatar">
 
                             <div
-                                *ngIf="!review.studentAvatarUrl"
+                                *ngIf="!review.student?.avatarUrl"
                                 class="review-avatar placeholder">
                                 {{ (review.student?.name || 'A').charAt(0).toUpperCase() }}
                             </div>

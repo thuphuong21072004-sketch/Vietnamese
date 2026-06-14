@@ -157,5 +157,37 @@
             public const string Class = "CLASS";
 
         }
+        public static class MatchRequestStatus
+        {
+            public const byte Pending = 0;
+            public const byte Accepted = 1;
+            public const byte Rejected = 2;
+            public const byte Cancelled = 3;
+        }
+        public static class MatchRequestType
+        {
+            public const byte StudentInvite = 0;
+            public const byte TeacherInvite = 1;
+        }
+        public static class StudentTripStatus
+        {
+            public const byte FindingTeacher = 0;
+            public const byte Matched = 1;
+            public const byte Cancelled = 2;
+        }
+        public static class TeacherScheduleStatus
+        {
+            public const byte Closed = 0;
+            public const byte Open = 1;
+        }
+        public static class TravelBookingStatus
+        {
+            
+            public const byte Confirmed = 1;
+
+            public const byte Cancelled = 2;
+
+            public const byte Completed = 3;
+        }
     }
 }

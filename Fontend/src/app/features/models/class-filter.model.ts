@@ -1,4 +1,5 @@
 export interface ClassFilterDto {
+  title?: string;
   country?: string;
 
   minRating?: number;

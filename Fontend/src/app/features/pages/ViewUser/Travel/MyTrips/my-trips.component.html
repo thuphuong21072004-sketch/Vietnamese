@@ -1,0 +1,163 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>My Travel Plans</h1>
+    <div class="header-actions">
+      <a routerLink="/user/travel/requests" class="btn-outline">My Requests</a>
+      <button class="btn-primary" (click)="openCreate()">+ New Trip</button>
+    </div>
+  </div>
+
+  <!-- Form create / edit -->
+  <div *ngIf="showForm" class="form-card">
+    <h2>{{ editingTripId ? 'Edit Trip' : 'New Trip' }}</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tỉnh/Thành phố</label>
+        <select [(ngModel)]="selectedProvince" (ngModelChange)="onProvinceChange()">
+          <option value="">-- Chọn tỉnh/thành --</option>
+          <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Địa điểm cụ thể (tùy chọn)</label>
+        <select [(ngModel)]="selectedSpot" [disabled]="!selectedProvince" (ngModelChange)="onSpotChange()">
+          <option value="">-- Chọn địa điểm --</option>
+          <option *ngFor="let spot of availableSpots" [value]="spot">{{ spot }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" [(ngModel)]="form.startDate" [min]="minStartDate">
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input type="date" [(ngModel)]="form.endDate" [min]="form.startDate || minStartDate">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save' }}
+      </button>
+      <button class="btn-cancel-form" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && trips.length > 0" class="filter-bar">
+    <select [(ngModel)]="filterStatus" class="filter-select">
+      <option value="">All Statuses</option>
+      <option value="0">Finding Teacher</option>
+      <option value="1">Matched</option>
+      <option value="2">Cancelled</option>
+    </select>
+    <input type="date" [(ngModel)]="filterFrom" class="filter-date">
+    <input type="date" [(ngModel)]="filterTo" class="filter-date">
+    <button *ngIf="filterStatus || filterFrom || filterTo" class="btn-clear" (click)="clearFilters()">✕ Clear</button>
+  </div>
+
+  <div *ngIf="loading" class="empty-state">Loading trips...</div>
+
+  <div *ngIf="!loading && trips.length === 0 && !showForm" class="empty-state">
+    <div class="empty-icon">✈️</div>
+    <h3>No trips yet</h3>
+    <p>Create a trip to find a language teacher for your journey.</p>
+    <button class="btn-primary" (click)="openCreate()">Create your first trip</button>
+  </div>
+
+  <div *ngIf="!loading && trips.length > 0 && filtered.length === 0" class="empty-state">
+    <p>No trips match the selected filters.</p>
+  </div>
+
+  <div *ngIf="!loading" class="trip-list">
+    <div *ngFor="let trip of filtered" class="trip-card">
+
+      <div class="trip-header">
+        <div class="trip-destination">
+          <span class="dest-icon">📍</span>
+          <h2>{{ trip.destination }}<span *ngIf="trip.specificLocation" class="specific-location"> — {{ trip.specificLocation }}</span></h2>
+        </div>
+        <span class="status-badge" [ngClass]="statusClass(trip.status)">
+          {{ statusLabel(trip.status) }}
+        </span>
+      </div>
+
+      <div class="trip-dates">
+        <span class="date-label">{{ trip.startDate | date:'dd/MM/yyyy' }}</span>
+        <span class="date-arrow">→</span>
+        <span class="date-label">{{ trip.endDate | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="trip-actions">
+        <ng-container *ngIf="trip.status !== 1; else matchedActions">
+          <button class="btn-find"
+            (click)="findTeachers(trip.tripId)"
+            [disabled]="loadingSuggestionsFor === trip.tripId">
+            <span *ngIf="loadingSuggestionsFor === trip.tripId">Searching...</span>
+            <span *ngIf="loadingSuggestionsFor !== trip.tripId">
+              {{ showSuggestionsFor === trip.tripId ? 'Hide Teachers' : 'Find Teachers' }}
+            </span>
+          </button>
+          <button class="btn-edit" (click)="openEdit(trip)">Edit</button>
+          <button class="btn-del" (click)="deleteTrip(trip.tripId)">Delete</button>
+        </ng-container>
+        <ng-template #matchedActions>
+          <a class="btn-find" [routerLink]="['/user/profile', trip.matchedTeacherId]">
+            View Matched Teacher
+          </a>
+          <a *ngIf="trip.classId" class="btn-enroll" [routerLink]="['/user/classdetail', trip.classId]">
+            Enroll Now
+          </a>
+        </ng-template>
+      </div>
+
+      <!-- Suggested Teachers Panel -->
+      <div *ngIf="showSuggestionsFor === trip.tripId" class="suggestions-panel">
+        <h3>Matching Teachers <span class="count">({{ suggestions[trip.tripId]?.length ?? 0 }})</span></h3>
+
+        <div *ngIf="!suggestions[trip.tripId]?.length" class="no-suggestions">
+          No matching teachers found for this destination and dates.
+        </div>
+
+        <div *ngFor="let s of suggestions[trip.tripId]" class="suggestion-card">
+          <div class="sugg-avatar-wrap">
+            <img *ngIf="s.teacherAvatarUrl"
+              [src]="'http://localhost:5108/uploads/' + s.teacherAvatarUrl"
+              class="sugg-avatar">
+            <div *ngIf="!s.teacherAvatarUrl" class="sugg-avatar placeholder">
+              {{ s.teacherName?.charAt(0) }}
+            </div>
+          </div>
+          <div class="sugg-info">
+            <strong>{{ s.teacherName }}</strong>
+            <span class="sugg-country">{{ s.teacherCountry }}</span>
+            <span class="sugg-dates">Available: {{ s.availableFrom | date:'dd/MM/yyyy' }} – {{ s.availableTo | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <ng-container *ngIf="getPendingRequest(trip.tripId, s.scheduleId) as pending; else sendBtn">
+            <!-- Student sent (requestType=0) → Cancel -->
+            <ng-container *ngIf="pending.requestType === 0">
+              <button class="btn-cancel-invite" (click)="cancelInvite(pending.id, trip.tripId)">Cancel</button>
+            </ng-container>
+            <!-- Teacher sent (requestType=1) → Reject + Accept -->
+            <ng-container *ngIf="pending.requestType === 1">
+              <button class="btn-reject" (click)="reject(pending.id, trip.tripId)">Reject</button>
+              <button class="btn-accept" (click)="accept(pending.id)">Accept</button>
+            </ng-container>
+            <a class="btn-view-detail" [routerLink]="['/user/profile', s.teacherId]">View Profile</a>
+          </ng-container>
+          <ng-template #sendBtn>
+            <div class="sugg-btn-group">
+              <button class="btn-invite"
+                (click)="sendInvite(s.scheduleId, trip.tripId)"
+                [disabled]="isSendingInvite(s.scheduleId, trip.tripId)">
+                {{ isSendingInvite(s.scheduleId, trip.tripId) ? 'Sending...' : 'Invite' }}
+              </button>
+              <a class="btn-view-detail" [routerLink]="['/user/profile', s.teacherId]">View profile</a>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -34,4 +34,8 @@ export interface ClassEnrollmentDto {
   endTime?: string;
 
   scheduleDays?: { id: number; classId: number; dayOfWeek: string }[];
+
+  sessions?: { sessionId: number; studyDate: string; startTime: string; endTime: string; topic: string; sessionNumber: number }[];
+
+  hasReview?: boolean;
 }

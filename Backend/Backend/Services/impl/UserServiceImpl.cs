@@ -257,6 +257,16 @@ namespace Backend.Services.impl
                 user.AvatarUrl = dto.AvatarUrl;
             }
 
+            if (dto.DateOfBirth.HasValue)
+            {
+                user.DateOfBirth = dto.DateOfBirth.Value;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Gender))
+            {
+                user.Gender = dto.Gender;
+            }
+
             await _userrepository.Save();
         }
         /*
@@ -396,6 +406,36 @@ namespace Backend.Services.impl
             return _mapper.Map<
                 UserDTO
             >(user);
+        }
+
+        public async Task<object?> GetUserPublicProfile(int userId)
+        {
+            var user = await _userrepository.GetUserById(userId);
+            if (user == null) throw new KeyNotFoundException("User not found");
+
+            var tp = user.TeacherProfile;
+            return new
+            {
+                userId = user.UserId,
+                name = user.Name,
+                avatarUrl = user.AvatarUrl,
+                country = user.Country,
+                bio = user.Bio,
+                dateOfBirth = user.DateOfBirth,
+                gender = user.Gender,
+                roleName = user.Role?.RoleName,
+                teacherProfile = tp == null ? null : new
+                {
+                    specialty = tp.Specialty,
+                    description = tp.Description,
+                    experienceYears = tp.ExperienceYears,
+                    ratingAverage = tp.RatingAverage,
+                    totalReviews = tp.TotalReviews,
+                    approvedPricePerHour = tp.ApprovedPricePerHour,
+                    introVideoUrl = tp.IntroVideoUrl,
+                    status = tp.Status
+                }
+            };
         }
 
     }
