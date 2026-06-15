@@ -39,6 +39,10 @@ namespace Backend.Services
 
         Task<List<StudentTripDto>> GetSuggestedStudents( int scheduleId);
 
+        Task<List<StudentTripDto>> GetOpenStudentTrips(string? destination);
+
+        Task<List<TravelBookingDto>> GetMyConfirmedBookings();
+
 
 
         // request
@@ -65,5 +69,20 @@ namespace Backend.Services
         Task<List<MatchRequestDto>>GetRequestsBySchedule( int scheduleId);
 
         Task LinkClass(int requestId, int classId);
+
+        // teacher creates class linked to a trip (reserves a slot for the student)
+        Task ReserveTripInClass(int tripId, int classId);
+
+        // teacher: map of studentId → classId for all classes they reserved
+        Task<Dictionary<int, int>> GetMyReservedClassMap();
+
+        // student views classes that reserved a slot for them (for a given trip)
+        Task<List<TeacherClassDto>> GetReservedClassesForTrip(int tripId);
+
+        // student chooses one class → auto-enroll, release other reservations, mark trip Matched
+        Task ChooseClassForTrip(int tripId, int classId);
+
+        // admin
+        Task<List<TravelBookingAdminDto>> GetAllBookingsForAdmin(DateOnly? from, DateOnly? to);
     }
 }

@@ -93,6 +93,20 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet("teacher/open-trips")]
+        public async Task<IActionResult> GetOpenStudentTrips([FromQuery] string? destination)
+        {
+            var result = await _travelService.GetOpenStudentTrips(destination);
+            return Ok(result);
+        }
+
+        [HttpGet("teacher/my-bookings")]
+        public async Task<IActionResult> GetMyConfirmedBookings()
+        {
+            var result = await _travelService.GetMyConfirmedBookings();
+            return Ok(result);
+        }
+
         // ── Requests ──────────────────────────────────────────────────────────
 
         [HttpPost("requests")]
@@ -163,6 +177,48 @@ namespace Backend.Controllers
         {
             await _travelService.LinkClass(id, classId);
             return Ok();
+        }
+
+        // ── Class reservation from trip ───────────────────────────────────────
+
+        [HttpGet("teacher/reserved-class-map")]
+        public async Task<IActionResult> GetMyReservedClassMap()
+        {
+            var result = await _travelService.GetMyReservedClassMap();
+            return Ok(result);
+        }
+
+        [HttpPost("teacher/link-trip/{tripId}/class/{classId}")]
+        public async Task<IActionResult> ReserveTripInClass(int tripId, int classId)
+        {
+            await _travelService.ReserveTripInClass(tripId, classId);
+            return Ok();
+        }
+
+        [HttpGet("student/trip/{tripId}/classes")]
+        public async Task<IActionResult> GetReservedClassesForTrip(int tripId)
+        {
+            var result = await _travelService.GetReservedClassesForTrip(tripId);
+            return Ok(result);
+        }
+
+        [HttpPost("student/trip/{tripId}/choose-class/{classId}")]
+        public async Task<IActionResult> ChooseClassForTrip(int tripId, int classId)
+        {
+            await _travelService.ChooseClassForTrip(tripId, classId);
+            return Ok();
+        }
+
+        // ── Admin ─────────────────────────────────────────────────────────────
+
+        [HttpGet("admin/bookings")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllBookingsAdmin(
+            [FromQuery] DateOnly? from,
+            [FromQuery] DateOnly? to)
+        {
+            var result = await _travelService.GetAllBookingsForAdmin(from, to);
+            return Ok(result);
         }
     }
 

@@ -22,6 +22,9 @@ namespace Backend.Repository
                 DateOnly availableFrom,
                 DateOnly availableTo);
 
+        Task<List<StudentTrip>>
+            GetAllOpen(string? destination);
+
         Task Create(
             StudentTrip trip);
 

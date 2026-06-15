@@ -25,6 +25,8 @@ namespace Backend.dto
 
         public DateTime CreatedAt { get; set; }
 
+        public string? PhoneNumber { get; set; }
+
         public string? StudentName { get; set; }
 
         public string? StudentAvatarUrl { get; set; }
@@ -36,5 +38,11 @@ namespace Backend.dto
         public string? MatchedTeacherName { get; set; }
 
         public int? ClassId { get; set; }
+
+        public bool HasEnrolledInClass { get; set; }
+
+        public int? EnrolledClassId { get; set; }
+
+        public string? EnrolledClassName { get; set; }
     }
 }

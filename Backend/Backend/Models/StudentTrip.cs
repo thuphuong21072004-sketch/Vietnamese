@@ -24,6 +24,8 @@ namespace Backend.Models
 
         public byte Status { get; set; }
 
+        public string? PhoneNumber { get; set; }
+
         public User? Student { get; set; }
     }
 }

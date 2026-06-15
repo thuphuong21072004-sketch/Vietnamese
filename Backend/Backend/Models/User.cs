@@ -18,6 +18,7 @@ namespace Backend.Models
         public string? AvatarUrl { get; set; }
         public DateOnly? DateOfBirth { get; set; }
         public string? Gender { get; set; }
+        public string? PhoneNumber { get; set; }
         public ICollection<UserQuiz>? UserQuizzes { get; set; }
         public ICollection<UserProgress>? UserProgresses { get; set; }
         public TeacherProfile? TeacherProfile { get; set; }

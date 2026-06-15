@@ -55,6 +55,16 @@ namespace Backend.Repository.impl
         {
             await _context.SaveChangesAsync();
         }
+        public async Task<Dictionary<int, Payment>> GetLatestByRefs(string refName, List<int> refIds)
+        {
+            var payments = await _context.Payments
+                .Where(x => x.RefName == refName && refIds.Contains(x.RefId))
+                .GroupBy(x => x.RefId)
+                .Select(g => g.OrderByDescending(p => p.CreatedDate).First())
+                .ToListAsync();
+            return payments.ToDictionary(p => p.RefId);
+        }
+
         public async Task<Payment?> GetByRef( string refName, int refId)
         {
             return await _context.Payments

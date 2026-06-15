@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { NavigationEnd, RouterOutlet, RouterLink, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { AccountService } from './features/services/account.service';
 import { filter } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
@@ -13,6 +13,8 @@ import { TestService } from './features/services/test.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
+  @ViewChild('contentEl') contentEl!: ElementRef<HTMLDivElement>;
+
   role: string | null = null;
   userId: number | null = null;
   name: string | null = null;
@@ -26,6 +28,7 @@ export class AppComponent {
     private router: Router,
     private api: AccountService,
     private testService: TestService,
+    @Inject(DOCUMENT) private document: Document,
   ) {}
 
   ngOnInit() {
@@ -34,6 +37,11 @@ export class AppComponent {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
+        // Direct assignment bypasses css scroll-behavior: smooth
+        this.document.documentElement.scrollTop = 0;
+        this.document.body.scrollTop = 0;
+        if (this.contentEl?.nativeElement) this.contentEl.nativeElement.scrollTop = 0;
+
         const token = localStorage.getItem('token');
         if (token !== this.lastToken) {
           this.loadCurrentUser();

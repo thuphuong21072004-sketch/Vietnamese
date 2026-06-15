@@ -37,6 +37,9 @@ export class TeacherClassCreateComponent implements OnInit {
       if (params['tripStartDate']) {
         this.tripStartDate = params['tripStartDate'];
       }
+      if (params['tripId']) {
+        this.tripId = params['tripId'];
+      }
     });
   }
   loading = false;
@@ -56,6 +59,7 @@ export class TeacherClassCreateComponent implements OnInit {
   selectedProvince = '';
   private travelMatchRequestId: string | null = null;
   private tripStartDate: string | null = null;
+  private tripId: string | null = null;
 
   get availableSpots(): string[] {
     return this.destinationGroups.find(g => g.province === this.selectedProvince)?.spots ?? [];
@@ -290,15 +294,8 @@ export class TeacherClassCreateComponent implements OnInit {
         this.teacherClass.sessions = response;
         this.loading = false;
 
-        if (this.tripStartDate && response.length > 0) {
-          const sorted = [...response].sort((a, b) => a.studyDate.localeCompare(b.studyDate));
-          const lastDate = new Date(sorted[sorted.length - 1].studyDate);
-          const deadline = new Date(this.tripStartDate);
-          deadline.setDate(deadline.getDate() - 3);
-          if (lastDate > deadline) {
-            const dl = deadline.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            alert(`Lịch du lịch: buổi học cuối cùng phải trước ngày khởi hành ít nhất 3 ngày (tức là trước ${dl}). Vui lòng chỉnh lại ngày bắt đầu lớp học.`);
-          }
+        if (this.travelDeadlineError) {
+          alert(this.travelDeadlineError);
         }
       },
 
@@ -310,22 +307,38 @@ export class TeacherClassCreateComponent implements OnInit {
     });
   }
 
+  get travelDeadlineError(): string | null {
+    if (!this.tripStartDate || this.teacherClass.sessions.length === 0) return null;
+    const sorted = [...this.teacherClass.sessions].sort((a, b) =>
+      a.studyDate.substring(0, 10).localeCompare(b.studyDate.substring(0, 10))
+    );
+    const lastDateStr = sorted[sorted.length - 1].studyDate.substring(0, 10);
+    // Calculate deadline = tripStartDate - 3 days using UTC to avoid timezone issues
+    const tripMs = Date.UTC(
+      +this.tripStartDate.substring(0, 4),
+      +this.tripStartDate.substring(5, 7) - 1,
+      +this.tripStartDate.substring(8, 10)
+    );
+    const deadlineMs = tripMs - 3 * 86400000;
+    const d = new Date(deadlineMs);
+    const deadlineStr = d.getUTCFullYear() + '-'
+      + String(d.getUTCMonth() + 1).padStart(2, '0') + '-'
+      + String(d.getUTCDate()).padStart(2, '0');
+    if (lastDateStr > deadlineStr) {
+      const [y, m, day] = deadlineStr.split('-');
+      return `Travel class: The last session must be at least 3 days before the departure date (before ${day}/${m}/${y}). Please adjust the class start date.`;
+    }
+    return null;
+  }
+
   saveClass(): void {
     if (this.teacherClass.sessions.length === 0) {
       alert('Please generate schedule first');
       return;
     }
 
-    if (this.tripStartDate && this.teacherClass.sessions.length > 0) {
-      const sorted = [...this.teacherClass.sessions].sort((a, b) => a.studyDate.localeCompare(b.studyDate));
-      const lastDate = new Date(sorted[sorted.length - 1].studyDate);
-      const deadline = new Date(this.tripStartDate);
-      deadline.setDate(deadline.getDate() - 3);
-      if (lastDate > deadline) {
-        const dl = deadline.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        alert(`Lịch du lịch: buổi học cuối cùng phải trước ngày khởi hành ít nhất 3 ngày (tức là trước ${dl}). Vui lòng chỉnh lại ngày bắt đầu lớp học.`);
-        return;
-      }
+    if (this.travelDeadlineError) {
+      return;
     }
 
     const request = this.buildRequest();
@@ -339,6 +352,13 @@ export class TeacherClassCreateComponent implements OnInit {
         if (this.travelMatchRequestId) {
           this.travelService.linkClassToRequest(
             Number(this.travelMatchRequestId),
+            response.classId
+          ).subscribe();
+        }
+
+        if (this.tripId) {
+          this.travelService.reserveTripInClass(
+            Number(this.tripId),
             response.classId
           ).subscribe();
         }

@@ -703,6 +703,9 @@ namespace Backend.Migrations
                     b.Property<int?>("ReservedStudentId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TripId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SpecificLocation")
                         .HasColumnType("nvarchar(max)");
 
@@ -756,28 +759,24 @@ namespace Backend.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DesiredPricePerHour")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("EnglishCertificateUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ExperienceYears")
                         .HasColumnType("int");
 
                     b.Property<string>("IntroVideoUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("RatingAverage")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Specialty")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte>("Status")
@@ -971,6 +970,9 @@ namespace Backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")

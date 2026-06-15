@@ -31,6 +31,17 @@
   background: #f0fdf4;
 }
 
+.nav-btn-highlight {
+  border-color: #6366f1;
+  color: #6366f1;
+  background: #f5f3ff;
+}
+.nav-btn-highlight:hover {
+  border-color: #4f46e5;
+  color: #4f46e5;
+  background: #ede9fe;
+}
+
 .nav-icon {
   font-size: 1.1rem;
 }

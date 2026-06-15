@@ -116,5 +116,10 @@ namespace Backend.Repository.impl
                      x.Status == StatusBooking.InProgress ||
                      x.Status == StatusBooking.Completed));
         }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

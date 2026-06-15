@@ -21,7 +21,8 @@ namespace Backend.Services.impl
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            using var timer = new PeriodicTimer(_interval);
+            while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
             {
                 try
                 {
@@ -31,8 +32,6 @@ namespace Backend.Services.impl
                 {
                     _logger.LogError(ex, "AutoCancelService error");
                 }
-
-                await Task.Delay(_interval, stoppingToken);
             }
         }
 

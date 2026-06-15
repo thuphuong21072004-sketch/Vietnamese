@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TravelService } from '../../../../services/travel.service';
 import { StudentTripDto, TeacherScheduleDto } from '../../../../models/travel.model';
+import { TeacherClassDto } from '../../../../models/teacher-class.model';
 import { VIETNAM_DESTINATIONS, DestinationGroup } from '../../../../models/vietnam-destinations';
 
 @Component({
@@ -21,7 +22,7 @@ export class MyTripsComponent implements OnInit {
 
   showForm = false;
   editingTripId: number | null = null;
-  form = { destination: '', specificLocation: '', startDate: '', endDate: '' };
+  form = { destination: '', specificLocation: '', phoneNumber: '', startDate: '', endDate: '' };
 
   readonly destinationGroups: DestinationGroup[] = VIETNAM_DESTINATIONS;
   selectedProvince = '';
@@ -33,7 +34,7 @@ export class MyTripsComponent implements OnInit {
 
   get minStartDate(): string {
     const d = new Date();
-    d.setDate(d.getDate() + 15);
+    d.setDate(d.getDate() + 30);
     return d.toISOString().split('T')[0];
   }
 
@@ -72,6 +73,9 @@ export class MyTripsComponent implements OnInit {
   showSuggestionsFor: number | null = null;
   sendingInvite: { scheduleId: number; tripId: number } | null = null;
 
+  reservedClasses: Record<number, TeacherClassDto[]> = {};
+  showClassesFor: number | null = null;
+  loadingClassesFor: number | null = null;
 
   constructor(private travelService: TravelService) {}
 
@@ -88,7 +92,7 @@ export class MyTripsComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.form = { destination: '', specificLocation: '', startDate: '', endDate: '' };
+    this.form = { destination: '', specificLocation: '', phoneNumber: '', startDate: '', endDate: '' };
     this.selectedProvince = '';
     this.selectedSpot = '';
     this.editingTripId = null;
@@ -96,7 +100,7 @@ export class MyTripsComponent implements OnInit {
   }
 
   openEdit(trip: StudentTripDto): void {
-    this.form = { destination: trip.destination, specificLocation: trip.specificLocation ?? '', startDate: trip.startDate, endDate: trip.endDate };
+    this.form = { destination: trip.destination, specificLocation: trip.specificLocation ?? '', phoneNumber: trip.phoneNumber ?? '', startDate: trip.startDate, endDate: trip.endDate };
     this.selectedProvince = trip.destination;
     this.selectedSpot = trip.specificLocation ?? '';
     this.editingTripId = trip.tripId;
@@ -117,10 +121,10 @@ export class MyTripsComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const minStart = new Date(today);
-    minStart.setDate(minStart.getDate() + 15);
+    minStart.setDate(minStart.getDate() + 30);
     const start = new Date(this.form.startDate);
     if (start < minStart) {
-      alert('Start date must be at least 15 days from today');
+      alert('Start date must be at least 30 days from today');
       return;
     }
     this.saving = true;
@@ -202,8 +206,24 @@ export class MyTripsComponent implements OnInit {
     });
   }
 
-isSendingInvite(scheduleId: number, tripId: number): boolean {
+  isSendingInvite(scheduleId: number, tripId: number): boolean {
     return this.sendingInvite?.scheduleId === scheduleId && this.sendingInvite?.tripId === tripId;
+  }
+
+  viewReservedClasses(tripId: number): void {
+    if (this.showClassesFor === tripId) {
+      this.showClassesFor = null;
+      return;
+    }
+    this.loadingClassesFor = tripId;
+    this.travelService.getReservedClassesForTrip(tripId).subscribe({
+      next: (classes) => {
+        this.reservedClasses[tripId] = classes;
+        this.showClassesFor = tripId;
+        this.loadingClassesFor = null;
+      },
+      error: () => { this.loadingClassesFor = null; },
+    });
   }
 
   statusLabel(status: number): string {

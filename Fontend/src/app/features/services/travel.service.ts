@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MatchRequestDto, StudentTripDto, TeacherScheduleDto } from '../models/travel.model';
+import { MatchRequestDto, StudentTripDto, TeacherScheduleDto, TravelBookingAdminDto, TravelBookingDto } from '../models/travel.model';
+import { TeacherClassDto } from '../models/teacher-class.model';
 
 @Injectable({ providedIn: 'root' })
 export class TravelService {
@@ -103,5 +104,42 @@ export class TravelService {
 
   linkClassToRequest(requestId: number, classId: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/requests/${requestId}/link-class/${classId}`, {}, this.getOptions());
+  }
+
+  getOpenStudentTrips(destination?: string): Observable<StudentTripDto[]> {
+    const q = destination ? `?destination=${encodeURIComponent(destination)}` : '';
+    return this.http.get<StudentTripDto[]>(`${this.apiUrl}/teacher/open-trips${q}`, this.getOptions());
+  }
+
+  getMyConfirmedBookings(): Observable<TravelBookingDto[]> {
+    return this.http.get<TravelBookingDto[]>(`${this.apiUrl}/teacher/my-bookings`, this.getOptions());
+  }
+
+  // ── Class reservation from trip ─────────────────────────────────────────
+
+  getMyReservedClassMap(): Observable<Record<number, number>> {
+    return this.http.get<Record<number, number>>(`${this.apiUrl}/teacher/reserved-class-map`, this.getOptions());
+  }
+
+  reserveTripInClass(tripId: number, classId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/teacher/link-trip/${tripId}/class/${classId}`, {}, this.getOptions());
+  }
+
+  getReservedClassesForTrip(tripId: number): Observable<TeacherClassDto[]> {
+    return this.http.get<TeacherClassDto[]>(`${this.apiUrl}/student/trip/${tripId}/classes`, this.getOptions());
+  }
+
+  chooseClassForTrip(tripId: number, classId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/student/trip/${tripId}/choose-class/${classId}`, {}, this.getOptions());
+  }
+
+  // ── Admin ───────────────────────────────────────────────────────────────────
+
+  getAllBookingsAdmin(from?: string, to?: string): Observable<TravelBookingAdminDto[]> {
+    let params = '';
+    if (from) params += `from=${from}`;
+    if (to) params += (params ? '&' : '') + `to=${to}`;
+    const url = `${this.apiUrl}/admin/bookings${params ? '?' + params : ''}`;
+    return this.http.get<TravelBookingAdminDto[]>(url, this.getOptions());
   }
 }

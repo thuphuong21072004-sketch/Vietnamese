@@ -386,5 +386,16 @@ namespace Backend.Repository.impl
                 .FirstOrDefaultAsync(
                     x => x.ClassId == classId);
         }
+
+        public async Task<List<TeacherClass>> GetByReservedStudentIdAsync(int studentId)
+        {
+            return await _context.TeacherClasses
+                .Include(x => x.TeacherProfile)
+                    .ThenInclude(x => x.User)
+                .Include(x => x.ClassScheduleDays)
+                .Where(x => x.ReservedStudentId == studentId && x.Status == 1)
+                .OrderBy(x => x.StartDate)
+                .ToListAsync();
+        }
     }
 }

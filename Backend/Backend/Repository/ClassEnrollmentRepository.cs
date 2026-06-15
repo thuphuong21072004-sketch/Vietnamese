@@ -29,5 +29,6 @@ namespace Backend.Repository
     int studentId);
 
         Task<int> GetActiveEnrollmentCountAsync(int classId);
+        Task SaveChangesAsync();
     }
 }

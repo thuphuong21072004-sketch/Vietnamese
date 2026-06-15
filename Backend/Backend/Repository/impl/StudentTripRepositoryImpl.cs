@@ -78,6 +78,27 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
+        public async Task<List<StudentTrip>>
+            GetAllOpen(string? destination)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = _context.StudentTrips
+                .Include(x => x.Student)
+                .Where(x =>
+                    x.Status == StudentTripStatus.FindingTeacher &&
+                    x.StartDate >= today)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(destination))
+                query = query.Where(x =>
+                    x.Destination.ToLower().Contains(destination.ToLower()));
+
+            return await query
+                .OrderBy(x => x.StartDate)
+                .ToListAsync();
+        }
+
         public async Task Create(
             StudentTrip trip)
         {

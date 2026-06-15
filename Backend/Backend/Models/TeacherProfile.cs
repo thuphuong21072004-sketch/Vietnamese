@@ -6,9 +6,9 @@
 
         public int UserId { get; set; }
 
-        public string IntroVideoUrl { get; set; }
+        public string? IntroVideoUrl { get; set; }
 
-        public string Specialty { get; set; }
+        public string? Specialty { get; set; }
 
         public int ExperienceYears { get; set; }
 
@@ -16,11 +16,11 @@
 
         public int TotalReviews { get; set; } = 0;
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public byte Status { get; set; } = 0;
 
-        public string EnglishCertificateUrl { get; set; }
+        public string? EnglishCertificateUrl { get; set; }
 
         public string? AdminNote { get; set; }
 

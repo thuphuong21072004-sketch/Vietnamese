@@ -37,6 +37,8 @@
 
         public int? ReservedStudentId { get; set; }
 
+        public int? TripId { get; set; }
+
         public DateTime CreatedDate { get; set; }
 
         public TeacherProfile? TeacherProfile { get; set; }

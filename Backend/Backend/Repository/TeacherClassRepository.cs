@@ -33,5 +33,6 @@ namespace Backend.Repository
         Task<List<TeacherClass>> GetTeacherClassesAsync( int teacherProfileId);
         Task<TeacherClass?> GetById(int classId);
 
+        Task<List<TeacherClass>> GetByReservedStudentIdAsync(int studentId);
     }
 }

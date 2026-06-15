@@ -1,66 +1,86 @@
 <div class="page">
 
+  <!-- Header -->
   <div class="page-header">
-    <h1>My Travel Plans</h1>
+    <div>
+      <h1>My Travel Plans</h1>
+      <p class="subtitle">Manage your upcoming trips and find Vietnamese teachers to travel with.</p>
+    </div>
     <div class="header-actions">
-      <a routerLink="/user/travel/requests" class="btn-outline">My Requests</a>
+      <a routerLink="/user/travel/requests" class="btn-outline">📋 My Requests</a>
       <button class="btn-primary" (click)="openCreate()">+ New Trip</button>
     </div>
   </div>
 
   <!-- Form create / edit -->
   <div *ngIf="showForm" class="form-card">
-    <h2>{{ editingTripId ? 'Edit Trip' : 'New Trip' }}</h2>
+    <div class="form-card-title">
+      <span class="form-icon">{{ editingTripId ? '✏️' : '✈️' }}</span>
+      <h2>{{ editingTripId ? 'Edit Trip' : 'New Trip' }}</h2>
+    </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Tỉnh/Thành phố</label>
+        <label>Province / City</label>
         <select [(ngModel)]="selectedProvince" (ngModelChange)="onProvinceChange()">
-          <option value="">-- Chọn tỉnh/thành --</option>
+          <option value="">— Select province —</option>
           <option *ngFor="let g of destinationGroups" [value]="g.province">{{ g.province }}</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Địa điểm cụ thể (tùy chọn)</label>
+        <label>Specific location <span class="optional">(optional)</span></label>
         <select [(ngModel)]="selectedSpot" [disabled]="!selectedProvince" (ngModelChange)="onSpotChange()">
-          <option value="">-- Chọn địa điểm --</option>
+          <option value="">— Select location —</option>
           <option *ngFor="let spot of availableSpots" [value]="spot">{{ spot }}</option>
         </select>
       </div>
+      <div class="form-group form-group--phone">
+        <label>Contact phone</label>
+        <input type="tel" [(ngModel)]="form.phoneNumber" placeholder="e.g. 0901 234 567">
+      </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
-        <label>Start Date</label>
+        <label>Start date</label>
         <input type="date" [(ngModel)]="form.startDate" [min]="minStartDate">
       </div>
       <div class="form-group">
-        <label>End Date</label>
+        <label>End date</label>
         <input type="date" [(ngModel)]="form.endDate" [min]="form.startDate || minStartDate">
       </div>
     </div>
+    <p class="form-note">📅 Trip must start at least 30 days from today.</p>
     <div class="form-actions">
       <button class="btn-save" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Saving...' : 'Save' }}
+        {{ saving ? 'Saving…' : (editingTripId ? 'Save Changes' : 'Create Trip') }}
       </button>
       <button class="btn-cancel-form" (click)="cancelForm()">Cancel</button>
     </div>
   </div>
 
+  <!-- Filter -->
   <div *ngIf="!loading && trips.length > 0" class="filter-bar">
     <select [(ngModel)]="filterStatus" class="filter-select">
-      <option value="">All Statuses</option>
+      <option value="">All statuses</option>
       <option value="0">Finding Teacher</option>
       <option value="1">Matched</option>
       <option value="2">Cancelled</option>
     </select>
-    <input type="date" [(ngModel)]="filterFrom" class="filter-date">
-    <input type="date" [(ngModel)]="filterTo" class="filter-date">
+    <input type="date" [(ngModel)]="filterFrom" class="filter-date" placeholder="From">
+    <input type="date" [(ngModel)]="filterTo" class="filter-date" placeholder="To">
     <button *ngIf="filterStatus || filterFrom || filterTo" class="btn-clear" (click)="clearFilters()">✕ Clear</button>
   </div>
 
-  <div *ngIf="loading" class="empty-state">Loading trips...</div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="empty-state">
+    <div class="spinner"></div>
+    <p>Loading trips…</p>
+  </div>
 
+  <!-- Empty -->
   <div *ngIf="!loading && trips.length === 0 && !showForm" class="empty-state">
     <div class="empty-icon">✈️</div>
     <h3>No trips yet</h3>
-    <p>Create a trip to find a language teacher for your journey.</p>
+    <p>Create a trip to find a Vietnamese language teacher for your journey.</p>
     <button class="btn-primary" (click)="openCreate()">Create your first trip</button>
   </div>
 
@@ -68,92 +88,155 @@
     <p>No trips match the selected filters.</p>
   </div>
 
+  <!-- Trip cards -->
   <div *ngIf="!loading" class="trip-list">
     <div *ngFor="let trip of filtered" class="trip-card">
 
+      <!-- Card top: destination + badge -->
       <div class="trip-header">
         <div class="trip-destination">
           <span class="dest-icon">📍</span>
-          <h2>{{ trip.destination }}<span *ngIf="trip.specificLocation" class="specific-location"> — {{ trip.specificLocation }}</span></h2>
+          <div>
+            <h2 class="dest-name">{{ trip.destination }}</h2>
+            <span *ngIf="trip.specificLocation" class="specific-location">{{ trip.specificLocation }}</span>
+          </div>
         </div>
         <span class="status-badge" [ngClass]="statusClass(trip.status)">
           {{ statusLabel(trip.status) }}
         </span>
       </div>
 
+      <!-- Dates -->
       <div class="trip-dates">
-        <span class="date-label">{{ trip.startDate | date:'dd/MM/yyyy' }}</span>
+        <span class="date-chip">{{ trip.startDate | date:'dd/MM/yyyy' }}</span>
         <span class="date-arrow">→</span>
-        <span class="date-label">{{ trip.endDate | date:'dd/MM/yyyy' }}</span>
+        <span class="date-chip">{{ trip.endDate | date:'dd/MM/yyyy' }}</span>
       </div>
 
+      <!-- Enrolled class banner (auto-shown after confirmed payment) -->
+      <div *ngIf="trip.enrolledClassId" class="enrolled-banner">
+        <div class="enrolled-banner-left">
+          <span class="enrolled-icon">🏫</span>
+          <div>
+            <div class="enrolled-label">Enrolled in a class for this trip</div>
+            <div class="enrolled-name">{{ trip.enrolledClassName }}</div>
+          </div>
+        </div>
+        <a class="btn-view-class" [routerLink]="['/user/classdetail', trip.enrolledClassId]">View class →</a>
+      </div>
+
+      <!-- Actions -->
       <div class="trip-actions">
         <ng-container *ngIf="trip.status !== 1; else matchedActions">
-          <button class="btn-find"
+          <button class="btn-action btn-primary-action"
             (click)="findTeachers(trip.tripId)"
             [disabled]="loadingSuggestionsFor === trip.tripId">
-            <span *ngIf="loadingSuggestionsFor === trip.tripId">Searching...</span>
+            <span *ngIf="loadingSuggestionsFor === trip.tripId">🔍 Searching…</span>
             <span *ngIf="loadingSuggestionsFor !== trip.tripId">
-              {{ showSuggestionsFor === trip.tripId ? 'Hide Teachers' : 'Find Teachers' }}
+              {{ showSuggestionsFor === trip.tripId ? '🔼 Hide Teachers' : '🔍 Find Teachers' }}
             </span>
           </button>
-          <button class="btn-edit" (click)="openEdit(trip)">Edit</button>
-          <button class="btn-del" (click)="deleteTrip(trip.tripId)">Delete</button>
+          <button class="btn-action btn-classes-action"
+            (click)="viewReservedClasses(trip.tripId)"
+            [disabled]="loadingClassesFor === trip.tripId">
+            <span *ngIf="loadingClassesFor === trip.tripId">Loading…</span>
+            <span *ngIf="loadingClassesFor !== trip.tripId">
+              {{ showClassesFor === trip.tripId ? '🔼 Hide Classes' : '🏫 View Classes' }}
+            </span>
+          </button>
+          <button class="btn-action btn-edit-action" (click)="openEdit(trip)">✏️ Edit</button>
+          <button class="btn-action btn-del-action" (click)="deleteTrip(trip.tripId)">🗑 Delete</button>
         </ng-container>
         <ng-template #matchedActions>
-          <a class="btn-find" [routerLink]="['/user/profile', trip.matchedTeacherId]">
-            View Matched Teacher
+          <a class="btn-action btn-primary-action" [routerLink]="['/user/profile', trip.matchedTeacherId]">
+            👤 View Teacher
           </a>
-          <a *ngIf="trip.classId" class="btn-enroll" [routerLink]="['/user/classdetail', trip.classId]">
-            Enroll Now
+          <a *ngIf="trip.classId" class="btn-action btn-classes-action" [routerLink]="['/user/classdetail', trip.classId]">
+            🏫 Enroll Now
           </a>
         </ng-template>
       </div>
 
-      <!-- Suggested Teachers Panel -->
-      <div *ngIf="showSuggestionsFor === trip.tripId" class="suggestions-panel">
-        <h3>Matching Teachers <span class="count">({{ suggestions[trip.tripId]?.length ?? 0 }})</span></h3>
-
-        <div *ngIf="!suggestions[trip.tripId]?.length" class="no-suggestions">
-          No matching teachers found for this destination and dates.
+      <!-- Classes panel -->
+      <div *ngIf="showClassesFor === trip.tripId" class="expand-panel classes-panel">
+        <div class="panel-header">
+          <span class="panel-title">🏫 Classes created for this trip</span>
+          <span class="panel-count">{{ (reservedClasses[trip.tripId] || []).length }} class(es)</span>
         </div>
 
-        <div *ngFor="let s of suggestions[trip.tripId]" class="suggestion-card">
-          <div class="sugg-avatar-wrap">
-            <img *ngIf="s.teacherAvatarUrl"
-              [src]="'http://localhost:5108/uploads/' + s.teacherAvatarUrl"
-              class="sugg-avatar">
-            <div *ngIf="!s.teacherAvatarUrl" class="sugg-avatar placeholder">
-              {{ s.teacherName?.charAt(0) }}
+        <div *ngIf="!reservedClasses[trip.tripId]?.length" class="panel-empty">
+          No teacher has created a class for this trip yet. Check back later.
+        </div>
+
+        <div *ngFor="let cls of reservedClasses[trip.tripId]" class="class-row"
+             [class.class-row--enrolled]="cls.classId === trip.enrolledClassId">
+          <div class="class-row-avatar">
+            <img *ngIf="cls.avatarUrl" [src]="'http://localhost:5108/uploads/' + cls.avatarUrl" class="row-avatar">
+            <div *ngIf="!cls.avatarUrl" class="row-avatar placeholder">{{ cls.teacherName?.charAt(0) }}</div>
+          </div>
+          <div class="class-row-info">
+            <div class="class-row-title">
+              {{ cls.title }}
+              <span *ngIf="cls.classId === trip.enrolledClassId" class="enrolled-chip">✅ Enrolled</span>
+            </div>
+            <div class="class-row-meta">
+              <span>👤 {{ cls.teacherName }}</span>
+              <span>·</span>
+              <span>{{ cls.totalSessions }} sessions</span>
+              <span>·</span>
+              <span>{{ cls.startTime | slice:0:5 }} – {{ cls.endTime | slice:0:5 }}</span>
+            </div>
+            <div class="class-row-price">${{ cls.price | number:'1.2-2' }}</div>
+          </div>
+          <a class="btn-row-detail" [routerLink]="['/user/classdetail', cls.classId]">
+            {{ cls.classId === trip.enrolledClassId ? 'View class' : 'View detail' }} →
+          </a>
+        </div>
+      </div>
+
+      <!-- Teachers panel -->
+      <div *ngIf="showSuggestionsFor === trip.tripId" class="expand-panel teachers-panel">
+        <div class="panel-header">
+          <span class="panel-title">🔍 Matching teachers</span>
+          <span class="panel-count">{{ suggestions[trip.tripId]?.length ?? 0 }} found</span>
+        </div>
+
+        <div *ngIf="!suggestions[trip.tripId]?.length" class="panel-empty">
+          No teachers available for this destination and dates yet.
+        </div>
+
+        <div *ngFor="let s of suggestions[trip.tripId]" class="teacher-row">
+          <div class="row-avatar-wrap">
+            <img *ngIf="s.teacherAvatarUrl" [src]="'http://localhost:5108/uploads/' + s.teacherAvatarUrl" class="row-avatar">
+            <div *ngIf="!s.teacherAvatarUrl" class="row-avatar placeholder">{{ s.teacherName?.charAt(0) }}</div>
+          </div>
+          <div class="teacher-row-info">
+            <div class="teacher-row-name">{{ s.teacherName }}</div>
+            <div class="teacher-row-meta">
+              <span *ngIf="s.teacherCountry">🌍 {{ s.teacherCountry }}</span>
+              <span>📅 {{ s.availableFrom | date:'dd/MM/yyyy' }} – {{ s.availableTo | date:'dd/MM/yyyy' }}</span>
             </div>
           </div>
-          <div class="sugg-info">
-            <strong>{{ s.teacherName }}</strong>
-            <span class="sugg-country">{{ s.teacherCountry }}</span>
-            <span class="sugg-dates">Available: {{ s.availableFrom | date:'dd/MM/yyyy' }} – {{ s.availableTo | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <ng-container *ngIf="getPendingRequest(trip.tripId, s.scheduleId) as pending; else sendBtn">
-            <!-- Student sent (requestType=0) → Cancel -->
-            <ng-container *ngIf="pending.requestType === 0">
-              <button class="btn-cancel-invite" (click)="cancelInvite(pending.id, trip.tripId)">Cancel</button>
+          <div class="teacher-row-actions">
+            <ng-container *ngIf="getPendingRequest(trip.tripId, s.scheduleId) as pending; else sendBtn">
+              <ng-container *ngIf="pending.requestType === 0">
+                <button class="btn-row-cancel" (click)="cancelInvite(pending.id, trip.tripId)">✕ Cancel</button>
+              </ng-container>
+              <ng-container *ngIf="pending.requestType === 1">
+                <button class="btn-row-reject" (click)="reject(pending.id, trip.tripId)">Reject</button>
+                <button class="btn-row-accept" (click)="accept(pending.id)">✓ Accept</button>
+              </ng-container>
+              <a class="btn-row-detail" [routerLink]="['/user/profile', s.teacherId]">Profile →</a>
             </ng-container>
-            <!-- Teacher sent (requestType=1) → Reject + Accept -->
-            <ng-container *ngIf="pending.requestType === 1">
-              <button class="btn-reject" (click)="reject(pending.id, trip.tripId)">Reject</button>
-              <button class="btn-accept" (click)="accept(pending.id)">Accept</button>
-            </ng-container>
-            <a class="btn-view-detail" [routerLink]="['/user/profile', s.teacherId]">View Profile</a>
-          </ng-container>
-          <ng-template #sendBtn>
-            <div class="sugg-btn-group">
-              <button class="btn-invite"
+            <ng-template #sendBtn>
+              <button class="btn-row-invite"
                 (click)="sendInvite(s.scheduleId, trip.tripId)"
                 [disabled]="isSendingInvite(s.scheduleId, trip.tripId)">
-                {{ isSendingInvite(s.scheduleId, trip.tripId) ? 'Sending...' : 'Invite' }}
+                {{ isSendingInvite(s.scheduleId, trip.tripId) ? 'Sending…' : '✉ Invite' }}
               </button>
-              <a class="btn-view-detail" [routerLink]="['/user/profile', s.teacherId]">View profile</a>
-            </div>
-          </ng-template>
+              <a class="btn-row-detail" [routerLink]="['/user/profile', s.teacherId]">Profile →</a>
+            </ng-template>
+          </div>
         </div>
       </div>
 

@@ -413,6 +413,29 @@ namespace Backend.Mapper
     .ReverseMap();
 
             /*
+             * travel booking
+             */
+            CreateMap<TravelBooking, TravelBookingDto>()
+
+                .ForMember(
+                    dest => dest.TeacherName,
+                    opt => opt.MapFrom(src =>
+                        src.Schedule != null && src.Schedule.Teacher != null
+                            ? src.Schedule.Teacher.Name
+                            : null
+                    )
+                )
+
+                .ForMember(
+                    dest => dest.StudentName,
+                    opt => opt.MapFrom(src =>
+                        src.Trip != null && src.Trip.Student != null
+                            ? src.Trip.Student.Name
+                            : null
+                    )
+                );
+
+            /*
  * teacher schedule
  */
             CreateMap<TeacherSchedule, TeacherScheduleDto>()

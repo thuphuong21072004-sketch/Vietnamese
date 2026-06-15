@@ -19,6 +19,14 @@ namespace Backend.Repository
             GetConfirmedByScheduleId(
                 int scheduleId);
 
+        Task<List<TravelBooking>>
+            GetAllConfirmed(
+                DateOnly? from,
+                DateOnly? to);
+
+        Task<List<TravelBooking>>
+            GetConfirmedByTeacherId(int teacherId);
+
         Task<bool>
             HasConflictBooking(
                 int scheduleId,

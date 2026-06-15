@@ -101,6 +101,43 @@ namespace Backend.Repository.impl
                 .ToListAsync();
         }
 
+        public async Task<List<TravelBooking>>
+            GetAllConfirmed(
+                DateOnly? from,
+                DateOnly? to)
+        {
+            var query = _context.TravelBookings
+                .Include(x => x.Schedule)
+                    .ThenInclude(x => x.Teacher)
+                .Include(x => x.Trip)
+                    .ThenInclude(x => x.Student)
+                .Where(x => x.Status == 1)
+                .AsQueryable();
+
+            if (from.HasValue)
+                query = query.Where(x => x.CreatedAt.Date >= from.Value.ToDateTime(TimeOnly.MinValue).Date);
+
+            if (to.HasValue)
+                query = query.Where(x => x.CreatedAt.Date <= to.Value.ToDateTime(TimeOnly.MinValue).Date);
+
+            return await query
+                .OrderBy(x => x.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<TravelBooking>>
+            GetConfirmedByTeacherId(int teacherId)
+        {
+            return await _context.TravelBookings
+                .Include(x => x.Schedule)
+                    .ThenInclude(x => x.Teacher)
+                .Include(x => x.Trip)
+                    .ThenInclude(x => x.Student)
+                .Where(x => x.Status == 1 && x.Schedule!.TeacherId == teacherId)
+                .OrderBy(x => x.StartDate)
+                .ToListAsync();
+        }
+
         /*
          * kiểm tra giáo viên
          * có đang bận trong

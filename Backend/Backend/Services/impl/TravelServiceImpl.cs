@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Backend.Common;
+using Backend.Data;
 using Backend.dto;
 using Backend.Models;
 using Backend.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +35,7 @@ namespace Backend.Services.impl
             _mapper;
         private readonly TravelBookingRepository _travelBookingRepository;
         private readonly TeacherClassRepository _teacherClassRepository;
+        private readonly AppDbContext _context;
 
         public TravelServiceImpl(
             TeacherScheduleRepository teacherScheduleRepository,
@@ -42,7 +45,8 @@ namespace Backend.Services.impl
             UserContextUtil userContext,
             IMapper mapper,
             TravelBookingRepository travelBookingRepository,
-            TeacherClassRepository teacherClassRepository)
+            TeacherClassRepository teacherClassRepository,
+            AppDbContext context)
         {
             _teacherScheduleRepository =
                 teacherScheduleRepository;
@@ -63,6 +67,7 @@ namespace Backend.Services.impl
                 mapper;
             _travelBookingRepository = travelBookingRepository;
             _teacherClassRepository = teacherClassRepository;
+            _context = context;
         }
         public async Task<TeacherScheduleDto>
     CreateTeacherSchedule(
@@ -203,12 +208,12 @@ namespace Backend.Services.impl
 
             var minStart =
                 DateOnly.FromDateTime(
-                    DateTime.UtcNow.AddDays(15));
+                    DateTime.UtcNow.AddDays(30));
 
             if (dto.StartDate < minStart)
             {
                 throw new Exception(
-                    "Start date must be at least 15 days from today");
+                    "Start date must be at least 30 days from today");
             }
 
             var email =
@@ -249,6 +254,9 @@ namespace Backend.Services.impl
 
                     SpecificLocation =
                         dto.SpecificLocation,
+
+                    PhoneNumber =
+                        dto.PhoneNumber,
 
                     StartDate =
                         dto.StartDate,
@@ -324,6 +332,26 @@ namespace Backend.Services.impl
                     dto.MatchedTeacherId = req.Schedule?.TeacherId;
                     dto.MatchedTeacherName = req.Schedule?.Teacher?.Name;
                     dto.ClassId = req.ClassId;
+                }
+            }
+
+            // For FindingTeacher trips, check if student has enrolled+paid in a class reserved for each specific trip
+            var enrolledReservations = await _context.ClassEnrollments
+                .Where(e =>
+                    e.StudentId == studentId &&
+                    (e.Status == 1 || e.Status == 2 || e.Status == 3) &&
+                    e.TeacherClass!.ReservedStudentId == studentId &&
+                    e.TeacherClass.TripId.HasValue)
+                .Select(e => new { e.ClassId, e.TeacherClass!.Title, TripId = e.TeacherClass.TripId!.Value })
+                .ToListAsync();
+
+            foreach (var dto in dtos.Where(d => d.Status == 0))
+            {
+                var match = enrolledReservations.FirstOrDefault(c => c.TripId == dto.TripId);
+                if (match != null)
+                {
+                    dto.EnrolledClassId = match.ClassId;
+                    dto.EnrolledClassName = match.Title;
                 }
             }
 
@@ -832,6 +860,42 @@ namespace Backend.Services.impl
 
             return _mapper.Map<List<StudentTripDto>>(available);
         }
+
+        public async Task<List<StudentTripDto>> GetOpenStudentTrips(string? destination)
+        {
+            var trips = await _studentTripRepository.GetAllOpen(destination);
+            var dtos = _mapper.Map<List<StudentTripDto>>(trips);
+
+            if (dtos.Count > 0)
+            {
+                var tripIds = dtos.Select(d => d.TripId).ToList();
+                // Flag HasEnrolledInClass per trip: student confirmed enrollment in a class
+                // reserved specifically for that trip (TripId matches)
+                var enrolledTripIds = await _context.ClassEnrollments
+                    .Where(e =>
+                        (e.Status == 1 || e.Status == 2 || e.Status == 3) &&
+                        e.TeacherClass!.TripId.HasValue &&
+                        tripIds.Contains(e.TeacherClass.TripId!.Value))
+                    .Select(e => e.TeacherClass!.TripId!.Value)
+                    .Distinct()
+                    .ToListAsync();
+
+                var enrolledTripSet = enrolledTripIds.ToHashSet();
+                foreach (var dto in dtos)
+                    dto.HasEnrolledInClass = enrolledTripSet.Contains(dto.TripId);
+            }
+
+            return dtos;
+        }
+
+        public async Task<List<TravelBookingDto>> GetMyConfirmedBookings()
+        {
+            var email = _userContext.GetEmail();
+            int teacherId = (await _userRepository.GetUserIdByEmail(email)).Value;
+            var bookings = await _travelBookingRepository.GetConfirmedByTeacherId(teacherId);
+            return _mapper.Map<List<TravelBookingDto>>(bookings);
+        }
+
         public async Task<List<MatchRequestDto>> GetIncomingRequests()
         {
             var email = _userContext.GetEmail();
@@ -1126,6 +1190,9 @@ namespace Backend.Services.impl
             trip.SpecificLocation =
                 dto.SpecificLocation;
 
+            trip.PhoneNumber =
+                dto.PhoneNumber;
+
             trip.StartDate =
                 dto.StartDate;
 
@@ -1354,6 +1421,151 @@ namespace Backend.Services.impl
             teacherClass.ReservedStudentId = request.Trip!.StudentId;
 
             await _matchRequestRepository.Save();
+        }
+
+        public async Task<Dictionary<int, int>> GetMyReservedClassMap()
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email)).Value;
+
+            // Map tripId → classId so each trip shows the correct class
+            var rows = await _context.TeacherClasses
+                .Where(c =>
+                    c.TeacherProfile!.UserId == userId &&
+                    c.ReservedStudentId.HasValue &&
+                    c.TripId.HasValue)
+                .Select(c => new { c.ClassId, c.TripId })
+                .ToListAsync();
+
+            return rows.ToDictionary(c => c.TripId!.Value, c => c.ClassId);
+        }
+
+        public async Task ReserveTripInClass(int tripId, int classId)
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email)).Value;
+
+            var trip = await _studentTripRepository.GetById(tripId)
+                ?? throw new Exception("Trip not found");
+
+            var cls = await _teacherClassRepository.GetByIdAsync(classId)
+                ?? throw new Exception("Class not found");
+
+            if (cls.TeacherProfile?.UserId != userId)
+                throw new Exception("No permission");
+
+            if (cls.CurrentStudents >= cls.MaxStudents)
+                throw new Exception("Class is full");
+
+            // One teacher can only reserve one class per trip
+            var existing = await _context.TeacherClasses
+                .FirstOrDefaultAsync(c =>
+                    c.TeacherProfile!.UserId == userId &&
+                    c.TripId == tripId);
+            if (existing != null)
+                throw new Exception("You already created a class for this trip");
+
+            cls.ReservedStudentId = trip.StudentId;
+            cls.TripId = tripId;
+            await _teacherClassRepository.UpdateAsync(cls);
+            await _teacherClassRepository.SaveChangesAsync();
+        }
+
+        public async Task<List<TeacherClassDto>> GetReservedClassesForTrip(int tripId)
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email)).Value;
+
+            var trip = await _studentTripRepository.GetById(tripId)
+                ?? throw new Exception("Trip not found");
+
+            if (trip.StudentId != userId)
+                throw new Exception("No permission");
+
+            // Return ALL classes reserved for this specific trip so student can browse and enroll
+            var classes = await _context.TeacherClasses
+                .Include(c => c.TeacherProfile).ThenInclude(c => c!.User)
+                .Include(c => c.ClassScheduleDays)
+                .Where(c => c.TripId == tripId && c.ReservedStudentId == userId && c.Status == 1)
+                .OrderBy(c => c.StartDate)
+                .ToListAsync();
+
+            return _mapper.Map<List<TeacherClassDto>>(classes);
+        }
+
+        public async Task ChooseClassForTrip(int tripId, int classId)
+        {
+            var email = _userContext.GetEmail();
+            int userId = (await _userRepository.GetUserIdByEmail(email)).Value;
+
+            var trip = await _studentTripRepository.GetById(tripId)
+                ?? throw new Exception("Trip not found");
+
+            if (trip.StudentId != userId)
+                throw new Exception("No permission");
+
+            if (trip.Status != StudentTripStatus.FindingTeacher)
+                throw new Exception("Trip already matched");
+
+            var chosenClass = await _teacherClassRepository.GetByIdAsync(classId)
+                ?? throw new Exception("Class not found");
+
+            if (chosenClass.ReservedStudentId != userId)
+                throw new Exception("No reservation for this class");
+
+            // Enroll student in chosen class
+            var enrollment = new ClassEnrollment
+            {
+                ClassId = classId,
+                StudentId = userId,
+                Status = 1,
+                EnrolledDate = DateTime.UtcNow,
+            };
+            await _context.ClassEnrollments.AddAsync(enrollment);
+            chosenClass.CurrentStudents += 1;
+            chosenClass.ReservedStudentId = null;
+            await _teacherClassRepository.UpdateAsync(chosenClass);
+
+            // Release reservations from all other classes that reserved a spot for this student
+            var otherClasses = await _teacherClassRepository.GetByReservedStudentIdAsync(userId);
+            foreach (var cls in otherClasses)
+            {
+                if (cls.ClassId != classId)
+                {
+                    cls.ReservedStudentId = null;
+                    await _teacherClassRepository.UpdateAsync(cls);
+                }
+            }
+
+            // Mark trip as Matched
+            trip.Status = StudentTripStatus.Matched;
+            await _studentTripRepository.Update(trip);
+
+            await _teacherClassRepository.SaveChangesAsync();
+        }
+
+        public async Task<List<TravelBookingAdminDto>> GetAllBookingsForAdmin(DateOnly? from, DateOnly? to)
+        {
+            var bookings = await _travelBookingRepository.GetAllConfirmed(from, to);
+
+            return bookings.Select(b => new TravelBookingAdminDto
+            {
+                TravelBookingId = b.TravelBookingId,
+                Destination     = b.Destination,
+                SpecificLocation = b.Trip?.SpecificLocation,
+                StartDate       = b.StartDate,
+                EndDate         = b.EndDate,
+                Status          = b.Status,
+                CreatedAt       = b.CreatedAt,
+                TeacherName     = b.Schedule?.Teacher?.Name ?? "",
+                TeacherEmail    = b.Schedule?.Teacher?.Email,
+                TeacherPhone    = b.Schedule?.Teacher?.PhoneNumber,
+                TeacherCountry  = b.Schedule?.Teacher?.Country,
+                StudentName     = b.Trip?.Student?.Name ?? "",
+                StudentPhone    = b.Trip?.PhoneNumber,
+                StudentEmail    = b.Trip?.Student?.Email,
+                StudentCountry  = b.Trip?.Student?.Country,
+            }).ToList();
         }
 
     }

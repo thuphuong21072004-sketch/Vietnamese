@@ -1,0 +1,131 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Students Looking for a Teacher</h1>
+      <p class="subtitle">Students who haven't found a travel companion yet — invite them if your schedule matches.</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Destination</label>
+      <input type="text" [(ngModel)]="filterDestination" placeholder="e.g. Hà Nội, Đà Nẵng…" class="filter-input">
+    </div>
+    <button class="btn-search" (click)="load()">🔍 Search</button>
+    <button *ngIf="filterDestination" class="btn-clear" (click)="clearFilter()">✕ Clear</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="empty-state">
+    <div class="spinner"></div>
+    <p>Loading…</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && trips.length === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <p>No open student trips found{{ filterDestination ? ' for "' + filterDestination + '"' : '' }}.</p>
+  </div>
+
+  <!-- Summary -->
+  <div *ngIf="!loading && trips.length > 0" class="summary-bar">
+    <span class="total-count">{{ trips.length }} trip{{ trips.length !== 1 ? 's' : '' }} looking for a teacher</span>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading" class="trip-grid">
+    <div *ngFor="let trip of trips" class="trip-card">
+
+      <!-- Student info -->
+      <div class="card-header">
+        <div class="avatar-wrap">
+          <img *ngIf="trip.studentAvatarUrl"
+               [src]="'http://localhost:5108/uploads/' + trip.studentAvatarUrl"
+               class="avatar">
+          <div *ngIf="!trip.studentAvatarUrl" class="avatar placeholder">
+            {{ trip.studentName?.charAt(0) }}
+          </div>
+        </div>
+        <div class="student-info">
+          <div class="student-name">{{ trip.studentName }}</div>
+          <div *ngIf="trip.studentCountry" class="student-country">🌍 {{ trip.studentCountry }}</div>
+        </div>
+        <span *ngIf="!trip.hasEnrolledInClass" class="badge badge-finding">Finding teacher</span>
+        <span *ngIf="trip.hasEnrolledInClass"  class="badge badge-enrolled">Enrolled in class</span>
+      </div>
+
+      <!-- Trip details -->
+      <div class="card-body">
+        <div class="dest-row">
+          <span class="dest-icon">📍</span>
+          <span class="dest-name">{{ trip.destination }}</span>
+        </div>
+        <div *ngIf="trip.specificLocation" class="specific-loc">{{ trip.specificLocation }}</div>
+        <div class="dates-row">
+          <span class="date-chip">{{ formatDate(trip.startDate) }}</span>
+          <span class="arrow">→</span>
+          <span class="date-chip">{{ formatDate(trip.endDate) }}</span>
+        </div>
+        <div class="posted-at">Posted {{ formatDate(trip.createdAt) }}</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-footer">
+
+        <!-- Already sent invite -->
+        <ng-container *ngIf="sentRequest(trip) as req">
+          <div class="invite-sent-row">
+            <span class="badge badge-sent">✉ Invite sent</span>
+            <button class="btn-cancel-sm" (click)="cancelInvite(req.matchRequestId)">Cancel</button>
+          </div>
+        </ng-container>
+
+        <!-- Not sent yet -->
+        <ng-container *ngIf="!sentRequest(trip)">
+
+          <!-- Student already enrolled → no actions -->
+          <ng-container *ngIf="trip.hasEnrolledInClass">
+            <p class="enrolled-notice">✅ Student already enrolled in a class</p>
+          </ng-container>
+
+          <!-- Student still looking -->
+          <ng-container *ngIf="!trip.hasEnrolledInClass">
+
+            <!-- Schedule matches -->
+            <ng-container *ngIf="matchingSchedule(trip) as sched">
+              <div class="match-hint">
+                ✅ Your schedule matches
+                <span class="match-dates">({{ sched.availableFrom | date:'dd/MM/yyyy' }} – {{ sched.availableTo | date:'dd/MM/yyyy' }})</span>
+              </div>
+              <button class="btn-invite"
+                      (click)="sendInvite(trip)"
+                      [disabled]="sendingTripId === trip.tripId">
+                {{ sendingTripId === trip.tripId ? 'Sending…' : '✉ Send Invite' }}
+              </button>
+            </ng-container>
+
+            <!-- No matching schedule -->
+            <p *ngIf="!matchingSchedule(trip)" class="no-match">No matching schedule for this destination & dates</p>
+
+            <!-- View Class / Create Class -->
+            <ng-container *ngIf="myReservedByTrip[trip.tripId]; else createBtn">
+              <a class="btn-view-class" [routerLink]="['/teacher/detail', myReservedByTrip[trip.tripId]]">
+                🏫 View my class
+              </a>
+            </ng-container>
+            <ng-template #createBtn>
+              <button *ngIf="canCreateClass(trip)" class="btn-create-class" (click)="createClass(trip)">
+                🏫 Create class for this trip
+              </button>
+            </ng-template>
+
+          </ng-container>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+
+</div>

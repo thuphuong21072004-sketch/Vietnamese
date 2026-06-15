@@ -49,6 +49,8 @@ import { UserTravelHomeComponent } from './features/pages/ViewUser/Travel/Travel
 import { MySchedulesComponent } from './features/pages/ViewAdmin/Travel/MySchedules/my-schedules.component'
 import { TeacherTravelRequestsComponent } from './features/pages/ViewAdmin/Travel/TravelRequests/travel-requests.component'
 import { TeacherTravelHomeComponent } from './features/pages/ViewAdmin/Travel/TravelHome/travel-home.component'
+import { TravelBookingsListComponent } from './features/pages/ViewAdmin/Travel/TravelBookingsList/travel-bookings-list.component'
+import { StudentTripsBrowseComponent } from './features/pages/ViewAdmin/Travel/StudentTripsBrowse/student-trips-browse.component'
 import { UserPublicProfileComponent } from './features/pages/ViewUser/UserPublicProfile/user-public-profile.component'
 
 export const routes: Routes = [
@@ -114,6 +116,9 @@ export const routes: Routes = [
   { path: 'teacher/travel', component: TeacherTravelHomeComponent },
   { path: 'teacher/travel/schedules', component: MySchedulesComponent },
   { path: 'teacher/travel/requests', component: TeacherTravelRequestsComponent },
+  { path: 'teacher/travel/open-trips', component: StudentTripsBrowseComponent },
+
+  { path: 'admin/travel/bookings', component: TravelBookingsListComponent },
 
   { path: 'user/profile/:id', component: UserPublicProfileComponent },
 ];

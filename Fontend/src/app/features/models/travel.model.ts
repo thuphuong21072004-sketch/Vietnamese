@@ -17,6 +17,7 @@ export interface StudentTripDto {
   studentId: number;
   destination: string;
   specificLocation?: string;
+  phoneNumber?: string;
   startDate: string;
   endDate: string;
   status: number;
@@ -27,6 +28,27 @@ export interface StudentTripDto {
   matchedTeacherId?: number;
   matchedTeacherName?: string;
   classId?: number;
+  hasEnrolledInClass?: boolean;
+  enrolledClassId?: number;
+  enrolledClassName?: string;
+}
+
+export interface TravelBookingAdminDto {
+  travelBookingId: number;
+  destination: string;
+  specificLocation?: string;
+  startDate: string;
+  endDate: string;
+  status: number;
+  createdAt: string;
+  teacherName: string;
+  teacherEmail?: string;
+  teacherPhone?: string;
+  teacherCountry?: string;
+  studentName: string;
+  studentPhone?: string;
+  studentEmail?: string;
+  studentCountry?: string;
 }
 
 export interface MatchRequestDto {

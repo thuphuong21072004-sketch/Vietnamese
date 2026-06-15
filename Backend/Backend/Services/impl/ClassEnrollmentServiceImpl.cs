@@ -197,6 +197,21 @@ namespace Backend.Services.impl
 
             await _enrollmentRepository.CreateAsync(enrollment);
 
+            // If this class reserved a slot for this student, release other reservations for the SAME trip only
+            if (teacherClass.ReservedStudentId == userId)
+            {
+                var allReserved = await _teacherClassRepository.GetByReservedStudentIdAsync(userId);
+                foreach (var cls in allReserved)
+                {
+                    if (cls.ClassId == classId) continue; // keep the enrolled class's reservation
+                    if (cls.TripId != teacherClass.TripId) continue; // don't touch other trips
+                    cls.ReservedStudentId = null;
+                    cls.TripId = null;
+                    await _teacherClassRepository.UpdateAsync(cls);
+                }
+                await _teacherClassRepository.SaveChangesAsync();
+            }
+
             return (enrollment.EnrollmentId, enrollment.Status);
         }
         public async Task CancelAsync( int enrollmentId)
@@ -290,8 +305,34 @@ namespace Backend.Services.impl
                     .GetStudentEnrollmentsAsync(
                         userId);
 
-            await Task.WhenAll(
-                enrollments.Select(e => AutoUpdateStatus(e)));
+            // Only process non-terminal enrollments
+            var active = enrollments
+                .Where(e => e.Status == StatusBooking.PendingPayment
+                         || e.Status == StatusBooking.Confirmed
+                         || e.Status == StatusBooking.InProgress)
+                .ToList();
+
+            if (active.Any())
+            {
+                // Batch-load payments for all PendingPayment enrollments in one query
+                var pendingIds = active
+                    .Where(e => e.Status == StatusBooking.PendingPayment)
+                    .Select(e => e.EnrollmentId)
+                    .ToList();
+
+                var paymentMap = pendingIds.Any()
+                    ? await _paymentRepository.GetLatestByRefs(RefName.Class, pendingIds)
+                    : new Dictionary<int, Payment>();
+
+                bool anyChanged = false;
+                var now = DateTime.UtcNow;
+
+                foreach (var e in active)
+                    anyChanged |= ApplyAutoStatus(e, paymentMap, now);
+
+                if (anyChanged)
+                    await _enrollmentRepository.SaveChangesAsync();
+            }
 
             var completedClassIds = enrollments
                 .Where(e => e.Status == StatusBooking.Completed)
@@ -616,120 +657,76 @@ namespace Backend.Services.impl
                 .ToList();
         }
 
+        // Batch-friendly: mutates entity only, caller saves once at the end
+        private bool ApplyAutoStatus(
+            ClassEnrollment enrollment,
+            Dictionary<int, Payment> paymentMap,
+            DateTime now)
+        {
+            if (enrollment.TeacherClass == null) return false;
+
+            if (enrollment.Status == StatusBooking.PendingPayment)
+            {
+                paymentMap.TryGetValue(enrollment.EnrollmentId, out var payment);
+                if (payment != null
+                    && (payment.Status == StatusPayment.Pending || payment.Status == StatusPayment.Failed)
+                    && payment.CreatedDate.AddMinutes(15) <= now)
+                {
+                    payment.Status = StatusPayment.Expired;
+                    enrollment.Status = StatusBooking.Cancelled;
+                    return true;
+                }
+                return false;
+            }
+
+            var sessions = enrollment.TeacherClass.ClassSessions
+                .OrderBy(x => x.StudyDate).ThenBy(x => x.StartTime).ToList();
+
+            if (!sessions.Any()) return false;
+
+            var firstStart = sessions.First().StudyDate.ToDateTime(
+                TimeOnly.FromTimeSpan(sessions.First().StartTime));
+            var lastEnd = sessions.Last().StudyDate.ToDateTime(
+                TimeOnly.FromTimeSpan(sessions.Last().EndTime));
+
+            if (enrollment.Status == StatusBooking.Confirmed && now >= firstStart && now < lastEnd)
+            {
+                enrollment.Status = StatusBooking.InProgress;
+                return true;
+            }
+
+            if ((enrollment.Status == StatusBooking.Confirmed
+                 || enrollment.Status == StatusBooking.InProgress)
+                && now >= lastEnd)
+            {
+                enrollment.Status = StatusBooking.Completed;
+                return true;
+            }
+
+            return false;
+        }
+
+        // Single-enrollment version (used by GetDetailAsync)
         private async Task AutoUpdateStatus( ClassEnrollment enrollment)
         {
-            if (enrollment.TeacherClass == null)
+            if (enrollment.TeacherClass == null) return;
+
+            if (enrollment.Status == StatusBooking.Completed
+                || enrollment.Status == StatusBooking.Cancelled) return;
+
+            var payment = enrollment.Status == StatusBooking.PendingPayment
+                ? await _paymentRepository.GetByRef(RefName.Class, enrollment.EnrollmentId)
+                : null;
+
+            bool changed = ApplyAutoStatus(enrollment, payment != null
+                ? new Dictionary<int, Payment> { [enrollment.EnrollmentId] = payment }
+                : new Dictionary<int, Payment>(), DateTime.UtcNow);
+
+            if (changed)
             {
-                return;
-            }
-            if (
-    enrollment.Status ==
-    StatusBooking.PendingPayment
-)
-            {
-                var payment =
-                    await _paymentRepository
-                        .GetByRef(
-                            RefName.Class,
-                            enrollment.EnrollmentId);
-
-                if (
-                    payment != null
-                    &&
-                    (
-                        payment.Status ==
-                        StatusPayment.Pending
-                        ||
-                        payment.Status ==
-                        StatusPayment.Failed
-                    )
-                    &&
-                    payment.CreatedDate
-                        .AddMinutes(15)
-                    <= DateTime.UtcNow
-                )
-                {
-                    payment.Status =
-                        StatusPayment.Expired;
-
-                    enrollment.Status =
-                        StatusBooking.Cancelled;
-
-                    await _paymentRepository
-                        .Update(payment);
-
-                    await _paymentRepository
-                        .Save();
-
-                    await _enrollmentRepository
-                        .UpdateAsync(
-                            enrollment);
-
-                    return;
-                }
-            }
-
-            var sessions =
-                enrollment.TeacherClass.ClassSessions
-                    .OrderBy(x => x.StudyDate)
-                    .ThenBy(x => x.StartTime)
-                    .ToList();
-
-            if (!sessions.Any())
-            {
-                return;
-            }
-
-            var firstSession = sessions.First();
-
-            var lastSession = sessions.Last();
-
-            var firstStart =
-                firstSession.StudyDate
-                    .ToDateTime(
-                        TimeOnly.FromTimeSpan(
-                            firstSession.StartTime));
-
-            var lastEnd =
-                lastSession.StudyDate
-                    .ToDateTime(
-                        TimeOnly.FromTimeSpan(
-                            lastSession.EndTime));
-
-            var now = DateTime.UtcNow;
-
-            if (
-                enrollment.Status == StatusBooking.Confirmed
-                &&
-                now >= firstStart
-                &&
-                now < lastEnd
-            )
-            {
-                enrollment.Status =
-                    StatusBooking.InProgress;
-
-                await _enrollmentRepository
-                    .UpdateAsync(enrollment);
-
-                return;
-            }
-
-            if (
-                (
-                    enrollment.Status == StatusBooking.Confirmed
-                    ||
-                    enrollment.Status == StatusBooking.InProgress
-                )
-                &&
-                now >= lastEnd
-            )
-            {
-                enrollment.Status =
-                    StatusBooking.Completed;
-
-                await _enrollmentRepository
-                    .UpdateAsync(enrollment);
+                if (payment?.Status == StatusPayment.Expired)
+                    await _paymentRepository.Save();
+                await _enrollmentRepository.UpdateAsync(enrollment);
             }
         }
 

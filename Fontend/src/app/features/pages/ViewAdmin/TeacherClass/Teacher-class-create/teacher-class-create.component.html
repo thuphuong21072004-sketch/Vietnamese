@@ -169,6 +169,7 @@
   </div>
 
   <button
+    type="button"
     class="generate-btn"
     (click)="generateSchedule()">
 
@@ -228,13 +229,25 @@
 
     </table>
 
-    <button
-      class="save-btn"
-      (click)="saveClass()">
+    <div *ngIf="travelDeadlineError" class="travel-deadline-error">
+      ⚠️ {{ travelDeadlineError }}
+    </div>
 
-      Save Class
+    <ng-container *ngIf="!travelDeadlineError; else disabledSaveBtn">
+      <button
+        type="button"
+        class="save-btn"
+        (click)="saveClass()"
+        [disabled]="loading">
+        Save Class
+      </button>
+    </ng-container>
 
-    </button>
+    <ng-template #disabledSaveBtn>
+      <button type="button" class="save-btn" disabled>
+        Save Class
+      </button>
+    </ng-template>
 
   </div>
 
