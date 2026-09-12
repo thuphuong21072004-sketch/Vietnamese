@@ -672,7 +672,7 @@ export class QuizLearnComponent implements OnInit, OnDestroy {
 
     let endTime = localStorage.getItem(storageKey);
 
-    if (!endTime) {
+    if (!endTime || +endTime <= Date.now()) {
       endTime = String(Date.now() + duration);
 
       localStorage.setItem(storageKey, endTime);

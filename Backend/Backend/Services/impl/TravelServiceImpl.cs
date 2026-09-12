@@ -335,7 +335,8 @@ namespace Backend.Services.impl
                 }
             }
 
-            // For FindingTeacher trips, check if student has enrolled+paid in a class reserved for each specific trip
+            // Check if student has enrolled+paid in a class reserved for each specific trip
+            // (applies whether the trip is still FindingTeacher or already Matched)
             var enrolledReservations = await _context.ClassEnrollments
                 .Where(e =>
                     e.StudentId == studentId &&
@@ -345,7 +346,7 @@ namespace Backend.Services.impl
                 .Select(e => new { e.ClassId, e.TeacherClass!.Title, TripId = e.TeacherClass.TripId!.Value })
                 .ToListAsync();
 
-            foreach (var dto in dtos.Where(d => d.Status == 0))
+            foreach (var dto in dtos)
             {
                 var match = enrolledReservations.FirstOrDefault(c => c.TripId == dto.TripId);
                 if (match != null)
@@ -1419,6 +1420,7 @@ namespace Backend.Services.impl
 
             request.ClassId = classId;
             teacherClass.ReservedStudentId = request.Trip!.StudentId;
+            teacherClass.TripId = request.TripId;
 
             await _matchRequestRepository.Save();
         }

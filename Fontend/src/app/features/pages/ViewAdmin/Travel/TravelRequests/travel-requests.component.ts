@@ -41,8 +41,8 @@ export class TeacherTravelRequestsComponent implements OnInit {
     this.loadAll();
   }
 
-  loadAll(): void {
-    this.loading = true;
+  loadAll(silent = false): void {
+    if (!silent) this.loading = true;
     Promise.all([
       this.travelService.getIncomingRequests().toPromise(),
       this.travelService.getOutgoingRequests().toPromise(),
@@ -66,21 +66,21 @@ export class TeacherTravelRequestsComponent implements OnInit {
 
   accept(id: number): void {
     this.travelService.acceptRequest(id).subscribe({
-      next: () => this.loadAll(),
+      next: () => this.loadAll(true),
       error: (err) => alert(err.error?.message || 'Failed'),
     });
   }
 
   reject(id: number): void {
     this.travelService.rejectRequest(id).subscribe({
-      next: () => this.loadAll(),
+      next: () => this.loadAll(true),
       error: (err) => alert(err.error?.message || 'Failed'),
     });
   }
 
   cancel(id: number): void {
     this.travelService.cancelRequest(id).subscribe({
-      next: () => this.loadAll(),
+      next: () => this.loadAll(true),
       error: (err) => alert(err.error?.message || 'Failed'),
     });
   }

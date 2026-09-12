@@ -4,7 +4,7 @@ import {
   HttpHeaders
 } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { TeacherClassDto, ClassSessionDto} from '../models/teacher-class.model';
 import { ClassFilterDto } from '../models/class-filter.model';
@@ -82,9 +82,17 @@ export class TeacherClassService {
     );
   }
   getCountries() {
-    return this.http.get<any[]>(
-      'https://restcountries.com/v3.1/all?fields=name',
-    );
+    const names = [
+      'Vietnam','United States','United Kingdom','Australia','Canada','France',
+      'Germany','Japan','South Korea','China','Singapore','Thailand','Malaysia',
+      'Indonesia','Philippines','India','Russia','Italy','Spain','Netherlands',
+      'Sweden','Norway','Denmark','Finland','Switzerland','Austria','Belgium',
+      'Portugal','Poland','Czech Republic','Hungary','Romania','Ukraine',
+      'Turkey','Saudi Arabia','United Arab Emirates','Israel','Egypt','Brazil',
+      'Argentina','Mexico','Colombia','Chile','New Zealand','South Africa',
+      'Nigeria','Kenya','Ghana','Pakistan','Bangladesh',
+    ];
+    return of(names.map(n => ({ name: { common: n } })));
   }
   deleteClass(classId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${classId}`, this.getOptions());

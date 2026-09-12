@@ -151,7 +151,7 @@
           <a class="btn-action btn-primary-action" [routerLink]="['/user/profile', trip.matchedTeacherId]">
             👤 View Teacher
           </a>
-          <a *ngIf="trip.classId" class="btn-action btn-classes-action" [routerLink]="['/user/classdetail', trip.classId]">
+          <a *ngIf="trip.classId && trip.classId !== trip.enrolledClassId" class="btn-action btn-classes-action" [routerLink]="['/user/classdetail', trip.classId]">
             🏫 Enroll Now
           </a>
         </ng-template>
