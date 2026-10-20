@@ -3,3 +3,6 @@ torch
 torchaudio
 transformers
 librosa
+flask
+youtube_transcript_api
+requests

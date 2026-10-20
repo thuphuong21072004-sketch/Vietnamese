@@ -36,6 +36,13 @@ export class LoginComponent {
 
     this.api.login(data).subscribe({
       next: (res: any) => {
+        // Backend trả về null khi sai email hoặc mật khẩu
+        if (!res?.token) {
+          alert('Sai email hoặc mật khẩu');
+
+          return;
+        }
+
         localStorage.setItem('token', res.token);
 
         this.router.navigate(['/home']).then(() => {

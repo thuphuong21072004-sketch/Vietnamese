@@ -188,3 +188,5 @@ PublishProfiles/
 *.Publish.xml
 *.pubxml.user
 .claude/skills/
+
+.models/

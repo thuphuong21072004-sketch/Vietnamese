@@ -200,4 +200,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Ảnh trong uploads bị thiếu (vd. chuyển máy nhưng không chép thư mục) -> trả avatar mặc định thay vì 404
+// (endpoint này khớp trước UseStaticFiles nên phải tự trả file thật khi có)
+var uploadContentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+app.MapGet("/uploads/{**file}", (string file, IWebHostEnvironment env) =>
+{
+    var uploadsRoot = Path.GetFullPath(Path.Combine(env.WebRootPath, "uploads"));
+    var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, file));
+
+    if (fullPath.StartsWith(uploadsRoot + Path.DirectorySeparatorChar) && File.Exists(fullPath))
+    {
+        uploadContentTypes.TryGetContentType(fullPath, out var contentType);
+        return Results.File(fullPath, contentType ?? "application/octet-stream");
+    }
+
+    return Results.File(
+        Path.Combine(env.WebRootPath, "images", "default-avatar.svg"),
+        "image/svg+xml");
+});
+
 app.Run();
