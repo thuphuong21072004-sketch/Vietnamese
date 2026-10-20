@@ -2,7 +2,12 @@
 
   <div class="dashboard-header">
     <h2>Student Dashboard</h2>
-    <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" />
+    <div class="period-controls">
+      <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" [disabled]="allTime" />
+      <label class="all-time">
+        <input type="checkbox" [(ngModel)]="allTime" (change)="loadData()" /> All time
+      </label>
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading-row">Loading...</div>
@@ -14,7 +19,7 @@
       <div class="stat-card">
         <div class="stat-title">Total Paid</div>
         <div class="stat-value money">{{ stats.totalPaid | currency:'USD':'symbol':'1.2-2' }}</div>
-        <div class="stat-subtitle">{{ year }}/{{ month < 10 ? '0'+month : month }}</div>
+        <div class="stat-subtitle">{{ periodLabel }}</div>
       </div>
 
       <div class="stat-card green">
@@ -41,6 +46,61 @@
         <div class="stat-subtitle">Returned to you</div>
       </div>
 
+    </div>
+
+    <!-- Tổng hợp khóa học (lớp nhóm) -->
+    <div class="stats-grid">
+      <div class="stat-card purple">
+        <div class="stat-title">My Courses</div>
+        <div class="stat-value">{{ stats.courseCount }}</div>
+        <div class="stat-subtitle">Group classes paid in {{ periodLabel }}</div>
+      </div>
+
+      <div class="stat-card purple">
+        <div class="stat-title">Spent on Courses</div>
+        <div class="stat-value money">{{ stats.courseTotal | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">Excluding cancelled / refunded</div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="section-header">
+        <h3>My Courses</h3>
+        <span class="section-note">Group classes — payments in {{ periodLabel }}</span>
+      </div>
+      <div class="table-wrapper" *ngIf="stats.courses.length > 0; else noCourses">
+        <table class="payment-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Teacher</th>
+              <th>Status</th>
+              <th>Paid On</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of stats.courses">
+              <td><strong>{{ c.title }}</strong></td>
+              <td>{{ c.teacherName }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="courseStatus(c).toLowerCase()">{{ courseStatus(c) }}</span>
+              </td>
+              <td>{{ c.paidAt | date:'dd/MM/yyyy' }}</td>
+              <td class="money-cell">{{ c.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="4">Total ({{ stats.courseCount }} courses)</td>
+              <td class="money-cell">{{ stats.courseTotal | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <ng-template #noCourses>
+        <div class="empty-state">No group class payments in {{ periodLabel }}.</div>
+      </ng-template>
     </div>
 
     <div class="history-section" *ngIf="stats.monthlyBreakdown.length > 0">

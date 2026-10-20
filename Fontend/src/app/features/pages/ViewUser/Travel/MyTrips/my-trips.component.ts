@@ -7,6 +7,7 @@ import { TravelService } from '../../../../services/travel.service';
 import { StudentTripDto, TeacherScheduleDto } from '../../../../models/travel.model';
 import { TeacherClassDto } from '../../../../models/teacher-class.model';
 import { VIETNAM_DESTINATIONS, DestinationGroup } from '../../../../models/vietnam-destinations';
+import { vnDateString } from '../../../../../core/utils/vn-time';
 
 @Component({
   selector: 'app-my-trips',
@@ -32,10 +33,9 @@ export class MyTripsComponent implements OnInit {
     return this.destinationGroups.find(g => g.province === this.selectedProvince)?.spots ?? [];
   }
 
+  // backend yêu cầu ngày bắt đầu >= hôm nay (lịch VN) + 30 ngày
   get minStartDate(): string {
-    const d = new Date();
-    d.setDate(d.getDate() + 30);
-    return d.toISOString().split('T')[0];
+    return vnDateString(30);
   }
 
   onProvinceChange(): void {
@@ -118,12 +118,8 @@ export class MyTripsComponent implements OnInit {
       alert('Start date must be before end date');
       return;
     }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const minStart = new Date(today);
-    minStart.setDate(minStart.getDate() + 30);
-    const start = new Date(this.form.startDate);
-    if (start < minStart) {
+    // so sánh chuỗi "yyyy-MM-dd" theo lịch VN, cùng quy tắc với backend
+    if (this.form.startDate.substring(0, 10) < this.minStartDate) {
       alert('Start date must be at least 30 days from today');
       return;
     }

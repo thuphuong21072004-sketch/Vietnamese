@@ -16,6 +16,9 @@ import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
 import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 import { ReviewService } from '../../../../services/review.service';
+import { TeacherProfileService } from '../../../../services/teacherProfile.service';
+
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
 
 @Component({
   selector: 'app-teacher-class-detail',
@@ -31,6 +34,15 @@ export class TeacherClassDetailComponent implements OnInit {
 
   teacherClass?: TeacherClassDto;
 
+  // hồ sơ giáo viên của người đang xem — chỉ chủ lớp mới thấy nút sửa / xoá
+  myTeacherProfileId: number | null = null;
+
+  get isOwner(): boolean {
+    return !!this.teacherClass
+      && this.myTeacherProfileId !== null
+      && this.teacherClass.teacherProfileId === this.myTeacherProfileId;
+  }
+
   constructor(
     private route: ActivatedRoute,
 
@@ -43,6 +55,8 @@ export class TeacherClassDetailComponent implements OnInit {
     private baseService: BaseService,
 
     private reviewService: ReviewService,
+
+    private teacherProfileService: TeacherProfileService,
   ) {}
   students: ClassEnrollmentDto[] = [];
 
@@ -64,6 +78,15 @@ export class TeacherClassDetailComponent implements OnInit {
     }
 
     this.loadClassDetail();
+
+    this.teacherProfileService.getMyProfile().subscribe({
+      next: (profile) => {
+        this.myTeacherProfileId = profile?.teacherProfileId ?? null;
+      },
+      error: () => {
+        this.myTeacherProfileId = null;
+      },
+    });
 
     this.loadStudents();
 
@@ -111,7 +134,7 @@ export class TeacherClassDetailComponent implements OnInit {
   }
 
   isPastSession(session: ClassSessionDto): boolean {
-    const start = new Date(`${session.studyDate}T${session.startTime}`);
+    const start = vnSessionTime(session.studyDate, session.startTime);
     return new Date() > start;
   }
 

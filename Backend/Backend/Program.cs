@@ -44,7 +44,9 @@ builder.Services.AddCors(options =>
         policy => policy
             .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            // header X-Timezone-Offset làm mọi request cần preflight → cho trình duyệt cache kết quả OPTIONS
+            .SetPreflightMaxAge(TimeSpan.FromHours(2)));
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -188,6 +190,7 @@ var app = builder.Build();
 
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<UserTimeZoneMiddleware>();
 
 app.UseCors("AllowAngular");
 app.UseStaticFiles();

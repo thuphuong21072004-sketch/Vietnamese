@@ -260,7 +260,8 @@ namespace Backend.Services.impl
             TimeOnly.FromTimeSpan(
                 firstSession.StartTime));
 
-            if (DateTime.UtcNow >=
+            // firstStudyTime là giờ Việt Nam
+            if (Backend.common.VnTime.ToVn(DateTime.UtcNow) >=
                 firstStudyTime.AddDays(-1))
             {
                 throw new Exception(
@@ -536,7 +537,7 @@ namespace Backend.Services.impl
                         userId);
 
             // Session times stored as Vietnam local (UTC+7); convert to UTC for comparison
-            var vnOffset = TimeSpan.FromHours(7);
+            var vnOffset = Backend.common.VnTime.Offset;
             var cutoff = DateTime.UtcNow.AddMinutes(-15);
 
             return enrollments
@@ -614,7 +615,7 @@ namespace Backend.Services.impl
                         teacher.TeacherProfileId);
 
             // Session times stored as Vietnam local (UTC+7); convert to UTC for comparison
-            var vnOffset = TimeSpan.FromHours(7);
+            var vnOffset = Backend.common.VnTime.Offset;
             var cutoff = DateTime.UtcNow.AddMinutes(-15);
 
             return classes
@@ -689,7 +690,10 @@ namespace Backend.Services.impl
             var lastEnd = sessions.Last().StudyDate.ToDateTime(
                 TimeOnly.FromTimeSpan(sessions.Last().EndTime));
 
-            if (enrollment.Status == StatusBooking.Confirmed && now >= firstStart && now < lastEnd)
+            // giờ buổi học lưu theo giờ Việt Nam, còn now là UTC
+            var nowVn = Backend.common.VnTime.ToVn(now);
+
+            if (enrollment.Status == StatusBooking.Confirmed && nowVn >= firstStart && nowVn < lastEnd)
             {
                 enrollment.Status = StatusBooking.InProgress;
                 return true;
@@ -697,7 +701,7 @@ namespace Backend.Services.impl
 
             if ((enrollment.Status == StatusBooking.Confirmed
                  || enrollment.Status == StatusBooking.InProgress)
-                && now >= lastEnd)
+                && nowVn >= lastEnd)
             {
                 enrollment.Status = StatusBooking.Completed;
                 return true;

@@ -14,7 +14,11 @@ public class UtcDateTimeConverter : JsonConverter<DateTime>
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var value = reader.GetDateTime();
-        return DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        // chuỗi có offset (vd "+07:00") được đọc thành giờ Local của server → đổi về UTC;
+        // chuỗi có "Z" đã là Utc; chuỗi không có múi giờ coi như UTC
+        return value.Kind == DateTimeKind.Local
+            ? value.ToUniversalTime()
+            : DateTime.SpecifyKind(value, DateTimeKind.Utc);
     }
 
     public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)

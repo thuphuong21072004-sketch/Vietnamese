@@ -12,6 +12,7 @@ import { TeacherClassService } from '../../../../services/teacher-class.service'
 import { RouterModule } from '@angular/router';
 import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
 import { Router } from '@angular/router'
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
 @Component({
   selector: 'app-class-search',
   standalone: true,
@@ -194,8 +195,8 @@ export class TeacherClassListComponent implements OnInit {
     const sorted = [...item.sessions].sort((a, b) =>
       a.studyDate.localeCompare(b.studyDate) || a.startTime.localeCompare(b.startTime)
     );
-    const firstStart = new Date(`${sorted[0].studyDate}T${sorted[0].startTime}`);
-    const lastEnd = new Date(`${sorted[sorted.length - 1].studyDate}T${sorted[sorted.length - 1].endTime}`);
+    const firstStart = vnSessionTime(sorted[0].studyDate, sorted[0].startTime);
+    const lastEnd = vnSessionTime(sorted[sorted.length - 1].studyDate, sorted[sorted.length - 1].endTime);
     if (now < firstStart) return 'Upcoming';
     if (now > lastEnd) return 'Completed';
     return 'Ongoing';

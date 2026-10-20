@@ -2,7 +2,12 @@
 
   <div class="dashboard-header">
     <h2>Teacher Dashboard</h2>
-    <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" />
+    <div class="period-controls">
+      <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" [disabled]="allTime" />
+      <label class="all-time">
+        <input type="checkbox" [(ngModel)]="allTime" (change)="loadData()" /> All time
+      </label>
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading-row">Loading...</div>
@@ -14,7 +19,7 @@
       <div class="stat-card">
         <div class="stat-title">Total from Students</div>
         <div class="stat-value money">{{ stats.totalFromStudents | currency:'USD':'symbol':'1.2-2' }}</div>
-        <div class="stat-subtitle">{{ year }}/{{ month < 10 ? '0'+month : month }}</div>
+        <div class="stat-subtitle">{{ periodLabel }}</div>
       </div>
 
       <div class="stat-card green">
@@ -35,6 +40,82 @@
         <div class="stat-subtitle">Cancelled, not yet refunded</div>
       </div>
 
+    </div>
+
+    <!-- Theo từng khóa học (lớp nhóm) -->
+    <div class="stats-grid">
+
+      <div class="stat-card purple">
+        <div class="stat-title">Group Classes</div>
+        <div class="stat-value">{{ stats.classCount }}</div>
+        <div class="stat-subtitle">With payments in {{ periodLabel }}</div>
+      </div>
+
+      <div class="stat-card purple">
+        <div class="stat-title">Students</div>
+        <div class="stat-value">{{ stats.studentCount }}</div>
+        <div class="stat-subtitle">Unique paid students</div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-title">Paid by Admin</div>
+        <div class="stat-value money">{{ stats.totalPaidOut | currency:'USD':'symbol':'1.2-2' }}</div>
+        <div class="stat-subtitle">of {{ stats.totalOwed | currency:'USD':'symbol':'1.2-2' }} earned (all time)</div>
+      </div>
+
+      <div class="stat-card" [class.orange]="stats.balance > 0" [class.red]="stats.balance < 0" [class.green]="stats.balance === 0">
+        <div class="stat-title">{{ stats.balance < 0 ? 'Overpaid' : 'Still Owed to You' }}</div>
+        <div class="stat-value" [class.balance-due]="stats.balance > 0" [class.balance-over]="stats.balance < 0"
+             [class.money]="stats.balance === 0">
+          {{ (stats.balance < 0 ? -stats.balance : stats.balance) | currency:'USD':'symbol':'1.2-2' }}
+        </div>
+        <div class="stat-subtitle">Finished classes & lessons − paid out</div>
+      </div>
+
+    </div>
+
+    <div class="history-section">
+      <div class="section-header">
+        <h3>By Course</h3>
+        <span class="section-note">Group classes — payments in {{ periodLabel }}</span>
+      </div>
+      <div class="table-wrapper" *ngIf="stats.classes.length > 0; else noClasses">
+        <table class="payment-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Status</th>
+              <th>Schedule</th>
+              <th>Fee</th>
+              <th>Students</th>
+              <th>Cancelled</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of stats.classes">
+              <td><strong>{{ c.title }}</strong></td>
+              <td><span class="status-badge" [ngClass]="statusClass(c)">{{ c.status }}</span></td>
+              <td>{{ c.startDate | date:'dd/MM/yyyy' }} → {{ c.endDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ c.price | currency:'USD':'symbol':'1.0-2' }}</td>
+              <td>{{ c.studentCount }} / {{ c.maxStudents }}</td>
+              <td [class.orange-text]="c.cancelledCount > 0">{{ c.cancelledCount }}</td>
+              <td class="money-cell">{{ c.totalRevenue | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="4">Total ({{ stats.classes.length }} classes)</td>
+              <td title="Students counted once even if they joined several classes">{{ stats.studentCount }} unique</td>
+              <td>{{ classTotals.cancelled }}</td>
+              <td class="money-cell">{{ classTotals.revenue | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <ng-template #noClasses>
+        <div class="empty-state">No group class payments in {{ periodLabel }}.</div>
+      </ng-template>
     </div>
 
     <div class="history-section" *ngIf="stats.monthlyBreakdown.length > 0">

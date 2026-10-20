@@ -2,7 +2,12 @@
 
   <div class="dashboard-header">
     <h2>Admin Dashboard — Finance</h2>
-    <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" />
+    <div class="period-controls">
+      <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="month-picker" [disabled]="allTime" />
+      <label class="all-time">
+        <input type="checkbox" [(ngModel)]="allTime" (change)="loadData()" /> All time
+      </label>
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading-row">Loading...</div>
@@ -15,7 +20,7 @@
       <div class="stat-card">
         <div class="stat-title">Total Student Payments</div>
         <div class="stat-value money">{{ stats.totalStudentPayments | currency:'USD':'symbol':'1.2-2' }}</div>
-        <div class="stat-subtitle">{{ year }}/{{ month < 10 ? '0'+month : month }}</div>
+        <div class="stat-subtitle">{{ periodLabel }}</div>
       </div>
 
       <div class="stat-card green">
@@ -73,72 +78,141 @@
       </div>
     </div>
 
-    <!-- Teacher payouts — sorted by completed earnings desc -->
+    <!-- Đối soát trả tiền giáo viên: phải trả (lũy kế) − đã trả -->
     <div class="history-section" *ngIf="stats.teacherPayouts.length > 0">
       <div class="section-header">
-        <h3>Teacher Payout Summary</h3>
-        <span class="section-note">Sorted by total from students — highest first</span>
+        <h3>Teacher Payout Reconciliation</h3>
+        <span class="section-note">
+          Classes & students: {{ periodLabel }} · Owed / paid: all time (finished classes and 1-on-1 lessons)
+        </span>
       </div>
       <div class="table-wrapper">
         <table class="payment-table">
           <thead>
             <tr>
-              <th>#</th>
               <th>Teacher</th>
-              <th>Email</th>
-              <th>Total from Students</th>
-              <th>Completed (Pay Out)</th>
-              <th>Active (Pending)</th>
-              <th>Cancelled</th>
+              <th>Classes</th>
+              <th>Students</th>
+              <th>Owed</th>
+              <th>Paid Out</th>
+              <th>Balance</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let t of stats.teacherPayouts; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td><strong>{{ t.teacherName }}</strong></td>
-              <td>{{ t.email }}</td>
-              <td class="money-cell">{{ t.totalFromStudents | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell highlight">{{ t.completedEarnings | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell">{{ t.activeEarnings | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell orange">{{ t.cancelledUnrefunded | currency:'USD':'symbol':'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <ng-container *ngFor="let t of stats.teacherPayouts">
+              <tr class="teacher-row" (click)="toggleTeacher(t)">
+                <td>
+                  <span class="expand-icon">{{ expandedTeacherId === t.userId ? '▾' : '▸' }}</span>
+                  <strong>{{ t.teacherName }}</strong>
+                  <div class="sub-text">{{ t.email }}</div>
+                </td>
+                <td>{{ t.classCount }}</td>
+                <td>{{ t.studentCount }}</td>
+                <td class="money-cell highlight">
+                  {{ t.totalOwed | currency:'USD':'symbol':'1.2-2' }}
+                  <div class="sub-text">group {{ t.groupOwed | currency:'USD':'symbol':'1.0-2' }} · 1-on-1 {{ t.privateOwed | currency:'USD':'symbol':'1.0-2' }}</div>
+                </td>
+                <td class="money-cell">
+                  {{ t.totalPaidOut | currency:'USD':'symbol':'1.2-2' }}
+                  <div class="sub-text" *ngIf="t.lastPaidAt">last {{ t.lastPaidAt | date:'dd/MM/yyyy' }}</div>
+                </td>
+                <td>
+                  <span class="balance-cell" [ngClass]="balanceClass(t.balance)">
+                    {{ abs(t.balance) | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+                  <div class="sub-text">{{ balanceLabel(t.balance) }}</div>
+                </td>
+                <td>
+                  <button *ngIf="canManagePayouts" class="btn-pay" (click)="openPayForm(t, $event)">Record payment</button>
+                </td>
+              </tr>
 
-    <!-- Student payment details — sorted by total paid desc -->
-    <div class="history-section" *ngIf="stats.studentSummaries.length > 0">
-      <div class="section-header">
-        <h3>Student Payment Details</h3>
-        <span class="section-note">Sorted by total paid — highest first</span>
-      </div>
-      <div class="table-wrapper">
-        <table class="payment-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Student</th>
-              <th>Email</th>
-              <th>Total Paid</th>
-              <th>Completed</th>
-              <th>Active</th>
-              <th>Cancelled</th>
-              <th>Refunded</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let s of stats.studentSummaries; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td><strong>{{ s.studentName }}</strong></td>
-              <td>{{ s.email }}</td>
-              <td class="money-cell">{{ s.totalPaid | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell green">{{ s.completedLearning | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell">{{ s.activeLearning | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell orange">{{ s.cancelledUnrefunded | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="money-cell refund">{{ s.refunded | currency:'USD':'symbol':'1.2-2' }}</td>
-            </tr>
+              <!-- form ghi nhận đã trả -->
+              <tr *ngIf="payForm?.teacherUserId === t.userId" class="form-row">
+                <td colspan="7">
+                  <form class="pay-form" (ngSubmit)="savePayout()" *ngIf="payForm as f">
+                    <label>Amount (USD)
+                      <input type="number" step="0.01" min="0.01" name="amount" [(ngModel)]="f.amount" required />
+                    </label>
+                    <label>Paid on
+                      <input type="date" name="paidAt" [(ngModel)]="f.paidAt" required />
+                    </label>
+                    <label class="grow">Note
+                      <input type="text" name="note" [(ngModel)]="f.note" placeholder="e.g. Bank transfer October" />
+                    </label>
+                    <button type="submit" class="btn-pay" [disabled]="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
+                    <button type="button" class="btn-cancel" (click)="cancelPayForm()">Cancel</button>
+                    <span class="form-error" *ngIf="errorMessage">{{ errorMessage }}</span>
+                  </form>
+                </td>
+              </tr>
+
+              <!-- chi tiết: từng lớp + lịch sử đã trả -->
+              <tr *ngIf="expandedTeacherId === t.userId" class="detail-row">
+                <td colspan="7">
+                  <div class="detail-grid">
+                    <div>
+                      <h4>Classes ({{ periodLabel }})</h4>
+                      <table class="payment-table inner" *ngIf="t.classes.length > 0; else noTeacherClasses">
+                        <thead>
+                          <tr><th>Class</th><th>Status</th><th>Students</th><th>Revenue</th></tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let c of t.classes">
+                            <td>{{ c.title }}</td>
+                            <td><span class="status-badge" [ngClass]="statusClass(c)">{{ c.status }}</span></td>
+                            <td>{{ c.studentCount }} / {{ c.maxStudents }}</td>
+                            <td class="money-cell">{{ c.totalRevenue | currency:'USD':'symbol':'1.2-2' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ng-template #noTeacherClasses><div class="sub-text">No group class payments.</div></ng-template>
+                    </div>
+                    <div>
+                      <h4>Payout History</h4>
+                      <table class="payment-table inner" *ngIf="(payoutHistory[t.userId] || []).length > 0; else noPayouts">
+                        <thead>
+                          <tr><th>Date</th><th>Amount</th><th>Note</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let p of payoutHistory[t.userId]">
+                            <td>{{ p.paidAt | date:'dd/MM/yyyy' }}</td>
+                            <td class="money-cell">{{ p.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+                            <td>{{ p.note || '—' }}<div class="sub-text">{{ p.createdBy }}</div></td>
+                            <td><button *ngIf="canManagePayouts" class="btn-delete" (click)="deletePayout(p)">Delete</button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <ng-template #noPayouts>
+                        <div class="form-error" *ngIf="payoutError[t.userId]; else emptyPayouts">{{ payoutError[t.userId] }}</div>
+                        <ng-template #emptyPayouts><div class="sub-text">No payouts recorded yet.</div></ng-template>
+                      </ng-template>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
           </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td>Total ({{ stats.teacherPayouts.length }} teachers)</td>
+              <td>{{ payoutTotals.classes }}</td>
+              <td title="Students counted once even if they study with several teachers">{{ stats.uniqueStudentCount }} unique</td>
+              <td class="money-cell highlight">
+                {{ payoutTotals.totalOwed | currency:'USD':'symbol':'1.2-2' }}
+                <div class="sub-text">group {{ payoutTotals.groupOwed | currency:'USD':'symbol':'1.0-2' }} · 1-on-1 {{ payoutTotals.privateOwed | currency:'USD':'symbol':'1.0-2' }}</div>
+              </td>
+              <td class="money-cell">{{ payoutTotals.paidOut | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>
+                <span class="balance-cell" [ngClass]="balanceClass(payoutTotals.balance)">
+                  {{ abs(payoutTotals.balance) | currency:'USD':'symbol':'1.2-2' }}
+                </span>
+                <div class="sub-text">{{ balanceLabel(payoutTotals.balance) }} (net)</div>
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>

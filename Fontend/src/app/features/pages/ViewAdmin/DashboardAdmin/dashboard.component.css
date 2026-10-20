@@ -196,3 +196,62 @@
 .empty-state  { text-align: center; padding: 48px 24px; color: #9ca3af; font-size: 15px; }
 
 .history-section + .history-section { margin-top: 24px; }
+
+/* ── Course breakdown & payout reconciliation ── */
+.period-controls { display: flex; align-items: center; gap: 12px; }
+.period-controls .month-picker:disabled { opacity: 0.5; cursor: not-allowed; }
+.all-time { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #374151; cursor: pointer; }
+
+.stat-card.purple { border-left: 4px solid #7c3aed; }
+.balance-due  { color: #ea580c; }
+.balance-over { color: #dc2626; }
+.orange-text  { color: #ea580c; font-weight: 600; }
+
+.status-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.status-badge.upcoming  { background: #e0e7ff; color: #4338ca; }
+.status-badge.ongoing   { background: #dbeafe; color: #1d4ed8; }
+.status-badge.completed { background: #dcfce7; color: #15803d; }
+.status-badge.cancelled { background: #fee2e2; color: #b91c1c; }
+.status-badge.refunded  { background: #f3e8ff; color: #7e22ce; }
+
+.payment-table tfoot .total-row td {
+  font-weight: 700; color: #111827; background: #f8fafc;
+  border-top: 2px solid #e5e7eb;
+}
+
+/* ── Payout reconciliation table ── */
+.teacher-row { cursor: pointer; }
+.expand-icon { display: inline-block; width: 16px; color: #6b7280; }
+.sub-text { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+.balance-cell { font-weight: 700; }
+
+.btn-pay, .btn-cancel, .btn-delete {
+  border: none; border-radius: 8px; padding: 8px 14px;
+  font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.btn-pay { background: #4f46e5; color: #fff; }
+.btn-pay:hover:not(:disabled) { background: #4338ca; }
+.btn-pay:disabled { background: #a5b4fc; cursor: not-allowed; }
+.btn-cancel { background: #f3f4f6; color: #374151; }
+.btn-delete { background: #fee2e2; color: #b91c1c; padding: 6px 10px; }
+
+.form-row td, .detail-row td { background: #f8fafc; }
+.pay-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.pay-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #6b7280; }
+.pay-form label.grow { flex: 1; min-width: 200px; }
+.pay-form input {
+  padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff;
+}
+.form-error { color: #dc2626; font-size: 13px; }
+
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.detail-grid h4 { margin: 0 0 8px; font-size: 15px; color: #111827; }
+.payment-table.inner th, .payment-table.inner td { padding: 8px 10px; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+.teacher-row td, .payment-table tfoot td { padding: 12px 10px; }

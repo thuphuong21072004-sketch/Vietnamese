@@ -17,6 +17,8 @@ import { ClassEnrollmentService } from '../../../../services/class-enrollment.se
 import { ReviewService } from '../../../../services/review.service';
 import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
 
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
+
 @Component({
   selector: 'app-class-list',
   standalone: true,
@@ -451,7 +453,7 @@ export class ClassListComponent implements OnInit {
     const first = cls.sessions.reduce((a, b) =>
       a.sessionNumber < b.sessionNumber ? a : b
     );
-    const firstStart = new Date(`${first.studyDate}T${first.startTime}`);
+    const firstStart = vnSessionTime(first.studyDate, first.startTime);
     return new Date() < firstStart;
   }
 }

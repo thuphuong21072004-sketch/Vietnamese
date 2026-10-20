@@ -11,10 +11,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const isBackendRequest = req.url.startsWith(environment.apiBaseUrl) ||
     req.url.startsWith('http://localhost:5108');
 
-  if (token && isBackendRequest) {
+  if (isBackendRequest) {
     req = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`,
+        // phút lệch so với UTC của trình duyệt (VN = 420) → backend lọc ngày / tháng theo lịch người dùng
+        'X-Timezone-Offset': String(-new Date().getTimezoneOffset()),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
   }

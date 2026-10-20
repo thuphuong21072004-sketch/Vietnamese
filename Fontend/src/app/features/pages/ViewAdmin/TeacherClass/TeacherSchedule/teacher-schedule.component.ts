@@ -8,6 +8,8 @@ import { UpcomingScheduleDto } from '../../../../models/upcoming-schedule.model'
 
 import { VideoRoomService } from '../../../../services/video-room.service';
 
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
+
 @Component({
   selector: 'app-teacher-schedule',
   standalone: true,
@@ -53,9 +55,9 @@ export class TeacherUpcomingComponent implements OnInit {
   canJoinRoom(item: UpcomingScheduleDto): boolean {
     const now = new Date();
 
-    const start = new Date(`${item.studyDate}T${item.startTime}`);
+    const start = vnSessionTime(item.studyDate, item.startTime);
 
-    const end = new Date(`${item.studyDate}T${item.endTime}`);
+    const end = vnSessionTime(item.studyDate, item.endTime);
 
     return (
       now >= new Date(start.getTime() - 15 * 60 * 1000) &&

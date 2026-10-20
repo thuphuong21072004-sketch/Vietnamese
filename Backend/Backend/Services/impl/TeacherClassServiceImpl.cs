@@ -428,7 +428,8 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
-            var now = DateTime.UtcNow;
+            // giờ buổi học lưu theo giờ Việt Nam
+            var now = Backend.common.VnTime.ToVn(DateTime.UtcNow);
             bool anyUpdated = false;
             foreach (var session in teacherClass.ClassSessions)
             {
@@ -465,28 +466,8 @@ namespace Backend.Services.impl
                     "Class not found");
             }
 
-            var email =
-                _userContext.GetEmail();
-
-            int userId =
-                (await _userRepository
-                    .GetUserIdByEmail(email))!
-                    .Value;
-
-            var teacherProfile =
-                await _teacherProfileRepository
-                    .GetByUserId(userId);
-
-            if (
-                teacherProfile == null
-                ||
-                teacherClass.TeacherProfileId
-                    != teacherProfile.TeacherProfileId
-            )
-            {
-                throw new Exception(
-                    "You do not have permission");
-            }
+            await EnsureClassOwnerAsync(
+                teacherClass);
 
             var enrolledCount =
     teacherClass.ClassEnrollments
@@ -521,6 +502,12 @@ namespace Backend.Services.impl
                 throw new Exception(
                     "Class not found");
             }
+
+            /*
+             * chỉ giáo viên của lớp được sửa lịch
+             */
+            await EnsureClassOwnerAsync(
+                teacherClass);
 
             var enrolledCount =
     teacherClass.ClassEnrollments
@@ -563,6 +550,36 @@ namespace Backend.Services.impl
 
             await _teacherClassRepository
                 .SaveChangesAsync();
+        }
+
+        /*
+         * người đang đăng nhập phải là giáo viên sở hữu lớp
+         */
+        private async Task EnsureClassOwnerAsync(
+            TeacherClass teacherClass)
+        {
+            var email =
+                _userContext.GetEmail();
+
+            int userId =
+                (await _userRepository
+                    .GetUserIdByEmail(email))!
+                    .Value;
+
+            var teacherProfile =
+                await _teacherProfileRepository
+                    .GetByUserId(userId);
+
+            if (
+                teacherProfile == null
+                ||
+                teacherClass.TeacherProfileId
+                    != teacherProfile.TeacherProfileId
+            )
+            {
+                throw new Exception(
+                    "You do not have permission");
+            }
         }
 
     }

@@ -7,7 +7,7 @@
             <p>Class Detail</p>
         </div>
 
-        <div class="header-actions">
+        <div class="header-actions" *ngIf="isOwner">
 
             <button class="edit-btn" (click)="saveAllSessions()">
 
@@ -174,7 +174,7 @@
 
             </div>
 
-            <textarea rows="3" [(ngModel)]="session.topic" placeholder="Enter lesson topic">
+            <textarea rows="3" [(ngModel)]="session.topic" placeholder="Enter lesson topic" [readonly]="!isOwner">
             </textarea>
 
         </div>

@@ -68,10 +68,11 @@ namespace Backend.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
+
                 return BadRequest(new
                 {
-                    message = ex.Message,
-                    stack = ex.StackTrace
+                    message = ex.Message
                 });
             }
         }

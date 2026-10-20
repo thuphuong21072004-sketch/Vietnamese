@@ -11,6 +11,8 @@ import {
   ClassSessionDto,
 } from '../../../../models/teacher-class.model';
 
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
+
 @Component({
   selector: 'app-student-course-detail',
   standalone: true,
@@ -239,8 +241,8 @@ export class StudentCourseDetailComponent implements OnInit {
 
   canJoinSession(session: ClassSessionDto): boolean {
     const now = new Date();
-    const start = new Date(`${session.studyDate}T${session.startTime}`);
-    const end = new Date(`${session.studyDate}T${session.endTime}`);
+    const start = vnSessionTime(session.studyDate, session.startTime);
+    const end = vnSessionTime(session.studyDate, session.endTime);
     return (
       now >= new Date(start.getTime() - 15 * 60 * 1000) &&
       now <= new Date(end.getTime() + 15 * 60 * 1000)
@@ -264,7 +266,7 @@ export class StudentCourseDetailComponent implements OnInit {
   }
 
   isPastSession(session: ClassSessionDto): boolean {
-    const end = new Date(`${session.studyDate}T${session.endTime}`);
+    const end = vnSessionTime(session.studyDate, session.endTime);
     return new Date() > end;
   }
 

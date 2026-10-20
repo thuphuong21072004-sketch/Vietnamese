@@ -114,11 +114,18 @@ namespace Backend.Repository.impl
                 .Where(x => x.Status == 1)
                 .AsQueryable();
 
+            // from / to là ngày theo lịch của admin, CreatedAt lưu UTC
             if (from.HasValue)
-                query = query.Where(x => x.CreatedAt.Date >= from.Value.ToDateTime(TimeOnly.MinValue).Date);
+            {
+                var fromUtc = common.UserTime.UtcRangeOf(from.Value).From;
+                query = query.Where(x => x.CreatedAt >= fromUtc);
+            }
 
             if (to.HasValue)
-                query = query.Where(x => x.CreatedAt.Date <= to.Value.ToDateTime(TimeOnly.MinValue).Date);
+            {
+                var toUtc = common.UserTime.UtcRangeOf(to.Value).To;
+                query = query.Where(x => x.CreatedAt < toUtc);
+            }
 
             return await query
                 .OrderBy(x => x.CreatedAt)

@@ -6,6 +6,8 @@ import { Router, RouterModule } from '@angular/router';
 import { ClassEnrollmentService } from '../../../../services/class-enrollment.service';
 import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
+import { vnSessionTime } from '../../../../../core/utils/vn-time';
+
 @Component({
   selector: 'app-my-classes',
   standalone: true,
@@ -84,7 +86,7 @@ export class MyClassesComponent implements OnInit {
     const first = item.sessions.reduce((a, b) =>
       a.sessionNumber < b.sessionNumber ? a : b
     );
-    const firstStart = new Date(`${first.studyDate}T${first.startTime}`);
+    const firstStart = vnSessionTime(first.studyDate, first.startTime);
     return new Date() < firstStart;
   }
 

@@ -207,8 +207,7 @@ namespace Backend.Services.impl
             }
 
             var minStart =
-                DateOnly.FromDateTime(
-                    DateTime.UtcNow.AddDays(30));
+                common.VnTime.Today.AddDays(30);
 
             if (dto.StartDate < minStart)
             {
@@ -292,7 +291,7 @@ namespace Backend.Services.impl
             var data =
                 await _studentTripRepository.GetByStudentId(studentId);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = common.VnTime.Today; // ngày chuyến đi theo lịch Việt Nam
             var deadline = today.AddDays(10);
 
             // Auto-cancel trips that are still FindingTeacher but too close to start
@@ -910,7 +909,7 @@ namespace Backend.Services.impl
             var studentRequests =
                 await _matchRequestRepository.GetPendingByStudentId(userId);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = common.VnTime.Today; // ngày chuyến đi theo lịch Việt Nam
 
             var requests = teacherRequests
                 .Concat(studentRequests)
@@ -934,7 +933,7 @@ namespace Backend.Services.impl
             var studentRequests =
                 await _matchRequestRepository.GetByStudentId(userId);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = common.VnTime.Today; // ngày chuyến đi theo lịch Việt Nam
 
             var requests = teacherRequests
                 .Concat(studentRequests)

@@ -44,21 +44,19 @@ namespace Backend.Repository.impl
 
             if (date.HasValue)
             {
-                query = query.Where(
-                    x => DateOnly.FromDateTime(x.StartTime) == date.Value);
+                // ngày người dùng chọn theo lịch của họ, StartTime lưu UTC
+                var (from, to) = common.UserTime.UtcRangeOf(date.Value);
+                query = query.Where(x => x.StartTime >= from && x.StartTime < to);
             }
-
-            
-            var now = DateTime.UtcNow;
 
             var data = await query.ToListAsync();
 
-            var today = DateTime.UtcNow.Date;
+            var today = common.UserTime.Today;
 
             return data
                 .OrderBy(x =>
-                    x.StartTime.Date == today ? 0 :
-                    x.StartTime.Date > today ? 1 : 2)
+                    common.UserTime.UserDate(x.StartTime) == today ? 0 :
+                    common.UserTime.UserDate(x.StartTime) > today ? 1 : 2)
 
                 .ThenBy(x =>
                     x.Status == common.Constant.StatusBooking.InProgress ? 0 :
@@ -91,18 +89,19 @@ namespace Backend.Repository.impl
 
             if (date.HasValue)
             {
-                query = query.Where(
-                    x => DateOnly.FromDateTime(x.StartTime) == date.Value);
+                // ngày người dùng chọn theo lịch của họ, StartTime lưu UTC
+                var (from, to) = common.UserTime.UtcRangeOf(date.Value);
+                query = query.Where(x => x.StartTime >= from && x.StartTime < to);
             }
 
             var data = await query.ToListAsync();
 
-            var today = DateTime.UtcNow.Date;
+            var today = common.UserTime.Today;
 
             return data
                 .OrderBy(x =>
-                    x.StartTime.Date == today ? 0 :
-                    x.StartTime.Date > today ? 1 : 2)
+                    common.UserTime.UserDate(x.StartTime) == today ? 0 :
+                    common.UserTime.UserDate(x.StartTime) > today ? 1 : 2)
 
                 .ThenBy(x =>
                     x.Status == common.Constant.StatusBooking.InProgress ? 0 :

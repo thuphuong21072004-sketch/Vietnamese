@@ -235,8 +235,9 @@ namespace Backend.Services.impl
                     "End time must be after start time.");
             }
 
-            if (dto.StartTime.Date !=
-                dto.EndTime.Date)
+            // cùng một ngày theo lịch của người dùng (DB lưu UTC)
+            if (common.UserTime.UserDate(dto.StartTime) !=
+                common.UserTime.UserDate(dto.EndTime))
             {
                 throw new InvalidOperationException(
                     "Schedule must start and end on the same day.");

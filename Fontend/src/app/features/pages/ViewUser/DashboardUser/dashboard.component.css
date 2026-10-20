@@ -206,3 +206,28 @@
 .empty-state  { text-align: center; padding: 48px 24px; color: #9ca3af; font-size: 15px; }
 
 .history-section + .history-section { margin-top: 24px; }
+
+/* ── Course breakdown & payout reconciliation ── */
+.period-controls { display: flex; align-items: center; gap: 12px; }
+.period-controls .month-picker:disabled { opacity: 0.5; cursor: not-allowed; }
+.all-time { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #374151; cursor: pointer; }
+
+.stat-card.purple { border-left: 4px solid #7c3aed; }
+.balance-due  { color: #ea580c; }
+.balance-over { color: #dc2626; }
+.orange-text  { color: #ea580c; font-weight: 600; }
+
+.status-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.status-badge.upcoming  { background: #e0e7ff; color: #4338ca; }
+.status-badge.ongoing   { background: #dbeafe; color: #1d4ed8; }
+.status-badge.completed { background: #dcfce7; color: #15803d; }
+.status-badge.cancelled { background: #fee2e2; color: #b91c1c; }
+.status-badge.refunded  { background: #f3e8ff; color: #7e22ce; }
+
+.payment-table tfoot .total-row td {
+  font-weight: 700; color: #111827; background: #f8fafc;
+  border-top: 2px solid #e5e7eb;
+}

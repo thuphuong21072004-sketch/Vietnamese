@@ -102,14 +102,28 @@ export class TeacherScheduleComponent
       return;
     }
 
+    /*
+     * ô datetime-local là giờ máy người dùng, backend lưu UTC
+     * → đổi sang ISO UTC trước khi gửi (nếu không sẽ bị lệch múi giờ)
+     */
+    const payload = {
+      startTime: this.toUtcIso(
+        this.form.startTime,
+      ),
+
+      endTime: this.toUtcIso(
+        this.form.endTime,
+      ),
+    };
+
     const request =
       this.editingId
         ? this.scheduleService.update(
             this.editingId,
-            this.form,
+            payload,
           )
         : this.scheduleService.create(
-            this.form,
+            payload,
           );
 
     request.subscribe({
@@ -150,18 +164,17 @@ export class TeacherScheduleComponent
     this.editingId =
       item.availabilityId;
 
+    /*
+     * API trả UTC ("...Z") → đổi về giờ máy người dùng cho ô datetime-local
+     */
     this.form = {
-      startTime:
-        item.startTime?.slice(
-          0,
-          16,
-        ),
+      startTime: this.toLocalInput(
+        item.startTime,
+      ),
 
-      endTime:
-        item.endTime?.slice(
-          0,
-          16,
-        ),
+      endTime: this.toLocalInput(
+        item.endTime,
+      ),
     };
 
     /*
@@ -247,5 +260,34 @@ export class TeacherScheduleComponent
     return this.schedules.filter(
       (x) => x.status === 2,
     ).length;
+  }
+
+  /*
+   * "yyyy-MM-ddTHH:mm" (giờ máy) → ISO UTC
+   */
+  private toUtcIso(
+    local: string,
+  ): string {
+    return new Date(
+      local,
+    ).toISOString();
+  }
+
+  /*
+   * ISO UTC → "yyyy-MM-ddTHH:mm" (giờ máy) cho datetime-local
+   */
+  private toLocalInput(
+    utc: string | null | undefined,
+  ): string {
+    if (!utc) {
+      return '';
+    }
+
+    const d = new Date(utc);
+
+    const pad = (n: number) =>
+      String(n).padStart(2, '0');
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 }

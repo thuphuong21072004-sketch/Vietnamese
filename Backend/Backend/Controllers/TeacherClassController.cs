@@ -187,8 +187,7 @@ namespace Backend.Controllers
                 return BadRequest(new
                 {
                     success = false,
-                    message = ex.Message,
-                    stackTrace = ex.StackTrace
+                    message = ex.Message
                 });
             }
         }

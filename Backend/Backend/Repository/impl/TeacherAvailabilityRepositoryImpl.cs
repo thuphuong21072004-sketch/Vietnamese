@@ -64,7 +64,9 @@ namespace Backend.Repository.impl
 
             if (date != null)
             {
-                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date);
+                // ngày người dùng chọn theo lịch của họ, StartTime lưu UTC
+                var (from, to) = common.UserTime.UtcRangeOf(date.Value);
+                query = query.Where(x => x.StartTime >= from && x.StartTime < to);
             }
 
             return await query
@@ -88,7 +90,9 @@ namespace Backend.Repository.impl
 
             if (date.HasValue)
             {
-                query = query.Where(x => DateOnly.FromDateTime(x.StartTime) == date.Value);
+                // ngày người dùng chọn theo lịch của họ, StartTime lưu UTC
+                var (from, to) = common.UserTime.UtcRangeOf(date.Value);
+                query = query.Where(x => x.StartTime >= from && x.StartTime < to);
             }
 
             return await query

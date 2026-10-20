@@ -615,6 +615,9 @@ namespace Backend.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SpecificLocation")
                         .HasColumnType("nvarchar(max)");
 
@@ -703,9 +706,6 @@ namespace Backend.Migrations
                     b.Property<int?>("ReservedStudentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TripId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SpecificLocation")
                         .HasColumnType("nvarchar(max)");
 
@@ -731,11 +731,54 @@ namespace Backend.Migrations
                     b.Property<int>("TotalSessions")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TripId")
+                        .HasColumnType("int");
+
                     b.HasKey("ClassId");
 
                     b.HasIndex("TeacherProfileId");
 
                     b.ToTable("TeacherClasses");
+                });
+
+            modelBuilder.Entity("Backend.Models.TeacherPayout", b =>
+                {
+                    b.Property<int>("PayoutId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayoutId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TeacherUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PayoutId");
+
+                    b.HasIndex("TeacherUserId");
+
+                    b.ToTable("TeacherPayouts");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherProfile", b =>
@@ -972,15 +1015,15 @@ namespace Backend.Migrations
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoleId")
@@ -1423,6 +1466,17 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("TeacherProfile");
+                });
+
+            modelBuilder.Entity("Backend.Models.TeacherPayout", b =>
+                {
+                    b.HasOne("Backend.Models.User", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Backend.Models.TeacherProfile", b =>

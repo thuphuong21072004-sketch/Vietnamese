@@ -81,7 +81,7 @@ namespace Backend.Repository.impl
         public async Task<List<StudentTrip>>
             GetAllOpen(string? destination)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = common.VnTime.Today; // ngày chuyến đi theo lịch Việt Nam
 
             var query = _context.StudentTrips
                 .Include(x => x.Student)

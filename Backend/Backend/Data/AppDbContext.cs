@@ -66,6 +66,8 @@ namespace Backend.Data
 
         public DbSet<TravelBooking> TravelBookings { get; set; }
 
+        public DbSet<TeacherPayout> TeacherPayouts { get; set; }
+
 
         /* * Cấu hình các ràng buộc Cascade Delete 
          * thuphuong21072004 
@@ -419,6 +421,26 @@ namespace Backend.Data
         x.TripId
     })
     .IsUnique();
+
+            /*
+             * teacher payout
+             */
+            modelBuilder.Entity<TeacherPayout>()
+                .HasKey(x => x.PayoutId);
+
+            // khoản đã xoá mềm không tính vào đối soát
+            modelBuilder.Entity<TeacherPayout>()
+                .HasQueryFilter(x => x.DeletedAt == null);
+
+            modelBuilder.Entity<TeacherPayout>()
+                .Property(x => x.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<TeacherPayout>()
+                .HasOne(x => x.Teacher)
+                .WithMany()
+                .HasForeignKey(x => x.TeacherUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

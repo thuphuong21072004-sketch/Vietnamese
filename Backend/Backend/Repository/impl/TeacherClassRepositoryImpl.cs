@@ -198,9 +198,8 @@ namespace Backend.Repository.impl
         .Include(x => x.ClassSessions)
         .AsQueryable();
 
-            var today =
-    DateOnly.FromDateTime(
-        DateTime.Today);
+            // ngày học theo lịch Việt Nam, không phụ thuộc múi giờ của server
+            var today = common.VnTime.Today;
 
             query = query.Where(x =>
 
