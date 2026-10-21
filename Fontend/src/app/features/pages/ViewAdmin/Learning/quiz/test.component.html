@@ -126,7 +126,7 @@
                         
                             <div *ngIf="q.imageUrl" class="media-preview-inline">
                         
-                                <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" alt="Question image" />
+                                <img class="preview-image" [src]="serverUrl + '/images/' + q.imageUrl" alt="Question image" />
                         
                                 <button class="remove-media" (click)="q.imageUrl = null">
                         
@@ -247,7 +247,7 @@
 
                                 <div *ngIf="a.imageUrl" class="media-preview small">
 
-                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
+                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="serverUrl + '/images/' + a.imageUrl" alt="Answer image" />
                                     <button class="remove-media" (click)="a.imageUrl = null">
                                         ×
                                     </button>
@@ -387,7 +387,7 @@
                                         
                                             <div *ngIf="q.imageUrl" class="media-preview small">
                                         
-                                                <img class="preview-image" *ngIf="q.imageUrl" [src]="'http://localhost:5108/images/' + q.imageUrl"
+                                                <img class="preview-image" *ngIf="q.imageUrl" [src]="serverUrl + '/images/' + q.imageUrl"
                                                     alt="Question image" />
                                                 <button class="remove-media" (click)="q.imageUrl = null">
                                                     ×
@@ -512,7 +512,7 @@
 
                                                 <div *ngIf="a.imageUrl" class="media-preview small">
 
-                                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
+                                                    <img class="answer-image" *ngIf="a.imageUrl" [src]="serverUrl + '/images/' + a.imageUrl" alt="Answer image" />
                                                     <button class="remove-media" (click)="a.imageUrl = null">
                                                         ×
                                                     </button>
@@ -616,7 +616,7 @@
                                     
                                         <div *ngIf="psg.imageUrl" class="media-preview passage-preview">
                                     
-                                            <img class="preview-image" *ngIf="psg.imageUrl" [src]="'http://localhost:5108/images/' + psg.imageUrl"
+                                            <img class="preview-image" *ngIf="psg.imageUrl" [src]="serverUrl + '/images/' + psg.imageUrl"
                                                 alt="Passage image" />
                                             <button class="remove-media" (click)="psg.imageUrl = null">
                                                 ×
@@ -713,7 +713,7 @@
                                                 
                                                     <div *ngIf="q.imageUrl" class="media-preview-inline">
                                                 
-                                                        <img class="preview-image" [src]="'http://localhost:5108/images/' + q.imageUrl" alt="Question image" />
+                                                        <img class="preview-image" [src]="serverUrl + '/images/' + q.imageUrl" alt="Question image" />
                                                 
                                                         <button class="remove-media" (click)="q.imageUrl = null">
                                                 
@@ -830,7 +830,7 @@
 
                                                         <div *ngIf="a.imageUrl" class="media-preview small">
 
-                                                            <img class="answer-image" *ngIf="a.imageUrl" [src]="'http://localhost:5108/images/' + a.imageUrl" alt="Answer image" />
+                                                            <img class="answer-image" *ngIf="a.imageUrl" [src]="serverUrl + '/images/' + a.imageUrl" alt="Answer image" />
                                                             <button class="remove-media" (click)="a.imageUrl = null">
                                                                 ×
                                                             </button>
@@ -1073,7 +1073,7 @@
                     <ng-container *ngIf="part.mode === 'passage'">
                         <div class="pv-passage-block" *ngFor="let psg of part.passages">
                             <div class="pv-passage-text" *ngIf="psg.content">{{ psg.content }}</div>
-                            <img *ngIf="!psg.content && psg.imageUrl" class="pv-psg-img" [src]="'http://localhost:5108/images/' + psg.imageUrl">
+                            <img *ngIf="!psg.content && psg.imageUrl" class="pv-psg-img" [src]="serverUrl + '/images/' + psg.imageUrl">
                             <audio *ngIf="!psg.content && !psg.imageUrl && psg.audioUrl" controls [src]="getAudioSrc(psg)"></audio>
                             <ng-container *ngFor="let q of psg.questions; let i = index">
                                 <ng-container *ngTemplateOutlet="pvQuestion; context: { q: q, idx: getQuestionIndex(q) }"></ng-container>
@@ -1093,14 +1093,14 @@
         <div class="pv-q-title">
             <span class="pv-q-num">Câu {{ idx }}.</span>
             <span class="pv-q-text" *ngIf="q.questionText">{{ q.questionText }}</span>
-            <img *ngIf="!q.questionText && q.imageUrl" class="pv-q-img" [src]="'http://localhost:5108/images/' + q.imageUrl">
+            <img *ngIf="!q.questionText && q.imageUrl" class="pv-q-img" [src]="serverUrl + '/images/' + q.imageUrl">
             <audio *ngIf="!q.questionText && !q.imageUrl && q.audioUrl" controls [src]="getAudioSrc(q)"></audio>
         </div>
         <div *ngIf="!q.questionType || q.questionType === 'MULTIPLE_CHOICE'" class="pv-answers">
             <div class="pv-a" *ngFor="let a of q.answers">
                 <span class="pv-a-lbl">{{ a.answerLabel }}.</span>
                 <span *ngIf="a.answerText">{{ a.answerText }}</span>
-                <img *ngIf="!a.answerText && a.imageUrl" class="pv-a-img" [src]="'http://localhost:5108/images/' + a.imageUrl">
+                <img *ngIf="!a.answerText && a.imageUrl" class="pv-a-img" [src]="serverUrl + '/images/' + a.imageUrl">
                 <audio *ngIf="!a.answerText && !a.imageUrl && a.audioUrl" controls [src]="getAudioSrc(a)"></audio>
             </div>
         </div>

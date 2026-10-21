@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My Availability</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 10px">
+    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Teacher dashboard</span>
+    <h1 style="margin: 2px 0 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">Manage Your Schedule</h1>
+    <p style="margin: 2px 0 0; font-size: 13px; color: #64748b">Create, edit and organize your teaching availability.</p>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 12px">
+    <form style="background: #fff; border-radius: 20px; padding: 16px; box-shadow: 0 18px 48px rgba(99,102,241,.12); display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Create New Schedule</h2>
+      <div style="display: flex; flex-direction: column; gap: 6px"><label for="s1" style="font-size: 13px; font-weight: 600; color: #334155">Start Time</label><input id="s1" type="text" value="24/10/2026  19:00" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 14px; font: 500 16px Inter, sans-serif"></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><label for="s2" style="font-size: 13px; font-weight: 600; color: #334155">End Time</label><input id="s2" type="text" value="24/10/2026  20:00" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 14px; font: 500 16px Inter, sans-serif"></div>
+      <div style="display: flex; gap: 10px">
+        <button type="button" style="flex: 1; height: 48px; border-radius: 12px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #475569; font: 700 15px Inter, sans-serif">Cancel</button>
+        <button type="button" style="flex: 2; height: 48px; border-radius: 12px; border: 0; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font: 700 15px Inter, sans-serif; box-shadow: 0 4px 12px rgba(124,108,255,.3)">Create Schedule</button>
+      </div>
+    </form>
+    <div style="display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0">
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: 600 12px Inter, sans-serif">{{c.l}}</button>
+      </sc-for>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #64748b">Total schedules: <b style="color: #0f172a">4</b></p>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{slots}}" as="s" hint-placeholder-count="4">
+        <div style="background: #fff; border-radius: 16px; padding: 12px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 8px">
+          <span style="align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: {{s.bg}}; color: {{s.fg}}; font-size: 11px; font-weight: 700">{{s.st}}</span>
+          <div><p style="margin: 0; font-size: 13px; color: #64748b; font-weight: 600">{{s.d}}</p><p style="margin: 2px 0 0; font-size: 17px; font-weight: 800">{{s.t}}</p></div>
+          <div style="display: flex; gap: 6px">
+            <button type="button" disabled="{{s.dis}}" aria-label="Edit" style="flex: 1; height: 40px; border-radius: 10px; border: 1px solid rgba(15,23,42,.1); background: #fff; color: #334155; display: flex; align-items: center; justify-content: center; opacity: {{s.op}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></button>
+            <button type="button" disabled="{{s.dis}}" aria-label="Delete" style="flex: 1; height: 40px; border-radius: 10px; border: 0; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; opacity: {{s.op}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg></button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      dash: 'M3 3v18h18M18 17V9M13 17V5M8 17v-3',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      sched: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      book: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2z',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['dash', 'Dashboard', 'TeacherDashboard.dc.html'], ['classes', 'Classes', 'TeacherClasses.dc.html'], ['sched', 'Schedule', 'Availability.dc.html'], ['book', 'Bookings', 'TeacherBookings.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'sched';
+    const ST = { Available: ['#dcfce7', '#166534'], Booked: ['#fef3c7', '#92400e'], Expired: ['#fee2e2', '#dc2626'] };
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 26, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      chips: ['All', 'Available', 'Booked', 'Expired'].map((l, i) => ({ l, bg: i === 0 ? '#7c3aed' : '#fff', fg: i === 0 ? '#fff' : '#64748b', bd: i === 0 ? '#7c3aed' : '#e2e8f0' })),
+      slots: [['Thu 23/10', '19:00 - 20:00', 'Booked'], ['Fri 24/10', '19:00 - 20:00', 'Available'], ['Sat 25/10', '08:30 - 09:30', 'Available'], ['Mon 20/10', '19:00 - 20:00', 'Expired']].map(([d, t, st]) => ({ d, t, st, bg: ST[st][0], fg: ST[st][1], dis: st !== 'Available', op: st === 'Available' ? 1 : 0.55 }))
+    };
+  }
+}
+</script>
+</body>
+</html>

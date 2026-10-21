@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiz</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: 'Times New Roman', Times, serif; color: #0f172a; background: #f8fafc">
+  <div style="height: {{top}}px; flex-shrink: 0; background: #1e3a8a"></div>
+  <header style="flex-shrink: 0; background: #1e3a8a; color: #fff; display: flex; align-items: center; gap: 8px; padding: 6px 10px 10px">
+    <a href="Lesson.dc.html" aria-label="Exit quiz" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #fff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></a>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; font-family: Inter, sans-serif">
+      <span style="font-size: 11px; font-weight: 600; opacity: .8">Time Remaining</span>
+      <span style="font-size: 20px; font-weight: 800; letter-spacing: .02em; color: #fde68a">04:52</span>
+    </div>
+    <a href="QuizResults.dc.html" style="height: 44px; padding: 0 16px; border-radius: 10px; background: #fff; color: #1e3a8a; font: 800 14px Inter, sans-serif; letter-spacing: .04em; text-decoration: none; display: flex; align-items: center">SUBMIT</a>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px">
+      <p style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .12em; color: #1e3a8a">VIETNAMESE LEARNING INSTITUTE</p>
+      <p style="margin: 2px 0 0; font-size: 13px; font-style: italic; color: #475569">Official Assessment Paper</p>
+      <h1 style="margin: 8px 0 0; font-size: 22px; font-weight: 700; color: #0f172a">Unit 4 · Ordering food</h1>
+      <p style="margin: 4px 0 0; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: #475569">Unit Test · Pass Score: 70%</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; font-family: Inter, sans-serif">
+      <button type="button" style="flex-shrink: 0; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #bbf7d0; background: #f0fdf4; color: #15803d; font: 700 13px Inter, sans-serif">Phần 1 · 5/5</button>
+      <button type="button" style="flex-shrink: 0; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #1e3a8a; background: #1e3a8a; color: #fff; font: 700 13px Inter, sans-serif">Phần 2 · 2/6</button>
+      <button type="button" style="flex-shrink: 0; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #d1d5db; background: #fff; color: #334155; font: 700 13px Inter, sans-serif">Phần 3 · 0/4</button>
+    </div>
+    <section style="background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+        <p style="margin: 0; font-size: 18px; line-height: 1.4"><b>Câu 8.</b> Choose the best reply when the waiter asks “Anh dùng gì ạ?” <span style="color: #64748b; font-size: 15px">(2 pts)</span></p>
+        <button type="button" style="flex-shrink: 0; height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #f59e0b; background: #fef3c7; color: #92400e; font: 700 12px Inter, sans-serif; display: flex; align-items: center; gap: 4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"></path></svg>Marked</button>
+      </div>
+      <sc-for list="{{opts}}" as="o" hint-placeholder-count="4">
+        <label style="min-height: 52px; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; border: {{o.bd}}; background: {{o.bg}}; font-size: 17px">
+          <input type="radio" name="q8" checked="{{o.on}}" style="width: 20px; height: 20px; margin: 0; accent-color: #1e3a8a">
+          <span><b>{{o.k}}.</b> {{o.t}}</span>
+        </label>
+      </sc-for>
+    </section>
+    <section style="background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; font-family: Inter, sans-serif">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <span style="font-size: 13px; font-weight: 700; color: #1e3a8a">Phần 2 · Questions</span>
+        <span style="display: flex; gap: 10px; font-size: 11px; font-weight: 600; color: #475569"><span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #22c55e"></span>Answered</span><span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #f59e0b"></span>Flagged</span></span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{grid}}" as="g" hint-placeholder-count="6">
+          <button type="button" style="height: 44px; border-radius: 10px; border: {{g.bd}}; background: {{g.bg}}; color: {{g.fg}}; font: 700 14px Inter, sans-serif">{{g.n}}</button>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+  <div style="flex-shrink: 0; display: flex; gap: 10px; padding: 10px 16px {{bot}}px; background: #fff; border-top: 1px solid #e2e8f0; font-family: Inter, sans-serif">
+    <button type="button" style="flex: 1; height: 50px; border-radius: 12px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #475569; font: 700 15px Inter, sans-serif">← Câu 7</button>
+    <button type="button" style="flex: 1; height: 50px; border-radius: 12px; border: 0; background: #1e3a8a; color: #fff; font: 700 15px Inter, sans-serif">Câu 9 →</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const O = [['A', 'Cho tôi một bát phở bò.', true], ['B', 'Tôi không biết.', false], ['C', 'Bao nhiêu tuổi?', false], ['D', 'Hẹn gặp lại.', false]];
+    const G = [['6', 'a'], ['7', 'a'], ['8', 'c'], ['9', ''], ['10', 'f'], ['11', '']];
+    const S = { a: ['#22c55e', '#fff', '1px solid #22c55e'], c: ['#1e3a8a', '#fff', '1px solid #1e3a8a'], f: ['#fef3c7', '#92400e', '1px solid #f59e0b'], '': ['#fff', '#334155', '1px solid #d1d5db'] };
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 16 : 34,
+      opts: O.map(([k, t, on]) => ({ k, t, on, bg: on ? '#eff6ff' : '#fff', bd: on ? '2px solid #1e3a8a' : '1px solid #e2e8f0' })),
+      grid: G.map(([n, s]) => ({ n, bg: S[s][0], fg: S[s][1], bd: S[s][2] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

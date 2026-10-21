@@ -8,14 +8,36 @@ namespace Backend.Services
     public class StripeService
     {
         private readonly StripeConfig _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
 
         public StripeService(
-            IOptions<StripeConfig> config)
+            IOptions<StripeConfig> config,
+            IHttpContextAccessor httpContextAccessor,
+            IConfiguration configuration)
         {
             _config = config.Value;
+            _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
 
             StripeConfiguration.ApiKey =
                 _config.SecretKey;
+        }
+
+        // Địa chỉ giao diện người dùng đang mở (localhost:4200, link tunnel, domain thật)
+        // để Stripe trả về đúng chỗ sau khi thanh toán.
+        private string GetFrontendBaseUrl()
+        {
+            var headers = _httpContextAccessor.HttpContext?.Request.Headers;
+
+            foreach (var candidate in new[] { headers?.Origin.ToString(), headers?.Referer.ToString() })
+            {
+                if (Uri.TryCreate(candidate, UriKind.Absolute, out var uri)
+                    && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+                    return uri.GetLeftPart(UriPartial.Authority);
+            }
+
+            return (_configuration["App:FrontendUrl"] ?? "http://localhost:4200").TrimEnd('/');
         }
 
         private long ConvertToStripeAmount(
@@ -34,6 +56,7 @@ namespace Backend.Services
             try
             {
                 currency = currency.ToUpper();
+                var frontendUrl = GetFrontendBaseUrl();
 
                 var options =
                     new SessionCreateOptions
@@ -50,12 +73,12 @@ namespace Backend.Services
                         Mode = "payment",
 
                         SuccessUrl = refName == "CLASS"
-                            ? $"http://localhost:4200/user/myclass?payment=success&paymentId={paymentId}"
-                            : $"http://localhost:4200/my-bookings?payment=success&paymentId={paymentId}",
+                            ? $"{frontendUrl}/user/myclass?payment=success&paymentId={paymentId}"
+                            : $"{frontendUrl}/my-bookings?payment=success&paymentId={paymentId}",
 
                         CancelUrl = refName == "CLASS"
-                            ? $"http://localhost:4200/user/myclass?payment=cancel&paymentId={paymentId}"
-                            : $"http://localhost:4200/my-bookings?payment=cancel&paymentId={paymentId}",
+                            ? $"{frontendUrl}/user/myclass?payment=cancel&paymentId={paymentId}"
+                            : $"{frontendUrl}/my-bookings?payment=cancel&paymentId={paymentId}",
 
                         LineItems =
                         [

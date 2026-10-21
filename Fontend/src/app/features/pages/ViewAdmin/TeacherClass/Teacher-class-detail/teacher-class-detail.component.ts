@@ -19,6 +19,7 @@ import { ReviewService } from '../../../../services/review.service';
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
 
 import { vnSessionTime } from '../../../../../core/utils/vn-time';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-class-detail',
@@ -28,6 +29,8 @@ import { vnSessionTime } from '../../../../../core/utils/vn-time';
   styleUrls: ['./teacher-class-detail.component.css'],
 })
 export class TeacherClassDetailComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   loading = false;
 
   classId = 0;
@@ -216,6 +219,6 @@ export class TeacherClassDetailComponent implements OnInit {
 
   getReviewAvatar(review: any): string | null {
     const url = review.student?.avatarUrl;
-    return url ? `http://localhost:5108/uploads/${url}` : null;
+    return url ? `${environment.serverUrl}/uploads/${url}` : null;
   }
 }

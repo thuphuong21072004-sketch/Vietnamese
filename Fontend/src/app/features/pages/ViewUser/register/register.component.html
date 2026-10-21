@@ -54,7 +54,7 @@
                 <div class="avatar-preview">
 
                     <img *ngIf="avatarUrl" [src]="
-                        'http://localhost:5108/uploads/'
+                        serverUrl + '/uploads/'
                         + avatarUrl
                       " />
                     <div *ngIf="!avatarUrl">

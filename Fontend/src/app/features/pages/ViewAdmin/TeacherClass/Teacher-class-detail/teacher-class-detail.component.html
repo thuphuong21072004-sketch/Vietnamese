@@ -107,7 +107,7 @@
 
             <div *ngFor="let student of students" class="student-item">
 
-                <img *ngIf="student.studentAvatarUrl" [src]="'http://localhost:5108/uploads/' + student.studentAvatarUrl"
+                <img *ngIf="student.studentAvatarUrl" [src]="serverUrl + '/uploads/' + student.studentAvatarUrl"
                     class="student-avatar">
 
                 <div *ngIf="!student.studentAvatarUrl" class="student-avatar placeholder">

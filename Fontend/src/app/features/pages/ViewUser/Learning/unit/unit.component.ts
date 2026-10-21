@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { LearningService } from '../../../../services/learning.service';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-unit',
@@ -18,6 +19,8 @@ import { LearningService } from '../../../../services/learning.service';
   styleUrls: ['./unit.component.css'],
 })
 export class MyProgressComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   currentLevel: any = null;
   @ViewChildren('unitNode')
   unitNodes!: QueryList<ElementRef>;

@@ -18,6 +18,7 @@ import { ReviewService } from '../../../../services/review.service';
 import { VIETNAM_DESTINATIONS } from '../../../../models/vietnam-destinations';
 
 import { vnSessionTime } from '../../../../../core/utils/vn-time';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-class-list',
@@ -27,6 +28,8 @@ import { vnSessionTime } from '../../../../../core/utils/vn-time';
   styleUrls: ['./classList.component.css'],
 })
 export class ClassListComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   loading = false;
 
   classes: TeacherClassDto[] = [];

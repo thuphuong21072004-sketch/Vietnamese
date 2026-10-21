@@ -5,6 +5,7 @@ import { AccountService } from '../../services/account.service';
 import { BaseService } from '../../services/base.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-profile',
 
@@ -60,7 +61,7 @@ export class ProfileComponent implements OnInit {
 
       this.country = res.country || '';
       this.bio = res.bio || '';
-      this.avatarUrl = res.avatarUrl ? `http://localhost:5108/uploads/${res.avatarUrl}` : '';
+      this.avatarUrl = res.avatarUrl ? `${environment.serverUrl}/uploads/${res.avatarUrl}` : '';
       this.dateOfBirth = res.dateOfBirth || '';
       this.gender = res.gender || '';
 
@@ -132,7 +133,7 @@ export class ProfileComponent implements OnInit {
       next: (res: any) => {
         this.newAvatarUrl = res.avatarUrl;
 
-        this.avatarUrl = `http://localhost:5108/uploads/${res.avatarUrl}`;
+        this.avatarUrl = `${environment.serverUrl}/uploads/${res.avatarUrl}`;
       },
 
       error: () => {

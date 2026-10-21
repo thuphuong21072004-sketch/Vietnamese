@@ -7,6 +7,7 @@ using Backend.Services;
 using Backend.Services.impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
@@ -194,6 +195,14 @@ app.UseMiddleware<UserTimeZoneMiddleware>();
 
 app.UseCors("AllowAngular");
 app.UseStaticFiles();
+
+// Bản build Angular (run-demo chép vào ClientApp) -> backend phục vụ luôn giao diện trên cùng cổng.
+// Khi code bình thường không có thư mục này nên khối dưới không chạy.
+var clientAppPath = Path.Combine(app.Environment.ContentRootPath, "ClientApp");
+var clientAppFiles = Directory.Exists(clientAppPath) ? new PhysicalFileProvider(clientAppPath) : null;
+if (clientAppFiles != null)
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = clientAppFiles });
+
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -218,5 +227,13 @@ app.MapGet("/uploads/{**file}", (string file, IWebHostEnvironment env) =>
         Path.Combine(env.WebRootPath, "images", "default-avatar.svg"),
         "image/svg+xml");
 });
+
+if (clientAppFiles != null)
+{
+    // /api sai đường dẫn vẫn trả 404 thay vì trang Angular
+    app.MapFallback("/api/{**path}", () => Results.NotFound());
+    // route của Angular (/my-bookings, /user/myclass...) khi F5 -> trả index.html để Angular tự điều hướng
+    app.MapFallbackToFile("index.html", new StaticFileOptions { FileProvider = clientAppFiles });
+}
 
 app.Run();

@@ -6,6 +6,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TestService } from '../../../../services/test.service';
 import { BaseService } from '../../../../services/base.service';
 import { LearningService } from '../../../../services/learning.service';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-quiz',
@@ -15,6 +16,8 @@ import { LearningService } from '../../../../services/learning.service';
   styleUrls: ['./test.component.css'],
 })
 export class QuizComponent implements OnChanges {
+  serverUrl = environment.serverUrl;
+
   @Input() refId!: number;
 
   @Input() refType!: string;
@@ -359,7 +362,7 @@ export class QuizComponent implements OnChanges {
 
   getAudioSrc(target: any): SafeUrl | string {
     if (target._blobUrl) return this.sanitizer.bypassSecurityTrustUrl(target._blobUrl);
-    return 'http://localhost:5108/audios/' + target.audioUrl;
+    return environment.serverUrl + '/audios/' + target.audioUrl;
   }
 
   saveQuiz() {

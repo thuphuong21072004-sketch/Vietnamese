@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Group Classes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 10px">
+    <h1 style="margin: 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">Find Vietnamese Classes</h1>
+    <div role="tablist" style="display: flex; padding: 4px; border-radius: 14px; background: #fff; border: 1px solid rgba(15,23,42,.08)">
+      <a href="GroupClasses.dc.html" role="tab" aria-selected="true" style="flex: 1; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Find classes</a>
+      <a href="MyClasses.dc.html" role="tab" aria-selected="false" style="flex: 1; height: 40px; border-radius: 10px; color: #334155; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">My Classes</a>
+    </div>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; gap: 8px">
+      <div style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 8px; padding: 0 12px; color: #94a3b8">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+        <label for="cn" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Class Name</label>
+        <input id="cn" type="search" placeholder="Class Name" style="flex: 1; min-width: 0; border: 0; outline: 0; font: 500 16px Inter, sans-serif; background: transparent">
+      </div>
+      <button type="button" style="height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(99,102,241,.18); background: #eef2ff; color: #4338ca; font: 700 14px Inter, sans-serif; display: flex; align-items: center; gap: 6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>Filters<span style="min-width: 20px; height: 20px; border-radius: 999px; background: #4f46e5; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center">2</span></button>
+    </div>
+    <div style="display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0">
+      <sc-for list="{{topics}}" as="c" hint-placeholder-count="5">
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font: 600 12px Inter, sans-serif">{{c.l}}</button>
+      </sc-for>
+    </div>
+    <sc-for list="{{classes}}" as="k" hint-placeholder-count="2">
+      <div style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; gap: 10px; align-items: center">
+          <div style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800">{{k.ini}}</div>
+          <div style="flex: 1; min-width: 0"><p style="margin: 0; font-size: 14px; font-weight: 700">{{k.teacher}}</p><p style="margin: 1px 0 0; font-size: 12px; color: #64748b">Vietnam · <span style="color: #92400e; font-weight: 700">★ {{k.rate}}</span></p></div>
+          <span style="padding: 4px 10px; border-radius: 999px; background: {{k.sbg}}; color: {{k.sfg}}; font-size: 12px; font-weight: 700">{{k.st}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline"><p style="margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.01em">{{k.title}}</p><p style="margin: 0; font-size: 17px; font-weight: 800; color: #5a2db5">{{k.price}}</p></div>
+        <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #475569">{{k.desc}}</p>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; font-size: 12px; color: #64748b">
+          <span>Topic <b style="color: #334155">{{k.topic}}</b></span><span>Time <b style="color: #334155">{{k.time}}</b></span>
+          <span>Students <b style="color: #334155">{{k.stu}}</b></span><span>Sessions <b style="color: #334155">{{k.ses}}</b></span>
+        </div>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap">
+          <sc-for list="{{k.days}}" as="d" hint-placeholder-count="3"><span style="padding: 3px 8px; border-radius: 999px; background: rgba(124,108,255,.12); color: #5a2db5; font-size: 11px; font-weight: 700">{{d}}</span></sc-for>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <a href="ClassDetail.dc.html" style="flex: 1; height: 44px; border-radius: 12px; border: 1px solid rgba(99,102,241,.18); background: #eef2ff; color: #4338ca; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">View Details</a>
+          <a href="Payment.dc.html" style="flex: 1; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Enroll Now</a>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+      learn: 'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',
+      tutor: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['home', 'Home', 'Home.dc.html'], ['learn', 'Learn', 'LearningPath.dc.html'], ['tutor', 'Tutoring', 'Tutoring.dc.html'], ['classes', 'Classes', 'GroupClasses.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'classes';
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 28, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      topics: ['All topics', 'Daily Communication', 'Work', 'Study', 'Travel', 'Exam Preparation', 'Vietnamese Culture'].map((l, i) => ({ l, bg: i === 1 ? '#7c3aed' : '#fff', fg: i === 1 ? '#fff' : '#64748b', bd: i === 1 ? '#7c3aed' : '#e2e8f0' })),
+      classes: [
+        { ini: 'H', teacher: 'Nguyễn Thu Hà', rate: '4.9', st: 'Upcoming', sbg: '#e0e7ff', sfg: '#4338ca', title: 'Daily Conversation A1', price: '$240', desc: 'Small-group speaking practice for everyday situations.', topic: 'Daily Communication', time: '19:00–20:00', stu: '6/10', ses: '10', days: ['Mon', 'Wed', 'Fri'] },
+        { ini: 'Q', teacher: 'Trần Minh Quân', rate: '4.8', st: 'Ongoing', sbg: '#dbeafe', sfg: '#1d4ed8', title: 'Small Talk at Work', price: '$180', desc: 'Polite phrases for meetings, emails and coffee breaks.', topic: 'Daily Communication', time: '07:30–08:30', stu: '8/10', ses: '8', days: ['Tue', 'Thu'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

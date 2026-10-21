@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherAvailabilityService } from '../../../../services/teacher-availability.service';
 import { BookingService } from '../../../../services/booking.service';
 import { ReviewService } from '../../../../services/review.service';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-schedule-detail',
@@ -118,7 +119,7 @@ export class ScheduleDetailComponent implements OnInit {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   getSpecialty(): string {
@@ -238,7 +239,7 @@ export class ScheduleDetailComponent implements OnInit {
       return video;
     }
 
-    return `http://localhost:5108/videos/${video}`;
+    return `${environment.serverUrl}/videos/${video}`;
   }
 
   getReviewAvatar(review: any): string {
@@ -252,6 +253,6 @@ export class ScheduleDetailComponent implements OnInit {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 }

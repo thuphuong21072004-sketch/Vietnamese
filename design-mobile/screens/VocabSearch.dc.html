@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vocabulary Search</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="Home.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Vocabulary Search</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Pronunciation search</span>
+      <h2 style="margin: 4px 0 0; font-size: 22px; font-weight: 800; letter-spacing: -0.03em">Hear Vietnamese in real clips</h2>
+    </div>
+    <form style="display: flex; gap: 8px">
+      <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search word</label>
+      <input id="q" type="search" value="xin chào" placeholder="Enter a Vietnamese word..." style="flex: 1; min-width: 0; height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(124,108,255,.45); box-shadow: 0 0 0 4px rgba(124,108,255,.12); background: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif">
+      <button type="button" style="height: 50px; padding: 0 18px; border: 0; border-radius: 12px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font: 700 15px Inter, sans-serif">Search</button>
+    </form>
+    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+      <span style="font-size: 13px; font-weight: 600; color: #64748b">Try:</span>
+      <button type="button" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 13px Inter, sans-serif">xin chào</button>
+      <button type="button" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 13px Inter, sans-serif">gia đình</button>
+      <button type="button" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 13px Inter, sans-serif">ngôi nhà</button>
+    </div>
+    <p style="margin: 0; font-size: 14px; font-weight: 700; color: #111827">Results for “xin chào”</p>
+    <div style="position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #0f172a, #334155); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; box-sizing: border-box">
+      <span style="padding: 6px 12px; border-radius: 8px; background: rgba(15,23,42,.75); color: #fff; font-size: 15px; font-weight: 600">Chào mọi người, <span style="color: #fde047">xin chào</span> các bạn!</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; background: #fff; border-radius: 14px; padding: 6px; box-shadow: 0 4px 15px rgba(15,23,42,.06)">
+      <sc-for list="{{ctrls}}" as="c" hint-placeholder-count="6">
+        <button type="button" aria-label="{{c.l}}" style="width: 48px; height: 48px; border-radius: 12px; border: 0; background: {{c.bg}}; color: {{c.fg}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.d}}"></path></svg></button>
+      </sc-for>
+    </div>
+    <section style="background: #fff; border-radius: 18px; padding: 16px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h3 style="margin: 0; font-size: 22px; font-weight: 800; color: #5a2db5">xin chào</h3>
+        <span style="font-size: 12px; font-weight: 600; color: #64748b">Vietnamese to English</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="align-self: flex-start; padding: 3px 10px; border-radius: 999px; background: rgba(124,108,255,.12); color: #5a2db5; font-size: 12px; font-weight: 700">interjection</span>
+        <p style="margin: 0; font-size: 15px; font-weight: 600">hello; hi; greetings</p>
+        <p style="margin: 0; font-size: 13px; color: #64748b">Similar: chào, chào bạn</p>
+      </div>
+      <div style="border-top: 1px solid #f1f5f9; padding-top: 10px">
+        <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #334155">Example Sentences</p>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5"><b>Xin chào</b>, tôi là Linh. <span style="color: #64748b">— Hello, I am Linh.</span></p>
+      </div>
+    </section>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+      learn: 'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',
+      tutor: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['home', 'Home', 'Home.dc.html'], ['learn', 'Learn', 'LearningPath.dc.html'], ['tutor', 'Tutoring', 'Tutoring.dc.html'], ['classes', 'Classes', 'GroupClasses.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'learn';
+    const C = [
+      ['Previous video', 'M19 20 9 12l10-8zM5 19V5', false], ['Back 5 seconds', 'M11 19l-7-7 7-7M18 19l-7-7 7-7', false],
+      ['Replay word', 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5', false], ['Pause', 'M6 4h4v16H6zM14 4h4v16h-4z', true],
+      ['Forward 5 seconds', 'M13 5l7 7-7 7M6 5l7 7-7 7', false], ['Next video', 'M5 4l10 8-10 8zM19 5v14', false]
+    ];
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17, backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6',
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      ctrls: C.map(([l, d, p]) => ({ l, d, bg: p ? 'linear-gradient(135deg, #7c6cff, #4f46e5)' : '#f5f3ff', fg: p ? '#fff' : '#4f46e5' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

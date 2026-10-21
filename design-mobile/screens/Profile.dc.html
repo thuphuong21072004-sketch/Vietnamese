@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 10px">
+    <h1 style="margin: 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">Me</h1>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <section style="background: #fff; border-radius: 24px; padding: 18px; box-shadow: 0 18px 48px rgba(99,102,241,.12); display: flex; align-items: center; gap: 14px">
+      <button type="button" aria-label="Change avatar photo" style="position: relative; width: 68px; height: 68px; flex-shrink: 0; padding: 0; border: 0; border-radius: 22px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font: 800 24px Inter, sans-serif">L<span aria-hidden="true" style="position: absolute; right: -4px; bottom: -4px; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 1px solid rgba(15,23,42,.08); box-shadow: 0 2px 8px rgba(0,0,0,.12); color: #4f46e5; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path></svg></span></button>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0; font-size: 18px; font-weight: 800; color: #5a2db5">Linh Tran</p>
+        <p style="margin: 2px 0 6px; font-size: 13px; color: #64748b">linh@example.com · Vietnam</p>
+        <span style="padding: 3px 10px; border-radius: 999px; background: rgba(79,70,229,.1); color: #4f46e5; font-size: 12px; font-weight: 700">Student</span>
+      </div>
+    </section>
+    <a href="BecomeTeacher.dc.html" style="min-height: 52px; border-radius: 16px; background: linear-gradient(135deg, #f97316, #f43f5e); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; box-shadow: 0 12px 30px rgba(244,63,94,.22)">Become a Teacher</a>
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section style="display: flex; flex-direction: column; gap: 6px">
+        <h2 style="margin: 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">{{g.t}}</h2>
+        <div style="background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(15,23,42,.06); overflow: hidden">
+          <sc-for list="{{g.items}}" as="i" hint-placeholder-count="3">
+            <a href="{{i.href}}" style="min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: {{i.c}}; border-bottom: 1px solid #f1f5f9">
+              <span style="width: 32px; height: 32px; border-radius: 10px; background: {{i.bg}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.d}}"></path></svg></span>
+              <span style="flex: 1; font-size: 15px; font-weight: 600">{{i.l}}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+      learn: 'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',
+      tutor: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['home', 'Home', 'Home.dc.html'], ['learn', 'Learn', 'LearningPath.dc.html'], ['tutor', 'Tutoring', 'Tutoring.dc.html'], ['classes', 'Classes', 'GroupClasses.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'me';
+    const it = (l, d, href, danger) => ({ l, d, href, c: danger ? '#dc2626' : '#334155', bg: danger ? '#fef2f2' : '#eef2ff' });
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 30, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      groups: [
+        { t: 'Learning', items: [it('Dashboard', 'M3 3v18h18M18 17V9M13 17V5M8 17v-3', 'StudentDashboard.dc.html'), it('Practice Speaking', 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3', 'Speaking.dc.html'), it('Vocabulary Search', 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3', 'VocabSearch.dc.html')] },
+        { t: 'Travel', items: [it('Travel Plans', 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0zM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'TravelTrips.dc.html'), it('Invites & Requests', 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6', 'TravelRequests.dc.html')] },
+        { t: 'Account', items: [it('Update Information', 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', '#'), it('Change Password', 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4', '#'), it('Log out', 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9', 'Main.dc.html', true)] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

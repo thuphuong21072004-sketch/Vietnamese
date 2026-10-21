@@ -42,7 +42,7 @@
       <div class="card-header">
         <div class="avatar-wrap">
           <img *ngIf="trip.studentAvatarUrl"
-               [src]="'http://localhost:5108/uploads/' + trip.studentAvatarUrl"
+               [src]="serverUrl + '/uploads/' + trip.studentAvatarUrl"
                class="avatar">
           <div *ngIf="!trip.studentAvatarUrl" class="avatar placeholder">
             {{ trip.studentName?.charAt(0) }}

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { jwtDecode } from 'jwt-decode';
 import { TeacherProfileService } from '../../../services/teacherProfile.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-profile',
@@ -12,6 +13,8 @@ import { TeacherProfileService } from '../../../services/teacherProfile.service'
   styleUrls: ['./becometeacher.component.css'],
 })
 export class TeacherProfileComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   profile: any = {
     teacherProfileId: 0,
     userId: 0,

@@ -4,6 +4,7 @@ import { AccountService } from '../../../services/account.service';
 import { BaseService } from '../../../services/base.service';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../../environments/environment';
 
 
 @Component({
@@ -14,6 +15,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   name: string = '';
   email: string = '';
   password: string = '';

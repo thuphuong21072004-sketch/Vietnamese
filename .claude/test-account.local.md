@@ -11,5 +11,3 @@ Chỉ dùng cho database local `vietnamese` trên localhost\SQLEXPRESS.
 - demo.admin@example.test — Admin (RoleId 2)
 - demo.teacher@example.test — Teacher (RoleId 5, có TeacherProfile Status=4 đã duyệt)
 - demo.moderator@example.test — Moderator (RoleId 3)
-
-Vai trò được đổi trực tiếp trong DB local sau khi đăng ký qua API.

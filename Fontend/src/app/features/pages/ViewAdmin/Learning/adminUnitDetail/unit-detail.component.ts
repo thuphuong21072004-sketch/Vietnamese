@@ -6,6 +6,7 @@ import { LearningService } from '../../../../services/learning.service';
 import { UnitDTO } from '../../../../models/unit.model';
 
 import { QuizComponent } from '../quiz/test.component';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-unit-detail',
@@ -53,7 +54,7 @@ export class UnitDetailComponent implements OnInit {
       this.learningService.getUnitById(this.unitId).subscribe((res) => {
         this.unit = res;
         if (res.videoUrl && res.videoUrl.trim() !== '') {
-          this.videoFullUrl = `http://localhost:5108/videos/${res.videoUrl}`;
+          this.videoFullUrl = `${environment.serverUrl}/videos/${res.videoUrl}`;
         }
         this.tempVideoUrl = res.videoUrl;
       });
@@ -113,7 +114,7 @@ export class UnitDetailComponent implements OnInit {
     this.learningService.uploadMedia(formData).subscribe((res: any) => {
       this.tempVideoUrl = res.fileName;
       this.unit.videoUrl = res.fileName;
-      this.videoFullUrl = `http://localhost:5108/videos/${res.fileName}`;
+      this.videoFullUrl = `${environment.serverUrl}/videos/${res.fileName}`;
     });
   }
 

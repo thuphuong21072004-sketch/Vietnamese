@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lesson</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="LearningPath.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Lesson</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 16px">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Current lesson</span>
+      <h2 style="margin: 4px 0 0; font-size: 26px; font-weight: 800; letter-spacing: -0.03em">Unit 4 · Ordering food</h2>
+    </div>
+    <div style="position: relative; aspect-ratio: 16 / 9; border-radius: 18px; overflow: hidden; background: linear-gradient(135deg, #1e293b, #312e81); display: flex; align-items: center; justify-content: center; box-shadow: 0 18px 48px rgba(99,102,241,.18)">
+      <button type="button" aria-label="Play lesson video" style="width: 64px; height: 64px; border-radius: 50%; border: 0; background: rgba(255,255,255,.95); color: #4f46e5; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></button>
+      <div style="position: absolute; left: 12px; right: 12px; bottom: 10px; display: flex; align-items: center; gap: 10px; color: #fff; font-size: 12px; font-weight: 600">
+        <span>00:00</span>
+        <div style="flex: 1; height: 4px; border-radius: 999px; background: rgba(255,255,255,.3)"><div style="width: 8%; height: 4px; border-radius: 999px; background: #a78bfa"></div></div>
+        <span>08:42</span>
+      </div>
+    </div>
+    <section style="background: #f5f3ff; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Objective</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #334155">Order dishes and drinks politely, ask for the price and request the bill in Vietnamese.</p>
+    </section>
+    <section style="background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 6px">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Description</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #334155">Watch a short scene at a local phở stall. You will hear "Cho tôi…", "Bao nhiêu tiền?" and "Tính tiền" in real conversation, then practise each phrase.</p>
+    </section>
+  </div>
+  <div style="flex-shrink: 0; padding: 12px 16px {{bot}}px; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08)">
+    <a href="Quiz.dc.html" style="height: 52px; border-radius: 14px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,108,255,.3)">Start Test</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    return { w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 16 : 34,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17, backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6' };
+  }
+}
+</script>
+</body>
+</html>

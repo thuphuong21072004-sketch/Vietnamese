@@ -105,7 +105,7 @@ export class TeacherAvailabilityService {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   /*

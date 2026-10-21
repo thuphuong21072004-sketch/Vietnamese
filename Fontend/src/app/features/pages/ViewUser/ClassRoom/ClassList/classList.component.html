@@ -277,7 +277,7 @@
             " class="class-card">
 <div class="teacher-header">
 
-    <img *ngIf="item.avatarUrl" [src]="'http://localhost:5108/uploads/' + item.avatarUrl" class="teacher-avatar">
+    <img *ngIf="item.avatarUrl" [src]="serverUrl + '/uploads/' + item.avatarUrl" class="teacher-avatar">
 
     <div *ngIf="!item.avatarUrl" class="teacher-avatar placeholder">
         {{ item.teacherName?.charAt(0) }}

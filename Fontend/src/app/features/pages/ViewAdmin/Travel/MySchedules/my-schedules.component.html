@@ -100,7 +100,7 @@
         <div *ngFor="let trip of suggestions[s.scheduleId]" class="suggestion-card">
           <div class="sugg-avatar-wrap">
             <img *ngIf="trip.studentAvatarUrl"
-              [src]="'http://localhost:5108/uploads/' + trip.studentAvatarUrl"
+              [src]="serverUrl + '/uploads/' + trip.studentAvatarUrl"
               class="sugg-avatar">
             <div *ngIf="!trip.studentAvatarUrl" class="sugg-avatar placeholder">
               {{ trip.studentName?.charAt(0) }}
@@ -149,7 +149,7 @@
         <div *ngFor="let req of requestsBySchedule[s.scheduleId]" class="suggestion-card">
           <div class="sugg-avatar-wrap">
             <img *ngIf="req.studentAvatarUrl"
-              [src]="'http://localhost:5108/uploads/' + req.studentAvatarUrl"
+              [src]="serverUrl + '/uploads/' + req.studentAvatarUrl"
               class="sugg-avatar">
             <div *ngIf="!req.studentAvatarUrl" class="sugg-avatar placeholder">
               {{ req.studentName?.charAt(0) }}

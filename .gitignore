@@ -190,3 +190,6 @@ PublishProfiles/
 .claude/skills/
 
 .models/
+
+# Ban build Angular do run-demo chep vao
+Backend/Backend/ClientApp/

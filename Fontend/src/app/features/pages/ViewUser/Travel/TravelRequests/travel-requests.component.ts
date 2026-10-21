@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TravelService } from '../../../../services/travel.service';
 import { MatchRequestDto } from '../../../../models/travel.model';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-user-travel-requests',
@@ -13,6 +14,8 @@ import { MatchRequestDto } from '../../../../models/travel.model';
   styleUrls: ['./travel-requests.component.css'],
 })
 export class UserTravelRequestsComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   requests: MatchRequestDto[] = [];
   loading = false;
 

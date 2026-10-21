@@ -12,6 +12,7 @@ import {
 } from '../../../../models/teacher-class.model';
 
 import { vnSessionTime } from '../../../../../core/utils/vn-time';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-student-course-detail',
@@ -21,6 +22,8 @@ import { vnSessionTime } from '../../../../../core/utils/vn-time';
   styleUrls: ['./classDetail.component.css'],
 })
 export class StudentCourseDetailComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   loading = false;
 
   classId = 0;
@@ -144,7 +147,7 @@ export class StudentCourseDetailComponent implements OnInit {
 
   getReviewAvatar(review: any): string | null {
     const url = review.student?.avatarUrl;
-    return url ? `http://localhost:5108/uploads/${url}` : null;
+    return url ? `${environment.serverUrl}/uploads/${url}` : null;
   }
 
   selectSession(session: ClassSessionDto): void {

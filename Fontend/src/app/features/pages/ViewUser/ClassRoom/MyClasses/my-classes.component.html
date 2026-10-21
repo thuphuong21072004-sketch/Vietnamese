@@ -67,7 +67,7 @@
 
             <div class="teacher-section">
 
-                <img *ngIf="item.teacherAvatarUrl" [src]="'http://localhost:5108/uploads/' + item.teacherAvatarUrl"
+                <img *ngIf="item.teacherAvatarUrl" [src]="serverUrl + '/uploads/' + item.teacherAvatarUrl"
                     class="teacher-avatar">
                 
                 <div *ngIf="!item.teacherAvatarUrl" class="teacher-avatar placeholder">

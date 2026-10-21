@@ -8,6 +8,7 @@ import { StudentTripDto, TeacherScheduleDto } from '../../../../models/travel.mo
 import { TeacherClassDto } from '../../../../models/teacher-class.model';
 import { VIETNAM_DESTINATIONS, DestinationGroup } from '../../../../models/vietnam-destinations';
 import { vnDateString } from '../../../../../core/utils/vn-time';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-my-trips',
@@ -17,6 +18,8 @@ import { vnDateString } from '../../../../../core/utils/vn-time';
   styleUrls: ['./my-trips.component.css'],
 })
 export class MyTripsComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   trips: StudentTripDto[] = [];
   loading = false;
   saving = false;

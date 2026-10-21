@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { forkJoin, of, catchError } from 'rxjs';
 import { TravelService } from '../../../../services/travel.service';
 import { StudentTripDto, TeacherScheduleDto, MatchRequestDto, TravelBookingDto } from '../../../../models/travel.model';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-student-trips-browse',
@@ -14,6 +15,8 @@ import { StudentTripDto, TeacherScheduleDto, MatchRequestDto, TravelBookingDto }
   styleUrls: ['./student-trips-browse.component.css'],
 })
 export class StudentTripsBrowseComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   trips: StudentTripDto[] = [];
   mySchedules: TeacherScheduleDto[] = [];
   outgoingRequests: MatchRequestDto[] = [];

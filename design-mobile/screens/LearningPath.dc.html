@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Learning Path</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 12px; display: flex; flex-direction: column; gap: 4px">
+    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Level 1</span>
+    <h1 style="margin: 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">Everyday Basics</h1>
+    <p style="margin: 0; font-size: 14px; color: #64748b">Greetings, numbers, food and getting around.</p>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 0 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="padding: 12px 16px; border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(99,102,241,.25)">
+      <div>
+        <p style="margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: .8">Course 2</p>
+        <p style="margin: 2px 0 0; font-size: 16px; font-weight: 800">Food &amp; Drinks</p>
+      </div>
+      <span style="font-size: 13px; font-weight: 700">3 / 6 units</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 6px 0">
+      <sc-for list="{{nodes}}" as="n" hint-placeholder-count="6">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; transform: translateX({{n.x}}px)">
+          <a href="{{n.href}}" aria-label="{{n.aria}}" style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; background: {{n.bg}}; color: {{n.fg}}; box-shadow: {{n.sh}}">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="{{n.fill}}" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg>
+          </a>
+          <span style="max-width: 120px; text-align: center; font-size: 12px; font-weight: 700; color: {{n.lc}}">{{n.label}}</span>
+        </div>
+      </sc-for>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+        <button type="button" disabled style="width: 72px; height: 72px; border-radius: 50%; border: 2px dashed #d1d5db; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button>
+        <span style="font-size: 12px; font-weight: 700; color: #94a3b8">Skip Course Test</span>
+      </div>
+    </div>
+    <a href="Quiz.dc.html" style="min-height: 50px; border-radius: 14px; border: 1px solid rgba(99,102,241,.18); background: #eef2ff; color: #4338ca; font-size: 15px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4a2 2 0 0 1 0-4h2M18 9h2a2 2 0 0 0 0-4h-2M6 3h12v7a6 6 0 0 1-12 0zM12 16v4M8 21h8"></path></svg>Skip Level Test</a>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+      learn: 'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',
+      tutor: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['home', 'Home', 'Home.dc.html'], ['learn', 'Learn', 'LearningPath.dc.html'], ['tutor', 'Tutoring', 'Tutoring.dc.html'], ['classes', 'Classes', 'GroupClasses.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'learn';
+    const K = {
+      done: { bg: '#22c55e', fg: '#fff', sh: '0 6px 0 #16a34a', d: 'M20 6 9 17l-5-5', fill: 'none', lc: '#166534', href: 'Lesson.dc.html', a: 'completed' },
+      current: { bg: 'linear-gradient(135deg, #7c6cff, #4f46e5)', fg: '#fff', sh: '0 0 0 8px rgba(124,108,255,.18), 0 6px 0 #4338ca', d: 'M8 5v14l11-7z', fill: 'currentColor', lc: '#5a2db5', href: 'Lesson.dc.html', a: 'current lesson' },
+      locked: { bg: '#e5e7eb', fg: '#9ca3af', sh: '0 6px 0 #d1d5db', d: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4', fill: 'none', lc: '#94a3b8', href: '#', a: 'locked' }
+    };
+    const N = [['Café talk', 'done', 0], ['Numbers & prices', 'done', 56], ['Ordering food', 'current', 84], ['At the market', 'locked', 40], ['Street food', 'locked', -30], ['Paying the bill', 'locked', -70]];
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 30, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      nodes: N.map(([label, k, x]) => ({ label, x, aria: label + ', ' + K[k].a, ...K[k] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payment</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="TutorDetail.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Secure Payment</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <section style="border-radius: 22px; padding: 18px; color: #fff; background: linear-gradient(135deg, #7c3aed, #6366f1); box-shadow: 0 18px 48px rgba(99,102,241,.25); display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; font-weight: 600; opacity: .85">Payment Details</span><span style="padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.2); font-size: 12px; font-weight: 700">Private Lesson</span></div>
+      <p style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em">$15.00</p>
+      <p style="margin: 0; font-size: 13px; opacity: .9">Nguyễn Thu Hà · 23/10/2026 · 19:00–20:00</p>
+    </section>
+    <section style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 4px">
+      <h2 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #111827">Booking Information</h2>
+      <sc-for list="{{info}}" as="r" hint-placeholder-count="6">
+        <div style="display: flex; justify-content: space-between; align-items: center; min-height: 34px; border-bottom: 1px solid #f1f5f9; font-size: 14px"><span style="color: #64748b">{{r.k}}</span><b>{{r.v}}</b></div>
+      </sc-for>
+    </section>
+    <h2 style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #111827">Select Payment Method</h2>
+    <div role="tablist" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <button type="button" role="tab" aria-selected="false" style="min-height: 64px; border-radius: 14px; border: 2px solid #e5e7eb; background: #f9fafb; color: #334155; font: 700 13px Inter, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h20v14H2zM2 10h20"></path></svg>Credit / Debit Card</button>
+      <button type="button" role="tab" aria-selected="true" style="min-height: 64px; border-radius: 14px; border: 2px solid #4f46e5; background: #eef2ff; box-shadow: 0 0 0 3px rgba(79,70,229,.15); color: #4338ca; font: 700 13px Inter, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"></path></svg>Bank Transfer (VietQR)</button>
+    </div>
+    <section style="background: #fff; border-radius: 18px; padding: 16px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; align-items: center; gap: 12px">
+      <div aria-label="VietQR code" role="img" style="width: 180px; height: 180px; border-radius: 14px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #fff">
+        <svg width="148" height="148" viewBox="0 0 37 37" aria-hidden="true"><path fill="#0f172a" d="M0 0h9v9H0zM2 2v5h5V2zM28 0h9v9h-9zM30 2v5h5V2zM0 28h9v9H0zM2 30v5h5v-5zM3 3h3v3H3zM31 3h3v3h-3zM3 31h3v3H3zM11 1h2v2h-2zM15 0h3v2h-3zM20 2h2v3h-2zM12 5h4v2h-4zM18 6h3v2h-3zM23 4h2v4h-2zM11 10h3v2h-3zM16 10h2v4h-2zM20 11h4v2h-4zM26 10h3v2h-3zM31 11h3v3h-3zM1 12h3v2H1zM6 11h2v4H6zM10 15h4v2h-4zM19 15h2v2h-2zM23 15h3v3h-3zM28 15h2v4h-2zM33 16h3v2h-3zM2 17h3v3H2zM12 19h3v3h-3zM17 18h4v2h-4zM31 20h2v3h-2zM7 20h3v2H7zM22 21h4v2h-4zM11 24h2v3h-2zM15 24h3v2h-3zM20 25h2v2h-2zM25 24h3v3h-3zM30 25h5v2h-5zM12 29h4v2h-4zM18 28h2v4h-2zM22 30h3v2h-3zM27 29h2v4h-2zM31 31h4v2h-4zM11 34h3v2h-3zM16 33h3v3h-3zM23 34h3v2h-3zM33 35h3v2h-3z"></path></svg>
+      </div>
+      <div style="align-self: stretch; display: flex; flex-direction: column; gap: 2px">
+        <sc-for list="{{bank}}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; justify-content: space-between; align-items: center; min-height: 34px; border-bottom: 1px solid #f1f5f9; font-size: 14px"><span style="color: #64748b">{{r.k}}</span><b>{{r.v}}</b></div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+  <div style="flex-shrink: 0; padding: 12px 16px {{bot}}px; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08)">
+    <a href="MyBookings.dc.html" style="height: 52px; border-radius: 14px; background: linear-gradient(135deg, #059669, #10b981); color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16,185,129,.25)">I've Transferred</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const kv = (rows) => rows.map(([k, v]) => ({ k, v }));
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 16 : 34,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17, backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6',
+      info: kv([['Booking ID', '#1042'], ['Teacher', 'Nguyễn Thu Hà'], ['Date', '23/10/2026'], ['Time', '19:00 – 20:00'], ['Duration', '1 hour'], ['Price / Hour', '$15.00'], ['Total Payment', '$15.00']]),
+      bank: kv([['Bank', '[BANK NAME]'], ['Account No', '[ACCOUNT NO]'], ['Account Name', '[ACCOUNT NAME]'], ['Amount (VND)', '[AMOUNT VND]'], ['Description', 'VP BOOKING 1042']])
+    };
+  }
+}
+</script>
+</body>
+</html>

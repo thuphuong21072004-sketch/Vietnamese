@@ -171,7 +171,7 @@
         <div *ngFor="let cls of reservedClasses[trip.tripId]" class="class-row"
              [class.class-row--enrolled]="cls.classId === trip.enrolledClassId">
           <div class="class-row-avatar">
-            <img *ngIf="cls.avatarUrl" [src]="'http://localhost:5108/uploads/' + cls.avatarUrl" class="row-avatar">
+            <img *ngIf="cls.avatarUrl" [src]="serverUrl + '/uploads/' + cls.avatarUrl" class="row-avatar">
             <div *ngIf="!cls.avatarUrl" class="row-avatar placeholder">{{ cls.teacherName?.charAt(0) }}</div>
           </div>
           <div class="class-row-info">
@@ -207,7 +207,7 @@
 
         <div *ngFor="let s of suggestions[trip.tripId]" class="teacher-row">
           <div class="row-avatar-wrap">
-            <img *ngIf="s.teacherAvatarUrl" [src]="'http://localhost:5108/uploads/' + s.teacherAvatarUrl" class="row-avatar">
+            <img *ngIf="s.teacherAvatarUrl" [src]="serverUrl + '/uploads/' + s.teacherAvatarUrl" class="row-avatar">
             <div *ngIf="!s.teacherAvatarUrl" class="row-avatar placeholder">{{ s.teacherName?.charAt(0) }}</div>
           </div>
           <div class="teacher-row-info">

@@ -8,8 +8,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
   const router = inject(Router);
 
+  // serverUrl rỗng (bản build) → backend cùng địa chỉ với giao diện, nhận diện qua đường dẫn tương đối
   const isBackendRequest = req.url.startsWith(environment.apiBaseUrl) ||
-    req.url.startsWith('http://localhost:5108');
+    (environment.serverUrl ? req.url.startsWith(environment.serverUrl) : req.url.startsWith('/'));
 
   if (isBackendRequest) {
     req = req.clone({

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Student Dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="Profile.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Student Dashboard</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; gap: 8px; align-items: center">
+      <label for="m" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Month</label>
+      <input id="m" type="month" value="2026-10" style="flex: 1; min-width: 0; height: 46px; box-sizing: border-box; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; padding: 0 12px; font: 600 16px Inter, sans-serif; color: #0f172a">
+      <label style="height: 46px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #334155"><input type="checkbox" style="width: 20px; height: 20px; margin: 0; accent-color: #7c3aed">All time</label>
+    </div>
+    <div style="border-radius: 18px; padding: 18px; background: #fff; border-left: 4px solid #7c3aed; box-shadow: 0 4px 16px rgba(0,0,0,.08)">
+      <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 600">Total Paid</p>
+      <p style="margin: 6px 0 0; font-size: 30px; font-weight: 800">$420.00</p>
+      <p style="margin: 2px 0 0; font-size: 12px; color: #64748b">October 2026</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="6">
+        <div style="border-radius: 16px; padding: 14px; background: #fff; border-left: 4px solid {{s.c}}; box-shadow: 0 4px 16px rgba(0,0,0,.06)">
+          <p style="margin: 0; font-size: 12px; line-height: 1.3; color: #6b7280; font-weight: 600">{{s.l}}</p>
+          <p style="margin: 6px 0 0; font-size: 22px; font-weight: 800">{{s.v}}</p>
+        </div>
+      </sc-for>
+    </div>
+    <h2 style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #111827">My Courses</h2>
+    <sc-for list="{{courses}}" as="c" hint-placeholder-count="3">
+      <div style="background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start">
+          <div style="min-width: 0"><p style="margin: 0; font-size: 15px; font-weight: 700">{{c.cls}}</p><p style="margin: 2px 0 0; font-size: 13px; color: #64748b">{{c.teacher}}</p></div>
+          <span style="flex-shrink: 0; padding: 4px 10px; border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; font-size: 12px; font-weight: 700">{{c.status}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569"><span>Paid On {{c.date}}</span><b style="color: #0f172a">{{c.amt}}</b></div>
+      </div>
+    </sc-for>
+    <div style="display: flex; justify-content: space-between; padding: 12px 14px; border-top: 2px solid #e5e7eb; font-size: 14px; font-weight: 800"><span>Total (3 courses)</span><span>$420.00</span></div>
+    <h2 style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #111827">Monthly Payment Breakdown</h2>
+    <div style="background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; justify-content: space-between"><b style="font-size: 15px">October 2026</b><b style="font-size: 15px">$420.00</b></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; font-size: 13px; color: #475569">
+        <span>Completed <b style="color: #15803d">$120</b></span><span>Active <b style="color: #1d4ed8">$240</b></span>
+        <span>Cancelled <b style="color: #ea580c">$60</b></span><span>Refunded <b style="color: #7e22ce">$0</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const B = { Ongoing: ['#dbeafe', '#1d4ed8'], Completed: ['#dcfce7', '#166534'], Cancelled: ['#fee2e2', '#dc2626'] };
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17, backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6',
+      stats: [
+        { l: 'Completed Learning', v: '$120', c: '#16a34a' }, { l: 'Active Learning', v: '$240', c: '#2563eb' },
+        { l: 'Cancelled (Pending Refund)', v: '$60', c: '#ea580c' }, { l: 'Refunded', v: '$0', c: '#dc2626' },
+        { l: 'My Courses', v: '3', c: '#7c3aed' }, { l: 'Spent on Courses', v: '$420', c: '#7c3aed' }
+      ],
+      courses: [
+        ['Daily Conversation A1', 'Nguyễn Thu Hà', 'Ongoing', '02/10/2026', '$240.00'],
+        ['Street Food Vocabulary', 'Trần Minh Quân', 'Completed', '05/09/2026', '$120.00'],
+        ['Business Vietnamese', 'Lê Hoàng Anh', 'Cancelled', '12/10/2026', '$60.00']
+      ].map(([cls, teacher, status, date, amt]) => ({ cls, teacher, status, date, amt, bg: B[status][0], fg: B[status][1] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

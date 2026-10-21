@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create Class</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="TeacherClasses.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Create Class</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <form style="background: #fff; border-radius: 20px; padding: 16px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; flex-direction: column; gap: 6px"><label for="ti" style="font-size: 13px; font-weight: 600; color: #334155">Title</label><input id="ti" type="text" value="Daily Conversation A2" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 14px; font: 500 16px Inter, sans-serif"></div>
+      <div style="display: flex; flex-direction: column; gap: 6px"><label for="ds" style="font-size: 13px; font-weight: 600; color: #334155">Description</label><textarea id="ds" rows="3" style="box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 12px 14px; font: 500 16px Inter, sans-serif; resize: none">Continue everyday speaking with longer conversations.</textarea></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="mt" style="font-size: 13px; font-weight: 600; color: #334155">Main Topic</label><select id="mt" style="height: 48px; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif; background: #fff; min-width: 0"><option>Daily Communication</option></select></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="st" style="font-size: 13px; font-weight: 600; color: #334155">Sub Topic</label><select id="st" style="height: 48px; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif; background: #fff; min-width: 0"><option>Shopping</option></select></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="pc" style="font-size: 13px; font-weight: 600; color: #334155">Price</label><input id="pc" type="number" value="240" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 16px Inter, sans-serif; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="ms" style="font-size: 13px; font-weight: 600; color: #334155">Max Students</label><input id="ms" type="number" value="10" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 16px Inter, sans-serif; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="ts" style="font-size: 13px; font-weight: 600; color: #334155">Sessions</label><input id="ts" type="number" value="10" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 16px Inter, sans-serif; min-width: 0"></div>
+      </div>
+      <span style="margin-top: -8px; font-size: 12px; font-weight: 600; color: #dc2626">Maximum allowed price: [MAX PRICE]</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="sd" style="font-size: 13px; font-weight: 600; color: #334155">Start Date</label><input id="sd" type="text" value="02/11/2026" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="sti" style="font-size: 13px; font-weight: 600; color: #334155">Start Time</label><input id="sti" type="text" value="19:00" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><label for="eti" style="font-size: 13px; font-weight: 600; color: #334155">End Time</label><input id="eti" type="text" value="20:00" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif; min-width: 0"></div>
+      </div>
+      <fieldset style="border: 0; margin: 0; padding: 0">
+        <legend style="font-size: 13px; font-weight: 600; color: #334155; padding: 0; margin-bottom: 8px">Study Days</legend>
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+          <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+            <button type="button" aria-pressed="{{d.on}}" style="height: 44px; border-radius: 10px; border: 1.5px solid {{d.bd}}; background: {{d.bg}}; color: {{d.fg}}; font: 700 12px Inter, sans-serif; padding: 0">{{d.l}}</button>
+          </sc-for>
+        </div>
+      </fieldset>
+      <button type="button" style="height: 48px; border-radius: 12px; border: 1px solid rgba(99,102,241,.18); background: #eef2ff; color: #4338ca; font: 700 15px Inter, sans-serif">Generate Schedule</button>
+    </form>
+    <section style="background: #fff; border-radius: 20px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Sessions</h2>
+      <sc-for list="{{sessions}}" as="s" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 32px; flex-shrink: 0; font-size: 13px; font-weight: 800; color: #5a2db5">{{s.n}}</span>
+          <span style="width: 74px; flex-shrink: 0; font-size: 12px; color: #64748b">{{s.d}}</span>
+          <label for="{{s.id}}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Topic</label>
+          <input id="{{s.id}}" type="text" value="{{s.t}}" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0 10px; font: 500 15px Inter, sans-serif">
+        </div>
+      </sc-for>
+    </section>
+  </div>
+  <div style="flex-shrink: 0; padding: 12px 16px {{bot}}px; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08)">
+    <a href="TeacherClasses.dc.html" style="height: 52px; border-radius: 14px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,108,255,.3)">Save Class</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const on = ['Mon', 'Wed', 'Fri'];
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 16 : 34,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17,
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((l) => { const o = on.includes(l); return { l, on: o ? 'true' : 'false', bg: o ? '#7c3aed' : '#fff', fg: o ? '#fff' : '#64748b', bd: o ? '#7c3aed' : '#e2e8f0' }; }),
+      sessions: [['1', 'Mon 02/11', 'Talking about family'], ['2', 'Wed 04/11', 'Weekend plans'], ['3', 'Fri 06/11', 'At the doctor']].map(([n, d, t]) => ({ n, d, t, id: 'topic' + n }))
+    };
+  }
+}
+</script>
+</body>
+</html>

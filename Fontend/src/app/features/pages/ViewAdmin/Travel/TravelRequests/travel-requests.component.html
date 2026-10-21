@@ -31,7 +31,7 @@
         <div class="people">
           <div class="person">
             <div class="person-avatar" *ngIf="req.teacherAvatarUrl">
-              <img [src]="'http://localhost:5108/uploads/' + req.teacherAvatarUrl">
+              <img [src]="serverUrl + '/uploads/' + req.teacherAvatarUrl">
             </div>
             <div class="person-avatar placeholder" *ngIf="!req.teacherAvatarUrl">
               {{ req.teacherName?.charAt(0) }}
@@ -46,7 +46,7 @@
 
           <div class="person">
             <div class="person-avatar" *ngIf="req.studentAvatarUrl">
-              <img [src]="'http://localhost:5108/uploads/' + req.studentAvatarUrl">
+              <img [src]="serverUrl + '/uploads/' + req.studentAvatarUrl">
             </div>
             <div class="person-avatar placeholder" *ngIf="!req.studentAvatarUrl">
               {{ req.studentName?.charAt(0) }}

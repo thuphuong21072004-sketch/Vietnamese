@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
 import { ReviewService } from '../../../../services/review.service';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-detail',
@@ -14,6 +15,8 @@ import { ReviewService } from '../../../../services/review.service';
   styleUrls: ['./teacher-detail.component.css'],
 })
 export class TeacherDetailComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   teacher: any = null;
 
   loading = true;
@@ -66,7 +69,7 @@ export class TeacherDetailComponent implements OnInit {
           !this.teacher.introVideoUrl.startsWith('http')
         ) {
           this.teacher.introVideoUrl =
-            'http://localhost:5108/videos/' + this.teacher.introVideoUrl;
+            environment.serverUrl + '/videos/' + this.teacher.introVideoUrl;
         }
 
         if (this.teacher?.introVideoUrl) {
@@ -282,6 +285,6 @@ export class TeacherDetailComponent implements OnInit {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.serverUrl}/uploads/${url}`;
   }
 }

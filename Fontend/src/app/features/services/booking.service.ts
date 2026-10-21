@@ -165,7 +165,7 @@ export class BookingService {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   getStudentAvatar(booking: any): string {
@@ -179,7 +179,7 @@ export class BookingService {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   /*
@@ -313,6 +313,6 @@ export class BookingService {
       return video;
     }
 
-    return `http://localhost:5108/videos/${video}`;
+    return `${environment.serverUrl}/videos/${video}`;
   }
 }

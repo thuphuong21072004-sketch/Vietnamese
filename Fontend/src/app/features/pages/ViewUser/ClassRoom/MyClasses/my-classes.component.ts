@@ -7,6 +7,7 @@ import { ClassEnrollmentService } from '../../../../services/class-enrollment.se
 import { ClassEnrollmentDto } from '../../../../models/class-enrollment.model';
 
 import { vnSessionTime } from '../../../../../core/utils/vn-time';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-my-classes',
@@ -16,6 +17,8 @@ import { vnSessionTime } from '../../../../../core/utils/vn-time';
   styleUrls: ['./my-classes.component.css'],
 })
 export class MyClassesComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   enrollments: ClassEnrollmentDto[] = [];
   loading = false;
 

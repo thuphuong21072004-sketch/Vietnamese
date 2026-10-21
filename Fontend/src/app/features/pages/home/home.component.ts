@@ -5,6 +5,7 @@ import { forkJoin, map, of, switchMap } from 'rxjs';
 import { LearningService } from '../../services/learning.service';
 import { CourseDTO } from '../../models/course.model';
 import { LevelDTO } from '../../models/level.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -164,6 +165,6 @@ export class HomeComponent implements OnInit {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.serverUrl}/uploads/${url}`;
   }
 }

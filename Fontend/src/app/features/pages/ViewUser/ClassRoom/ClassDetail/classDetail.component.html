@@ -43,7 +43,7 @@
         <div class="teacher-top">
 
             <img *ngIf="teacherClass.teacherProfile?.avatarUrl"
-                [src]="'http://localhost:5108/uploads/' + teacherClass.teacherProfile?.avatarUrl"
+                [src]="serverUrl + '/uploads/' + teacherClass.teacherProfile?.avatarUrl"
                 class="teacher-avatar">
 
             <div class="teacher-meta">
@@ -63,7 +63,7 @@
         <p class="teacher-description">{{ teacherClass.teacherProfile?.description }}</p>
 
         <video *ngIf="teacherClass.teacherProfile?.introVideoUrl" controls class="intro-video">
-            <source [src]="'http://localhost:5108/videos/' + teacherClass.teacherProfile?.introVideoUrl">
+            <source [src]="serverUrl + '/videos/' + teacherClass.teacherProfile?.introVideoUrl">
         </video>
 
         <div class="teacher-rating">

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Register</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; position: relative; overflow: hidden; display: flex; flex-direction: column; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #fff; background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #312e81 100%)">
+  <div aria-hidden="true" style="position: absolute; width: 240px; height: 240px; border-radius: 50%; background: #7c3aed; opacity: .32; filter: blur(60px); top: -70px; right: -60px"></div>
+  <div aria-hidden="true" style="position: absolute; width: 220px; height: 220px; border-radius: 50%; background: #2563eb; opacity: .26; filter: blur(60px); bottom: 80px; left: -100px"></div>
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="position: relative; flex-shrink: 0; display: flex; align-items: center; padding: 0 8px; height: {{barH}}px">
+    <a href="Main.dc.html" aria-label="Back to login" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #c4b5fd"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+  </header>
+  <div style="position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 20px {{bot}}px; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.03em">Start Your Journey</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #cbd5e1">Create your account to unlock lessons, tutors and live classes.</p>
+    </div>
+    <form style="background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 24px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; backdrop-filter: blur(18px)">
+      <div>
+        <h2 style="margin: 0; font-size: 20px; font-weight: 800">Register</h2>
+        <p style="margin: 4px 0 0; font-size: 14px; color: #94a3b8">Create your account</p>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <button type="button" aria-label="Choose avatar photo" style="position: relative; width: 92px; height: 92px; padding: 0; border-radius: 50%; border: 2px dashed rgba(167,139,250,.6); background: rgba(255,255,255,.06); color: #c4b5fd; display: flex; align-items: center; justify-content: center">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path></svg>
+          <span aria-hidden="true" style="position: absolute; right: -2px; bottom: -2px; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #6366f1); border: 2px solid #1e293b; color: #fff; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path></svg></span>
+        </button>
+        <span style="font-size: 12px; color: #94a3b8">Tap to add a photo</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="fn" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Full Name</label>
+        <input id="fn" type="text" value="Linh Tran" style="height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="re" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Email</label>
+        <input id="re" type="email" value="linh@example.com" style="height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="co" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Country</label>
+        <select id="co" style="height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif"><option>Select Country</option><option>Vietnam</option></select>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="bio" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Bio</label>
+        <textarea id="bio" rows="3" placeholder="Tell us about yourself" style="box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff; padding: 12px 14px; font: 500 16px Inter, sans-serif; resize: none"></textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="p1" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Password</label>
+        <input id="p1" type="password" value="secret12" style="height: 50px; box-sizing: border-box; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="p2" style="font-size: 13px; font-weight: 600; color: #cbd5e1">Confirm Password</label>
+        <input id="p2" type="password" value="secret1" style="height: 50px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #f87171; background: rgba(255,255,255,.06); color: #fff; padding: 0 14px; font: 500 16px Inter, sans-serif">
+        <span style="font-size: 12px; font-weight: 600; color: #fca5a5">Passwords do not match</span>
+      </div>
+      <label style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14px; color: #cbd5e1"><input type="checkbox" style="width: 20px; height: 20px; accent-color: #7c3aed; margin: 0">I agree to the terms</label>
+      <button type="button" style="height: 52px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font: 700 16px Inter, sans-serif; box-shadow: 0 18px 40px rgba(124,108,255,.3)">Create Account</button>
+      <p style="margin: 0; text-align: center; font-size: 14px; color: #94a3b8">Already have an account? <a href="Main.dc.html" style="color: #a78bfa; font-weight: 700; text-decoration: none">Login</a></p>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    return { w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 24 : 40, barH: A ? 56 : 44,
+      backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6' };
+  }
+}
+</script>
+</body>
+</html>

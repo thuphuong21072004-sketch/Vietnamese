@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Teacher Dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 10px">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Teacher panel</span>
+      <h1 style="margin: 2px 0 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">Teacher Dashboard</h1>
+    </div>
+    <div style="display: flex; gap: 8px">
+      <label for="tm" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Month</label>
+      <input id="tm" type="month" value="2026-10" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; padding: 0 12px; font: 600 16px Inter, sans-serif">
+      <label style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #334155"><input type="checkbox" style="width: 20px; height: 20px; margin: 0; accent-color: #7c3aed">All time</label>
+    </div>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 12px">
+    <div style="border-radius: 18px; padding: 16px; background: #fff7ed; border: 1px solid #fed7aa; display: flex; justify-content: space-between; align-items: center">
+      <div><p style="margin: 0; font-size: 14px; font-weight: 600; color: #9a3412">Still Owed to You</p><p style="margin: 4px 0 0; font-size: 30px; font-weight: 800; color: #ea580c">$310</p></div>
+      <p style="margin: 0; max-width: 130px; text-align: right; font-size: 12px; color: #9a3412">Paid by Admin $1,250 of $1,560 earned (all time)</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="6">
+        <div style="border-radius: 16px; padding: 14px; background: #fff; border-left: 4px solid {{s.c}}; box-shadow: 0 4px 16px rgba(0,0,0,.06)">
+          <p style="margin: 0; font-size: 12px; line-height: 1.3; color: #6b7280; font-weight: 600">{{s.l}}</p>
+          <p style="margin: 6px 0 0; font-size: 22px; font-weight: 800">{{s.v}}</p>
+          <p style="margin: 2px 0 0; font-size: 11px; color: #64748b">{{s.sub}}</p>
+        </div>
+      </sc-for>
+    </div>
+    <h2 style="margin: 4px 0 0; font-size: 16px; font-weight: 700; color: #111827">By Course</h2>
+    <sc-for list="{{courses}}" as="c" hint-placeholder-count="2">
+      <div style="background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start"><p style="margin: 0; font-size: 15px; font-weight: 700">{{c.t}}</p><span style="flex-shrink: 0; padding: 4px 10px; border-radius: 999px; background: {{c.sbg}}; color: {{c.sfg}}; font-size: 12px; font-weight: 700">{{c.st}}</span></div>
+        <p style="margin: 0; font-size: 12px; color: #64748b">{{c.sched}}</p>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; background: #f8fafc; border-radius: 10px; padding: 8px">
+          <div><p style="margin: 0; font-size: 11px; color: #64748b">Fee</p><b style="font-size: 13px">{{c.fee}}</b></div>
+          <div><p style="margin: 0; font-size: 11px; color: #64748b">Students</p><b style="font-size: 13px">{{c.stu}}</b></div>
+          <div><p style="margin: 0; font-size: 11px; color: #64748b">Cancelled</p><b style="font-size: 13px; color: {{c.cc}}">{{c.can}}</b></div>
+          <div><p style="margin: 0; font-size: 11px; color: #64748b">Revenue</p><b style="font-size: 13px">{{c.rev}}</b></div>
+        </div>
+      </div>
+    </sc-for>
+    <div style="display: flex; justify-content: space-between; padding: 12px 14px; border-top: 2px solid #e5e7eb; font-size: 14px; font-weight: 800"><span>Total (2 classes)</span><span>$1,620</span></div>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      dash: 'M3 3v18h18M18 17V9M13 17V5M8 17v-3',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      sched: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      book: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2z',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['dash', 'Dashboard', 'TeacherDashboard.dc.html'], ['classes', 'Classes', 'TeacherClasses.dc.html'], ['sched', 'Schedule', 'Availability.dc.html'], ['book', 'Bookings', 'TeacherBookings.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'dash';
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 28, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      stats: [
+        { l: 'Total from Students', v: '$1,620', sub: 'This month', c: '#7c3aed' }, { l: 'Completed Earnings', v: '$480', sub: 'Finished sessions', c: '#16a34a' },
+        { l: 'Active Earnings', v: '$1,080', sub: 'Ongoing sessions', c: '#2563eb' }, { l: 'Cancelled (Pending Refund)', v: '$60', sub: '1 enrollment', c: '#ea580c' },
+        { l: 'Group Classes', v: '2', sub: 'Active this month', c: '#7c3aed' }, { l: 'Students', v: '14', sub: 'Unique paid students', c: '#7c3aed' }
+      ],
+      courses: [
+        { t: 'Daily Conversation A1', st: 'Ongoing', sbg: '#dbeafe', sfg: '#1d4ed8', sched: '02/10 → 06/11/2026', fee: '$240', stu: '6/10', can: '0', cc: '#0f172a', rev: '$1,440' },
+        { t: 'Street Food Vocabulary', st: 'Completed', sbg: '#dcfce7', sfg: '#166534', sched: '01/09 → 30/09/2026', fee: '$120', stu: '2/8', can: '1', cc: '#ea580c', rev: '$180' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

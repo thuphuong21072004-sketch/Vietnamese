@@ -11,6 +11,7 @@ import { VideoRoomService } from '../../../services/video-room.service';
 import { PaymentService } from '../../../services/payment.service';
 
 import { ReviewService } from '../../../services/review.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-teacher-booking-detail',
@@ -153,7 +154,7 @@ export class TeacherBookingDetailComponent implements OnInit {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   /*

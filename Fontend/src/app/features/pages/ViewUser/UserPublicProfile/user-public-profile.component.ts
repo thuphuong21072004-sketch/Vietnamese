@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../services/account.service';
 import { ReviewService } from '../../../services/review.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-user-public-profile',
@@ -72,12 +73,12 @@ export class UserPublicProfileComponent implements OnInit {
 
   avatarUrl(url: string | null): string {
     if (!url) return '';
-    return url.startsWith('http') ? url : `http://localhost:5108/uploads/${url}`;
+    return url.startsWith('http') ? url : `${environment.serverUrl}/uploads/${url}`;
   }
 
   videoUrl(url: string | null): string {
     if (!url) return '';
-    return url.startsWith('http') ? url : `http://localhost:5108/videos/${url}`;
+    return url.startsWith('http') ? url : `${environment.serverUrl}/videos/${url}`;
   }
 
   roleLabel(role: string): string {

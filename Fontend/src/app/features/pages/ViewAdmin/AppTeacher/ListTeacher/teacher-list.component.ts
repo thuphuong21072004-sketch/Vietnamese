@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { TeacherProfileService } from '../../../../services/teacherProfile.service';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-teacher-list',
@@ -153,7 +154,7 @@ export class AdminTeacherListComponent implements OnInit {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.serverUrl}/uploads/${url}`;
   }
 
   private isAdmin(): boolean {

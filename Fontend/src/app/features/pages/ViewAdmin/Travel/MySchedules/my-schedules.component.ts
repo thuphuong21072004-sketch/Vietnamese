@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 import { TravelService } from '../../../../services/travel.service';
 import { TeacherScheduleDto, StudentTripDto } from '../../../../models/travel.model';
 import { VIETNAM_DESTINATIONS, DestinationGroup } from '../../../../models/vietnam-destinations';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-my-schedules',
@@ -15,6 +16,8 @@ import { VIETNAM_DESTINATIONS, DestinationGroup } from '../../../../models/vietn
   styleUrls: ['./my-schedules.component.css'],
 })
 export class MySchedulesComponent implements OnInit {
+  serverUrl = environment.serverUrl;
+
   schedules: TeacherScheduleDto[] = [];
   loading = false;
   saving = false;

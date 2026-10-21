@@ -11,6 +11,7 @@ import { BookingService } from '../../../services/booking.service';
 import { ClassEnrollmentService } from '../../../services/class-enrollment.service';
 
 import { ReviewService } from '../../../services/review.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-review',
@@ -231,7 +232,7 @@ export class ReviewComponent implements OnInit {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
 
   getTeacherName(): string {

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tutor Slot Detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 0 6px; height: {{barH}}px">
+    <a href="Tutoring.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #5a2db5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{backD}}"></path></svg></a>
+    <h1 style="margin: 0; flex: 1; text-align: {{ta}}; font-size: {{dts}}px; font-weight: 700">Tutor</h1>
+    <span style="width: 44px"></span>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <section style="background: #fff; border-radius: 22px; padding: 18px; box-shadow: 0 18px 48px rgba(99,102,241,.12); display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; gap: 14px; align-items: center">
+        <div style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 26px">H</div>
+        <div style="min-width: 0">
+          <p style="margin: 0; font-size: 19px; font-weight: 800">Nguyễn Thu Hà</p>
+          <p style="margin: 2px 0 0; font-size: 13px; color: #64748b">Conversation &amp; pronunciation</p>
+          <p style="margin: 6px 0 0; font-size: 18px; font-weight: 800; color: #5a2db5">$15 <span style="font-size: 13px; font-weight: 600; color: #64748b">/ hour</span></p>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px">
+        <span style="padding: 4px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700">★ 4.9</span>
+        <span style="padding: 4px 10px; border-radius: 999px; background: rgba(124,108,255,.12); color: #5a2db5; font-size: 12px; font-weight: 700">128 đánh giá</span>
+        <span style="padding: 4px 10px; border-radius: 999px; background: rgba(124,108,255,.12); color: #5a2db5; font-size: 12px; font-weight: 700">5 năm kinh nghiệm</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #334155">Hanoi-born tutor focused on natural everyday speech and clear northern tones.</p>
+    </section>
+    <section style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Teacher Introduction</h2>
+      <div style="aspect-ratio: 16 / 9; border-radius: 14px; background: linear-gradient(135deg, #1e293b, #312e81); display: flex; align-items: center; justify-content: center"><button type="button" aria-label="Play introduction video" style="width: 56px; height: 56px; border-radius: 50%; border: 0; background: rgba(255,255,255,.95); color: #4f46e5; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></button></div>
+    </section>
+    <section style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 4px">
+      <h2 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #111827">Schedule Information</h2>
+      <sc-for list="{{info}}" as="r" hint-placeholder-count="6">
+        <div style="display: flex; justify-content: space-between; align-items: center; min-height: 36px; border-bottom: 1px solid #f1f5f9; font-size: 14px"><span style="color: #64748b">{{r.k}}</span><b style="color: {{r.c}}">{{r.v}}</b></div>
+      </sc-for>
+    </section>
+    <section style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827">Teacher Reviews</h2><span style="font-size: 13px; font-weight: 700; color: #92400e">★ 4.9 · 128</span></div>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap">
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid #7c3aed; background: #7c3aed; color: #fff; font: 600 12px Inter, sans-serif">All (128)</button>
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 12px Inter, sans-serif">5★ (112)</button>
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 12px Inter, sans-serif">4★ (13)</button>
+        <button type="button" style="flex-shrink: 0; height: 32px; padding: 0 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; font: 600 12px Inter, sans-serif">3★ (3)</button>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <div style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px">M</div>
+        <div><p style="margin: 0; font-size: 14px; font-weight: 700">Mark · <span style="color: #92400e">★★★★★</span></p><p style="margin: 2px 0 0; font-size: 12px; color: #94a3b8">12/10/2026</p><p style="margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: #334155">Patient and very clear about tones. I finally hear the difference.</p></div>
+      </div>
+    </section>
+  </div>
+  <div style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 12px 16px {{bot}}px; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08)">
+    <div><p style="margin: 0; font-size: 12px; color: #64748b">Total Cost</p><p style="margin: 0; font-size: 20px; font-weight: 800">$15.00</p></div>
+    <a href="Payment.dc.html" style="flex: 1; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,108,255,.3)">Book Schedule</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, bot: A ? 16 : 34,
+      barH: A ? 64 : 44, ta: A ? 'left' : 'center', dts: A ? 20 : 17, backD: A ? 'M19 12H5M12 19l-7-7 7-7' : 'M15 18l-6-6 6-6',
+      info: [['Date', '23/10/2026'], ['Start Time', '19:00'], ['End Time', '20:00'], ['Status', 'Available'], ['Duration', '1 hour'], ['Total Cost', '$15.00']].map(([k, v]) => ({ k, v, c: k === 'Status' ? '#15803d' : '#0f172a' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

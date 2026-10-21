@@ -5,6 +5,7 @@ import { AccountService } from './features/services/account.service';
 import { filter } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { TestService } from './features/services/test.service';
+import { environment } from '../environments/environment';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -179,7 +180,7 @@ export class AppComponent {
       return url;
     }
 
-    return `http://localhost:5108/uploads/${url}`;
+    return `${environment.serverUrl}/uploads/${url}`;
   }
 
   private normalizeRole(value: any): string | null {

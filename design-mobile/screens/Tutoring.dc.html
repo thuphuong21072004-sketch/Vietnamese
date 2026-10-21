@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>1-on-1 Tutoring</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}*::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; display: flex; flex-direction: column; overflow: hidden; font-family: Inter, 'Segoe UI', Arial, sans-serif; color: #0f172a; background: radial-gradient(circle at 0% 0%, rgba(124,108,255,.14), transparent 40%), radial-gradient(circle at 100% 100%, rgba(56,189,248,.12), transparent 40%), linear-gradient(180deg, #f3f0ff, #faf8ff 50%, #f5f3ff)">
+  <div style="height: {{top}}px; flex-shrink: 0"></div>
+  <header style="flex-shrink: 0; padding: 4px 16px 10px; display: flex; flex-direction: column; gap: 10px">
+    <h1 style="margin: 0; font-size: {{lts}}px; font-weight: 800; letter-spacing: -0.03em">1-on-1 Tutoring</h1>
+    <div role="tablist" style="display: flex; padding: 4px; border-radius: 14px; background: #fff; border: 1px solid rgba(15,23,42,.08)">
+      <a href="Tutoring.dc.html" role="tab" aria-selected="true" style="flex: 1; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Find tutors</a>
+      <a href="MyBookings.dc.html" role="tab" aria-selected="false" style="flex: 1; height: 40px; border-radius: 10px; color: #334155; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">My Bookings</a>
+    </div>
+  </header>
+  <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 16px 20px; display: flex; flex-direction: column; gap: 12px">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #4338ca">Your personal schedule</span>
+      <h2 style="margin: 2px 0 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em">Find your next class</h2>
+    </div>
+    <div style="display: flex; gap: 8px">
+      <div style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; display: flex; align-items: center; gap: 8px; padding: 0 12px; color: #94a3b8">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+        <label for="s" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</label>
+        <input id="s" type="search" placeholder="Teacher, specialty or date" style="flex: 1; min-width: 0; border: 0; outline: 0; font: 500 16px Inter, sans-serif; background: transparent">
+      </div>
+      <button type="button" aria-label="Filter by date" style="width: 48px; height: 48px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #4f46e5; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg></button>
+    </div>
+    <p style="margin: 0; font-size: 13px; color: #64748b"><b style="color: #0f172a">3 schedules found</b> · 12 total available</p>
+    <sc-for list="{{slots}}" as="s" hint-placeholder-count="3">
+      <div style="background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 4px 15px rgba(15,23,42,.06); display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; gap: 12px; align-items: center">
+          <div style="width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px">{{s.ini}}</div>
+          <div style="flex: 1; min-width: 0">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px"><p style="margin: 0; font-size: 15px; font-weight: 700">{{s.name}}</p><span style="padding: 3px 9px; border-radius: 999px; background: {{s.pbg}}; color: {{s.pfg}}; font-size: 11px; font-weight: 700">{{s.st}}</span></div>
+            <p style="margin: 2px 0 0; font-size: 13px; color: #64748b">{{s.spec}}</p>
+            <p style="margin: 2px 0 0; font-size: 12px; font-weight: 600; color: #92400e">★ {{s.rate}} · {{s.rev}} reviews</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; background: #f8fafc; border-radius: 12px; padding: 10px">
+          <div><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 600">Date</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">{{s.date}}</p></div>
+          <div><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 600">Time</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">{{s.time}}</p></div>
+          <div><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 600">Rate</p><p style="margin: 2px 0 0; font-size: 13px; font-weight: 700">{{s.price}}</p></div>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <a href="TutorDetail.dc.html" style="flex: 1; height: 44px; border-radius: 12px; border: 1px solid rgba(99,102,241,.18); background: #eef2ff; color: #4338ca; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">View detail</a>
+          <sc-if value="{{s.ok}}" hint-placeholder-val="{{true}}"><a href="Payment.dc.html" style="flex: 1; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #7c6cff, #4f46e5); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124,108,255,.3)">Book now</a></sc-if>
+          <sc-if value="{{s.no}}" hint-placeholder-val="{{false}}"><button type="button" disabled style="flex: 1; height: 44px; border-radius: 12px; border: 0; background: #e5e7eb; color: #6b7280; font: 700 14px Inter, sans-serif; opacity: .8">Unavailable</button></sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <nav aria-label="Main" style="flex-shrink: 0; display: flex; background: rgba(255,255,255,.97); border-top: 1px solid rgba(15,23,42,.08); padding: 8px 4px {{tabPad}}px">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <a href="{{t.href}}" style="flex: 1; min-height: {{tabH}}px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: {{t.c}}; font-size: 11px; font-weight: {{t.fw}}">
+        <span style="width: {{t.pw}}px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: {{t.bg}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.d}}"></path></svg></span>
+        <span>{{t.l}}</span>
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"platform":{"editor":"enum","options":["ios","android"],"default":"ios"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const A = this.props.platform === 'android';
+    const I = {
+      home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+      learn: 'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',
+      tutor: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+      classes: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      me: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'
+    };
+    const T = [['home', 'Home', 'Home.dc.html'], ['learn', 'Learn', 'LearningPath.dc.html'], ['tutor', 'Tutoring', 'Tutoring.dc.html'], ['classes', 'Classes', 'GroupClasses.dc.html'], ['me', 'Me', 'Profile.dc.html']];
+    const act = 'tutor';
+    const S = [
+      ['H', 'Nguyễn Thu Hà', 'Conversation & pronunciation', '4.9', '128', '23/10', '19:00', '$15/h', true],
+      ['Q', 'Trần Minh Quân', 'Business Vietnamese', '4.8', '64', '24/10', '08:30', '$18/h', true],
+      ['A', 'Lê Hoàng Anh', 'Beginner grammar', '4.7', '41', '24/10', '20:00', '$12/h', false]
+    ];
+    return {
+      w: A ? 412 : 390, h: A ? 915 : 844, top: A ? 28 : 50, lts: A ? 24 : 30, tabH: A ? 56 : 44, tabPad: A ? 12 : 30,
+      tabs: T.map(([k, l, href]) => { const on = k === act; return { l, href, d: I[k], c: on ? '#7c3aed' : '#64748b', fw: on ? 700 : 600, bg: on && A ? '#ede9fe' : 'transparent', pw: A ? 60 : 32 }; }),
+      slots: S.map(([ini, name, spec, rate, rev, date, time, price, ok]) => ({ ini, name, spec, rate, rev, date, time, price, ok, no: !ok, st: ok ? 'Available' : 'Booked', pbg: ok ? '#dcfce7' : '#fef3c7', pfg: ok ? '#166534' : '#92400e' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

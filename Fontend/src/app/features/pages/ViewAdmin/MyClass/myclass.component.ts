@@ -10,6 +10,7 @@ import { VideoRoomService } from '../../../services/video-room.service';
 
 import { BookingService } from '../../../services/booking.service';
 import { ReviewService } from '../../../services/review.service';
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-teacher-bookings',
 
@@ -291,7 +292,7 @@ export class TeacherBookingsComponent implements OnInit {
       return avatar;
     }
 
-    return `http://localhost:5108/uploads/${avatar}`;
+    return `${environment.serverUrl}/uploads/${avatar}`;
   }
   checkReviewedBookings() {
     this.reviewedBookings.clear();
