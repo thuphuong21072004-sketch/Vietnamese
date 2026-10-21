@@ -1,0 +1,212 @@
+.page {
+  gap: 14px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vp-indigo-dark);
+}
+.hero-title {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ---- Ô tìm kiếm ---- */
+.search {
+  display: flex;
+  gap: 8px;
+}
+.search__input {
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+}
+.search__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.search__btn {
+  height: 50px;
+  padding: 0 18px;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.try {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.try__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-muted);
+}
+.try__chip {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--vp-r-pill);
+  border: 1.5px solid var(--vp-border);
+  background: #fff;
+  color: var(--vp-muted);
+  font: 600 13px var(--vp-font);
+  cursor: pointer;
+}
+.results-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-heading);
+}
+
+/* ---- Video ---- */
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--vp-r-l);
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a, #334155);
+  flex-shrink: 0;
+}
+.video.is-hidden {
+  display: none;
+}
+.video__player {
+  position: absolute;
+  inset: 0;
+}
+.video__player ::ng-deep iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.video__sub {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 14px;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+.video__hit {
+  color: #fde047;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: var(--vp-r-m2);
+  padding: 6px;
+  box-shadow: var(--vp-sh-card);
+}
+.ctrl {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--vp-r-m);
+  border: 0;
+  padding: 0;
+  background: var(--vp-fill-violet);
+  color: var(--vp-indigo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ctrl--main {
+  background: var(--vp-grad-primary);
+  color: #fff;
+}
+.ctrl:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.counter {
+  margin-top: -6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-muted);
+}
+
+/* ---- Từ điển ---- */
+.dict {
+  padding: 16px;
+  gap: 10px;
+}
+.dict__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dict__word {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+  overflow-wrap: anywhere;
+}
+.dict__sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-muted);
+  white-space: nowrap;
+}
+.meaning {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.meaning__type {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-tag-bg);
+  color: var(--vp-primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+.meaning__en {
+  font-size: 15px;
+  font-weight: 600;
+}
+.meaning__sim {
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+.examples {
+  border-top: 1px solid var(--vp-fill-2);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.examples__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-text-body);
+}
+.examples__item {
+  font-size: 14px;
+  line-height: 1.5;
+}

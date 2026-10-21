@@ -316,9 +316,20 @@ namespace Backend.Services.impl
          */
         public async Task<List<UnitDTO>> GetUnits(int courseId)
         {
-            var email = _userContext.GetEmail();
-            int userId = (await _userRepository.GetUserIdByEmail(email))!.Value;
             var units = await _unitRepository.GetAllUnits(courseId, null);
+
+            // Khách chưa đăng nhập (trang giới thiệu): trả danh sách unit, không kèm tiến độ
+            // (GetEmail ném lỗi khi request không có token)
+            string? email = null;
+            try { email = _userContext.GetEmail(); } catch { email = null; }
+            int? currentUserId = string.IsNullOrEmpty(email)
+                ? null
+                : await _userRepository.GetUserIdByEmail(email);
+            if (currentUserId == null)
+            {
+                return units.Select(unit => _mapper.Map<UnitDTO>(unit)).ToList();
+            }
+            int userId = currentUserId.Value;
 
             var progresses = await _progressRepository
                 .GetUserProgress(

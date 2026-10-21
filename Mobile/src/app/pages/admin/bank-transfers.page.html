@@ -1,0 +1,48 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Pending Bank Transfers" defaultHref="/admin/more" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll adm-list">
+    <p class="vp-meta">Review and confirm payments made via bank transfer</p>
+
+    @if (loading) {
+      <vp-loading text="Loading..." />
+    } @else {
+      @for (p of payments; track p.paymentId) {
+        <section class="vp-card">
+          <div class="vp-row head">
+            <p class="vp-card-title vp-grow">Payment #{{ p.paymentId }}</p>
+            <vp-badge [tone]="p.refName === 'CLASS' ? 'info' : 'upcoming'" [label]="refLabel(p.refName)" />
+          </div>
+          <div class="vp-grid-3 cells">
+            <div class="vp-info-cell">
+              <span class="vp-info-cell__k">Ref ID</span>
+              <span class="vp-info-cell__v">#{{ p.refId }}</span>
+            </div>
+            <div class="vp-info-cell">
+              <span class="vp-info-cell__k">Amount (USD)</span>
+              <span class="vp-info-cell__v vp-price">${{ p.amount }}</span>
+            </div>
+            <div class="vp-info-cell">
+              <span class="vp-info-cell__k">Submitted At</span>
+              <span class="vp-info-cell__v">{{ p.createdDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="vp-btn vp-btn--primary vp-btn--block"
+            [disabled]="confirming === p.paymentId"
+            (click)="confirm(p.paymentId)"
+          >
+            {{ confirming === p.paymentId ? 'Confirming...' : 'Confirm Payment' }}
+          </button>
+        </section>
+      } @empty {
+        <vp-empty text="No pending bank transfers." />
+      }
+    }
+  </div>
+</ion-content>

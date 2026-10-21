@@ -1,0 +1,32 @@
+.intro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pl-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.pl-name,
+.pl-desc {
+  display: block;
+}
+.pl-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--vp-fill-2);
+  padding-top: 10px;
+}
+.pl-actions .cm-by {
+  margin: 0;
+}

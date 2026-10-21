@@ -1,0 +1,126 @@
+.teacher {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.teacher__name {
+  font-size: 19px;
+  font-weight: 800;
+}
+.teacher__spec {
+  margin-top: 2px;
+}
+.teacher__price {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+}
+.teacher__price span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-muted);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--vp-r-m2);
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e293b, #312e81);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+}
+.video__play {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--vp-indigo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.video__none {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kv {
+  min-height: 36px;
+}
+.kv b.ok {
+  color: #15803d;
+}
+.kv b.bad {
+  color: var(--vp-danger);
+}
+
+.rv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.rv-sum {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-warning);
+}
+.chips {
+  gap: 6px;
+}
+.rv {
+  display: flex;
+  gap: 10px;
+}
+vp-avatar.rv__av {
+  background: var(--vp-upcoming-bg);
+  color: var(--vp-indigo-dark);
+}
+.rv__name {
+  font-size: 14px;
+  font-weight: 700;
+}
+.rv__name span {
+  color: var(--vp-warning);
+}
+.rv__date {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--vp-placeholder);
+}
+.rv__text {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--vp-text-body);
+}
+
+.total__k {
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.total__v {
+  font-size: 20px;
+  font-weight: 800;
+}

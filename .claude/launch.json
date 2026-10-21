@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "Fontend", "start"],
       "port": 4200
+    },
+    {
+      "name": "mobile",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "Mobile", "start"],
+      "port": 8100
     }
   ]
 }

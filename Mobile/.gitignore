@@ -1,0 +1,5 @@
+/node_modules
+/dist
+/.angular
+# bản sao tự động từ Fontend (scripts/sync-web.mjs)
+/src/app/web

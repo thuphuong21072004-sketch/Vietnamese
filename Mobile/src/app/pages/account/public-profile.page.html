@@ -1,0 +1,169 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Profile" defaultHref="/" />
+</ion-header>
+
+<ion-content>
+  @if (loading) {
+    <vp-loading text="Loading profile..." />
+  } @else if (!profile) {
+    <div class="vp-scroll"><vp-empty title="Profile not found." /></div>
+  } @else {
+    <div class="vp-scroll pp-scroll">
+      <!-- Hero: avatar + thông tin cơ bản -->
+      <section class="vp-card vp-card--lg pp-hero">
+        <div class="vp-row pp-hero__top">
+          <vp-avatar [name]="profile.name" [url]="avatar" [size]="72" radius="22px" />
+          <div class="vp-grow">
+            <h2 class="pp-name">{{ profile.name }}</h2>
+            <span class="pp-role">{{ roleLabel(profile.roleName) }}</span>
+          </div>
+        </div>
+        @if (profile.country || profile.gender || profile.dateOfBirth) {
+          <div class="pp-meta">
+            @if (profile.country) {
+              <span class="pp-meta__item">{{ profile.country }}</span>
+            }
+            @if (profile.gender) {
+              <span class="pp-meta__item">{{ profile.gender }}</span>
+            }
+            @if (profile.dateOfBirth) {
+              <span class="pp-meta__item">{{ profile.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+            }
+          </div>
+        }
+        @if (profile.bio) {
+          <p class="vp-body">{{ profile.bio }}</p>
+        }
+        @if (profile.teacherProfile && reviews.length) {
+          <div class="pp-rating">
+            <span class="pp-stars" aria-hidden="true">
+              @for (s of stars; track s) {
+                <span [class.on]="s <= averageRating">★</span>
+              }
+            </span>
+            <strong>{{ averageRating | number: '1.1-1' }}</strong>
+            <span class="vp-meta">({{ reviews.length }} reviews)</span>
+          </div>
+        }
+      </section>
+
+      @if (profile.teacherProfile; as tp) {
+        <!-- Teaching Info -->
+        <section class="vp-section">
+          <h2 class="vp-section-title">Teaching Info</h2>
+          <div class="vp-grid-2">
+            @if (tp.specialty) {
+              <div class="vp-info-cell">
+                <span class="vp-info-cell__k">Specialty</span>
+                <span class="vp-info-cell__v">{{ tp.specialty }}</span>
+              </div>
+            }
+            @if (tp.experienceYears) {
+              <div class="vp-info-cell">
+                <span class="vp-info-cell__k">Experience</span>
+                <span class="vp-info-cell__v">{{ tp.experienceYears }} years</span>
+              </div>
+            }
+            @if (tp.approvedPricePerHour) {
+              <div class="vp-info-cell">
+                <span class="vp-info-cell__k">Price / hour</span>
+                <span class="vp-info-cell__v vp-price">${{ tp.approvedPricePerHour | number: '1.0-2' }}</span>
+              </div>
+            }
+            <div class="vp-info-cell">
+              <span class="vp-info-cell__k">Rating</span>
+              <span class="vp-info-cell__v">★ {{ tp.ratingAverage | number: '1.1-1' }} · {{ tp.totalReviews }} reviews</span>
+            </div>
+          </div>
+        </section>
+
+        @if (tp.description) {
+          <section class="vp-card">
+            <h2 class="vp-card-title">About</h2>
+            <p class="vp-body pp-pre">{{ tp.description }}</p>
+          </section>
+        }
+
+        @if (videoSrc) {
+          <section class="vp-card">
+            <h2 class="vp-card-title">Introduction Video</h2>
+            <video class="pp-video" [src]="videoSrc" controls playsinline preload="metadata"></video>
+          </section>
+        }
+
+        <!-- Reviews -->
+        <section class="vp-section">
+          <div class="vp-row">
+            <h2 class="vp-section-title vp-grow">Reviews</h2>
+            @if (reviews.length) {
+              <span class="vp-badge vp-badge--warning">★ {{ averageRating | number: '1.1-1' }} · {{ reviews.length }} total</span>
+            }
+          </div>
+
+          @if (reviewsLoading) {
+            <vp-loading text="Loading reviews..." />
+          } @else if (!reviews.length) {
+            <vp-empty text="No reviews yet." />
+          } @else {
+            <div class="vp-chips">
+              <button type="button" class="vp-chip" [class.is-active]="ratingFilter === 0" (click)="setFilter(0)">All ({{ reviews.length }})</button>
+              @for (s of filters; track s) {
+                <button type="button" class="vp-chip" [class.is-active]="ratingFilter === s" (click)="setFilter(s)">{{ s }}★ ({{ countByRating(s) }})</button>
+              }
+            </div>
+
+            @for (r of filteredReviews; track $index) {
+              <article class="vp-card">
+                <div class="vp-row">
+                  <vp-avatar [name]="r.student?.name || 'A'" [url]="reviewerAvatar(r)" [size]="40" />
+                  <div class="vp-grow">
+                    <p class="pp-reviewer">{{ r.student?.name || 'Anonymous' }}</p>
+                    @if (r.createdDate) {
+                      <p class="vp-meta">{{ r.createdDate | date: 'dd/MM/yyyy' }}</p>
+                    }
+                  </div>
+                  <span class="pp-stars" [attr.aria-label]="r.rating + ' stars'">
+                    @for (s of stars; track s) {
+                      <span [class.on]="s <= r.rating">★</span>
+                    }
+                  </span>
+                </div>
+                @if (r.comment) {
+                  <p class="vp-body">{{ r.comment }}</p>
+                }
+              </article>
+            } @empty {
+              <vp-empty text="No reviews for this rating." />
+            }
+          }
+        </section>
+      } @else {
+        <!-- Học viên: thông tin cơ bản -->
+        <section class="vp-grid-2">
+          @if (profile.country) {
+            <div class="vp-info-cell pp-cell">
+              <span class="vp-info-cell__k">Country</span>
+              <span class="vp-info-cell__v">{{ profile.country }}</span>
+            </div>
+          }
+          @if (profile.gender) {
+            <div class="vp-info-cell pp-cell">
+              <span class="vp-info-cell__k">Gender</span>
+              <span class="vp-info-cell__v">{{ profile.gender }}</span>
+            </div>
+          }
+          @if (profile.dateOfBirth) {
+            <div class="vp-info-cell pp-cell">
+              <span class="vp-info-cell__k">Date of Birth</span>
+              <span class="vp-info-cell__v">{{ profile.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          }
+          <div class="vp-info-cell pp-cell">
+            <span class="vp-info-cell__k">Role</span>
+            <span class="vp-info-cell__v">{{ roleLabel(profile.roleName) }}</span>
+          </div>
+        </section>
+      }
+    </div>
+  }
+</ion-content>

@@ -1,0 +1,169 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="My Travel Schedules" defaultHref="/teacher/travel" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight list">
+    <vp-teacher-travel-tabs active="schedules" />
+
+    @if (showForm) {
+      <form class="form-card" (ngSubmit)="save()" novalidate>
+        <h2 class="vp-section-title">{{ editingScheduleId ? 'Edit Schedule' : 'New Schedule' }}</h2>
+        <div class="vp-field">
+          <label for="pv" class="vp-label">Tỉnh/Thành phố</label>
+          <select id="pv" name="destination" class="vp-input" [(ngModel)]="form.destination">
+            <option value="">-- Chọn tỉnh/thành --</option>
+            @for (g of destinations; track g.province) {
+              <option [value]="g.province">{{ g.province }}</option>
+            }
+          </select>
+        </div>
+        <div class="vp-grid-2">
+          <div class="vp-field">
+            <label for="af" class="vp-label">Available From</label>
+            <input id="af" name="availableFrom" type="date" class="vp-input" [(ngModel)]="form.availableFrom" />
+          </div>
+          <div class="vp-field">
+            <label for="at" class="vp-label">Available To</label>
+            <input id="at" name="availableTo" type="date" class="vp-input" [(ngModel)]="form.availableTo" />
+          </div>
+        </div>
+        @if (editingScheduleId) {
+          <div class="vp-field">
+            <span class="vp-label">Status</span>
+            <div class="vp-chips">
+              <button type="button" class="vp-chip" [class.is-active]="form.status === 1" (click)="form.status = 1">Open</button>
+              <button type="button" class="vp-chip" [class.is-active]="form.status === 0" (click)="form.status = 0">Closed</button>
+            </div>
+          </div>
+        }
+        <div class="form-actions">
+          <button type="button" class="vp-btn vp-btn--back vp-btn--form" (click)="cancelForm()">Cancel</button>
+          <button type="submit" class="vp-btn vp-btn--travel vp-btn--form save" [disabled]="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
+        </div>
+      </form>
+    }
+
+    @if (loading) {
+      <vp-loading text="Loading schedules..." />
+    } @else if (schedules.length === 0 && !showForm) {
+      <vp-empty title="No schedules yet" text="Create a travel schedule to connect with students planning trips to your destination.">
+        <button type="button" class="vp-btn vp-btn--travel" (click)="openCreate()">Create your first schedule</button>
+      </vp-empty>
+    }
+
+    @if (!loading) {
+      @for (s of schedules; track s.scheduleId) {
+        <section class="t-card">
+          <div class="t-card__top">
+            <p class="tr-dest tr-pin"><vp-icon [d]="icons.pin" [size]="18" />{{ s.destination }}</p>
+            <vp-badge [label]="statusLabel(s.status)" />
+          </div>
+          <span class="tr-date-chip">{{ s.availableFrom | date: 'dd/MM/yyyy' }} → {{ s.availableTo | date: 'dd/MM/yyyy' }}</span>
+
+          <div class="vp-grid-2">
+            <button type="button" class="vp-btn vp-btn--travel" [disabled]="loadingSuggestionsFor === s.scheduleId" (click)="findStudents(s.scheduleId)">
+              {{ loadingSuggestionsFor === s.scheduleId ? 'Searching...' : showSuggestionsFor === s.scheduleId ? 'Hide Students' : 'Find Students' }}
+            </button>
+            <button type="button" class="vp-btn vp-btn--outline-travel" (click)="toggleRequests(s.scheduleId)">
+              {{ showRequestsFor === s.scheduleId ? 'Hide Requests' : 'View Requests' }}
+            </button>
+          </div>
+
+          <!-- Matching Students -->
+          @if (showSuggestionsFor === s.scheduleId) {
+            <div class="tr-panel">
+              <p class="tr-panel__title">Matching Students ({{ suggestions[s.scheduleId]?.length ?? 0 }})</p>
+              @for (trip of suggestions[s.scheduleId] ?? []; track trip.tripId) {
+                <div class="tr-person">
+                  <div class="vp-row">
+                    <vp-avatar [name]="trip.studentName" [url]="avatar(trip.studentAvatarUrl)" [size]="40" />
+                    <div class="vp-grow">
+                      <p class="tr-person__name">{{ trip.studentName }}</p>
+                      <p class="tr-person__meta">
+                        {{ trip.studentCountry }}{{ trip.studentCountry ? ' · ' : '' }}{{ trip.startDate | date: 'dd/MM' }} – {{ trip.endDate | date: 'dd/MM/yyyy' }}
+                      </p>
+                      <p class="tr-person__meta">{{ trip.destination }}{{ trip.specificLocation ? ' — ' + trip.specificLocation : '' }}</p>
+                    </div>
+                    <vp-badge [label]="tripStatusLabel(trip.status)" />
+                  </div>
+                  <div class="tr-row-btns">
+                    @if (pendingOf(s.scheduleId, trip.tripId); as pending) {
+                      @if (pending.requestType === 1) {
+                        <button type="button" class="vp-btn vp-btn--danger tr-btn-sm" (click)="cancelInvite(pending.id, s.scheduleId)">Cancel</button>
+                      } @else {
+                        <button type="button" class="vp-btn vp-btn--danger tr-btn-sm" (click)="reject(pending.id, s.scheduleId)">Reject</button>
+                        <button type="button" class="vp-btn vp-btn--travel tr-btn-sm" (click)="accept(pending.id, s.scheduleId)">Accept</button>
+                      }
+                    } @else {
+                      <button type="button" class="vp-btn vp-btn--travel tr-btn-sm" [disabled]="isSending(s.scheduleId, trip.tripId)" (click)="invite(s.scheduleId, trip.tripId)">
+                        {{ isSending(s.scheduleId, trip.tripId) ? 'Sending...' : 'Invite' }}
+                      </button>
+                    }
+                    <a class="vp-btn t-btn-white tr-btn-sm" [routerLink]="['/user', trip.studentId]">View Profile</a>
+                  </div>
+                </div>
+              } @empty {
+                <p class="vp-meta">No matching students found for this destination and dates.</p>
+              }
+            </div>
+          }
+
+          <!-- Requests -->
+          @if (showRequestsFor === s.scheduleId) {
+            <div class="tr-panel">
+              <p class="tr-panel__title">Requests ({{ requestsBySchedule[s.scheduleId]?.length ?? 0 }})</p>
+              @for (req of requestsBySchedule[s.scheduleId] ?? []; track req.matchRequestId) {
+                <div class="tr-person">
+                  <div class="vp-row">
+                    <vp-avatar [name]="req.studentName" [url]="avatar(req.studentAvatarUrl)" [size]="40" />
+                    <div class="vp-grow">
+                      <p class="tr-person__name">{{ req.studentName }}</p>
+                      <p class="tr-person__meta">{{ req.destination }}{{ req.specificLocation ? ' — ' + req.specificLocation : '' }}</p>
+                      <p class="tr-person__meta">{{ req.startDate | date: 'dd/MM/yyyy' }} – {{ req.endDate | date: 'dd/MM/yyyy' }}</p>
+                    </div>
+                    <vp-badge [label]="requestStatusLabel(req.status)" />
+                  </div>
+                  <div class="tr-row-btns">
+                    @if (req.status === 0 && req.requestType === 0) {
+                      <button type="button" class="vp-btn vp-btn--danger tr-btn-sm" (click)="reject(req.matchRequestId, s.scheduleId)">Reject</button>
+                      <button type="button" class="vp-btn vp-btn--travel tr-btn-sm" (click)="accept(req.matchRequestId, s.scheduleId)">Accept</button>
+                    }
+                    @if (req.status === 0 && req.requestType === 1) {
+                      <button type="button" class="vp-btn vp-btn--danger tr-btn-sm" (click)="cancelInvite(req.matchRequestId, s.scheduleId)">Cancel</button>
+                    }
+                    <a class="vp-btn t-btn-white tr-btn-sm" [routerLink]="['/user', req.studentId]">View Profile</a>
+                  </div>
+                </div>
+              } @empty {
+                <p class="vp-meta">No requests for this schedule yet.</p>
+              }
+            </div>
+          }
+
+          <div class="tr-row-btns">
+            @if (!s.hasActiveRequest) {
+              <button type="button" class="vp-btn t-btn-white" (click)="openEdit(s)">Edit</button>
+            }
+            @if (!s.hasActiveRequest && s.status === 1) {
+              <button type="button" class="vp-btn vp-btn--back" (click)="close(s)">Close</button>
+            }
+            @if (s.status === 0) {
+              <button type="button" class="vp-btn vp-btn--outline-travel" (click)="reopen(s)">Mở lại</button>
+            }
+            @if (!s.hasActiveRequest) {
+              <button type="button" class="vp-btn vp-btn--danger" (click)="remove(s)">Delete</button>
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+
+  <button type="button" slot="fixed" class="t-fab t-fab--travel t-fab--fs" (click)="openCreate()">
+    <vp-icon [d]="icons.plus" [size]="20" [stroke]="2.4" />
+    New Schedule
+  </button>
+</ion-content>

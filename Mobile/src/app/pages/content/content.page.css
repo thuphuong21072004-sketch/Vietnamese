@@ -1,0 +1,48 @@
+/* Segmented Levels › Courses › Units (design: chữ 13px, nút 40px) */
+.seg {
+  display: flex;
+  padding: 4px;
+  border-radius: var(--vp-r-m2);
+  background: #fff;
+  border: 1px solid var(--vp-hairline);
+}
+.seg button {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--vp-text-body);
+  font: 700 13px var(--vp-font);
+  cursor: pointer;
+}
+.seg button.on {
+  background: var(--vp-grad-accent);
+  color: #fff;
+}
+
+.row-top {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.row-main {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.save-btn {
+  box-shadow: var(--vp-sh-btn);
+}

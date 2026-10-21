@@ -1,0 +1,62 @@
+<ion-content [scrollY]="true">
+  <div class="auth vp-dark">
+    <div class="blob" style="width: 260px; height: 260px; background: #7c3aed; opacity: 0.35; top: -60px; left: -80px"></div>
+    <div class="blob" style="width: 220px; height: 220px; background: #2563eb; opacity: 0.3; top: 280px; right: -90px"></div>
+    <div class="blob" style="width: 200px; height: 200px; background: #9333ea; opacity: 0.28; bottom: -40px; left: 30px"></div>
+
+    <div class="auth__body">
+      <div class="intro">
+        <div class="logo">VP</div>
+        <h1 class="intro__title">Welcome Back</h1>
+        <p class="intro__text">Continue your Vietnamese journey with lessons, tutors and pronunciation practice.</p>
+        <div class="pills">
+          <span class="pill">Interactive Lessons</span>
+          <span class="pill">Online Teacher Booking</span>
+          <span class="pill">AI Pronunciation Practice</span>
+        </div>
+      </div>
+
+      <form class="glass" (ngSubmit)="login()" novalidate>
+        <div>
+          <h2 class="glass__title">Login</h2>
+          <p class="glass__sub">Sign in to your account</p>
+        </div>
+        <div class="vp-field">
+          <label for="em" class="vp-label">Email</label>
+          <input
+            id="em"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            class="vp-input"
+            placeholder="you@example.com"
+            [class.is-invalid]="submitted && !email"
+            [(ngModel)]="email"
+          />
+        </div>
+        <div class="vp-field">
+          <label for="pw" class="vp-label">Password</label>
+          <input
+            id="pw"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            class="vp-input"
+            [class.is-invalid]="submitted && !password"
+            [(ngModel)]="password"
+          />
+        </div>
+        <div class="row-between">
+          <label class="vp-check"><input type="checkbox" name="remember" [(ngModel)]="remember" />Remember me</label>
+          <button type="button" class="vp-link forgot" (click)="forgot()">Forgot password?</button>
+        </div>
+        <button type="submit" class="vp-btn vp-btn--accent vp-btn--cta" [disabled]="loading">
+          {{ loading ? 'Signing in...' : 'Login Account' }}
+        </button>
+        <p class="switch">Don't have an account? <a routerLink="/register" class="vp-link">Create Account</a></p>
+        <a routerLink="/welcome" class="guest-link">Explore as a guest</a>
+      </form>
+    </div>
+  </div>
+</ion-content>

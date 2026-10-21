@@ -1,0 +1,44 @@
+.head {
+  gap: 0;
+}
+.chips {
+  gap: 6px;
+}
+.app__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.app__meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.star {
+  color: var(--vp-warning);
+  font-weight: 700;
+}
+.app__badge {
+  flex-shrink: 0;
+}
+.app__badge ::ng-deep .vp-badge {
+  font-size: 11px;
+}
+.app__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-m);
+  padding: 10px;
+}
+.app__k {
+  font-size: 11px;
+  color: var(--vp-muted);
+  font-weight: 600;
+}
+.app__v {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+}

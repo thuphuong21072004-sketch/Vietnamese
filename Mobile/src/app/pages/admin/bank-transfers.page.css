@@ -1,0 +1,12 @@
+.head {
+  gap: 8px;
+}
+.cells {
+  gap: 8px;
+}
+.cells .vp-info-cell {
+  padding: 10px;
+}
+.cells .vp-info-cell__k {
+  font-size: 11px;
+}

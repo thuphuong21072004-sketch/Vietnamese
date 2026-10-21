@@ -1,0 +1,168 @@
+<ion-header class="vp-header">
+  <vp-nav-bar [title]="title" [defaultHref]="meHref" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  @if (loading) {
+    <vp-loading text="Loading profile..." />
+  } @else {
+    <div class="vp-scroll bt-scroll">
+      <!-- Hộp trạng thái -->
+      <div class="bt-status vp-alert--{{ status.tone }}">
+        <div class="bt-status__row">
+          <span class="bt-status__k">Status:</span>
+          @if (hasProfile) {
+            <vp-badge [label]="status.label" />
+          } @else {
+            <vp-badge label="New" tone="neutral" />
+          }
+        </div>
+        <p class="bt-status__text">{{ status.text }}</p>
+      </div>
+
+      <!-- Form hồ sơ -->
+      <form class="bt-form" (ngSubmit)="save()" novalidate>
+        <div class="vp-field">
+          <label for="sp" class="vp-label">Specialty <span class="req">*</span></label>
+          <input
+            id="sp"
+            name="specialty"
+            type="text"
+            class="vp-input"
+            placeholder="Vietnamese Grammar, Communication..."
+            [class.is-invalid]="submitted && !profile.specialty"
+            [disabled]="!canEdit"
+            [(ngModel)]="profile.specialty"
+          />
+        </div>
+        <div class="vp-grid-2">
+          <div class="vp-field">
+            <label for="ex" class="vp-label">Experience Years</label>
+            <input id="ex" name="experienceYears" type="number" inputmode="numeric" min="0" class="vp-input" [disabled]="!canEdit" [(ngModel)]="profile.experienceYears" />
+          </div>
+          <div class="vp-field">
+            <label for="pr" class="vp-label">Desired Price / Hour</label>
+            <input
+              id="pr"
+              name="desiredPricePerHour"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              class="vp-input"
+              [class.is-invalid]="submitted && !(profile.desiredPricePerHour > 0)"
+              [disabled]="!canEdit"
+              [(ngModel)]="profile.desiredPricePerHour"
+            />
+          </div>
+        </div>
+        <div class="vp-field">
+          <label for="de" class="vp-label">Description <span class="req">*</span></label>
+          <textarea
+            id="de"
+            name="description"
+            rows="4"
+            class="vp-input"
+            placeholder="Tell students about your teaching style"
+            [class.is-invalid]="submitted && !profile.description"
+            [disabled]="!canEdit"
+            [(ngModel)]="profile.description"
+          ></textarea>
+        </div>
+
+        <!-- Video giới thiệu -->
+        <div class="vp-field">
+          <span class="vp-label">Introduction Video</span>
+          @if (videoSrc) {
+            <video class="bt-video" [src]="videoSrc" controls playsinline preload="metadata"></video>
+            @if (canEdit) {
+              <button type="button" class="vp-btn vp-btn--secondary vp-btn--block" [disabled]="uploadingVideo" (click)="video.click()">
+                <vp-icon [d]="videoIcon" [size]="18" />{{ uploadingVideo ? 'Uploading...' : 'Replace video' }}
+              </button>
+            }
+          } @else {
+            <button type="button" class="bt-drop" [disabled]="!canEdit || uploadingVideo" (click)="video.click()">
+              @if (uploadingVideo) {
+                <span class="vp-spinner"></span>Uploading...
+              } @else {
+                <vp-icon [d]="videoIcon" [size]="26" />Upload a video<span class="bt-drop__hint">MP4 or MOV</span>
+              }
+            </button>
+          }
+          <input #video type="file" accept="video/*" hidden (change)="onVideoSelected($event)" />
+        </div>
+
+        <!-- Chứng chỉ -->
+        <div class="vp-field">
+          <span class="vp-label">English Certificate</span>
+          <button type="button" class="bt-file" [disabled]="!canEdit || uploadingCert" (click)="cert.click()">
+            <vp-icon class="bt-file__icon" [d]="uploadIcon" [size]="20" />
+            {{ uploadingCert ? 'Uploading...' : certName ? 'Replace file' : 'Choose file' }}
+            <span class="bt-file__hint">.pdf .doc .jpg .png</span>
+          </button>
+          <input #cert type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" hidden (change)="onCertificateSelected($event)" />
+          @if (certName) {
+            <button type="button" class="bt-cert" (click)="openCertificate()">
+              <vp-icon [d]="fileIcon" [size]="18" />
+              <span class="bt-cert__name">{{ certName }}</span>
+              <span class="vp-link">Download File</span>
+            </button>
+          }
+        </div>
+      </form>
+
+      <!-- Kết quả duyệt (chỉ đọc) -->
+      @if (profile.approvedPricePerHour || profile.updatedDate || profile.adminNote) {
+        <section class="vp-card">
+          <h2 class="vp-card-title">Review</h2>
+          <div>
+            @if (profile.approvedPricePerHour) {
+              <div class="vp-kv-row">
+                <span class="vp-kv-row__k">Approved Price Per Hour</span>
+                <span class="vp-kv-row__v vp-price">${{ profile.approvedPricePerHour }}</span>
+              </div>
+            }
+            @if (profile.updatedDate) {
+              <div class="vp-kv-row">
+                <span class="vp-kv-row__k">Reviewed Date</span>
+                <span class="vp-kv-row__v">{{ profile.updatedDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+          </div>
+          @if (profile.adminNote) {
+            <div class="vp-info-cell">
+              <span class="vp-info-cell__k">Admin Note</span>
+              <span class="bt-note">{{ profile.adminNote }}</span>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</ion-content>
+
+@if (!loading && (canEdit || canDecide)) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      @if (canDecide) {
+        <button type="button" class="vp-btn vp-btn--danger bt-cta" [disabled]="busy" (click)="reject()">Reject Teaching</button>
+        <button type="button" class="vp-btn vp-btn--primary bt-cta" [disabled]="busy" (click)="accept()">Accept Teaching</button>
+      } @else {
+        <button
+          type="button"
+          class="vp-btn bt-cta"
+          [class.vp-btn--secondary]="profile.status === 0"
+          [class.vp-btn--primary]="profile.status !== 0"
+          [disabled]="busy || uploadingVideo || uploadingCert"
+          (click)="save()"
+        >
+          {{ busy ? 'Saving...' : hasProfile ? 'Update Profile' : 'Create Profile' }}
+        </button>
+        @if (profile.status === 0) {
+          <button type="button" class="vp-btn vp-btn--primary bt-cta" [disabled]="busy || !canSubmit" (click)="submit()">Submit Profile</button>
+        }
+      }
+    </div>
+  </ion-footer>
+}

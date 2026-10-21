@@ -1,0 +1,133 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Tutor" defaultHref="/tutoring" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll gap14">
+    @if (loading) {
+      <vp-loading text="Loading schedule..." />
+    } @else if (!schedule) {
+      <vp-empty title="Schedule not found" text="This schedule may have been removed." />
+    } @else {
+      <!-- Giáo viên -->
+      <section class="vp-card vp-card--lg">
+        <div class="teacher">
+          <vp-avatar [name]="teacherName" [url]="teacherAvatar" [size]="72" />
+          <div class="vp-grow">
+            <p class="teacher__name">{{ teacherName }}</p>
+            @if (specialty) {
+              <p class="vp-meta teacher__spec">{{ specialty }}</p>
+            }
+            <p class="teacher__price">${{ pricePerHour | number: '1.0-2' }} <span>/ hour</span></p>
+          </div>
+        </div>
+        <div class="tags">
+          <span class="vp-badge vp-badge--warning">★ {{ rating | number: '1.1-1' }}</span>
+          <span class="vp-badge">{{ totalReviews }} đánh giá</span>
+          <span class="vp-badge">{{ experience }} năm kinh nghiệm</span>
+        </div>
+        @if (description) {
+          <p class="vp-body">{{ description }}</p>
+        }
+      </section>
+
+      <!-- Video giới thiệu -->
+      <section class="vp-card">
+        <h2 class="vp-section-title">Teacher Introduction</h2>
+        <div class="video">
+          @if (videoUrl) {
+            <video #intro [src]="videoUrl" [controls]="playing" playsinline preload="metadata"></video>
+            @if (!playing) {
+              <button type="button" class="video__play" aria-label="Play introduction video" (click)="playIntro()">
+                <vp-icon [d]="icons.play" [size]="22" [fill]="true" />
+              </button>
+            }
+          } @else {
+            <p class="video__none">No introduction video yet.</p>
+          }
+        </div>
+      </section>
+
+      <!-- Thông tin slot -->
+      <section class="vp-card info">
+        <h2 class="vp-section-title info__title">Schedule Information</h2>
+        <div class="kv"><span>Date</span><b>{{ schedule.startTime | date: 'dd/MM/yyyy' }}</b></div>
+        <div class="kv"><span>Start Time</span><b>{{ schedule.startTime | date: 'HH:mm' }}</b></div>
+        <div class="kv"><span>End Time</span><b>{{ schedule.endTime | date: 'HH:mm' }}</b></div>
+        <div class="kv">
+          <span>Status</span>
+          <b [class.ok]="schedule.status === 0" [class.bad]="schedule.status !== 0">{{ statusText }}</b>
+        </div>
+        <div class="kv"><span>Duration</span><b>{{ durationText }}</b></div>
+        <div class="kv"><span>Total Cost</span><b>{{ totalCost }}</b></div>
+      </section>
+
+      <!-- Đánh giá -->
+      <section class="vp-card">
+        <div class="rv-head">
+          <h2 class="vp-section-title">Teacher Reviews</h2>
+          @if (reviews.length) {
+            <span class="rv-sum">★ {{ average | number: '1.1-1' }} · {{ reviews.length }}</span>
+          }
+        </div>
+
+        @if (reviewLoading) {
+          <p class="vp-meta">Loading reviews...</p>
+        } @else if (reviewError) {
+          <p class="vp-error-text">{{ reviewError }}</p>
+        } @else if (!reviews.length) {
+          <p class="vp-meta">No reviews available for this teacher yet.</p>
+        } @else {
+          <div class="vp-chips chips">
+            <button type="button" class="vp-chip" [class.is-active]="ratingFilter === 0" (click)="setFilter(0)">
+              All ({{ reviews.length }})
+            </button>
+            @for (s of stars; track s) {
+              @if (countOf(s)) {
+                <button type="button" class="vp-chip" [class.is-active]="ratingFilter === s" (click)="setFilter(s)">
+                  {{ s }}★ ({{ countOf(s) }})
+                </button>
+              }
+            }
+          </div>
+
+          @for (r of filteredReviews; track $index) {
+            <div class="rv">
+              <vp-avatar class="rv__av" [name]="r.studentName || 'A'" [url]="reviewAvatar(r)" [size]="36" />
+              <div class="vp-grow">
+                <p class="rv__name">
+                  {{ r.studentName || 'Anonymous' }} · <span>{{ starsOf(r.rating) }}</span>
+                </p>
+                <p class="rv__date">{{ r.createdDate | date: 'dd/MM/yyyy' }}</p>
+                @if (r.comment) {
+                  <p class="rv__text">{{ r.comment }}</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <p class="vp-meta">No reviews found for selected rating.</p>
+          }
+        }
+      </section>
+    }
+  </div>
+</ion-content>
+
+@if (schedule) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <div>
+        <p class="total__k">Total Cost</p>
+        <p class="total__v">{{ totalCost }}</p>
+      </div>
+      <button
+        type="button"
+        class="vp-btn vp-btn--primary vp-btn--cta grow"
+        [disabled]="schedule.status !== 0 || bookingLoading"
+        (click)="book()"
+      >
+        {{ bookingLoading ? 'Booking...' : schedule.status !== 0 ? 'Already Booked' : 'Book Schedule' }}
+      </button>
+    </div>
+  </ion-footer>
+}

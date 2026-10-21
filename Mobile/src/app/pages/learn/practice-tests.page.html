@@ -1,0 +1,48 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Practice Tests" defaultHref="/learn" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll page">
+    <section class="intro">
+      <span class="vp-eyebrow">Placement</span>
+      <h2 class="intro__title">Entrance Placement Test</h2>
+      <p class="intro__text">Take one paper to find your starting level. Your learning path unlocks right after.</p>
+      <div class="vp-chips tags">
+        <span class="vp-badge tag">{{ placements.length }} exam papers</span>
+        <span class="vp-badge tag">Scored automatically</span>
+        <span class="vp-badge tag">Level assigned after completion</span>
+      </div>
+    </section>
+
+    @if (loading) {
+      <vp-loading text="Loading exams…" />
+    } @else if (!placements.length) {
+      <vp-empty title="No exams yet" text="Placement papers are being prepared. Please check back later." />
+    } @else {
+      <h2 class="vp-section-title">Available exams — {{ placements.length }} papers</h2>
+
+      <div class="random">
+        <span class="random__icon"><vp-icon [d]="diceIcon" [size]="24" /></span>
+        <div class="vp-grow">
+          <p class="exam__title">Random Exam</p>
+          <p class="vp-meta exam__sub">We pick a paper for you</p>
+        </div>
+        <button type="button" class="vp-btn vp-btn--primary start" (click)="openRandom()">Start</button>
+      </div>
+
+      @for (p of placements; track p.placementId; let i = $index) {
+        <div class="exam">
+          <div class="exam__head">
+            <span class="exam__n">{{ i + 1 }}</span>
+            <div class="vp-grow">
+              <p class="exam__title">{{ p.name }}</p>
+              <p class="exam__desc">{{ p.description || '(No description)' }}</p>
+            </div>
+          </div>
+          <button type="button" class="vp-btn vp-btn--secondary vp-btn--block take" (click)="open(p)">Take Exam</button>
+        </div>
+      }
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,73 @@
+.pp-scroll {
+  gap: 14px;
+}
+.pp-hero {
+  border-radius: var(--vp-r-xl2);
+}
+.pp-hero__top {
+  gap: 14px;
+}
+.pp-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--vp-primary-dark);
+  overflow-wrap: anywhere;
+}
+.pp-role {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: var(--vp-r-pill);
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--vp-indigo);
+  font-size: 12px;
+  font-weight: 700;
+}
+.pp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pp-meta__item {
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-fill-2);
+  color: var(--vp-text-body-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+.pp-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.pp-stars {
+  display: inline-flex;
+  gap: 1px;
+  font-size: 15px;
+  color: var(--vp-border-3);
+  white-space: nowrap;
+}
+.pp-stars .on {
+  color: #f59e0b;
+}
+.pp-pre {
+  white-space: pre-line;
+}
+.pp-video {
+  width: 100%;
+  max-height: 240px;
+  border-radius: var(--vp-r-m2);
+  background: #000;
+}
+.pp-reviewer {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-text);
+}
+.pp-cell {
+  background: #fff;
+  box-shadow: var(--vp-sh-card);
+}

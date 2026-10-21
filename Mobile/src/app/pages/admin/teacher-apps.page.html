@@ -1,0 +1,65 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header head">
+    <span class="adm-eyebrow">Admin Dashboard</span>
+    <h1 class="vp-large-title adm-title">Teacher Profiles</h1>
+    <p class="adm-sub">Review and manage teacher applications.</p>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadTeachers($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll adm-list">
+    <div class="vp-chips chips" role="tablist" aria-label="Filter by status">
+      @for (c of chips; track c.value) {
+        <button
+          type="button"
+          role="tab"
+          class="vp-chip"
+          [attr.aria-selected]="selectedStatus === c.value"
+          [class.is-active]="selectedStatus === c.value"
+          (click)="setStatusFilter(c.value)"
+        >
+          {{ c.label }}
+        </button>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading teacher profiles..." />
+    } @else {
+      @for (t of teachers; track t.teacherProfileId) {
+        <div class="vp-card app">
+          <div class="app__head">
+            <vp-avatar [name]="t.teacherName || 'T'" [url]="avatar(t)" [size]="52" />
+            <div class="vp-grow">
+              <p class="vp-card-title">{{ t.teacherName }}</p>
+              <p class="app__meta">
+                {{ t.country || '—' }} · <span class="star">★ {{ t.totalReviews ? t.ratingAverage : '—' }}</span> ·
+                {{ t.totalReviews || 0 }} Reviews
+              </p>
+            </div>
+            <vp-badge class="app__badge" [label]="statusText(t.status)" />
+          </div>
+          <div class="app__grid">
+            <div>
+              <p class="app__k">Experience</p>
+              <p class="app__v">{{ t.experienceYears }} yrs</p>
+            </div>
+            <div>
+              <p class="app__k">Desired</p>
+              <p class="app__v">{{ money(t.desiredPricePerHour) }}</p>
+            </div>
+            <div>
+              <p class="app__k">Approved</p>
+              <p class="app__v">{{ money(t.approvedPricePerHour) }}</p>
+            </div>
+          </div>
+          <a class="vp-btn vp-btn--secondary vp-btn--block" [routerLink]="['/admin/teachers', t.teacherProfileId]">View Detail</a>
+        </div>
+      } @empty {
+        <vp-empty text="No teacher profiles found." />
+      }
+    }
+  </div>
+</ion-content>

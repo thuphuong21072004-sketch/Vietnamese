@@ -1,0 +1,183 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header head">
+    <div class="vp-grow">
+      <h1 class="vp-large-title">My Classes</h1>
+      <p class="t-sub">Manage your teaching classes and schedules.</p>
+    </div>
+    <a routerLink="/teacher/upcoming" class="upcoming-btn">Upcoming</a>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="search($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight list">
+    <form class="searchbar" (ngSubmit)="search()">
+      <label class="search">
+        <vp-icon [d]="icons.search" [size]="18" />
+        <span class="sr-only">Class Name</span>
+        <input type="search" name="title" placeholder="Class Name" enterkeyhint="search" [(ngModel)]="filter.title" (search)="search()" />
+      </label>
+      <button type="button" class="filter-btn" aria-label="Filters" (click)="sheetOpen = true">
+        <vp-icon [d]="icons.sliders" [size]="20" />
+        @if (activeFilterCount) {
+          <span class="filter-btn__dot">{{ activeFilterCount }}</span>
+        }
+      </button>
+    </form>
+
+    <div class="vp-chips" role="group" aria-label="Class Status">
+      @for (c of statusChips; track c.value) {
+        <button type="button" class="vp-chip" [class.is-active]="classStatusFilter === c.value" (click)="setStatus(c.value)">
+          {{ c.label }}
+        </button>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading classes..." />
+    } @else {
+      @for (k of filtered; track k.classId) {
+        <article class="t-card">
+          <div class="t-card__top">
+            <div class="vp-grow">
+              <p class="t-card__title">{{ k.title }}</p>
+              <p class="topic">{{ topicLine(k) }}</p>
+            </div>
+            <vp-badge [label]="status(k)" [classLifecycle]="true" />
+          </div>
+          <div class="facts">
+            <span>Start Date <b>{{ k.startDate | date: 'dd/MM/yyyy' }}</b></span>
+            <span>Time <b>{{ hhmm(k.startTime) }}–{{ hhmm(k.endTime) }}</b></span>
+            <span>Students: <b>{{ k.currentStudents }} / {{ k.maxStudents }}</b></span>
+            <span>Sessions <b>{{ k.totalSessions }}</b></span>
+          </div>
+          <div class="days">
+            @for (d of k.scheduleDays; track d.id + d.dayOfWeek) {
+              <span class="t-chip-day">{{ shortDay(d.dayOfWeek) }}</span>
+            }
+            <span class="price">${{ k.price }}</span>
+          </div>
+          <a class="vp-btn vp-btn--secondary vp-btn--block" [routerLink]="['/teacher/classes', k.classId]">View Details</a>
+        </article>
+      } @empty {
+        <vp-empty title="No classes found." text="Create a class or change the filters." />
+      }
+    }
+  </div>
+
+  <a slot="fixed" class="t-fab" routerLink="/teacher/classes/new">
+    <vp-icon [d]="icons.plus" [size]="20" [stroke]="2.4" />
+    Create New Class
+  </a>
+
+  <!-- Bottom sheet bộ lọc -->
+  <ion-modal [isOpen]="sheetOpen" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="sheetOpen = false">
+    <ng-template>
+      <ion-content>
+        <div class="t-sheet">
+          <div class="t-sheet__head">
+            <h2 class="t-sheet__title">Filters</h2>
+            <button type="button" class="vp-icon-btn" aria-label="Close" (click)="sheetOpen = false">
+              <vp-icon [d]="icons.close" [size]="20" />
+            </button>
+          </div>
+
+          <div class="vp-field">
+            <label class="vp-label" for="f-main">Main Topic</label>
+            <select id="f-main" class="vp-input" [(ngModel)]="filter.mainTopic" (ngModelChange)="onMainTopicChange()">
+              <option value="">All Main Topics</option>
+              @for (t of mainTopics; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+
+          @if (filter.mainTopic !== 'Travel') {
+            <div class="vp-field">
+              <label class="vp-label" for="f-sub">Sub Topic</label>
+              <select id="f-sub" class="vp-input" [(ngModel)]="filter.subTopic">
+                <option value="">All Sub Topics</option>
+                @for (t of subTopics[filter.mainTopic || ''] || []; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+          } @else {
+            <div class="vp-field">
+              <label class="vp-label" for="f-prov">Province</label>
+              <select id="f-prov" class="vp-input" [(ngModel)]="filterProvince" (ngModelChange)="onProvinceChange()">
+                <option value="">All Provinces</option>
+                @for (g of destinations; track g.province) {
+                  <option [value]="g.province">{{ g.province }}</option>
+                }
+              </select>
+            </div>
+            <div class="vp-field">
+              <label class="vp-label" for="f-spot">Specific Location</label>
+              <select id="f-spot" class="vp-input" [(ngModel)]="filterSpecificLocation" [disabled]="!filterProvince">
+                <option value="">All Locations</option>
+                @for (s of spots; track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="vp-field">
+            <span class="vp-label">Class Status</span>
+            <div class="vp-chips">
+              @for (c of statusChips; track c.value) {
+                <button type="button" class="vp-chip" [class.is-active]="classStatusFilter === c.value" (click)="setStatus(c.value)">
+                  {{ c.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (classStatusFilter) {
+            <div class="vp-field">
+              <label class="vp-label" for="f-study">Study Date</label>
+              <input id="f-study" type="date" class="vp-input" [(ngModel)]="studyDateFilter" />
+            </div>
+          }
+
+          <div class="vp-grid-2">
+            <div class="vp-field">
+              <label class="vp-label" for="f-sd">Start Date</label>
+              <input id="f-sd" type="date" class="vp-input" [(ngModel)]="filter.startDate" />
+            </div>
+            <div class="vp-field">
+              <label class="vp-label" for="f-ed">End Date</label>
+              <input id="f-ed" type="date" class="vp-input" [(ngModel)]="filter.endDate" />
+            </div>
+            <div class="vp-field">
+              <label class="vp-label" for="f-st">Start Time</label>
+              <input id="f-st" type="time" class="vp-input" [(ngModel)]="filter.startTime" />
+            </div>
+            <div class="vp-field">
+              <label class="vp-label" for="f-et">End Time</label>
+              <input id="f-et" type="time" class="vp-input" [(ngModel)]="filter.endTime" />
+            </div>
+          </div>
+
+          <fieldset class="days-field">
+            <legend class="vp-label">Study Days</legend>
+            <div class="t-days">
+              @for (d of weekDays; track d) {
+                <button type="button" [class.on]="filter.daysOfWeek.includes(d)" [attr.aria-pressed]="filter.daysOfWeek.includes(d)" (click)="toggleDay(d)">
+                  {{ shortDay(d) }}
+                </button>
+              }
+            </div>
+          </fieldset>
+
+          <div class="t-sheet__actions">
+            <button type="button" class="vp-btn vp-btn--back vp-btn--form" (click)="clear()">Clear Filters</button>
+            <button type="button" class="vp-btn vp-btn--primary vp-btn--form" (click)="apply()">Search</button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

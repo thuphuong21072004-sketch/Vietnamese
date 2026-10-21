@@ -1,0 +1,22 @@
+.list {
+  padding-bottom: calc(var(--vp-safe-bottom) + 96px);
+}
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: var(--vp-sh-large);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+.form-actions .vp-btn {
+  flex: 1;
+}
+.form-actions .save {
+  flex: 2;
+}

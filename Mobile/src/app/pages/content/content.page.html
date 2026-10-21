@@ -1,0 +1,216 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <h1 class="vp-large-title">{{ title }}</h1>
+    <nav class="seg" aria-label="Content level">
+      @for (s of segs; track s.value) {
+        <button type="button" [class.on]="s.value === seg" [attr.aria-current]="s.value === seg ? 'page' : null" (click)="changeSeg(s.value)">
+          {{ s.label }}
+        </button>
+      }
+    </nav>
+  </header>
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll vp-scroll--tight">
+    @if (loading) {
+      <vp-loading />
+    } @else {
+      @switch (seg) {
+        <!-- ================= LEVELS ================= -->
+        @case ('levels') {
+          @if (!levels.length) {
+            <vp-empty title="No levels yet" text="Create the first level for your courses." />
+          }
+          @for (l of levels; track $index) {
+            <div class="cm-card" [class.is-deleted]="l.isDelete">
+              <div class="row-top">
+                <button type="button" class="row-main" aria-label="Edit level" (click)="editLevel = l">
+                  <p class="cm-name" [class.cm-empty-text]="!l.levelName">{{ l.levelName || 'Tap to enter a name' }}</p>
+                  <p class="cm-desc" [class.cm-empty-text]="!l.description">{{ l.description || 'No description' }}</p>
+                </button>
+                <button type="button" class="cm-open" aria-label="Open courses" [disabled]="!l.levelId" (click)="openLevel(l)">
+                  <vp-icon [d]="icons.chevronRight" [size]="20" />
+                </button>
+              </div>
+              <div class="cm-checks">
+                <label class="cm-check"><input type="checkbox" [(ngModel)]="l.isActive" (ngModelChange)="markDirty()" />Active</label>
+                <label class="cm-check cm-check--danger"><input type="checkbox" [(ngModel)]="l.isDelete" (ngModelChange)="markDirty()" />Delete</label>
+              </div>
+            </div>
+          }
+          <button type="button" class="cm-add" (click)="addLevel()">
+            <vp-icon [d]="plus" [size]="18" [stroke]="2.4" />Add new row
+          </button>
+        }
+
+        <!-- ================= COURSES ================= -->
+        @case ('courses') {
+          @if (level) {
+            <section class="cm-context">
+              <span class="vp-eyebrow">Level</span>
+              <p class="cm-context__name">{{ level.levelName }}</p>
+              @if (level.description) {
+                <p class="cm-context__desc">{{ level.description }}</p>
+              }
+            </section>
+            @if (!courses.length) {
+              <vp-empty title="No courses yet" text="Add the first course for this level." />
+            }
+            @for (c of courses; track $index) {
+              <div class="cm-card" [class.is-deleted]="c.isDelete">
+                <div class="row-top">
+                  <button type="button" class="row-main" aria-label="Edit course" (click)="editCourse = c">
+                    <p class="cm-name" [class.cm-empty-text]="!c.courseName">{{ c.courseName || 'Tap to enter a name' }}</p>
+                    <p class="cm-desc" [class.cm-empty-text]="!c.description">{{ c.description || 'No description' }}</p>
+                    <p class="cm-by">Created By {{ c.createdBy || 'N/A' }}</p>
+                  </button>
+                  <button type="button" class="cm-open" aria-label="Open units" [disabled]="!c.courseId" (click)="openCourse(c)">
+                    <vp-icon [d]="icons.chevronRight" [size]="20" />
+                  </button>
+                </div>
+                <div class="cm-checks">
+                  <label class="cm-check"><input type="checkbox" [(ngModel)]="c.isActive" [disabled]="c.isDelete" (ngModelChange)="markDirty()" />Active</label>
+                  <label class="cm-check cm-check--danger"><input type="checkbox" [(ngModel)]="c.isDelete" (ngModelChange)="markDirty()" />Delete</label>
+                </div>
+              </div>
+            }
+            <button type="button" class="cm-add" (click)="addCourse()">
+              <vp-icon [d]="plus" [size]="18" [stroke]="2.4" />Add new row
+            </button>
+            <button type="button" class="vp-btn vp-btn--secondary vp-btn--block vp-btn--form" [disabled]="!level.levelId" (click)="manageLevelQuiz()">
+              Manage Level Quiz
+            </button>
+          } @else {
+            <vp-empty title="No level selected" text="Create a level first, then manage its courses.">
+              <button type="button" class="vp-btn vp-btn--secondary" (click)="changeSeg('levels')">Go to Levels</button>
+            </vp-empty>
+          }
+        }
+
+        <!-- ================= UNITS ================= -->
+        @case ('units') {
+          @if (course) {
+            <section class="cm-context">
+              <span class="vp-eyebrow">Course</span>
+              <p class="cm-context__name">{{ course.courseName }}</p>
+              @if (course.description) {
+                <p class="cm-context__desc">{{ course.description }}</p>
+              }
+            </section>
+            @if (!units.length) {
+              <vp-empty title="No units yet" text="Add the first unit for this course." />
+            }
+            @for (u of units; track u.unitId) {
+              <div class="cm-card" [class.is-deleted]="u.isDelete">
+                <div class="row-top">
+                  <button type="button" class="row-main" aria-label="Open unit" (click)="openUnit(u)">
+                    <div class="name-row">
+                      <p class="cm-name vp-grow">{{ u.unitName }}</p>
+                      <span class="vp-badge" [class.vp-badge--success]="u.isActive" [class.vp-badge--neutral]="!u.isActive">
+                        {{ u.isActive ? 'Active' : 'Inactive' }}
+                      </span>
+                    </div>
+                    @if (u.description) {
+                      <p class="cm-desc">{{ u.description }}</p>
+                    }
+                    <p class="cm-by">Created By {{ u.createdBy || 'N/A' }}@if (u.createdDate) {<span> · {{ u.createdDate | date: 'dd/MM/yyyy' }}</span>}</p>
+                  </button>
+                  <button type="button" class="cm-open" aria-label="Open unit" (click)="openUnit(u)">
+                    <vp-icon [d]="icons.chevronRight" [size]="20" />
+                  </button>
+                </div>
+                <div class="cm-checks">
+                  <label class="cm-check cm-check--danger"><input type="checkbox" [(ngModel)]="u.isDelete" />Delete</label>
+                </div>
+              </div>
+            }
+            <button type="button" class="cm-add" (click)="addUnit()">
+              <vp-icon [d]="plus" [size]="18" [stroke]="2.4" />Add unit
+            </button>
+            <button type="button" class="vp-btn vp-btn--secondary vp-btn--block vp-btn--form" [disabled]="!course.courseId" (click)="manageCourseQuiz()">
+              Manage Course Quiz
+            </button>
+          } @else {
+            <vp-empty title="No course selected" text="Choose a course to see its units.">
+              <button type="button" class="vp-btn vp-btn--secondary" (click)="changeSeg('courses')">Go to Courses</button>
+            </vp-empty>
+          }
+        }
+      }
+    }
+  </div>
+</ion-content>
+
+@if (!loading && (seg === 'levels' || (seg === 'courses' && level) || (seg === 'units' && course))) {
+  <ion-footer class="vp-footer">
+    <div class="cm-bar">
+      @if (seg === 'units') {
+        <button type="button" class="vp-btn vp-btn--danger-solid" [disabled]="saving || !selectedUnitCount" (click)="deleteSelectedUnits()">
+          {{ saving ? 'Deleting...' : 'Delete Selected' + (selectedUnitCount ? ' (' + selectedUnitCount + ')' : '') }}
+        </button>
+      } @else {
+        <button type="button" class="vp-btn vp-btn--accent save-btn" [disabled]="saving" (click)="save()">
+          {{ saving ? 'Saving...' : 'Save All' }}
+        </button>
+      }
+    </div>
+  </ion-footer>
+}
+
+<!-- Bottom sheet sửa Level -->
+<ion-modal class="cm-modal" [isOpen]="!!editLevel" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="closeSheet()">
+  <ng-template>
+    <ion-content>
+      @if (editLevel; as l) {
+        <div class="cm-sheet">
+          <p class="cm-sheet__title">{{ l.levelId ? 'Edit level' : 'New level' }}</p>
+          @if (l.isDelete) {
+            <div class="vp-alert vp-alert--danger">This level is marked for deletion. Untick "Delete" to edit it.</div>
+          }
+          <div class="vp-field">
+            <label class="vp-label" for="lv-name">Name <span class="cm-req">*</span></label>
+            <input id="lv-name" class="vp-input" [(ngModel)]="l.levelName" (ngModelChange)="markDirty()" [disabled]="l.isDelete" placeholder="Level name" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="lv-desc">Description <span class="cm-req">*</span></label>
+            <textarea id="lv-desc" class="vp-input" rows="4" [(ngModel)]="l.description" (ngModelChange)="markDirty()" [disabled]="l.isDelete" placeholder="Description"></textarea>
+          </div>
+          <label class="vp-check"><input type="checkbox" [(ngModel)]="l.isActive" (ngModelChange)="markDirty()" />Active</label>
+          <p class="vp-hint">Changes are kept on this screen until you tap "Save All".</p>
+          <button type="button" class="vp-btn vp-btn--accent vp-btn--block vp-btn--form" (click)="closeSheet()">Done</button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Bottom sheet sửa Course -->
+<ion-modal class="cm-modal" [isOpen]="!!editCourse" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="closeSheet()">
+  <ng-template>
+    <ion-content>
+      @if (editCourse; as c) {
+        <div class="cm-sheet">
+          <p class="cm-sheet__title">{{ c.courseId ? 'Edit course' : 'New course' }}</p>
+          @if (c.isDelete) {
+            <div class="vp-alert vp-alert--danger">This course is marked for deletion. Untick "Delete" to edit it.</div>
+          }
+          <div class="vp-field">
+            <label class="vp-label" for="co-name">Name <span class="cm-req">*</span></label>
+            <input id="co-name" class="vp-input" [(ngModel)]="c.courseName" (ngModelChange)="markDirty()" [disabled]="c.isDelete" placeholder="Course name" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="co-desc">Description <span class="cm-req">*</span></label>
+            <textarea id="co-desc" class="vp-input" rows="4" [(ngModel)]="c.description" (ngModelChange)="markDirty()" [disabled]="c.isDelete" placeholder="Description"></textarea>
+          </div>
+          <label class="vp-check"><input type="checkbox" [(ngModel)]="c.isActive" (ngModelChange)="markDirty()" [disabled]="c.isDelete" />Active</label>
+          @if (c.createdBy) {
+            <p class="vp-meta">Created By {{ c.createdBy }}</p>
+          }
+          <p class="vp-hint">Changes are kept on this screen until you tap "Save All".</p>
+          <button type="button" class="vp-btn vp-btn--accent vp-btn--block vp-btn--form" (click)="closeSheet()">Done</button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,0 +1,68 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header head">
+    <div>
+      <h1 class="vp-large-title">Teaching Bookings</h1>
+      <p class="t-sub">Manage your classes and students</p>
+    </div>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    <div class="vp-chips" role="group" aria-label="Status">
+      @for (c of statusChips; track c.value) {
+        <button type="button" class="vp-chip" [class.is-active]="selectedStatus === c.value" (click)="setStatus(c.value)">{{ c.label }}</button>
+      }
+    </div>
+
+    <div class="date-row">
+      <label for="bd" class="sr-only">Date</label>
+      <input id="bd" type="date" class="vp-input vp-input--sm" [(ngModel)]="selectedDate" (change)="load()" />
+      @if (selectedDate) {
+        <button type="button" class="vp-icon-btn" aria-label="Clear date" (click)="clearDate()">
+          <vp-icon [d]="icons.close" [size]="18" />
+        </button>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading bookings..." />
+    } @else {
+      @for (b of bookings; track b.bookingId) {
+        <article class="t-card">
+          <div class="vp-row">
+            <vp-avatar [name]="name(b)" [url]="avatar(b)" [size]="48" />
+            <div class="vp-grow">
+              <p class="name">{{ name(b) }}</p>
+              <p class="vp-meta when">{{ b.startTime | date: 'dd/MM/yyyy' }} · {{ b.startTime | date: 'HH:mm' }} – {{ b.endTime | date: 'HH:mm' }}</p>
+            </div>
+            <vp-badge [label]="statusText(b)" />
+          </div>
+          <div class="t-strip">
+            <span>Duration <b>{{ duration(b) }} {{ duration(b) === 1 ? "hour" : "hours" }}</b></span>
+            <span>Revenue <b>{{ b.totalPrice | currency: 'USD' : 'symbol' : '1.2-2' }}</b></span>
+          </div>
+          <div class="t-actions">
+            <a class="vp-btn t-btn-white" [routerLink]="['/teacher/bookings', b.bookingId]">View Detail</a>
+            @if (canJoin(b)) {
+              <button type="button" class="vp-btn vp-btn--primary" (click)="join(b)">Join Room</button>
+            }
+            @if (isWaiting(b)) {
+              <button type="button" class="vp-btn t-btn-wait" disabled>Waiting for class time</button>
+            }
+            @if (reviewed.has(b.bookingId)) {
+              <a class="vp-btn vp-btn--secondary" [routerLink]="['/teacher/bookings', b.bookingId]">View Review</a>
+            }
+            @if (canCancel(b)) {
+              <button type="button" class="vp-btn vp-btn--danger" (click)="cancel(b)">Cancel</button>
+            }
+          </div>
+        </article>
+      } @empty {
+        <vp-empty text="No bookings found" />
+      }
+    }
+  </div>
+</ion-content>

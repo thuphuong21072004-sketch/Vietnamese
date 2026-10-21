@@ -1,0 +1,111 @@
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.filter {
+  gap: 12px;
+}
+.filter__actions {
+  display: flex;
+  gap: 8px;
+}
+.filter__actions .vp-btn {
+  flex: 1;
+}
+.filter__search {
+  box-shadow: none;
+}
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.summary__count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-text-body);
+}
+.head {
+  align-items: flex-start;
+  gap: 10px;
+}
+.num {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--vp-indigo-soft);
+  color: var(--vp-indigo-dark);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dates {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-emerald-soft);
+  color: var(--vp-emerald);
+  font-size: 13px;
+  font-weight: 700;
+}
+.arrow {
+  opacity: 0.7;
+}
+.people {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.person {
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-s);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.person__role {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vp-indigo-dark);
+}
+.person__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-text);
+  overflow-wrap: anywhere;
+}
+.person__line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  font-size: 12px;
+  color: var(--vp-text-body-2);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.person__line vp-icon {
+  flex-shrink: 0;
+  color: var(--vp-muted);
+}
+.person__line.muted {
+  color: var(--vp-placeholder);
+}
+.confirmed {
+  font-size: 12px;
+  color: var(--vp-muted);
+}

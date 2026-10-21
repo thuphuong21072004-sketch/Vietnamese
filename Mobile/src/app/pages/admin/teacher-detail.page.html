@@ -1,0 +1,163 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Teacher Application" defaultHref="/admin/teachers" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll">
+    @if (loading) {
+      <vp-loading text="Loading teacher detail..." />
+    } @else if (!teacher) {
+      <vp-empty title="Teacher not found" text="This teacher profile could not be loaded." />
+    } @else {
+      <!-- Hồ sơ -->
+      <section class="vp-card vp-card--lg">
+        <div class="vp-row prof">
+          <vp-avatar [name]="teacher.teacherName || 'T'" [url]="avatar(teacher.avatarUrl)" [size]="72" radius="22px" />
+          <div class="vp-grow">
+            <h2 class="prof__name">{{ teacher.teacherName }}</h2>
+            @if (teacher.specialty) {
+              <p class="prof__spec">{{ teacher.specialty }}</p>
+            }
+            <p class="vp-meta">
+              <span class="star">★ {{ teacher.ratingAverage }}</span> · {{ teacher.totalReviews }} Reviews ·
+              {{ teacher.experienceYears }} years experience
+            </p>
+          </div>
+        </div>
+        <vp-badge class="prof__badge" [label]="statusText(teacher.status)" />
+        @if (teacher.description) {
+          <p class="vp-body">{{ teacher.description }}</p>
+        }
+      </section>
+
+      <!-- Teacher Information -->
+      <section class="vp-section">
+        <h2 class="vp-section-title">Teacher Information</h2>
+        <div class="vp-card kv">
+          <div class="vp-kv-row"><span class="vp-kv-row__k">Country</span><span class="vp-kv-row__v">{{ teacher.country || '—' }}</span></div>
+          <div class="vp-kv-row"><span class="vp-kv-row__k">Experience</span><span class="vp-kv-row__v">{{ teacher.experienceYears }} years</span></div>
+          <div class="vp-kv-row"><span class="vp-kv-row__k">Desired Price</span><span class="vp-kv-row__v">{{ teacher.desiredPricePerHour }}</span></div>
+          @if (teacher.approvedPricePerHour) {
+            <div class="vp-kv-row"><span class="vp-kv-row__k">Approved Price</span><span class="vp-kv-row__v">{{ teacher.approvedPricePerHour }}</span></div>
+          }
+          <div class="vp-kv-row"><span class="vp-kv-row__k">Rating</span><span class="vp-kv-row__v">★ {{ teacher.ratingAverage }}</span></div>
+          <div class="vp-kv-row"><span class="vp-kv-row__k">Reviews</span><span class="vp-kv-row__v">{{ teacher.totalReviews }}</span></div>
+          @if (teacher.approvedBy) {
+            <div class="vp-kv-row"><span class="vp-kv-row__k">Approved By</span><span class="vp-kv-row__v">{{ teacher.approvedBy }}</span></div>
+          }
+        </div>
+      </section>
+
+      @if (videoUrl) {
+        <section class="vp-section">
+          <h2 class="vp-section-title">Introduction Video</h2>
+          <video class="video" [src]="videoUrl" controls playsinline preload="metadata"></video>
+        </section>
+      }
+
+      @if (teacher.englishCertificateUrl) {
+        <section class="vp-section">
+          <h2 class="vp-section-title">English Certificate</h2>
+          <button type="button" class="vp-btn vp-btn--secondary vp-btn--block" (click)="openCertificate()">View Certificate</button>
+        </section>
+      }
+
+      <!-- Admin Review (khi Submitted) -->
+      @if (canReview) {
+        <section class="vp-section">
+          <h2 class="vp-section-title">Admin Review</h2>
+          <div class="vp-card">
+            <div class="vp-field">
+              <label for="td-price" class="vp-label">Approved Price Per Hour</label>
+              <input id="td-price" type="number" inputmode="decimal" min="0" class="vp-input" [(ngModel)]="approvedPrice" />
+            </div>
+            <div class="vp-field">
+              <label for="td-note" class="vp-label">Admin Note</label>
+              <textarea id="td-note" rows="5" class="vp-input" [(ngModel)]="adminNote"></textarea>
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (teacher.adminNote) {
+        <section class="vp-section">
+          <h2 class="vp-section-title">Existing Admin Note</h2>
+          <div class="vp-card"><p class="vp-body">{{ teacher.adminNote }}</p></div>
+        </section>
+      }
+
+      @if (canBan) {
+        <button type="button" class="vp-btn vp-btn--block adm-btn-black" [disabled]="busy" (click)="ban()">Ban Teacher</button>
+      }
+
+      <!-- Teacher Reviews -->
+      <section class="vp-section">
+        <div class="rev-head">
+          <h2 class="vp-section-title">Teacher Reviews</h2>
+          @if (reviews.length) {
+            <span class="vp-meta"><span class="star">★ {{ averageRating | number: '1.1-1' }}</span> · {{ reviews.length }} reviews</span>
+          }
+        </div>
+
+        @if (reviews.length) {
+          <div class="vp-chips" role="tablist" aria-label="Filter by rating">
+            <button
+              type="button"
+              role="tab"
+              class="vp-chip"
+              [attr.aria-selected]="selectedRating === 0"
+              [class.is-active]="selectedRating === 0"
+              (click)="selectedRating = 0"
+            >
+              All ({{ reviews.length }})
+            </button>
+            @for (s of stars; track s) {
+              <button
+                type="button"
+                role="tab"
+                class="vp-chip"
+                [attr.aria-selected]="selectedRating === s"
+                [class.is-active]="selectedRating === s"
+                (click)="selectedRating = s"
+              >
+                {{ s }}★ ({{ reviewCount(s) }})
+              </button>
+            }
+          </div>
+        }
+
+        @if (reviewLoading) {
+          <vp-loading text="Loading reviews..." />
+        } @else if (reviewError) {
+          <div class="vp-alert vp-alert--danger">{{ reviewError }}</div>
+        } @else if (!reviews.length) {
+          <vp-empty text="No reviews available." />
+        } @else {
+          @for (r of filteredReviews; track $index) {
+            <div class="vp-card review">
+              <div class="vp-row">
+                <vp-avatar [name]="r.student?.name || 'A'" [url]="avatar(r.student?.avatarUrl)" [size]="40" />
+                <p class="vp-card-title vp-grow">{{ r.student?.name || 'Anonymous' }}</p>
+                <span class="star">{{ r.rating }}★</span>
+              </div>
+              @if (r.comment) {
+                <p class="vp-body">{{ r.comment }}</p>
+              }
+            </div>
+          } @empty {
+            <p class="vp-meta">No reviews with this rating.</p>
+          }
+        }
+      </section>
+    }
+  </div>
+</ion-content>
+
+@if (teacher && canReview) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--danger vp-btn--cta" [disabled]="busy" (click)="reject()">Reject Teacher</button>
+      <button type="button" class="vp-btn vp-btn--cta adm-btn-success" [disabled]="busy" (click)="approve()">Approve Teacher</button>
+    </div>
+  </ion-footer>
+}

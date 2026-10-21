@@ -1,0 +1,296 @@
+<ion-header class="vp-header">
+  <div class="qh-safe"></div>
+  <header class="qh">
+    <button type="button" class="qh__close" [attr.aria-label]="isSubmitted ? 'Close' : 'Exit quiz'" (click)="exit()">
+      <vp-icon [d]="icons.close" [size]="22" />
+    </button>
+    @if (!isSubmitted) {
+      <div class="qh__timer">
+        @if (timerText) {
+          <span class="qh__timer-k">Time Remaining</span>
+          <span class="qh__timer-v" [class.warn]="timeLeft <= 300 && timeLeft > 60" [class.danger]="timeLeft <= 60">{{ timerText }}</span>
+        } @else {
+          <span class="qh__timer-k">{{ typeLabel }}</span>
+        }
+      </div>
+      <button type="button" class="qh__submit" [disabled]="!quiz || submitting" (click)="confirmSubmit()">
+        {{ submitting ? '...' : 'SUBMIT' }}
+      </button>
+    } @else {
+      <h1 class="qh__title">{{ showSummary ? 'Your Results' : 'Review Answers' }}</h1>
+      <span class="qh__spacer"></span>
+    }
+  </header>
+</ion-header>
+
+<ion-content>
+  @if (loading) {
+    <vp-loading text="Loading test..." />
+  } @else if (!quiz) {
+    <div class="body"><p class="vp-meta center">Quiz not found.</p></div>
+  } @else if (isSubmitted && showSummary) {
+    <!-- ===== 08 Quiz Results ===== -->
+    <div class="body body--results">
+      <section class="score-card">
+        <p class="score-card__title">{{ resultTitle }}</p>
+        <p class="score-card__pct">{{ currentScore | number: '1.0-0' }}%</p>
+        @if (refType === 'PLACEMENT') {
+          <span class="verdict verdict--pass">LEVEL {{ placementLevel || 'ASSIGNED' }}</span>
+          <p class="score-card__note">Placement Test · level assigned</p>
+        } @else {
+          <span class="verdict" [class.verdict--pass]="isPassed" [class.verdict--fail]="!isPassed">{{ isPassed ? 'PASSED' : 'FAILED' }}</span>
+          <p class="score-card__note">Pass Score: {{ passScore }}%{{ isPassed && refType === 'UNIT' ? ' · Next unit unlocked' : '' }}</p>
+        }
+      </section>
+
+      <div class="stats">
+        <div class="stat" style="border-left-color: #16a34a">
+          <p class="stat__k">Correct Answers</p>
+          <p class="stat__v" style="color: #15803d">{{ correctCount }}</p>
+        </div>
+        <div class="stat" style="border-left-color: #dc2626">
+          <p class="stat__k">Wrong Answers</p>
+          <p class="stat__v" style="color: #b91c1c">{{ wrongCount }}</p>
+        </div>
+        <div class="stat" style="border-left-color: #f59e0b">
+          <p class="stat__k">Skipped</p>
+          <p class="stat__v" style="color: #92400e">{{ skippedCount }} Câu</p>
+        </div>
+        <div class="stat" style="border-left-color: #2563eb">
+          <p class="stat__k">Score</p>
+          <p class="stat__v" style="color: #1e40af">{{ earnedPoints }}/{{ totalPoints }}</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        @if (refType === 'PLACEMENT') {
+          <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="startLearning()">Start Learning</button>
+        } @else if (isPassed) {
+          <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="continue()">Continue</button>
+        }
+        <button type="button" class="vp-btn vp-btn--secondary act-review" (click)="review()">Review Answers</button>
+        <div class="actions__row">
+          <button type="button" class="vp-btn act-retry" (click)="retry()">Try Again</button>
+          <button type="button" class="vp-btn vp-btn--back act-back" (click)="backToList()">{{ refType === 'PLACEMENT' ? 'Back' : 'Back to Units' }}</button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    @if (cur; as f) {
+    <!-- ===== 07 Quiz (làm bài / xem lại) ===== -->
+    <div class="body">
+      <div class="banner">
+        <p class="banner__school">VIETNAMESE LEARNING INSTITUTE</p>
+        <p class="banner__sub">Official Assessment Paper</p>
+        <h1 class="banner__title">{{ resultTitle }}</h1>
+        <p class="banner__meta">{{ typeLabel }}{{ refType !== 'PLACEMENT' ? ' · Pass Score: ' + passScore + '%' : '' }}</p>
+      </div>
+
+      @if (isSubmitted) {
+        <div class="review-bar">
+          <span class="review-bar__score">{{ currentScore | number: '1.0-0' }}%</span>
+          <span class="verdict verdict--sm" [class.verdict--pass]="isPassed" [class.verdict--fail]="!isPassed">
+            {{ refType === 'PLACEMENT' ? 'Level Assigned' : isPassed ? 'PASSED' : 'FAILED' }}
+          </span>
+          <span class="vp-grow"></span>
+          <button type="button" class="review-bar__btn" (click)="backToSummary()">← Results</button>
+        </div>
+      } @else if (hasPrevious) {
+        <button type="button" class="prev-attempt" (click)="reviewPrevious()">Review previous attempt</button>
+      }
+
+      @if (hasParts) {
+        <div class="parts">
+          @for (part of quiz.parts; track $index; let pi = $index) {
+            <button
+              type="button"
+              class="part-pill"
+              [class.on]="f.partIndex === pi"
+              [class.done]="!isSubmitted && f.partIndex !== pi && partTotal(pi) > 0 && partAnswered(pi) === partTotal(pi)"
+              (click)="goPart(pi)"
+            >
+              Phần {{ $any(part).partNumber }}{{ !isSubmitted ? ' · ' + partAnswered(pi) + '/' + partTotal(pi) : '' }}
+            </button>
+          }
+        </div>
+        @if (isPartStart(f) && ($any(quiz.parts[f.partIndex]).partName || $any(quiz.parts[f.partIndex]).instruction)) {
+          <section class="part-info">
+            <p class="part-info__name">Phần {{ $any(quiz.parts[f.partIndex]).partNumber }}{{ $any(quiz.parts[f.partIndex]).partName ? ' · ' + $any(quiz.parts[f.partIndex]).partName : '' }}</p>
+            @if ($any(quiz.parts[f.partIndex]).instruction) {
+              <p class="part-info__text">{{ $any(quiz.parts[f.partIndex]).instruction }}</p>
+            }
+          </section>
+        }
+      }
+
+      @if (f.passage; as psg) {
+        <section class="passage">
+          @if (psg.content) {
+            <p class="passage__text">{{ psg.content }}</p>
+          } @else if (psg.imageUrl) {
+            <img class="media-img" [src]="mediaSrc(psg.imageUrl, 'images')" alt="" />
+          } @else if (psg.audioUrl) {
+            <audio controls class="media-audio" [src]="mediaSrc(psg.audioUrl, 'audios')"></audio>
+          }
+        </section>
+      }
+
+      <!-- Câu hỏi -->
+      <section class="q" [id]="'q-' + f.q.questionId">
+        <div class="q__head">
+          <div class="q__text">
+            <b>Câu {{ f.no }}.</b>
+            @if (f.q.questionText) {
+              {{ f.q.questionText }}
+            }
+            <span class="q__pts">({{ f.q.score }} pts)</span>
+          </div>
+          @if (!isSubmitted) {
+            <button type="button" class="flag" [class.on]="flagged.has(f.q.questionId)" (click)="toggleFlag(f.q.questionId)">
+              <vp-icon [d]="icons.flag" [size]="14" />{{ flagged.has(f.q.questionId) ? 'Marked' : 'Mark' }}
+            </button>
+          }
+        </div>
+        @if (!f.q.questionText && f.q.imageUrl) {
+          <img class="media-img" [src]="mediaSrc(f.q.imageUrl, 'images')" alt="" />
+        } @else if (!f.q.questionText && f.q.audioUrl) {
+          <audio controls class="media-audio" [src]="mediaSrc(f.q.audioUrl, 'audios')"></audio>
+        }
+
+        <!-- Trắc nghiệm -->
+        @if (isMC(f.q)) {
+          @for (a of f.q.answers; track a.answerId; let ai = $index) {
+            <label [class]="answerClass(f.q, a)">
+              <input
+                type="radio"
+                [name]="'q' + f.q.questionId"
+                [checked]="selectedAnswers[f.q.questionId] === a.answerId"
+                [disabled]="isSubmitted"
+                (change)="select(f.q.questionId, a.answerId)"
+              />
+              <span class="opt__body">
+                <b>{{ letter(ai) }}.</b>
+                @if (a.answerText) {
+                  {{ a.answerText }}
+                } @else if (a.imageUrl) {
+                  <img class="opt__img" [src]="mediaSrc(a.imageUrl, 'images')" alt="" />
+                } @else if (a.audioUrl) {
+                  <audio controls class="media-audio" [src]="mediaSrc(a.audioUrl, 'audios')"></audio>
+                }
+              </span>
+            </label>
+          }
+          @if (isSubmitted && selectedAnswers[f.q.questionId] === undefined) {
+            <p class="skipped">Not answered</p>
+          }
+        }
+
+        <!-- Phát âm -->
+        @if (f.q.questionType === 'PRONUNCIATION') {
+          @if (!isSubmitted) {
+            <div class="pron">
+              <button
+                type="button"
+                class="pron__btn"
+                [class.rec]="pronState(f.q.questionId).isRecording"
+                [disabled]="pronState(f.q.questionId).isTranscribing"
+                (click)="toggleRecord(f.q)"
+              >
+                {{ pronState(f.q.questionId).isRecording ? '⏹ Stop' : '🎤 Record' }}
+              </button>
+              @if (pronState(f.q.questionId).isTranscribing) {
+                <span class="pron__status"><span class="mini-spin"></span>Processing...</span>
+              } @else if (pronState(f.q.questionId).score !== undefined) {
+                <span class="pron__status pron__status--ok">✓ Recorded</span>
+              }
+            </div>
+          } @else {
+            <div class="review-media">
+              @if (pronState(f.q.questionId).recordedAudioUrl) {
+                <p class="review-media__k">Your recording:</p>
+                <audio controls class="media-audio" [src]="pronState(f.q.questionId).recordedAudioUrl"></audio>
+              }
+              @if (pronState(f.q.questionId).ttsAudioUrl) {
+                <p class="review-media__k">Reference:</p>
+                <audio controls class="media-audio" [src]="pronState(f.q.questionId).ttsAudioUrl"></audio>
+              }
+              @if (pronState(f.q.questionId).score !== undefined) {
+                <span class="verdict verdict--sm" [class.verdict--pass]="pronState(f.q.questionId).score! >= 80" [class.verdict--fail]="pronState(f.q.questionId).score! < 80">
+                  {{ pronState(f.q.questionId).score | number: '1.0-0' }}% {{ pronState(f.q.questionId).score! >= 80 ? '✓ Passed' : '✗ Failed' }}
+                </span>
+              } @else {
+                <p class="skipped">Not recorded</p>
+              }
+            </div>
+          }
+        }
+
+        <!-- Viết -->
+        @if (f.q.questionType === 'WRITING') {
+          @if (!isSubmitted) {
+            <textarea class="vp-input writing" rows="3" placeholder="Type your answer here..." [(ngModel)]="writingAnswers[f.q.questionId]"></textarea>
+          } @else {
+            <div class="review-media">
+              <p class="review-media__k">Your answer:</p>
+              <p class="review-media__v" [class.muted]="!writingAnswers[f.q.questionId]">{{ writingAnswers[f.q.questionId] || '(Not answered)' }}</p>
+              <p class="review-media__k">Correct answer:</p>
+              <p class="review-media__v review-media__v--ok">{{ correctText(f.q) }}</p>
+              @if (!writingAnswers[f.q.questionId]) {
+                <p class="skipped">Not answered</p>
+              } @else {
+                <span class="verdict verdict--sm" [class.verdict--pass]="(writingState(f.q.questionId).score ?? 0) >= 80" [class.verdict--fail]="(writingState(f.q.questionId).score ?? 0) < 80">
+                  {{ (writingState(f.q.questionId).score ?? 0) >= 80 ? '✓ Correct' : '✗ Incorrect' }}
+                </span>
+              }
+            </div>
+          }
+        }
+      </section>
+
+      <!-- Lưới số câu -->
+      <section class="grid-card">
+        <div class="grid-card__head">
+          <span class="grid-card__title">{{ gridTitle }}</span>
+          @if (!isSubmitted) {
+            <span class="legend">
+              <span><i class="dot dot--ans"></i>Answered</span>
+              <span><i class="dot dot--flag"></i>Flagged</span>
+            </span>
+          }
+        </div>
+        <div class="grid">
+          @for (g of gridItems; track g.q.questionId) {
+            <button
+              type="button"
+              class="cell"
+              [class.cell--cur]="g === f"
+              [class.cell--ans]="g !== f && !isSubmitted && isAnswered(g.q)"
+              [class.cell--flag]="g !== f && !isSubmitted && flagged.has(g.q.questionId)"
+              (click)="goQ(g)"
+            >
+              {{ g.no }}
+            </button>
+          }
+        </div>
+      </section>
+    </div>
+    }
+  }
+</ion-content>
+
+@if (quiz && cur && !(isSubmitted && showSummary)) {
+  <ion-footer class="vp-footer">
+    <div class="qf">
+      <button type="button" class="qf__btn qf__btn--prev" [disabled]="current === 0" (click)="go(current - 1)">
+        ← Câu {{ current > 0 ? current : 1 }}
+      </button>
+      @if (current < flat.length - 1) {
+        <button type="button" class="qf__btn qf__btn--next" (click)="go(current + 1)">Câu {{ current + 2 }} →</button>
+      } @else if (!isSubmitted) {
+        <button type="button" class="qf__btn qf__btn--next" [disabled]="submitting" (click)="confirmSubmit()">Submit</button>
+      } @else {
+        <button type="button" class="qf__btn qf__btn--next" (click)="backToSummary()">Results</button>
+      }
+    </div>
+  </ion-footer>
+}

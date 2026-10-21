@@ -1,0 +1,88 @@
+/* Dùng chung cho các màn Travel của giáo viên (nền bg-travel). */
+:host ::ng-deep vp-nav-bar .back {
+  color: #047857;
+}
+.vp-chip.is-active {
+  background: var(--vp-emerald);
+  border-color: var(--vp-emerald);
+}
+.tr-dest {
+  font-size: 17px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.tr-date-chip {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-emerald-soft);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tr-panel {
+  background: #f0fdf4;
+  border-radius: var(--vp-r-m2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tr-panel__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #065f46;
+}
+.tr-person {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(5, 150, 105, 0.15);
+}
+.tr-person:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.tr-person__name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.tr-person__meta {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.tr-btn-sm {
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: var(--vp-r-s);
+}
+.tr-row-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tr-row-btns > .vp-btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.tr-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.tr-filter-row .vp-field {
+  flex: 1;
+  min-width: 0;
+}
+.tr-pin {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tr-pin vp-icon {
+  color: var(--vp-emerald);
+}

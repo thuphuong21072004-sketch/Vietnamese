@@ -1,0 +1,17 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <h1 class="vp-large-title">{{ title }}</h1>
+    <vp-segmented [options]="options" [value]="seg" (valueChange)="changeSeg($event)" />
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($any($event))"><ion-refresher-content /></ion-refresher>
+
+  @if (visited.browse) {
+    <vp-class-browse [hidden]="seg !== 'browse'" />
+  }
+  @if (visited.mine) {
+    <vp-my-classes [hidden]="seg !== 'mine'" />
+  }
+</ion-content>

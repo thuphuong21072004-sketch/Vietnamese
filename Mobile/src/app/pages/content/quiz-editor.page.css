@@ -1,0 +1,446 @@
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--vp-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.qz-title {
+  margin-top: 2px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--vp-text);
+}
+.qz-total {
+  color: var(--vp-primary-dark);
+  font-weight: 800;
+}
+.qz-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.add-row {
+  display: flex;
+  gap: 10px;
+}
+.cm-add--sm {
+  height: 44px;
+  font-size: 13px;
+}
+
+/* ---------- Câu hỏi ---------- */
+.q-card {
+  background: #fff;
+  border-radius: var(--vp-r-l);
+  box-shadow: var(--vp-sh-card);
+  border: 1px solid transparent;
+  overflow: hidden;
+}
+.q-card.is-open {
+  border-color: rgba(124, 108, 255, 0.25);
+}
+/* Câu hỏi lồng trong part / passage: phẳng hơn */
+.part-body .q-card,
+.psg-body .q-card {
+  box-shadow: none;
+  border: 1px solid var(--vp-border);
+}
+.q-head,
+.part-head,
+.psg-head {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.q-num,
+.psg-no {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-indigo-soft);
+  color: var(--vp-indigo-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+.q-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.q-sum {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.q-meta {
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.chev {
+  flex-shrink: 0;
+  color: var(--vp-muted);
+  display: inline-flex;
+  transition: transform 0.2s;
+}
+.chev.up {
+  transform: rotate(180deg);
+}
+.q-body,
+.psg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 14px 14px;
+}
+
+/* Media */
+.tool-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tool {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--vp-r-s);
+  border: 1px solid var(--vp-border);
+  background: var(--vp-fill);
+  color: var(--vp-text-body-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+.tool.is-rec {
+  background: var(--vp-danger-bg);
+  border-color: #fca5a5;
+  color: var(--vp-danger);
+  animation: rec-pulse 1.2s ease-in-out infinite;
+}
+.rec-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vp-danger);
+}
+@keyframes rec-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.15);
+  }
+}
+.media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.media__img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  object-fit: contain;
+  background: var(--vp-fill);
+}
+.media--audio audio {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+}
+.media__x {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 0;
+  background: #fef2f2;
+  color: var(--vp-danger);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+.media:not(.media--audio) .media__x {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+/* Đáp án */
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ans {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--vp-r-m);
+  background: var(--vp-fill);
+  border: 1px solid var(--vp-border);
+}
+.ans.is-correct {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.ans__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ans__radio {
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--vp-text-body);
+  cursor: pointer;
+}
+.ans__radio input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #16a34a;
+}
+
+/* ---------- Part / passage ---------- */
+.part-card {
+  background: #fff;
+  border-radius: var(--vp-r-l2);
+  box-shadow: var(--vp-sh-card);
+  border-left: 4px solid var(--vp-accent);
+  overflow: hidden;
+}
+.part-no {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-grad-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+.part-name {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.part-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px 14px 14px;
+}
+.part-fields {
+  display: flex;
+  gap: 10px;
+}
+.part-num-field {
+  width: 96px;
+  flex-shrink: 0;
+}
+.part-actions {
+  display: flex;
+  gap: 10px;
+}
+.psg-card {
+  border-radius: var(--vp-r-m2);
+  background: var(--vp-fill-violet);
+  border: 1px solid rgba(124, 108, 255, 0.18);
+  overflow: hidden;
+}
+.psg-no {
+  background: #fff;
+}
+
+/* ---------- Footer ---------- */
+.del-btn {
+  height: var(--vp-h-cta);
+  border-radius: var(--vp-r-m2);
+  flex-shrink: 0;
+}
+
+/* ---------- Student preview (kiểu đề thi: navy + Times) ---------- */
+ion-modal.pv-modal {
+  --background: var(--vp-bg-quiz);
+}
+.pv-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(var(--vp-safe-top) + 10px) var(--vp-gutter) 12px;
+  background: var(--vp-navy);
+  color: #fff;
+}
+.pv-title {
+  font-family: var(--vp-font-serif);
+  font-size: 20px;
+  font-weight: 700;
+}
+.pv-meta {
+  font-size: 13px;
+  opacity: 0.85;
+}
+.pv-close {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--vp-r-s);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font: 700 13px var(--vp-font);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.pv-content {
+  --background: var(--vp-bg-quiz);
+}
+.pv-body {
+  padding: 16px var(--vp-gutter) calc(var(--vp-safe-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: var(--vp-font-serif);
+  color: var(--vp-text);
+}
+.pv-part {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pv-part__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--vp-navy);
+}
+.pv-part__num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--vp-navy);
+}
+.pv-part__name {
+  font-size: 16px;
+  font-weight: 700;
+}
+.pv-instruction {
+  font-style: italic;
+  font-size: 15px;
+  color: var(--vp-text-body);
+}
+.pv-passage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-r-m);
+  background: #fff;
+}
+.pv-passage__text {
+  white-space: pre-wrap;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.pv-q {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--vp-r-m);
+  background: #fff;
+  border: 1px solid var(--vp-border-2);
+}
+.pv-q__title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.pv-q__num {
+  font-weight: 700;
+  color: var(--vp-navy);
+}
+.pv-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 8px;
+}
+.pv-a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 15px;
+}
+.pv-a__lbl {
+  font-weight: 700;
+}
+.pv-img {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+}
+.pv-a__img {
+  max-width: 160px;
+  max-height: 120px;
+  border-radius: 8px;
+}
+.pv-body audio {
+  max-width: 100%;
+}
+.pv-tag {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  font: 700 12px var(--vp-font);
+}
+.pv-tag--writing {
+  background: var(--vp-info-bg);
+  color: var(--vp-info);
+}
+.pv-tag--pron {
+  background: var(--vp-violet-bg);
+  color: var(--vp-violet);
+}

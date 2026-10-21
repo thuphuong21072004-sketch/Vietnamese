@@ -1,0 +1,8 @@
+vp-class-browse,
+vp-my-classes {
+  display: block;
+}
+vp-class-browse[hidden],
+vp-my-classes[hidden] {
+  display: none;
+}

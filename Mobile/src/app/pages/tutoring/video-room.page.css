@@ -1,0 +1,68 @@
+.hero {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  border-radius: var(--vp-r-xl);
+  padding: 18px;
+}
+.hero__icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: var(--vp-r-l);
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero__title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.hero__sub {
+  margin-top: 2px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Cùng kiểu khối "Online Class Room" của Booking Detail */
+.room {
+  border-radius: 20px;
+  padding: 16px;
+  background: var(--vp-indigo-soft);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.room__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.room__row span {
+  color: var(--vp-text-body-2);
+}
+.room__row .code {
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.room__note {
+  font-size: 13px;
+  color: var(--vp-indigo-dark);
+  line-height: 1.45;
+}
+.room__link {
+  align-self: center;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  font: 600 14px var(--vp-font);
+  color: var(--vp-accent);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}

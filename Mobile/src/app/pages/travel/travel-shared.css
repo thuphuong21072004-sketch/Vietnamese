@@ -1,0 +1,148 @@
+/* Dùng chung cho các màn Du lịch (nền bg-travel, nhấn emerald). */
+
+/* Nút back màu emerald (#047857) như design */
+:host ::ng-deep vp-nav-bar .back {
+  color: #047857;
+}
+
+/* Chip lọc: trạng thái đang chọn màu emerald */
+.chip {
+  flex-shrink: 0;
+  height: var(--vp-h-chip);
+  padding: 0 10px;
+  border-radius: var(--vp-r-pill);
+  border: 1.5px solid var(--vp-border);
+  background: #fff;
+  color: var(--vp-muted);
+  font: 600 12px var(--vp-font);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.chip.is-active {
+  border-color: var(--vp-emerald);
+  background: var(--vp-emerald);
+  color: #fff;
+}
+.chip--dates.is-set {
+  border-color: var(--vp-emerald);
+  color: var(--vp-emerald);
+  background: var(--vp-emerald-soft);
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* Card */
+.t-card {
+  background: #fff;
+  border-radius: var(--vp-r-l2);
+  padding: 14px;
+  box-shadow: var(--vp-sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Nút trong card (cao 44, bo 12) */
+.t-btn {
+  height: 44px;
+  border-radius: var(--vp-r-m);
+  border: 0;
+  padding: 0 10px;
+  font: 700 14px var(--vp-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  min-width: 0;
+  white-space: nowrap;
+}
+.t-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.t-btn--fill {
+  background: var(--vp-grad-travel);
+  color: #fff;
+}
+.t-btn--outline {
+  border: 1.5px solid var(--vp-emerald);
+  background: #fff;
+  color: var(--vp-emerald);
+}
+.t-btn--plain {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  color: var(--vp-text-body);
+}
+.t-btn--danger {
+  background: var(--vp-danger-bg);
+  color: var(--vp-danger);
+}
+.t-row {
+  display: flex;
+  gap: 8px;
+}
+.t-row > * {
+  flex: 1;
+}
+
+/* Bottom sheet */
+.sheet {
+  padding: 8px var(--vp-gutter) calc(var(--vp-safe-bottom) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+}
+.sheet__title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.sheet__close {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--vp-r-m);
+  background: var(--vp-fill-2);
+  color: var(--vp-text-body-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.sheet__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.sheet__actions > * {
+  flex: 1;
+}
+.sheet .vp-input:focus {
+  border-color: rgba(5, 150, 105, 0.45);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+.sheet .vp-input:disabled {
+  background: var(--vp-fill);
+  color: var(--vp-placeholder);
+}
+ion-modal.t-sheet {
+  --background: #fff;
+  --border-radius: 24px;
+}

@@ -1,0 +1,90 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Travel Bookings" defaultHref="/admin/more" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll adm-list">
+    <div>
+      <h2 class="page-title">Confirmed Travel Bookings</h2>
+      <p class="vp-meta">List of matched teacher–student travel plans for tourism company cooperation</p>
+    </div>
+
+    <!-- Lọc theo ngày -->
+    <form class="vp-card filter" (ngSubmit)="load()">
+      <div class="vp-field">
+        <label for="tb-date" class="vp-label">Confirmed At</label>
+        <input id="tb-date" name="filterDate" type="date" class="vp-input vp-input--sm" [(ngModel)]="filterDate" />
+      </div>
+      <div class="filter__actions">
+        @if (filterDate) {
+          <button type="button" class="vp-btn vp-btn--back" (click)="clearFilter()">✕ Clear</button>
+        }
+        <button type="submit" class="vp-btn vp-btn--accent filter__search">Search</button>
+      </div>
+    </form>
+
+    @if (loading) {
+      <vp-loading text="Loading..." />
+    } @else {
+      <div class="summary">
+        <span class="summary__count">{{ bookings.length }} booking{{ bookings.length !== 1 ? 's' : '' }} found</span>
+        <button type="button" class="vp-btn vp-btn--secondary vp-btn--sm" [disabled]="!bookings.length || exporting" (click)="exportExcel()">
+          <vp-icon [d]="downloadIcon" [size]="16" />Export Excel
+        </button>
+      </div>
+
+      @for (b of bookings; track b.travelBookingId; let i = $index) {
+        <section class="vp-card">
+          <div class="vp-row head">
+            <span class="num">{{ i + 1 }}</span>
+            <div class="vp-grow">
+              <p class="vp-card-title">{{ b.destination }}</p>
+              @if (b.specificLocation) {
+                <p class="vp-meta">{{ b.specificLocation }}</p>
+              }
+            </div>
+          </div>
+          <div class="dates">
+            <vp-icon [d]="icons.calendar" [size]="16" />
+            <span>{{ b.startDate | date: 'dd/MM/yyyy' }}</span>
+            <span class="arrow">→</span>
+            <span>{{ b.endDate | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="people">
+            <div class="person">
+              <p class="person__role">Teacher</p>
+              <p class="person__name">{{ b.teacherName }}</p>
+              @if (b.teacherEmail) {
+                <a class="person__line" [href]="'mailto:' + b.teacherEmail"><vp-icon [d]="mailIcon" [size]="14" />{{ b.teacherEmail }}</a>
+              } @else {
+                <p class="person__line muted">—</p>
+              }
+              @if (b.teacherPhone) {
+                <a class="person__line" [href]="'tel:' + b.teacherPhone"><vp-icon [d]="phoneIcon" [size]="14" />{{ b.teacherPhone }}</a>
+              }
+            </div>
+            <div class="person">
+              <p class="person__role">Student</p>
+              <p class="person__name">{{ b.studentName }}</p>
+              @if (b.studentEmail) {
+                <a class="person__line" [href]="'mailto:' + b.studentEmail"><vp-icon [d]="mailIcon" [size]="14" />{{ b.studentEmail }}</a>
+              } @else {
+                <p class="person__line muted">—</p>
+              }
+              @if (b.studentPhone) {
+                <a class="person__line" [href]="'tel:' + b.studentPhone"><vp-icon [d]="phoneIcon" [size]="14" />{{ b.studentPhone }}</a>
+              }
+            </div>
+          </div>
+
+          <p class="confirmed">Confirmed At {{ b.createdAt | date: 'dd/MM/yyyy' }}</p>
+        </section>
+      } @empty {
+        <vp-empty text="No confirmed travel bookings found." />
+      }
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,96 @@
+/* Style dùng chung cho các màn con của nhóm 4 (Tutor / Payment / Booking / Review / Room). */
+.gap14 {
+  gap: 14px;
+}
+
+/* Hàng key–value trong card (design: min-height 34, viền dưới #f1f5f9, chữ 14) */
+.kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+  border-bottom: 1px solid var(--vp-fill-2);
+  font-size: 14px;
+}
+.kv:last-child {
+  border-bottom: 0;
+}
+.kv > span {
+  color: var(--vp-muted);
+  flex-shrink: 0;
+}
+.kv > b {
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.info {
+  gap: 4px;
+}
+.info__title {
+  margin-bottom: 6px;
+}
+
+/* Ô thông tin 2 cột nền #f8fafc */
+.cells2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-m);
+  padding: 12px;
+}
+.cells2__k {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vp-muted);
+}
+.cells2__v {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Card giáo viên ở đầu màn */
+.head-card {
+  border-radius: 20px;
+  padding: 16px;
+}
+.head-name {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* Hộp viền đứt (trạng thái chưa có) */
+.dashed {
+  border-radius: var(--vp-r-l2);
+  padding: 16px;
+  border: 2px dashed var(--vp-border-3);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dashed__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vp-text-body);
+}
+.dashed__text {
+  font-size: 13px;
+  color: var(--vp-muted-2);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.vp-bottom-bar .vp-btn--cta {
+  width: auto;
+}
+.vp-bottom-bar > .vp-btn--cta:only-child {
+  width: 100%;
+}

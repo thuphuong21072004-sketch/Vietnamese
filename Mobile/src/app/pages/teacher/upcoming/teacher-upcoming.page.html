@@ -1,0 +1,45 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Upcoming Schedule" defaultHref="/teacher/classes" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    <div>
+      <h2 class="title">Upcoming Teaching Schedule</h2>
+      <p class="t-sub">Your upcoming classes and sessions.</p>
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading schedule..." />
+    } @else {
+      @for (item of schedules; track item.sessionId) {
+        <article class="t-card">
+          <div class="vp-row top">
+            <div class="date">
+              <span class="date__m">{{ item.studyDate | date: 'MMM' | uppercase }}</span>
+              <span class="date__d">{{ item.studyDate | date: 'dd' }}</span>
+            </div>
+            <div class="vp-grow">
+              <a class="cls" [routerLink]="['/teacher/classes', item.classId]">{{ item.classTitle }}</a>
+              <p class="vp-meta">{{ item.studyDate | date: 'EEE dd/MM/yyyy' }} · {{ hhmm(item.startTime) }} - {{ hhmm(item.endTime) }}</p>
+            </div>
+            <span class="vp-badge vp-badge--upcoming">Session {{ item.sessionNumber }}</span>
+          </div>
+          <div class="t-strip">
+            <span>Topic: <b>{{ item.topic || '—' }}</b></span>
+          </div>
+          @if (canJoin(item)) {
+            <button type="button" class="vp-btn vp-btn--primary vp-btn--block" (click)="join(item)">
+              <vp-icon [d]="icons.video" [size]="18" />
+              Join Zoom Room
+            </button>
+          }
+        </article>
+      } @empty {
+        <vp-empty text="No upcoming sessions." />
+      }
+    }
+  </div>
+</ion-content>

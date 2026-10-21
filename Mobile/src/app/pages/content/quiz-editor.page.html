@@ -1,0 +1,418 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Quiz Management" [defaultHref]="backHref">
+    @if (quiz) {
+      <button type="button" class="nav-btn" aria-label="Preview as Student" (click)="showPreview = true">
+        <vp-icon [d]="icons.eye" [size]="22" />
+      </button>
+    }
+  </vp-nav-bar>
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll vp-scroll--tight">
+    @if (!refId || !refType) {
+      <vp-empty title="Quiz not found" text="Missing refType / refId. Open the quiz from a unit, course, level or placement test." />
+    } @else if (loading) {
+      <vp-loading />
+    } @else if (!quiz) {
+      <section class="vp-card vp-card--lg">
+        <p class="vp-eyebrow">{{ refLabel }}</p>
+        <h2 class="qz-title">Quiz Management</h2>
+      </section>
+      <vp-empty title="No quiz yet" text="Create a quiz, then add questions or parts.">
+        <button type="button" class="vp-btn vp-btn--primary" (click)="addQuiz()">+ Create Quiz</button>
+      </vp-empty>
+    } @else {
+      <!-- Tổng quan -->
+      <section class="vp-card vp-card--lg">
+        <div>
+          <p class="vp-eyebrow">{{ refLabel }}</p>
+          <h2 class="qz-title">Quiz Management</h2>
+          <p class="vp-meta">Total Score: <strong class="qz-total">{{ totalScore }}</strong></p>
+        </div>
+        <div class="qz-badges">
+          <span class="vp-badge vp-badge--violet">Mode: {{ modeLabel }}</span>
+          <span class="vp-badge vp-badge--upcoming">Questions: {{ visible(quiz.questions).length }}</span>
+          <span class="vp-badge vp-badge--upcoming">Parts: {{ visible(quiz.parts).length }}</span>
+          @if (timerOn && quiz.timeLimit) {
+            <span class="vp-badge vp-badge--info">Timer: {{ quiz.timeLimit }} min</span>
+          }
+        </div>
+        <button type="button" class="vp-btn vp-btn--secondary vp-btn--block" (click)="showPreview = true">
+          <vp-icon [d]="icons.eye" [size]="18" />Preview as Student
+        </button>
+      </section>
+
+      <!-- Thông tin quiz -->
+      <section class="vp-card">
+        <div class="vp-field">
+          <label class="vp-label" for="qz-name">Quiz Name</label>
+          <input id="qz-name" class="vp-input" [(ngModel)]="quiz.quizName" placeholder="Quiz name..." />
+        </div>
+        <div class="vp-field">
+          <span class="vp-label">Time Limit (minutes)</span>
+          <label class="vp-check">
+            <input type="checkbox" [ngModel]="timerOn" (ngModelChange)="onTimerToggle($event)" />
+            Enable timer
+          </label>
+          @if (timerOn) {
+            <input class="vp-input" type="number" min="1" inputmode="numeric" [(ngModel)]="quiz.timeLimit" placeholder="Minutes..." aria-label="Time limit in minutes" />
+          }
+        </div>
+        <div class="vp-field">
+          <label class="vp-label" for="qz-pass">Pass Score</label>
+          <input id="qz-pass" class="vp-input" type="number" inputmode="numeric" [(ngModel)]="quiz.passScore" />
+        </div>
+      </section>
+
+      <div class="vp-alert vp-alert--info">
+        Start by adding a question or a part. Use the buttons below to build your quiz step by step and keep each answer clear.
+      </div>
+
+      <!-- Chế độ chỉ câu hỏi -->
+      @if (quiz.questions.length && !quiz.parts.length) {
+        @for (q of visible(quiz.questions); track q) {
+          <ng-container *ngTemplateOutlet="qTpl; context: { $implicit: q, list: quiz.questions }"></ng-container>
+        }
+      }
+
+      <!-- Chế độ chia phần -->
+      @if (quiz.parts.length) {
+        @for (part of visible(quiz.parts); track part) {
+          <div class="part-card">
+            <button type="button" class="part-head" [attr.aria-expanded]="isOpen(part)" (click)="toggle(part)">
+              <span class="part-no">Phần {{ part.partNumber }}</span>
+              <span class="vp-grow part-name">{{ part.partName || 'Untitled part' }}</span>
+              <span class="vp-meta">
+                {{ part.mode === 'passage' ? visible(part.passages).length + ' passage(s)' : visible(part.questions).length + ' question(s)' }}
+              </span>
+              <span class="chev" [class.up]="isOpen(part)"><vp-icon [d]="icons.chevronDown" [size]="18" /></span>
+            </button>
+
+            @if (isOpen(part)) {
+              <div class="part-body">
+                <div class="part-fields">
+                  <div class="vp-field part-num-field">
+                    <label class="vp-label" [attr.for]="'pn-' + uid(part)">Part number</label>
+                    <input [id]="'pn-' + uid(part)" class="vp-input vp-input--sm" type="number" inputmode="numeric" [(ngModel)]="part.partNumber" />
+                  </div>
+                  <div class="vp-field vp-grow">
+                    <label class="vp-label" [attr.for]="'pname-' + uid(part)">Part name</label>
+                    <input [id]="'pname-' + uid(part)" class="vp-input vp-input--sm" [(ngModel)]="part.partName" placeholder="Part name" />
+                  </div>
+                </div>
+                <textarea class="vp-input" rows="2" [(ngModel)]="part.instruction" placeholder="Instruction..." aria-label="Instruction"></textarea>
+
+                @if (part.mode === 'question') {
+                  @for (q of visible(part.questions); track q) {
+                    <ng-container *ngTemplateOutlet="qTpl; context: { $implicit: q, list: part.questions }"></ng-container>
+                  }
+                }
+
+                @if (part.mode === 'passage') {
+                  @for (psg of visible(part.passages); track psg; let pi = $index) {
+                    <div class="psg-card">
+                      <button type="button" class="psg-head" [attr.aria-expanded]="isOpen(psg)" (click)="toggle(psg)">
+                        <span class="psg-no">Passage {{ pi + 1 }}</span>
+                        <span class="vp-grow q-sum">
+                          {{ psg.content?.trim() || (psg.imageUrl ? '[Image]' : hasAudio(psg) ? '[Audio]' : 'Empty passage') }}
+                        </span>
+                        <span class="vp-meta">{{ visible(psg.questions).length }} Q</span>
+                        <span class="chev" [class.up]="isOpen(psg)"><vp-icon [d]="icons.chevronDown" [size]="18" /></span>
+                      </button>
+                      @if (isOpen(psg)) {
+                        <div class="psg-body">
+                          @if (!psg.imageUrl && !hasAudio(psg)) {
+                            <textarea class="vp-input" rows="4" [(ngModel)]="psg.content" placeholder="Enter conversation, email, or passage..." aria-label="Passage"></textarea>
+                          }
+                          <ng-container *ngTemplateOutlet="mediaPreview; context: { $implicit: psg }"></ng-container>
+                          <div class="tool-row">
+                            <ng-container *ngTemplateOutlet="mediaTools; context: { $implicit: psg, clear: true }"></ng-container>
+                            <button type="button" class="vp-btn vp-btn--danger vp-btn--sm" (click)="deletePassage(psg, part)">Delete</button>
+                          </div>
+                          @for (q of visible(psg.questions); track q) {
+                            <ng-container *ngTemplateOutlet="qTpl; context: { $implicit: q, list: psg.questions }"></ng-container>
+                          }
+                          <button type="button" class="cm-add cm-add--sm" (click)="addQuestionToPassage(psg, part)">
+                            <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Add Question
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+
+                <div class="part-actions">
+                  @if (!part.mode) {
+                    <button type="button" class="cm-add cm-add--sm" (click)="addQuestionToPart(part)">
+                      <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Question
+                    </button>
+                    <button type="button" class="cm-add cm-add--sm" (click)="addPassage(part)">
+                      <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Passage
+                    </button>
+                  } @else if (part.mode === 'question') {
+                    <button type="button" class="cm-add cm-add--sm" (click)="addQuestionToPart(part)">
+                      <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Add Question
+                    </button>
+                  } @else {
+                    <button type="button" class="cm-add cm-add--sm" (click)="addPassage(part)">
+                      <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Add Passage
+                    </button>
+                  }
+                </div>
+                <button type="button" class="vp-btn vp-btn--danger vp-btn--block" (click)="deletePart(part)">
+                  <vp-icon [d]="icons.trash" [size]="16" />Delete Part
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- Nút thêm cấp quiz -->
+      <div class="add-row">
+        @if (!quiz.quizMode) {
+          <button type="button" class="cm-add" (click)="addQuestionToQuiz()"><vp-icon [d]="icons.plus" [size]="18" [stroke]="2.4" />Question</button>
+          <button type="button" class="cm-add" (click)="addPart()"><vp-icon [d]="icons.plus" [size]="18" [stroke]="2.4" />Part</button>
+        } @else if (quiz.quizMode === 'question') {
+          <button type="button" class="cm-add" (click)="addQuestionToQuiz()"><vp-icon [d]="icons.plus" [size]="18" [stroke]="2.4" />Add Question</button>
+        } @else {
+          <button type="button" class="cm-add" (click)="addPart()"><vp-icon [d]="icons.plus" [size]="18" [stroke]="2.4" />Add Part</button>
+        }
+      </div>
+    }
+  </div>
+</ion-content>
+
+@if (quiz && !loading) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      @if (quiz.quizId) {
+        <button type="button" class="vp-btn vp-btn--danger del-btn" [disabled]="saving" (click)="deleteQuiz()">Delete Quiz</button>
+      }
+      <button type="button" class="vp-btn vp-btn--primary vp-btn--cta vp-grow" [disabled]="saving" (click)="saveQuiz()">
+        {{ saving ? 'Saving...' : 'Save Quiz' }}
+      </button>
+    </div>
+  </ion-footer>
+}
+
+<!-- ===== Card câu hỏi (dùng cho quiz / part / passage) ===== -->
+<ng-template #qTpl let-q let-list="list">
+  <div class="q-card" [class.is-open]="isOpen(q)">
+    <button type="button" class="q-head" [attr.aria-expanded]="isOpen(q)" (click)="toggle(q)">
+      <span class="q-num">Câu {{ questionNo(q) }}</span>
+      <span class="vp-grow q-head__text">
+        <span class="q-sum">{{ summary(q) }}</span>
+        <span class="q-meta">{{ typeLabel(q.questionType) }} · {{ q.score || 0 }} pts</span>
+      </span>
+      <span class="chev" [class.up]="isOpen(q)"><vp-icon [d]="icons.chevronDown" [size]="18" /></span>
+    </button>
+
+    @if (isOpen(q)) {
+      <div class="q-body">
+        @if (!q.imageUrl && !hasAudio(q)) {
+          <textarea class="vp-input" rows="3" [(ngModel)]="q.questionText" placeholder="Enter question..." aria-label="Question"></textarea>
+        }
+        <ng-container *ngTemplateOutlet="mediaPreview; context: { $implicit: q }"></ng-container>
+        <div class="tool-row">
+          <ng-container *ngTemplateOutlet="mediaTools; context: { $implicit: q, clear: false }"></ng-container>
+          <button type="button" class="vp-btn vp-btn--danger vp-btn--sm" (click)="deleteQuestion(q, list)">Delete</button>
+        </div>
+
+        <div class="vp-grid-2">
+          <div class="vp-field">
+            <label class="vp-label" [attr.for]="'sc-' + uid(q)">Score</label>
+            <input [id]="'sc-' + uid(q)" class="vp-input vp-input--sm" type="number" inputmode="decimal" [(ngModel)]="q.score" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" [attr.for]="'ty-' + uid(q)">Question Type</label>
+            <select [id]="'ty-' + uid(q)" class="vp-input vp-input--sm" [ngModel]="q.questionType || 'MULTIPLE_CHOICE'" (ngModelChange)="onQuestionTypeChange(q, $event)">
+              @for (t of types; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (!q.questionType || q.questionType === 'MULTIPLE_CHOICE') {
+          <div class="answers">
+            <span class="vp-label">Answers <span class="vp-hint">(select the correct one)</span></span>
+            @for (a of visible(q.answers); track a) {
+              <div class="ans" [class.is-correct]="a.isCorrect">
+                <div class="ans__main">
+                  <label class="ans__radio">
+                    <input type="radio" [name]="'ans-' + uid(q)" [checked]="a.isCorrect" (change)="selectCorrectAnswer(q, a)" [attr.aria-label]="'Correct answer ' + labelOf(q, a)" />
+                    <span>{{ labelOf(q, a) }}</span>
+                  </label>
+                  <div class="vp-grow">
+                    @if (!a.imageUrl && !hasAudio(a)) {
+                      <input class="vp-input vp-input--sm" [(ngModel)]="a.answerText" placeholder="Answer..." [attr.aria-label]="'Answer ' + labelOf(q, a)" />
+                    }
+                    <ng-container *ngTemplateOutlet="mediaPreview; context: { $implicit: a }"></ng-container>
+                  </div>
+                </div>
+                <div class="tool-row">
+                  <ng-container *ngTemplateOutlet="mediaTools; context: { $implicit: a, clear: false }"></ng-container>
+                  <button type="button" class="vp-btn vp-btn--danger vp-btn--sm" (click)="deleteAnswer(q, a)">Remove</button>
+                </div>
+              </div>
+            }
+            <button type="button" class="cm-add cm-add--sm" (click)="addAnswer(q)">
+              <vp-icon [d]="icons.plus" [size]="16" [stroke]="2.4" />Add Answer
+            </button>
+          </div>
+        } @else if (q.questionType === 'WRITING') {
+          <div class="vp-field">
+            <label class="vp-label" [attr.for]="'wa-' + uid(q)">Correct Answer</label>
+            <input [id]="'wa-' + uid(q)" class="vp-input vp-input--sm" [(ngModel)]="q.answers[0].answerText" placeholder="Enter correct answer..." />
+          </div>
+        } @else {
+          <p class="vp-hint">Students record their pronunciation of the question. No answer options needed.</p>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- ===== Xem trước ảnh / audio đã gắn ===== -->
+<ng-template #mediaPreview let-t>
+  @if (t.imageUrl) {
+    <div class="media">
+      <img [src]="imageSrc(t)" alt="" class="media__img" />
+      <button type="button" class="media__x" aria-label="Remove image" (click)="removeImage(t)"><vp-icon [d]="icons.x" [size]="16" /></button>
+    </div>
+  }
+  @if (hasAudio(t)) {
+    <div class="media media--audio">
+      <audio controls [src]="audioSrc(t)"></audio>
+      <button type="button" class="media__x" aria-label="Remove audio" (click)="removeAudio(t)"><vp-icon [d]="icons.x" [size]="16" /></button>
+    </div>
+  }
+</ng-template>
+
+<!-- ===== Thanh công cụ media: ảnh / audio / ghi âm ===== -->
+<ng-template #mediaTools let-t let-clear="clear">
+  <div class="tools">
+    <label class="tool" aria-label="Upload image">
+      <vp-icon [d]="icons.image" [size]="18" />
+      <input type="file" accept="image/*" class="cm-hidden-file" (change)="onPick($event, t, 'image', clear)" />
+    </label>
+    <label class="tool" aria-label="Upload audio">
+      <vp-icon [d]="icons.music" [size]="18" />
+      <input type="file" accept="audio/*" class="cm-hidden-file" (change)="onPick($event, t, 'audio', clear)" />
+    </label>
+    <button
+      type="button"
+      class="tool"
+      [class.is-rec]="isRecordingTarget(t)"
+      [attr.aria-label]="isRecordingTarget(t) ? 'Stop recording' : 'Record audio'"
+      (click)="toggleRecord(t)"
+    >
+      <vp-icon [d]="isRecordingTarget(t) ? icons.stop : icons.mic" [fill]="isRecordingTarget(t)" [size]="18" />
+    </button>
+    @if (isUploading(t)) {
+      <span class="vp-hint">Uploading...</span>
+    } @else if (isRecordingTarget(t)) {
+      <span class="rec-text">Recording...</span>
+    }
+  </div>
+</ng-template>
+
+<!-- ===== Student preview (toàn màn) ===== -->
+<ion-modal class="pv-modal" [isOpen]="showPreview" (didDismiss)="showPreview = false">
+  <ng-template>
+    <ion-header class="vp-header">
+      <div class="pv-head">
+        <div class="vp-grow">
+          <p class="pv-title">{{ quiz?.quizName || 'Untitled quiz' }}</p>
+          @if (timerOn && quiz?.timeLimit) {
+            <p class="pv-meta">Timer: {{ quiz.timeLimit }} min</p>
+          }
+        </div>
+        <button type="button" class="pv-close" (click)="showPreview = false">✕ Close Preview</button>
+      </div>
+    </ion-header>
+    <ion-content class="pv-content">
+      <div class="pv-body">
+        @if (quiz) {
+          @if (quiz.questions.length && !quiz.parts.length) {
+            @for (q of visible(quiz.questions); track q) {
+              <ng-container *ngTemplateOutlet="pvQ; context: { $implicit: q }"></ng-container>
+            }
+          }
+          @for (part of visible(quiz.parts); track part) {
+            <section class="pv-part">
+              <div class="pv-part__head">
+                <span class="pv-part__num">Phần {{ part.partNumber }}</span>
+                <span class="pv-part__name">{{ part.partName }}</span>
+              </div>
+              @if (part.instruction) {
+                <p class="pv-instruction">{{ part.instruction }}</p>
+              }
+              @if (part.mode === 'question') {
+                @for (q of visible(part.questions); track q) {
+                  <ng-container *ngTemplateOutlet="pvQ; context: { $implicit: q }"></ng-container>
+                }
+              }
+              @if (part.mode === 'passage') {
+                @for (psg of visible(part.passages); track psg) {
+                  <div class="pv-passage">
+                    @if (psg.content) {
+                      <p class="pv-passage__text">{{ psg.content }}</p>
+                    } @else if (psg.imageUrl) {
+                      <img class="pv-img" [src]="imageSrc(psg)" alt="" />
+                    } @else if (hasAudio(psg)) {
+                      <audio controls [src]="audioSrc(psg)"></audio>
+                    }
+                    @for (q of visible(psg.questions); track q) {
+                      <ng-container *ngTemplateOutlet="pvQ; context: { $implicit: q }"></ng-container>
+                    }
+                  </div>
+                }
+              }
+            </section>
+          }
+          @if (!visible(quiz.questions).length && !visible(quiz.parts).length) {
+            <vp-empty title="Nothing to preview" text="Add a question or a part first." />
+          }
+        }
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ng-template #pvQ let-q>
+  <div class="pv-q">
+    <div class="pv-q__title">
+      <span class="pv-q__num">Câu {{ questionNo(q) }}.</span>
+      @if (q.questionText) {
+        <span>{{ q.questionText }}</span>
+      } @else if (q.imageUrl) {
+        <img class="pv-img" [src]="imageSrc(q)" alt="" />
+      } @else if (hasAudio(q)) {
+        <audio controls [src]="audioSrc(q)"></audio>
+      }
+    </div>
+    @if (!q.questionType || q.questionType === 'MULTIPLE_CHOICE') {
+      <div class="pv-answers">
+        @for (a of visible(q.answers); track a) {
+          <div class="pv-a">
+            <span class="pv-a__lbl">{{ labelOf(q, a) }}.</span>
+            @if (a.answerText) {
+              <span>{{ a.answerText }}</span>
+            } @else if (a.imageUrl) {
+              <img class="pv-a__img" [src]="imageSrc(a)" alt="" />
+            } @else if (hasAudio(a)) {
+              <audio controls [src]="audioSrc(a)"></audio>
+            }
+          </div>
+        }
+      </div>
+    } @else if (q.questionType === 'WRITING') {
+      <span class="pv-tag pv-tag--writing">Written Answer</span>
+    } @else {
+      <span class="pv-tag pv-tag--pron">🎤 Pronunciation</span>
+    }
+  </div>
+</ng-template>

@@ -1,0 +1,135 @@
+.detail {
+  gap: 14px;
+}
+.hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.hero__tag {
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.hero__title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.hero__days {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.hero__day {
+  padding: 3px 8px;
+  border-radius: var(--vp-r-pill);
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  font-weight: 700;
+}
+.hero__price {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: 800;
+}
+.cells {
+  gap: 8px;
+}
+.desc {
+  margin-top: 4px;
+  white-space: pre-line;
+}
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.person__name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.person__meta {
+  margin-top: 1px;
+  font-size: 12px;
+}
+.session {
+  background: #fff;
+  border-radius: var(--vp-r-l);
+  padding: 12px;
+  box-shadow: var(--vp-sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.session--past {
+  opacity: 0.6;
+}
+.session__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.session__badge {
+  padding: 4px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-tag-bg);
+  color: var(--vp-primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+.session__date {
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.session__topic {
+  border-radius: var(--vp-r-s);
+  font-size: 15px;
+}
+.session__topic[readonly] {
+  background: var(--vp-fill);
+}
+.reviews-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.avg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #b45309;
+}
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--vp-fill-2);
+}
+.rating {
+  font-size: 13px;
+  font-weight: 800;
+  color: #b45309;
+  flex-shrink: 0;
+}
+.del {
+  flex: 1;
+}
+.save {
+  flex: 1.4;
+}

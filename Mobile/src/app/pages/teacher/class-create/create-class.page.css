@@ -1,0 +1,115 @@
+/* Thanh tiêu đề có nút đóng (X) — cùng thông số với vp-nav-bar */
+.safe {
+  height: var(--vp-safe-top);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  height: var(--vp-nav-h);
+}
+.bar__close {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vp-primary-dark);
+  background: none;
+  border: 0;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.bar__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  text-align: var(--vp-nav-align);
+  font-size: var(--vp-nav-title);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar__end {
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.form-scroll {
+  gap: 14px;
+}
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: var(--vp-sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cc {
+  border-radius: var(--vp-r-s);
+}
+.cc--sm {
+  padding: 0 10px;
+  min-width: 0;
+}
+select.cc--sm {
+  font-size: 15px;
+  padding-right: 30px;
+  background-position: right 6px center;
+}
+.cc--15 {
+  font-size: 15px;
+}
+.max-price {
+  margin-top: -8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-danger);
+}
+.days-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.days-field legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+.gen {
+  font-size: 15px;
+}
+
+.sessions {
+  padding: 14px;
+  gap: 8px;
+}
+.session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.session__n {
+  width: 32px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+}
+.session__d {
+  width: 74px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.session__t {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 10px;
+  font-size: 15px;
+}

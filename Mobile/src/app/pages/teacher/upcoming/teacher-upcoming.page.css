@@ -1,0 +1,39 @@
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.top {
+  align-items: flex-start;
+}
+.date {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--vp-r-m);
+  background: var(--vp-upcoming-bg);
+  color: var(--vp-upcoming);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.date__m {
+  font-size: 11px;
+}
+.date__d {
+  font-size: 18px;
+}
+.cls {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vp-text);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.t-strip {
+  justify-content: flex-start;
+}

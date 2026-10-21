@@ -1,0 +1,126 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Video Management" defaultHref="/admin/more" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll">
+    <p class="vp-meta">Import, review and moderate videos for the platform</p>
+
+    <!-- Player + chi tiết video đang chọn -->
+    @if (selected && playerUrl) {
+      <section class="vp-card player-card">
+        <div class="player">
+          <iframe
+            [src]="playerUrl"
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <div class="player-info">
+          <p class="vp-card-title">{{ selected.title }}</p>
+          <div class="vp-row meta-row">
+            <span class="vp-meta">Youtube ID: <b>{{ selected.youtubeId }}</b></span>
+            <vp-badge [tone]="statusTone(selected.status)" [label]="statusLabel(selected.status)" />
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Import + tìm theo YouTube ID -->
+    <section class="vp-card tools">
+      <form class="tool" (ngSubmit)="importVideo()">
+        <label for="vid-import" class="sr-only">Enter Youtube ID to import</label>
+        <input
+          id="vid-import"
+          name="youtubeId"
+          class="vp-input vp-input--sm"
+          autocomplete="off"
+          enterkeyhint="go"
+          placeholder="Enter Youtube ID to import"
+          [(ngModel)]="youtubeId"
+        />
+        <button type="submit" class="vp-btn vp-btn--accent tool__btn" [disabled]="importing">
+          {{ importing ? 'Importing...' : 'Import' }}
+        </button>
+      </form>
+      <form class="tool" (ngSubmit)="searchVideoById()" role="search">
+        <label for="vid-search" class="sr-only">Search by Youtube ID</label>
+        <input
+          id="vid-search"
+          name="searchYoutubeId"
+          type="search"
+          class="vp-input vp-input--sm"
+          autocomplete="off"
+          enterkeyhint="search"
+          placeholder="Search by Youtube ID"
+          [(ngModel)]="searchYoutubeId"
+        />
+        <button type="submit" class="vp-btn vp-btn--secondary tool__btn">Search</button>
+      </form>
+      @if (searchMode) {
+        <button type="button" class="vp-btn vp-btn--back vp-btn--block" (click)="backToList()">Back</button>
+      }
+    </section>
+
+    <!-- Lọc trạng thái -->
+    @if (!searchMode) {
+      <div class="vp-chips" role="tablist" aria-label="Filter by status">
+        @for (c of statusChips; track c.label) {
+          <button
+            type="button"
+            role="tab"
+            class="vp-chip"
+            [attr.aria-selected]="status === c.value"
+            [class.is-active]="status === c.value"
+            (click)="setStatus(c.value)"
+          >
+            {{ c.label }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Danh sách video -->
+    @if (loading) {
+      <vp-loading text="Loading videos..." />
+    } @else {
+      <div class="list">
+        @for (v of videos; track v.id) {
+          <div class="video" [class.is-current]="selected?.id === v.id">
+            <button type="button" class="video__thumb" [attr.aria-label]="'Play ' + v.title" (click)="select(v)">
+              <img [src]="thumb(v)" alt="" loading="lazy" />
+              <span class="video__play"><vp-icon [d]="icons.play" [size]="16" [fill]="true" /></span>
+            </button>
+            <div class="video__info">
+              <button type="button" class="video__title" (click)="select(v)">{{ v.title }}</button>
+              <p class="video__id">ID: {{ v.id }}</p>
+              <label class="sr-only" [for]="'vs' + v.id">Status</label>
+              <select
+                [id]="'vs' + v.id"
+                class="video__status"
+                [attr.data-s]="v.status"
+                [ngModel]="v.status"
+                (ngModelChange)="updateStatus(v, $event)"
+              >
+                <option [ngValue]="0">Pending</option>
+                <option [ngValue]="1">Approved</option>
+                <option [ngValue]="2">Locked</option>
+              </select>
+            </div>
+          </div>
+        } @empty {
+          <vp-empty text="No videos found." />
+        }
+      </div>
+
+      @if (!searchMode) {
+        <div class="adm-pager">
+          <button type="button" class="vp-btn vp-btn--blue" [disabled]="page <= 1" (click)="prevPage()">Prev</button>
+          <span class="adm-pager__label">Page {{ page }}@if (total) { / {{ totalPages }}}</span>
+          <button type="button" class="vp-btn vp-btn--blue" [disabled]="page >= totalPages" (click)="nextPage()">Next</button>
+        </div>
+      }
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,151 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Class Detail" defaultHref="/teacher/classes" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll detail">
+    @if (loading) {
+      <vp-loading text="Loading class detail..." />
+    } @else if (!teacherClass) {
+      <vp-empty title="Class not found" text="This class could not be loaded." />
+    } @else {
+      <!-- Hero -->
+      <section class="vp-hero hero">
+        <div class="hero__top">
+          <span class="hero__tag">{{ teacherClass.mainTopic || 'Class' }}</span>
+          <vp-badge [label]="status" [classLifecycle]="true" />
+        </div>
+        <h2 class="hero__title">{{ teacherClass.title }}</h2>
+        <div class="hero__days">
+          @for (d of teacherClass.scheduleDays; track d.id + d.dayOfWeek) {
+            <span class="hero__day">{{ shortDay(d.dayOfWeek) }}</span>
+          }
+          <span class="hero__price">${{ teacherClass.price }}</span>
+        </div>
+      </section>
+
+      <!-- Class Information -->
+      <section class="vp-card">
+        <h2 class="vp-section-title">Class Information</h2>
+        <div class="vp-grid-2 cells">
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Main Topic</span><span class="vp-info-cell__v">{{ teacherClass.mainTopic || '—' }}</span></div>
+          @if (isTravel) {
+            <div class="vp-info-cell"><span class="vp-info-cell__k">Province</span><span class="vp-info-cell__v">{{ teacherClass.province || '—' }}</span></div>
+            @if (teacherClass.specificLocation) {
+              <div class="vp-info-cell"><span class="vp-info-cell__k">Location</span><span class="vp-info-cell__v">{{ teacherClass.specificLocation }}</span></div>
+            }
+          } @else {
+            <div class="vp-info-cell"><span class="vp-info-cell__k">Sub Topic</span><span class="vp-info-cell__v">{{ teacherClass.subTopic || '—' }}</span></div>
+          }
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Price</span><span class="vp-info-cell__v">${{ teacherClass.price }}</span></div>
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Students</span><span class="vp-info-cell__v">{{ teacherClass.currentStudents }} / {{ teacherClass.maxStudents }}</span></div>
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Total Sessions</span><span class="vp-info-cell__v">{{ teacherClass.totalSessions }}</span></div>
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Study Time</span><span class="vp-info-cell__v">{{ hhmm(teacherClass.startTime) }} - {{ hhmm(teacherClass.endTime) }}</span></div>
+          <div class="vp-info-cell"><span class="vp-info-cell__k">Start Date</span><span class="vp-info-cell__v">{{ teacherClass.startDate | date: 'dd/MM/yyyy' }}</span></div>
+        </div>
+        @if (teacherClass.description) {
+          <div>
+            <p class="vp-label">Description</p>
+            <p class="vp-body desc">{{ teacherClass.description }}</p>
+          </div>
+        }
+      </section>
+
+      <!-- Enrolled Students -->
+      <section class="vp-card">
+        <h2 class="vp-section-title">Enrolled Students ({{ students.length }})</h2>
+        @for (s of students; track s.enrollmentId) {
+          <div class="person">
+            <vp-avatar [name]="s.studentName" [url]="studentAvatar(s)" [size]="40" />
+            <div class="vp-grow">
+              <p class="person__name">{{ s.studentName }}</p>
+              <p class="vp-meta person__meta">
+                @if (s.studentCountry) {
+                  <span>{{ s.studentCountry }} · </span>
+                }
+                Joined: {{ s.enrolledDate | date: 'dd/MM/yyyy' }}
+              </p>
+            </div>
+          </div>
+        } @empty {
+          <p class="vp-meta">No students enrolled yet.</p>
+        }
+      </section>
+
+      <!-- Session Content -->
+      <section class="vp-section">
+        <h2 class="vp-section-title">Session Content</h2>
+        @for (s of teacherClass.sessions; track s.sessionId) {
+          <div class="session" [class.session--past]="isPast(s)">
+            <div class="session__head">
+              <span class="session__badge">Session {{ s.sessionNumber }}</span>
+              <span class="session__date">{{ s.studyDate | date: 'dd/MM/yyyy' }} · {{ hhmm(s.startTime) }} - {{ hhmm(s.endTime) }}</span>
+            </div>
+            <label class="sr-only" [for]="'topic-' + s.sessionId">Topic of session {{ s.sessionNumber }}</label>
+            <textarea
+              [id]="'topic-' + s.sessionId"
+              rows="2"
+              class="vp-input session__topic"
+              placeholder="Enter lesson topic"
+              [readonly]="!isOwner"
+              [(ngModel)]="s.topic"
+            ></textarea>
+          </div>
+        } @empty {
+          <vp-empty text="No sessions." />
+        }
+      </section>
+
+      <!-- Student Reviews -->
+      <section class="vp-card">
+        <div class="reviews-head">
+          <h2 class="vp-section-title">Student Reviews ({{ reviews.length }})</h2>
+          @if (reviews.length > 0) {
+            <span class="avg"><vp-icon [d]="icons.star" [size]="14" [fill]="true" /> {{ averageRating | number: '1.1-1' }} average</span>
+          }
+        </div>
+        @if (reviews.length > 0) {
+          <div class="vp-chips">
+            <button type="button" class="vp-chip" [class.is-active]="selectedRating === 0" (click)="selectedRating = 0">All ({{ reviews.length }})</button>
+            @for (r of ratingOptions; track r) {
+              <button type="button" class="vp-chip" [class.is-active]="selectedRating === r" (click)="selectedRating = r">{{ r }}★ ({{ reviewCount(r) }})</button>
+            }
+          </div>
+        }
+        @if (reviewLoading) {
+          <p class="vp-meta">Loading reviews...</p>
+        } @else if (reviews.length === 0) {
+          <p class="vp-meta">No reviews yet.</p>
+        }
+        @for (r of filteredReviews; track $index) {
+          <div class="review">
+            <div class="person">
+              <vp-avatar [name]="r.studentName || 'A'" [url]="reviewAvatar(r)" [size]="40" />
+              <div class="vp-grow">
+                <p class="person__name">{{ r.studentName || 'Anonymous' }}</p>
+                <p class="vp-meta person__meta">{{ r.createdDate | date: 'dd/MM/yyyy' }}</p>
+              </div>
+              <span class="rating">{{ r.rating }} ★</span>
+            </div>
+            @if (r.comment) {
+              <p class="vp-body">{{ r.comment }}</p>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</ion-content>
+
+@if (teacherClass && isOwner) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--danger vp-btn--cta del" (click)="deleteClass()">Delete Class</button>
+      <button type="button" class="vp-btn vp-btn--primary vp-btn--cta save" [disabled]="saving" (click)="saveAll()">
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </ion-footer>
+}

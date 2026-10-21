@@ -1,0 +1,16 @@
+.date-row {
+  display: flex;
+  gap: 8px;
+}
+.date-row .vp-input {
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.when {
+  margin-top: 2px;
+}

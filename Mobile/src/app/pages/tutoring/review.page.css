@@ -1,0 +1,78 @@
+.summary,
+.form,
+.your {
+  gap: 12px;
+}
+.form {
+  gap: 14px;
+}
+.spec {
+  margin-top: 2px;
+}
+.span2 {
+  grid-column: span 2;
+}
+
+.rating {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+.stars {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.star {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 1;
+  min-width: 0;
+  border-radius: var(--vp-r-m2);
+  border: 1px solid var(--vp-border-2);
+  background: #fff;
+  color: var(--vp-border-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.star:active {
+  transform: scale(0.94);
+}
+.star.on {
+  color: #f59e0b;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.rating-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-warning);
+}
+.stars--static {
+  gap: 2px;
+}
+.star-s {
+  color: var(--vp-border-3);
+  display: inline-flex;
+}
+.star-s.on {
+  color: #f59e0b;
+}
+.stars--static .rating-label {
+  margin-left: 8px;
+}
+.req {
+  color: var(--vp-danger);
+}

@@ -1,0 +1,160 @@
+.head {
+  padding: calc(var(--vp-safe-top) + 4px) 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.eyebrow {
+  font-size: 12px;
+}
+:host-context(html.ios) .title {
+  font-size: 30px;
+}
+.desc {
+  font-size: 14px;
+  color: var(--vp-muted);
+}
+
+.body {
+  padding: 0 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.course {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--vp-grad-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+}
+.course__k {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.course__name {
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.course__count {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.path {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 6px 0;
+}
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.node__btn {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.node__btn--done {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 6px 0 #16a34a;
+}
+.node__btn--current {
+  background: var(--vp-grad-primary);
+  color: #fff;
+  box-shadow: 0 0 0 8px rgba(124, 108, 255, 0.18), 0 6px 0 #4338ca;
+}
+.node__btn--locked {
+  background: #e5e7eb;
+  color: #9ca3af;
+  box-shadow: 0 6px 0 #d1d5db;
+  cursor: default;
+}
+.node__btn:active:not(:disabled) {
+  transform: translateY(3px);
+}
+.node__label {
+  max-width: 120px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vp-primary-dark);
+}
+.node__label--done {
+  color: var(--vp-success);
+}
+.node__label--current {
+  color: var(--vp-primary-dark);
+}
+.node__label--locked {
+  color: var(--vp-placeholder);
+}
+
+/* Node "Skip Course Test" — design chỉ vẽ trạng thái khóa; trạng thái mở dùng vàng cam, đã xong dùng xanh */
+.skip {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.skip--locked {
+  border: 2px dashed var(--vp-border-3);
+  background: var(--vp-neutral-bg);
+  color: var(--vp-placeholder);
+  cursor: default;
+}
+.skip--current {
+  border: 0;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #fff;
+  box-shadow: 0 6px 0 #d97706;
+}
+.skip--done {
+  border: 0;
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 6px 0 #16a34a;
+  cursor: default;
+}
+
+.level-test {
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: var(--vp-indigo-soft);
+  color: var(--vp-indigo-dark);
+  font: 700 15px var(--vp-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.level-test:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -1,0 +1,119 @@
+<ion-header class="vp-header">
+  <vp-nav-bar
+    [title]="isClass ? 'Course Review' : 'Teacher Review'"
+    [defaultHref]="isClass ? '/classes?seg=mine' : '/tutoring?seg=bookings'"
+  />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll gap14">
+    @if (dataLoading) {
+      <vp-loading />
+    } @else {
+      <!-- Tóm tắt -->
+      @if (booking || enrollment) {
+        <section class="vp-card head-card summary">
+          <div class="vp-row">
+            <vp-avatar [name]="teacherName" [url]="teacherAvatar" [size]="52" />
+            <div class="vp-grow">
+              <p class="head-name">{{ teacherName }}</p>
+              @if (specialty) {
+                <p class="vp-meta spec">{{ specialty }}</p>
+              }
+            </div>
+          </div>
+
+          @if (booking) {
+            <div class="cells2">
+              <div><p class="cells2__k">Class Date</p><p class="cells2__v">{{ booking.startTime | date: 'dd/MM/yyyy' }}</p></div>
+              <div>
+                <p class="cells2__k">Class Time</p>
+                <p class="cells2__v">{{ booking.startTime | date: 'HH:mm' }} – {{ booking.endTime | date: 'HH:mm' }}</p>
+              </div>
+              <div><p class="cells2__k">Duration</p><p class="cells2__v">{{ durationText }}</p></div>
+              <div><p class="cells2__k">Lesson Fee</p><p class="cells2__v">{{ money(booking.totalPrice) }}</p></div>
+            </div>
+          } @else {
+            <div class="cells2">
+              <div class="span2"><p class="cells2__k">Course</p><p class="cells2__v">{{ tc?.title || enrollment.classTitle }}</p></div>
+              <div><p class="cells2__k">Main Topic</p><p class="cells2__v">{{ tc?.mainTopic || '—' }}</p></div>
+              <div><p class="cells2__k">Sub Topic</p><p class="cells2__v">{{ tc?.subTopic || '—' }}</p></div>
+              <div><p class="cells2__k">Students</p><p class="cells2__v">{{ tc?.currentStudents }} / {{ tc?.maxStudents }}</p></div>
+              <div><p class="cells2__k">Sessions</p><p class="cells2__v">{{ tc?.totalSessions }}</p></div>
+              <div><p class="cells2__k">Course Fee</p><p class="cells2__v">{{ money(tc?.price) }}</p></div>
+            </div>
+          }
+        </section>
+      }
+
+      @if (reviewed && review) {
+        <!-- Đã đánh giá -->
+        <section class="vp-card head-card your">
+          <h2 class="vp-section-title">Your Review</h2>
+          <div class="stars stars--static" aria-label="Rating">
+            @for (n of starValues; track n) {
+              <span class="star-s" [class.on]="n <= review.rating"><vp-icon [d]="starIcon" [size]="22" [fill]="true" /></span>
+            }
+            <span class="rating-label">{{ review.rating }}/5</span>
+          </div>
+          @if (review.comment) {
+            <p class="vp-body">{{ review.comment }}</p>
+          }
+          <p class="vp-meta">{{ review.createdDate | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </section>
+      } @else {
+        @if ((booking || enrollment) && !canReview()) {
+          <p class="vp-alert vp-alert--warning">Review is available after the class is completed.</p>
+        }
+
+        <!-- Form -->
+        <form class="vp-card head-card form" (ngSubmit)="submit()">
+          <fieldset class="rating">
+            <legend class="vp-label legend">Rating</legend>
+            <div class="stars">
+              @for (n of starValues; track n) {
+                <button
+                  type="button"
+                  class="star"
+                  [class.on]="n <= rating"
+                  [attr.aria-label]="n + ' Star' + (n > 1 ? 's' : '')"
+                  [attr.aria-pressed]="n === rating"
+                  (click)="setRating(n)"
+                >
+                  <vp-icon [d]="starIcon" [size]="26" [fill]="true" />
+                </button>
+              }
+            </div>
+            <span class="rating-label">{{ ratingLabel }}</span>
+          </fieldset>
+
+          <div class="vp-field">
+            <label class="vp-label" for="rv-comment">Comment <span class="req">*</span></label>
+            <textarea
+              id="rv-comment"
+              name="comment"
+              rows="5"
+              class="vp-input"
+              [class.is-invalid]="submitted && !comment.trim()"
+              placeholder="Share what went well and what could be better"
+              [(ngModel)]="comment"
+            ></textarea>
+            @if (submitted && !comment.trim()) {
+              <span class="vp-error-text">Comment required</span>
+            }
+          </div>
+        </form>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (!dataLoading && !reviewed) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" [disabled]="loading || !canReview()" (click)="submit()">
+        {{ loading ? 'Submitting...' : 'Submit Review' }}
+      </button>
+    </div>
+  </ion-footer>
+}

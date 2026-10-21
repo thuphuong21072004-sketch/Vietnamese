@@ -1,0 +1,347 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="My Travel Plans" defaultHref="/me" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadTrips($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll page">
+    <!-- Nav tile (gộp từ Travel Home) -->
+    <nav class="tiles" aria-label="Travel">
+      <a class="tile tile--on" routerLink="/travel/trips" aria-current="page">
+        <vp-icon [d]="icons.pin" [size]="18" />My Travel Plans
+      </a>
+      <a class="tile" routerLink="/travel/requests">
+        <vp-icon [d]="icons.mail" [size]="18" />Invites &amp; Requests
+      </a>
+    </nav>
+
+    @if (loading) {
+      <vp-loading text="Loading trips…" />
+    } @else if (!trips.length) {
+      <vp-empty title="No trips yet" text="Create a trip to find a Vietnamese language teacher for your journey.">
+        <button type="button" class="t-btn t-btn--fill empty-cta" (click)="openCreate()">Create your first trip</button>
+      </vp-empty>
+    } @else {
+      <!-- Lọc trạng thái + ngày -->
+      <div class="chips">
+        @for (c of statusChips; track c.value) {
+          <button type="button" class="chip" [class.is-active]="filterStatus === c.value" (click)="filterStatus = c.value">
+            {{ c.label }}
+          </button>
+        }
+        <button type="button" class="chip chip--dates" [class.is-set]="hasDateFilter" (click)="openDates()">
+          <vp-icon [d]="icons.calendar" [size]="14" />{{ dateChipLabel }}
+        </button>
+        @if (filterStatus || hasDateFilter) {
+          <button type="button" class="chip" (click)="clearFilters()">
+            <vp-icon [d]="icons.close" [size]="14" />Clear
+          </button>
+        }
+      </div>
+
+      @if (!filtered.length) {
+        <vp-empty text="No trips match the selected filters." />
+      }
+
+      @for (trip of filtered; track trip.tripId) {
+        <section class="t-card">
+          <div class="trip__top">
+            <div class="vp-grow">
+              <p class="trip__dest">{{ trip.destination }}</p>
+              @if (trip.specificLocation) {
+                <p class="trip__spot">{{ trip.specificLocation }}</p>
+              }
+            </div>
+            <vp-badge [label]="statusLabel(trip.status)" />
+          </div>
+
+          <span class="date-chip">{{ range(trip) }}</span>
+
+          @if (trip.enrolledClassId) {
+            <p class="enrolled">
+              Enrolled in a class for this trip ·
+              <a [routerLink]="['/classes', trip.enrolledClassId]">View class →</a>
+            </p>
+          }
+
+          @if (trip.status !== 1) {
+            <!-- Chưa ghép cặp -->
+            <div class="grid-2">
+              <button
+                type="button"
+                class="t-btn t-btn--fill"
+                [disabled]="loadingSuggestionsFor === trip.tripId"
+                (click)="findTeachers(trip.tripId)"
+              >
+                {{
+                  loadingSuggestionsFor === trip.tripId
+                    ? 'Searching…'
+                    : showSuggestionsFor === trip.tripId
+                      ? 'Hide Teachers'
+                      : 'Find Teachers'
+                }}
+              </button>
+              <button
+                type="button"
+                class="t-btn t-btn--outline"
+                [disabled]="loadingClassesFor === trip.tripId"
+                (click)="viewReservedClasses(trip.tripId)"
+              >
+                {{
+                  loadingClassesFor === trip.tripId
+                    ? 'Loading…'
+                    : showClassesFor === trip.tripId
+                      ? 'Hide Classes'
+                      : 'View Classes'
+                }}
+              </button>
+            </div>
+
+            <!-- Panel: Matching teachers -->
+            @if (showSuggestionsFor === trip.tripId) {
+              <div class="panel">
+                <div class="panel__head">
+                  <p class="panel__title">Matching teachers</p>
+                  <span class="panel__count">{{ suggestions[trip.tripId]?.length ?? 0 }} found</span>
+                </div>
+                @for (s of suggestions[trip.tripId] ?? []; track s.scheduleId) {
+                  <div class="person">
+                    <a class="person__main" [routerLink]="['/user', s.teacherId]">
+                      <vp-avatar [name]="s.teacherName" [url]="avatar(s.teacherAvatarUrl)" [size]="40" />
+                      <div class="vp-grow">
+                        <p class="person__name">{{ s.teacherName }}</p>
+                        <p class="person__meta">
+                          @if (s.teacherCountry) {
+                            {{ s.teacherCountry }} ·
+                          }
+                          free {{ freeRange(s) }}
+                        </p>
+                        <span class="person__link">Profile →</span>
+                      </div>
+                    </a>
+                    <div class="person__actions">
+                      @if (getPendingRequest(trip.tripId, s.scheduleId); as pending) {
+                        @if (pending.requestType === 0) {
+                          <button
+                            type="button"
+                            class="mini mini--danger"
+                            [disabled]="busyRequestId === pending.id"
+                            (click)="cancelInvite(pending.id, trip.tripId)"
+                          >
+                            Cancel
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="mini mini--danger"
+                            [disabled]="busyRequestId === pending.id"
+                            (click)="reject(pending.id, trip.tripId)"
+                          >
+                            Reject
+                          </button>
+                          <button
+                            type="button"
+                            class="mini"
+                            [disabled]="busyRequestId === pending.id"
+                            (click)="accept(pending.id)"
+                          >
+                            Accept
+                          </button>
+                        }
+                      } @else {
+                        <button
+                          type="button"
+                          class="mini"
+                          [disabled]="isSendingInvite(s.scheduleId, trip.tripId)"
+                          (click)="sendInvite(s.scheduleId, trip.tripId)"
+                        >
+                          {{ isSendingInvite(s.scheduleId, trip.tripId) ? 'Sending…' : 'Invite' }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="panel__empty">No teachers available for this destination and dates yet.</p>
+                }
+              </div>
+            }
+
+            <!-- Panel: Classes created for this trip -->
+            @if (showClassesFor === trip.tripId) {
+              <div class="panel">
+                <div class="panel__head">
+                  <p class="panel__title">Classes created for this trip</p>
+                  <span class="panel__count">{{ (reservedClasses[trip.tripId] ?? []).length }} class(es)</span>
+                </div>
+                @for (cls of reservedClasses[trip.tripId] ?? []; track cls.classId) {
+                  <a class="person person--link" [routerLink]="['/classes', cls.classId]">
+                    <vp-avatar [name]="cls.teacherName" [url]="avatar(cls.avatarUrl)" [size]="40" />
+                    <div class="vp-grow">
+                      <p class="person__name">
+                        {{ cls.title }}
+                        @if (cls.classId === trip.enrolledClassId) {
+                          <span class="vp-badge vp-badge--success enrolled-badge">Enrolled</span>
+                        }
+                      </p>
+                      <p class="person__meta">
+                        {{ cls.teacherName }} · {{ cls.totalSessions }} sessions · {{ time(cls.startTime) }} – {{ time(cls.endTime) }}
+                      </p>
+                      <p class="person__price">${{ cls.price | number: '1.2-2' }}</p>
+                    </div>
+                    <span class="person__chev"><vp-icon [d]="icons.chevronRight" [size]="18" /></span>
+                  </a>
+                } @empty {
+                  <p class="panel__empty">No teacher has created a class for this trip yet. Check back later.</p>
+                }
+              </div>
+            }
+
+            <div class="t-row">
+              <button type="button" class="t-btn t-btn--plain" (click)="openEdit(trip)">Edit</button>
+              <button type="button" class="t-btn t-btn--danger" (click)="deleteTrip(trip)">Delete</button>
+            </div>
+          } @else {
+            <!-- Đã ghép cặp -->
+            <div class="t-row">
+              @if (trip.matchedTeacherId) {
+                <a class="t-btn t-btn--outline" [routerLink]="['/user', trip.matchedTeacherId]">View Teacher</a>
+              }
+              @if (trip.classId && trip.classId !== trip.enrolledClassId) {
+                <a class="t-btn t-btn--fill" [routerLink]="['/classes', trip.classId]">Enroll Now</a>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
+  </div>
+
+  <!-- FAB New Trip -->
+  <button slot="fixed" type="button" class="fab" (click)="openCreate()">
+    <vp-icon [d]="icons.plus" [size]="20" [stroke]="2.4" />New Trip
+  </button>
+
+  <!-- Sheet: New / Edit Trip -->
+  <ion-modal class="t-sheet" [isOpen]="showForm" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="closeForm()">
+    <ng-template>
+      <ion-content>
+        <form class="sheet" (ngSubmit)="save()" novalidate>
+          <div class="sheet__head">
+            <h2 class="sheet__title">{{ editingTripId ? 'Edit Trip' : 'New Trip' }}</h2>
+            <button type="button" class="sheet__close" aria-label="Close" (click)="closeForm()">
+              <vp-icon [d]="icons.close" [size]="20" />
+            </button>
+          </div>
+
+          <div class="vp-field">
+            <label class="vp-label" for="tf-province">Province / City</label>
+            <select
+              id="tf-province"
+              name="province"
+              class="vp-input"
+              [(ngModel)]="selectedProvince"
+              (ngModelChange)="onProvinceChange()"
+            >
+              <option value="">— Select province —</option>
+              @for (g of destinationGroups; track g.province) {
+                <option [value]="g.province">{{ g.province }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="vp-field">
+            <label class="vp-label" for="tf-spot">Specific location <span class="optional">(optional)</span></label>
+            <select
+              id="tf-spot"
+              name="spot"
+              class="vp-input"
+              [(ngModel)]="selectedSpot"
+              [disabled]="!selectedProvince"
+              (ngModelChange)="onSpotChange()"
+            >
+              <option value="">— Select location —</option>
+              @for (spot of availableSpots; track spot) {
+                <option [value]="spot">{{ spot }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="vp-field">
+            <label class="vp-label" for="tf-phone">Contact phone</label>
+            <input
+              id="tf-phone"
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              class="vp-input"
+              placeholder="e.g. 0901 234 567"
+              [(ngModel)]="form.phoneNumber"
+            />
+          </div>
+
+          <div class="vp-grid-2">
+            <div class="vp-field">
+              <label class="vp-label" for="tf-start">Start date</label>
+              <input
+                id="tf-start"
+                name="start"
+                type="date"
+                class="vp-input"
+                [min]="minStartDate"
+                [(ngModel)]="form.startDate"
+              />
+            </div>
+            <div class="vp-field">
+              <label class="vp-label" for="tf-end">End date</label>
+              <input
+                id="tf-end"
+                name="end"
+                type="date"
+                class="vp-input"
+                [min]="form.startDate || minStartDate"
+                [(ngModel)]="form.endDate"
+              />
+            </div>
+          </div>
+          <p class="vp-hint">Trip must start at least 30 days from today.</p>
+
+          <div class="sheet__actions">
+            <button type="button" class="t-btn t-btn--plain" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="t-btn t-btn--fill" [disabled]="saving">
+              {{ saving ? 'Saving…' : editingTripId ? 'Save Changes' : 'Create Trip' }}
+            </button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Sheet: lọc theo ngày -->
+  <ion-modal class="t-sheet" [isOpen]="showDates" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="showDates = false">
+    <ng-template>
+      <ion-content>
+        <div class="sheet">
+          <div class="sheet__head">
+            <h2 class="sheet__title">Filter by dates</h2>
+            <button type="button" class="sheet__close" aria-label="Close" (click)="showDates = false">
+              <vp-icon [d]="icons.close" [size]="20" />
+            </button>
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="tf-from">From</label>
+            <input id="tf-from" type="date" class="vp-input" [(ngModel)]="draftFrom" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="tf-to">To</label>
+            <input id="tf-to" type="date" class="vp-input" [min]="draftFrom" [(ngModel)]="draftTo" />
+          </div>
+          <div class="sheet__actions">
+            <button type="button" class="t-btn t-btn--plain" (click)="draftFrom = ''; draftTo = ''; applyDates()">Clear</button>
+            <button type="button" class="t-btn t-btn--fill" (click)="applyDates()">Apply</button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

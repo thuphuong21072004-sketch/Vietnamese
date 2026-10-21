@@ -1,0 +1,102 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Travel Requests" defaultHref="/travel/trips" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadAll($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll page">
+    @if (loading) {
+      <vp-loading />
+    } @else {
+      <!-- Lọc trạng thái + ngày -->
+      <div class="chips">
+        @for (c of statusChips; track c.value) {
+          <button type="button" class="chip" [class.is-active]="filterStatus === c.value" (click)="filterStatus = c.value">
+            {{ c.label }}
+          </button>
+        }
+        <button type="button" class="chip chip--dates" [class.is-set]="hasDateFilter" (click)="openDates()">
+          <vp-icon [d]="icons.calendar" [size]="14" />{{ dateChipLabel }}
+        </button>
+        @if (filterStatus || hasDateFilter) {
+          <button type="button" class="chip" (click)="clearFilters()">
+            <vp-icon [d]="icons.close" [size]="14" />Clear
+          </button>
+        }
+      </div>
+
+      @for (r of filtered; track r.matchRequestId) {
+        <div class="t-card">
+          <div class="req__top">
+            <vp-avatar [name]="r.teacherName" [url]="avatar(r.teacherAvatarUrl)" [size]="40" />
+            <span class="req__swap"><vp-icon [d]="icons.swap" [size]="18" /></span>
+            <span class="req__you">You</span>
+            <div class="vp-grow">
+              <p class="req__name">{{ r.teacherName }}</p>
+              <p class="req__dir">{{ typeLabel(r) }}</p>
+            </div>
+            <vp-badge [label]="statusLabel(r.status)" />
+          </div>
+
+          <div class="req__info">
+            <span class="req__place"><vp-icon [d]="icons.pin" [size]="14" />{{ place(r) }}</span>
+            <span>{{ range(r) }}</span>
+          </div>
+
+          <div class="t-row">
+            @if (r.teacherId) {
+              <a class="t-btn t-btn--plain" [routerLink]="['/user', r.teacherId]">View Profile</a>
+            }
+            @if (r.status === 0 && !youSent(r)) {
+              <button type="button" class="t-btn t-btn--danger" [disabled]="busyId === r.matchRequestId" (click)="reject(r.matchRequestId)">
+                Reject
+              </button>
+              <button type="button" class="t-btn t-btn--fill" [disabled]="busyId === r.matchRequestId" (click)="accept(r.matchRequestId)">
+                Accept
+              </button>
+            }
+            @if (r.status === 0 && youSent(r)) {
+              <button type="button" class="t-btn t-btn--danger" [disabled]="busyId === r.matchRequestId" (click)="cancel(r.matchRequestId)">
+                Cancel
+              </button>
+            }
+            @if (r.status === 1 && r.classId) {
+              <a class="t-btn t-btn--fill" [routerLink]="['/classes', r.classId]">View Class Detail</a>
+            }
+          </div>
+        </div>
+      } @empty {
+        <vp-empty text="No requests found." />
+      }
+    }
+  </div>
+
+  <!-- Sheet: lọc theo ngày -->
+  <ion-modal class="t-sheet" [isOpen]="showDates" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="showDates = false">
+    <ng-template>
+      <ion-content>
+        <div class="sheet">
+          <div class="sheet__head">
+            <h2 class="sheet__title">Filter by dates</h2>
+            <button type="button" class="sheet__close" aria-label="Close" (click)="showDates = false">
+              <vp-icon [d]="icons.close" [size]="20" />
+            </button>
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="tr-from">From</label>
+            <input id="tr-from" type="date" class="vp-input" [(ngModel)]="draftFrom" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="tr-to">To</label>
+            <input id="tr-to" type="date" class="vp-input" [min]="draftFrom" [(ngModel)]="draftTo" />
+          </div>
+          <div class="sheet__actions">
+            <button type="button" class="t-btn t-btn--plain" (click)="draftFrom = ''; draftTo = ''; applyDates()">Clear</button>
+            <button type="button" class="t-btn t-btn--fill" (click)="applyDates()">Apply</button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

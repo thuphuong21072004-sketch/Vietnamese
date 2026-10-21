@@ -1,0 +1,91 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Student Dashboard" defaultHref="/me" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadData($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll page">
+    <!-- Lọc kỳ -->
+    <div class="period">
+      <label for="sd-month" class="sr-only">Month</label>
+      <input
+        id="sd-month"
+        type="month"
+        class="period__month"
+        [(ngModel)]="selectedMonth"
+        (change)="onMonthChange()"
+        [disabled]="allTime"
+      />
+      <label class="period__all">
+        <input type="checkbox" [(ngModel)]="allTime" (change)="onAllTimeChange()" />All time
+      </label>
+    </div>
+
+    @if (loading) {
+      <vp-loading />
+    } @else {
+      <div class="total">
+        <p class="total__k">Total Paid</p>
+        <p class="total__v">{{ stats.totalPaid | currency: 'USD' : 'symbol' : '1.2-2' }}</p>
+        <p class="total__sub">{{ periodLabel }}</p>
+      </div>
+
+      <div class="vp-grid-2">
+        @for (c of smallCards; track c.label) {
+          <div class="stat" [style.border-left-color]="c.color">
+            <p class="stat__k">{{ c.label }}</p>
+            <p class="stat__v">{{ c.money ? (c.value | currency: 'USD' : 'symbol' : '1.0-2') : c.value }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- My Courses -->
+      <h2 class="vp-section-title heading">My Courses</h2>
+      @if (stats.courses.length) {
+        @for (c of stats.courses; track c.classId + '-' + $index) {
+          <div class="course">
+            <div class="course__top">
+              <div class="vp-grow">
+                <p class="course__title">{{ c.title }}</p>
+                <p class="course__teacher">{{ c.teacherName }}</p>
+              </div>
+              <vp-badge [label]="courseStatus(c)" [classLifecycle]="true" />
+            </div>
+            <div class="course__foot">
+              <span>Paid On {{ c.paidAt ? (c.paidAt | date: 'dd/MM/yyyy') : '—' }}</span>
+              <b>{{ c.amount | currency: 'USD' : 'symbol' : '1.2-2' }}</b>
+            </div>
+          </div>
+        }
+        <div class="sum">
+          <span>Total ({{ stats.courseCount }} courses)</span>
+          <span>{{ stats.courseTotal | currency: 'USD' : 'symbol' : '1.2-2' }}</span>
+        </div>
+      } @else {
+        <vp-empty [text]="'No group class payments in ' + periodLabel + '.'" />
+      }
+
+      <!-- Monthly Payment Breakdown -->
+      @if (stats.monthlyBreakdown.length) {
+        <h2 class="vp-section-title heading">Monthly Payment Breakdown</h2>
+        @for (row of stats.monthlyBreakdown; track row.year + '-' + row.month) {
+          <div class="month">
+            <div class="month__top">
+              <b>{{ monthLabel(row) }}</b>
+              <b>{{ row.totalPaid | currency: 'USD' : 'symbol' : '1.2-2' }}</b>
+            </div>
+            <div class="month__grid">
+              <span>Completed <b class="c-green">{{ row.completedLearning | currency: 'USD' : 'symbol' : '1.0-2' }}</b></span>
+              <span>Active <b class="c-blue">{{ row.activeLearning | currency: 'USD' : 'symbol' : '1.0-2' }}</b></span>
+              <span>Cancelled <b class="c-orange">{{ row.cancelledUnrefunded | currency: 'USD' : 'symbol' : '1.0-2' }}</b></span>
+              <span>Refunded <b class="c-violet">{{ row.refunded | currency: 'USD' : 'symbol' : '1.0-2' }}</b></span>
+            </div>
+          </div>
+        }
+      } @else {
+        <vp-empty text="No payment records found." />
+      }
+    }
+  </div>
+</ion-content>

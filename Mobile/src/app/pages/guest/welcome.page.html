@@ -1,0 +1,118 @@
+<ion-header class="vp-header">
+  <header class="top">
+    <img src="logo.png" alt="" class="top__logo" />
+    <div class="vp-grow">
+      <p class="top__brand">VietPhuong</p>
+      <p class="top__tag">Learn Vietnamese with us, every day.</p>
+    </div>
+    <a routerLink="/login" class="vp-btn vp-btn--ghost vp-btn--sm top__login">Login</a>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll">
+    <!-- Hero -->
+    <section class="vp-hero">
+      <span class="hero-tag">Learn Vietnamese the smart way</span>
+      <h1 class="hero-title">Master Vietnamese with a modern study path</h1>
+      <p class="hero-text">Learn naturally through interactive lessons, pronunciation drills, quizzes, and a clear course progression.</p>
+      <div class="hero-actions">
+        <a routerLink="/register" class="vp-btn vp-btn--white">Register</a>
+        <a routerLink="/login" class="vp-btn hero-outline">Login</a>
+      </div>
+    </section>
+
+    <!-- Số liệu -->
+    <section class="vp-grid-3">
+      <div class="mini"><p class="mini__k">Levels</p><p class="mini__v">{{ loading ? '–' : levels.length }}</p></div>
+      <div class="mini"><p class="mini__k">Courses</p><p class="mini__v">{{ loading ? '–' : totalCourses }}</p></div>
+      @if (unitsAvailable) {
+        <div class="mini"><p class="mini__k">Units</p><p class="mini__v">{{ totalUnits }}</p></div>
+      } @else {
+        <div class="mini"><p class="mini__k">Audio lessons</p><p class="mini__v">100+</p></div>
+      }
+    </section>
+
+    <!-- Tra từ không cần tài khoản -->
+    <a routerLink="/search" class="vp-card search-card">
+      <span class="search-card__icon"><vp-icon [d]="icons.search" [size]="22" /></span>
+      <div class="vp-grow">
+        <p class="vp-eyebrow">Free for everyone</p>
+        <p class="vp-card-title">Vocabulary Search</p>
+        <p class="vp-meta">Hear Vietnamese words in real video clips</p>
+      </div>
+      <vp-icon [d]="icons.chevronRight" [size]="20" class="search-card__chev" />
+    </a>
+
+    <!-- Lý do chọn -->
+    <section class="vp-section">
+      <h2 class="vp-section-title">Why choose VietPhuong</h2>
+      @for (f of features; track f.title) {
+        <div class="vp-card feature">
+          <span class="feature__icon"><vp-icon [d]="f.d" [size]="20" /></span>
+          <div class="vp-grow">
+            <p class="vp-card-title">{{ f.title }}</p>
+            <p class="vp-meta feature__text">{{ f.text }}</p>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- Lộ trình -->
+    <section class="vp-section">
+      <h2 class="vp-section-title">Explore our learning system</h2>
+      @if (loading) {
+        <vp-loading text="Loading available paths..." />
+      } @else if (error) {
+        <div class="vp-alert vp-alert--danger">{{ error }}</div>
+      } @else if (!levels.length) {
+        <div class="vp-empty"><p>Study paths are being updated…</p></div>
+      } @else {
+        @for (l of levels; track l.levelId) {
+          <div class="vp-card level">
+            <button type="button" class="level__head" [attr.aria-expanded]="openLevels.has(l.levelId)" (click)="toggleLevel(l.levelId)">
+              <span class="level__badge">{{ l.levelName }}</span>
+              <span class="vp-grow level__info">
+                @if (l.description) {
+                  <span class="level__desc">{{ l.description }}</span>
+                }
+                <span class="vp-meta">{{ l.courses.length }} courses{{ unitsAvailable ? ' · ' + unitsOf(l) + ' units' : '' }}</span>
+              </span>
+              <vp-icon [d]="icons.chevronDown" [size]="20" class="chev" [class.chev--open]="openLevels.has(l.levelId)" />
+            </button>
+
+            @if (openLevels.has(l.levelId)) {
+              <div class="courses">
+                @for (c of l.courses; track c.courseId) {
+                  <div class="course">
+                    <p class="course__name">{{ c.courseName }}</p>
+                    @if (c.description) {
+                      <p class="vp-meta course__desc">{{ c.description }}</p>
+                    }
+                    @if (c.units.length) {
+                      <ol class="units">
+                        @for (u of c.units; track $index) {
+                          <li>{{ u }}</li>
+                        }
+                      </ol>
+                    }
+                  </div>
+                } @empty {
+                  <p class="vp-meta">No courses available for this level yet.</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </section>
+  </div>
+</ion-content>
+
+<ion-footer class="vp-footer">
+  <div class="vp-bottom-bar">
+    <a routerLink="/register" class="vp-btn vp-btn--primary vp-btn--cta">Create free account</a>
+  </div>
+</ion-footer>

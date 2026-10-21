@@ -1,0 +1,78 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header head">
+    <div>
+      <span class="t-eyebrow">Teacher dashboard</span>
+      <h1 class="vp-large-title t-title-gap">Manage Your Schedule</h1>
+      <p class="t-sub">Create, edit and organize your teaching availability.</p>
+    </div>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    <form class="form-card" (ngSubmit)="save()" novalidate>
+      <h2 class="vp-section-title">{{ editingId ? 'Update Schedule' : 'Create New Schedule' }}</h2>
+      <div class="vp-field">
+        <label for="s1" class="vp-label">Start Time</label>
+        <input id="s1" name="startTime" type="datetime-local" class="vp-input av-input" [(ngModel)]="form.startTime" />
+      </div>
+      <div class="vp-field">
+        <label for="s2" class="vp-label">End Time</label>
+        <input id="s2" name="endTime" type="datetime-local" class="vp-input av-input" [(ngModel)]="form.endTime" />
+      </div>
+      <div class="form-actions">
+        <button type="button" class="vp-btn vp-btn--back vp-btn--form cancel" (click)="resetForm()">Cancel</button>
+        <button type="submit" class="vp-btn vp-btn--primary vp-btn--form submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : editingId ? 'Update Schedule' : 'Create Schedule' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="date-filter">
+      <label for="fd" class="vp-label">Filter by Date</label>
+      <div class="date-filter__row">
+        <input id="fd" type="date" class="vp-input vp-input--sm" [(ngModel)]="selectedDate" (change)="load()" />
+        @if (selectedDate) {
+          <button type="button" class="vp-icon-btn" aria-label="Clear date" (click)="clearDate()">
+            <vp-icon [d]="icons.close" [size]="18" />
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="vp-chips" role="group" aria-label="Status">
+      @for (c of statusChips; track c.value) {
+        <button type="button" class="vp-chip" [class.is-active]="selectedStatus === c.value" (click)="setStatus(c.value)">{{ c.label }}</button>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading schedules..." />
+    } @else if (schedules.length === 0) {
+      <vp-empty text="No schedules found." />
+    } @else {
+      <p class="total">Total schedules: <b>{{ schedules.length }}</b></p>
+      <div class="vp-grid-2 slots">
+        @for (s of schedules; track s.availabilityId) {
+          <div class="slot">
+            <vp-badge class="slot__badge" [label]="statusText(s.status)" />
+            <div>
+              <p class="slot__d">{{ s.startTime | date: 'EEE dd/MM' }}</p>
+              <p class="slot__t">{{ s.startTime | date: 'HH:mm' }} - {{ s.endTime | date: 'HH:mm' }}</p>
+            </div>
+            <div class="slot__actions">
+              <button type="button" class="slot__btn" aria-label="Edit" [disabled]="s.status !== 0" (click)="edit(s)">
+                <vp-icon [d]="icons.edit" [size]="16" />
+              </button>
+              <button type="button" class="slot__btn slot__btn--del" aria-label="Delete" [disabled]="s.status !== 0" (click)="remove(s)">
+                <vp-icon [d]="icons.trash" [size]="16" />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ion-content>

@@ -1,0 +1,68 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Update Information" [defaultHref]="meHref" />
+</ion-header>
+
+<ion-content>
+  @if (loading) {
+    <vp-loading text="Loading profile..." />
+  } @else {
+    <div class="vp-scroll af-scroll">
+      <!-- Avatar: bấm để chọn ảnh, upload ngay -->
+      <div class="af-avatar">
+        <button type="button" class="af-avatar__btn" aria-label="Change avatar photo" [disabled]="uploading" (click)="file.click()">
+          <vp-avatar [name]="name" [url]="avatarPreview" [size]="92" />
+          <span class="af-avatar__cam" aria-hidden="true"><vp-icon [d]="icons.camera" [size]="16" /></span>
+        </button>
+        <span class="vp-hint">{{ uploading ? 'Uploading...' : 'Tap to change photo' }}</span>
+        <input #file type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+      </div>
+
+      <form class="af-card" (ngSubmit)="save()" novalidate>
+        <div class="vp-field">
+          <label for="fn" class="vp-label">Full Name <span class="req">*</span></label>
+          <input id="fn" name="name" type="text" autocomplete="name" class="vp-input" [class.is-invalid]="submitted && !name.trim()" [(ngModel)]="name" />
+        </div>
+        <div class="vp-field">
+          <label for="em" class="vp-label">Email</label>
+          <input id="em" name="email" type="email" class="vp-input" [value]="email" disabled />
+        </div>
+        <div class="vp-field">
+          <label for="co" class="vp-label">Country</label>
+          <select id="co" name="country" class="vp-input" [(ngModel)]="country">
+            <option value="">Select Country</option>
+            @for (c of countryOptions; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+        <div class="vp-grid-2">
+          <div class="vp-field">
+            <label for="dob" class="vp-label">Date of Birth</label>
+            <input id="dob" name="dateOfBirth" type="date" class="vp-input" [(ngModel)]="dateOfBirth" />
+          </div>
+          <div class="vp-field">
+            <label for="ge" class="vp-label">Gender</label>
+            <select id="ge" name="gender" class="vp-input" [(ngModel)]="gender">
+              <option value="">-- Select --</option>
+              @for (g of genders; track g) {
+                <option [value]="g">{{ g }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="vp-field">
+          <label for="bio" class="vp-label">Bio</label>
+          <textarea id="bio" name="bio" rows="4" class="vp-input" placeholder="Tell us about yourself" [(ngModel)]="bio"></textarea>
+        </div>
+      </form>
+    </div>
+  }
+</ion-content>
+
+<ion-footer class="vp-footer">
+  <div class="vp-bottom-bar">
+    <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" [disabled]="loading || saving || uploading" (click)="save()">
+      {{ saving ? 'Saving...' : 'Update Profile' }}
+    </button>
+  </div>
+</ion-footer>

@@ -1,0 +1,52 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Online Class Room" [defaultHref]="'/booking/' + bookingId" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll gap14">
+    @if (loading) {
+      <vp-loading text="Loading room..." />
+    } @else {
+      <section class="vp-hero hero">
+        <span class="hero__icon"><vp-icon [d]="videoIcon" [size]="26" /></span>
+        <div>
+          <h2 class="hero__title">Online Class Room</h2>
+          <p class="hero__sub">Booking ID: #{{ bookingId }}</p>
+        </div>
+      </section>
+
+      @if (room) {
+        <section class="room">
+          <div class="room__row"><span>Room Code</span><b class="code">{{ room.roomCode }}</b></div>
+          <div class="room__row"><span>Expired At</span><b>{{ room.expiredAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+          <p class="room__note">Room is ready. Click the button below to open the class now.</p>
+          @if (room.joinUrl) {
+            <button type="button" class="room__link" (click)="openLink()">Open class room</button>
+          }
+        </section>
+      } @else {
+        <section class="dashed">
+          <h2 class="dashed__title">No room yet</h2>
+          <p class="dashed__text">Create the room for this booking, then join the class.</p>
+        </section>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (!loading) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      @if (room) {
+        <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="joinRoom()">
+          <vp-icon [d]="videoIcon" [size]="20" />
+          Join Room
+        </button>
+      } @else {
+        <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" [disabled]="creating" (click)="createRoom()">
+          {{ creating ? 'Creating...' : 'Create room and join class' }}
+        </button>
+      }
+    </div>
+  </ion-footer>
+}

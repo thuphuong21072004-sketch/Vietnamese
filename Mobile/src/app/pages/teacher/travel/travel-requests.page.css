@@ -1,0 +1,36 @@
+.who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.you {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--vp-emerald-soft);
+  color: #047857;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.swap {
+  color: var(--vp-placeholder);
+}
+.who__name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.who__dir {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.strip {
+  justify-content: flex-start;
+  gap: 14px;
+  color: var(--vp-text-body);
+}

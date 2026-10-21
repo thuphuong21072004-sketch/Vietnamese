@@ -1,0 +1,96 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <div>
+      <span class="eyebrow">Teacher panel</span>
+      <h1 class="vp-large-title">Teacher Dashboard</h1>
+    </div>
+    <div class="period">
+      <label for="tm" class="sr-only">Month</label>
+      <input
+        id="tm"
+        type="month"
+        class="period__month"
+        [(ngModel)]="selectedMonth"
+        (change)="onMonthChange()"
+        [disabled]="allTime"
+      />
+      <label class="period__all">
+        <input type="checkbox" [(ngModel)]="allTime" (change)="load()" />
+        All time
+      </label>
+    </div>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    @if (loading) {
+      <vp-loading text="Loading..." />
+    } @else {
+      <!-- Số dư admin còn nợ (lũy kế) -->
+      <section class="owed" [class.owed--over]="balanceTone === 'over'" [class.owed--settled]="balanceTone === 'settled'">
+        <div>
+          <p class="owed__k">{{ stats.balance < 0 ? 'Overpaid' : 'Still Owed to You' }}</p>
+          <p class="owed__v">{{ (stats.balance < 0 ? -stats.balance : stats.balance) | currency: 'USD' : 'symbol' : '1.0-2' }}</p>
+        </div>
+        <p class="owed__note">
+          Paid by Admin {{ stats.totalPaidOut | currency: 'USD' : 'symbol' : '1.0-2' }} of
+          {{ stats.totalOwed | currency: 'USD' : 'symbol' : '1.0-2' }} earned (all time)
+        </p>
+      </section>
+
+      <div class="vp-grid-2">
+        <vp-stat-card label="Total from Students" [value]="stats.totalFromStudents | currency: 'USD' : 'symbol' : '1.0-2'" [sub]="periodLabel" accent="#7c3aed" />
+        <vp-stat-card label="Completed Earnings" [value]="stats.completedEarnings | currency: 'USD' : 'symbol' : '1.0-2'" sub="Finished sessions" accent="#16a34a" />
+        <vp-stat-card label="Active Earnings" [value]="stats.activeEarnings | currency: 'USD' : 'symbol' : '1.0-2'" sub="Ongoing sessions" accent="#2563eb" />
+        <vp-stat-card label="Cancelled (Pending Refund)" [value]="stats.cancelledUnrefunded | currency: 'USD' : 'symbol' : '1.0-2'" sub="Cancelled, not yet refunded" accent="#ea580c" />
+        <vp-stat-card label="Group Classes" [value]="stats.classCount" [sub]="'With payments in ' + periodLabel" accent="#7c3aed" />
+        <vp-stat-card label="Students" [value]="stats.studentCount" sub="Unique paid students" accent="#7c3aed" />
+      </div>
+
+      <h2 class="vp-section-title section-gap">By Course</h2>
+      @for (c of stats.classes; track c.classId) {
+        <article class="course">
+          <div class="course__top">
+            <p class="course__title">{{ c.title }}</p>
+            <vp-badge [label]="c.status" [classLifecycle]="true" />
+          </div>
+          <p class="course__sched">{{ c.startDate | date: 'dd/MM' }} → {{ c.endDate | date: 'dd/MM/yyyy' }}</p>
+          <div class="cells">
+            <div><p>Fee</p><b>{{ c.price | currency: 'USD' : 'symbol' : '1.0-2' }}</b></div>
+            <div><p>Students</p><b>{{ c.studentCount }}/{{ c.maxStudents }}</b></div>
+            <div><p>Cancelled</p><b [class.orange]="c.cancelledCount > 0">{{ c.cancelledCount }}</b></div>
+            <div><p>Revenue</p><b>{{ c.totalRevenue | currency: 'USD' : 'symbol' : '1.0-2' }}</b></div>
+          </div>
+        </article>
+      } @empty {
+        <vp-empty [text]="'No group class payments in ' + periodLabel + '.'" />
+      }
+      @if (stats.classes.length) {
+        <div class="total">
+          <span>Total ({{ stats.classes.length }} classes)</span>
+          <span>{{ classTotals.revenue | currency: 'USD' : 'symbol' : '1.0-2' }}</span>
+        </div>
+      }
+
+      <h2 class="vp-section-title section-gap">Monthly Earnings Breakdown</h2>
+      @for (row of stats.monthlyBreakdown; track row.year * 100 + row.month) {
+        <article class="course">
+          <div class="course__top">
+            <p class="course__title">{{ monthLabel(row) }}</p>
+            <span class="vp-price">{{ row.totalFromStudents | currency: 'USD' : 'symbol' : '1.0-2' }}</span>
+          </div>
+          <div class="cells cells--3">
+            <div><p>Completed</p><b class="green">{{ row.completedEarnings | currency: 'USD' : 'symbol' : '1.0-2' }}</b></div>
+            <div><p>Active</p><b>{{ row.activeEarnings | currency: 'USD' : 'symbol' : '1.0-2' }}</b></div>
+            <div><p>Cancelled</p><b class="orange">{{ row.cancelledUnrefunded | currency: 'USD' : 'symbol' : '1.0-2' }}</b></div>
+          </div>
+        </article>
+      } @empty {
+        <vp-empty text="No earnings records found." />
+      }
+    }
+  </div>
+</ion-content>

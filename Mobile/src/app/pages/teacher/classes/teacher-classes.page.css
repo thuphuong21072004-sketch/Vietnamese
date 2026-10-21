@@ -1,0 +1,117 @@
+.head {
+  flex-direction: row;
+  align-items: flex-end;
+}
+.upcoming-btn {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--vp-r-m);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: var(--vp-indigo-soft);
+  color: var(--vp-indigo-dark);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.list {
+  padding-bottom: 96px;
+}
+.searchbar {
+  display: flex;
+  gap: 8px;
+}
+.search {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  box-sizing: border-box;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--vp-placeholder);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  font: 500 16px var(--vp-font);
+  background: transparent;
+  color: var(--vp-text);
+}
+.filter-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--vp-r-m);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: var(--vp-indigo-soft);
+  color: var(--vp-indigo-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+.filter-btn__dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: var(--vp-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.topic {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.facts b {
+  color: var(--vp-text-body);
+}
+.days {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.price {
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+}
+.days-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.days-field legend {
+  padding: 0;
+  margin-bottom: 8px;
+}

@@ -1,0 +1,169 @@
+/* Lớp dùng chung trong nhóm Giáo viên (thêm vào styleUrls của từng page). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.t-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vp-indigo-dark);
+}
+.t-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+.t-title-gap {
+  margin-top: 2px;
+}
+
+/* Card danh sách (r18 p14) */
+.t-card {
+  background: #fff;
+  border-radius: var(--vp-r-l2);
+  padding: 14px;
+  box-shadow: var(--vp-sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.t-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.t-card__title {
+  font-size: 16px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.t-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.t-actions > .vp-btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.t-btn-white {
+  background: #fff;
+  color: var(--vp-text-body);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+.t-btn-wait {
+  background: var(--vp-border-2);
+  color: var(--vp-muted-2);
+  font-size: 12px;
+  line-height: 1.15;
+  padding: 0 8px;
+  white-space: normal;
+  text-align: center;
+}
+.t-btn-wait:disabled {
+  opacity: 1;
+}
+.t-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--vp-text-body-2);
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-s);
+  padding: 8px 10px;
+}
+.t-strip b {
+  color: var(--vp-text);
+}
+.t-chip-day {
+  padding: 3px 8px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-tag-bg);
+  color: var(--vp-primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* FAB (README §2.5: cao 56, bo iOS 28 / Android 16) */
+.t-fab {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  height: 56px;
+  padding: 0 20px;
+  border-radius: var(--vp-fab-r);
+  background: var(--vp-grad-primary);
+  color: #fff;
+  font: 700 15px var(--vp-font);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 18px 40px rgba(124, 108, 255, 0.35);
+  border: 0;
+}
+.t-fab--travel {
+  background: var(--vp-grad-travel);
+  box-shadow: 0 12px 30px rgba(5, 150, 105, 0.35);
+}
+
+/* Bottom sheet bộ lọc */
+.t-sheet {
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.t-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+}
+.t-sheet__title {
+  font-size: 18px;
+  font-weight: 800;
+}
+.t-sheet__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+.t-sheet__actions .vp-btn {
+  flex: 1;
+}
+
+/* Chip ngày trong tuần dạng lưới 7 ô */
+.t-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.t-days button {
+  height: 44px;
+  border-radius: var(--vp-r-s);
+  border: 1.5px solid var(--vp-border);
+  background: #fff;
+  color: var(--vp-muted);
+  font: 700 12px var(--vp-font);
+  padding: 0;
+  cursor: pointer;
+}
+.t-days button.on {
+  background: var(--vp-accent);
+  border-color: var(--vp-accent);
+  color: #fff;
+}
+
+/* FAB trên màn toàn màn hình (không có tab bar) → cộng vùng an toàn dưới */
+.t-fab--fs {
+  bottom: calc(var(--vp-safe-bottom) + 16px);
+}

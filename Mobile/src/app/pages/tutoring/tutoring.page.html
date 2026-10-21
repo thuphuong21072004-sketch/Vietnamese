@@ -1,0 +1,228 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <h1 class="vp-large-title tut-title">1-on-1 Tutoring</h1>
+    <vp-segmented [options]="segOptions" [value]="seg" (valueChange)="changeSeg($event)" />
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    @if (seg === 'find') {
+      <!-- ===== Find tutors ===== -->
+      <div>
+        <span class="vp-eyebrow intro-eyebrow">Your personal schedule</span>
+        <h2 class="intro-title">Find your next class</h2>
+      </div>
+
+      <div class="search-row">
+        <label class="search">
+          <vp-icon [d]="icons.search" [size]="18" />
+          <span class="sr-only">Search</span>
+          <input
+            type="search"
+            placeholder="Teacher, specialty or date"
+            [(ngModel)]="keyword"
+            (ngModelChange)="applySearch()"
+          />
+        </label>
+        <button
+          type="button"
+          class="date-btn"
+          [class.is-on]="!!selectedDate"
+          aria-label="Filter by date"
+          (click)="openDateSheet()"
+        >
+          <vp-icon [d]="icons.calendar" [size]="20" />
+        </button>
+      </div>
+
+      @if (selectedDate) {
+        <div class="vp-chips">
+          <button type="button" class="vp-chip is-active" (click)="clearDate()">
+            {{ selectedDate | date: 'dd/MM/yyyy' }} <span aria-hidden="true">✕</span>
+            <span class="sr-only">Clear date</span>
+          </button>
+        </div>
+      }
+
+      @if (loadingFind && !schedules.length) {
+        <vp-loading text="Loading schedules..." />
+      } @else if (!schedules.length) {
+        <vp-empty text="No schedules available right now. Please check again later." />
+      } @else if (!visibleSchedules.length) {
+        <vp-empty text="No schedules match your filter. Try a different keyword or date." />
+      } @else {
+        <p class="summary">
+          <b>{{ visibleSchedules.length }} schedule{{ visibleSchedules.length === 1 ? '' : 's' }} found</b>
+          · {{ schedules.length }} total available
+        </p>
+
+        @for (item of visibleSchedules; track item.availabilityId) {
+          <article class="vp-card slot">
+            <div class="vp-row">
+              <vp-avatar
+                [name]="scheduleService.getTeacherName(item)"
+                [url]="scheduleService.getTeacherAvatar(item)"
+                [size]="52"
+              />
+              <div class="vp-grow">
+                <div class="slot__head">
+                  <p class="vp-card-title">{{ scheduleService.getTeacherName(item) }}</p>
+                  <span class="pill" [class.pill--booked]="item.status !== 0">
+                    {{ item.status === 0 ? 'Available' : 'Booked' }}
+                  </span>
+                </div>
+                @if (scheduleService.getSpecialty(item)) {
+                  <p class="vp-meta slot__spec">{{ scheduleService.getSpecialty(item) }}</p>
+                }
+                <p class="rating">
+                  ★ {{ scheduleService.getRating(item) | number: '1.1-1' }} ·
+                  {{ scheduleService.getTotalReviews(item) }} reviews
+                </p>
+              </div>
+            </div>
+
+            <div class="cells">
+              <div>
+                <p class="cells__k">Date</p>
+                <p class="cells__v">{{ item.startTime | date: 'dd/MM' }}</p>
+              </div>
+              <div>
+                <p class="cells__k">Time</p>
+                <p class="cells__v">{{ item.startTime | date: 'HH:mm' }}</p>
+              </div>
+              <div>
+                <p class="cells__k">Rate</p>
+                <p class="cells__v">${{ item.pricePerHour | number: '1.0-2' }}/h</p>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="vp-btn vp-btn--secondary" (click)="openSlot(item)">View detail</button>
+              @if (item.status === 0) {
+                <button
+                  type="button"
+                  class="vp-btn vp-btn--primary"
+                  [disabled]="bookingSlotId !== null"
+                  (click)="bookSlot(item)"
+                >
+                  {{ bookingSlotId === item.availabilityId ? 'Booking...' : 'Book now' }}
+                </button>
+              } @else {
+                <button type="button" class="vp-btn btn-off" disabled>Unavailable</button>
+              }
+            </div>
+          </article>
+        }
+      }
+    } @else {
+      <!-- ===== My Bookings ===== -->
+      <div class="vp-chips chips">
+        @for (c of statusChips; track c.label) {
+          <button
+            type="button"
+            class="vp-chip"
+            [class.is-active]="selectedStatus === c.value"
+            (click)="setStatus(c.value)"
+          >
+            {{ c.label }}
+          </button>
+        }
+        <button type="button" class="vp-chip" [class.is-active]="!!bookingDate" (click)="openDateSheet()">
+          <vp-icon [d]="icons.calendar" [size]="14" />
+          {{ bookingDate ? (bookingDate | date: 'dd/MM/yyyy') : 'Date' }}
+        </button>
+      </div>
+
+      @if (loadingBookings && !bookings.length) {
+        <vp-loading text="Loading bookings..." />
+      } @else if (!bookings.length) {
+        <vp-empty text="No bookings found" />
+      } @else {
+        @for (item of bookings; track item.bookingId) {
+          <article class="vp-card booking">
+            <div class="vp-row">
+              <vp-avatar [name]="teacherName(item)" [url]="bookingService.getAvatar(item)" [size]="48" />
+              <div class="vp-grow">
+                <p class="vp-card-title">{{ teacherName(item) }}</p>
+                <p class="vp-meta booking__when">
+                  {{ item.startTime | date: 'dd/MM/yyyy' }} · {{ item.startTime | date: 'HH:mm' }} –
+                  {{ item.endTime | date: 'HH:mm' }}
+                </p>
+              </div>
+              <vp-badge [label]="bookingService.getStatusText(item.status)" />
+            </div>
+
+            <div class="sumline">
+              <span>Duration <b>{{ durationText(item) }}</b></span>
+              <span>Total Amount <b>{{ money(item.totalPrice) }}</b></span>
+            </div>
+
+            @if (item.status === 0) {
+              <p class="pay-note">Please complete payment within 15 minutes or the slot is released.</p>
+            }
+
+            <div class="actions actions--wrap">
+              <button type="button" class="vp-btn vp-btn--ghost btn-white" (click)="openDetail(item)">View Detail</button>
+              @if (item.status === 0) {
+                <button type="button" class="vp-btn vp-btn--primary" (click)="goPayment(item)">Pay Now</button>
+              }
+              @if (canJoinRoom(item)) {
+                <button
+                  type="button"
+                  class="vp-btn vp-btn--primary"
+                  [disabled]="busyBookingId === item.bookingId"
+                  (click)="joinRoom(item)"
+                >
+                  {{ busyBookingId === item.bookingId ? 'Opening...' : 'Join Room' }}
+                </button>
+              } @else if (roomNotOpen(item)) {
+                <button type="button" class="vp-btn btn-off btn-off--sm" disabled>Room not open yet</button>
+              }
+              @if (canReview(item)) {
+                <button type="button" class="vp-btn vp-btn--secondary" (click)="writeReview(item)">Write Review</button>
+              } @else if (hasReviewed(item)) {
+                <button type="button" class="vp-btn btn-off" disabled>Reviewed</button>
+              }
+              @if (canCancel(item)) {
+                <button
+                  type="button"
+                  class="vp-btn vp-btn--danger"
+                  [disabled]="busyBookingId === item.bookingId"
+                  (click)="cancelBooking(item)"
+                >
+                  Cancel
+                </button>
+              }
+            </div>
+          </article>
+        }
+      }
+    }
+  </div>
+
+  <!-- Bottom sheet chọn ngày -->
+  <ion-modal
+    class="tut-modal"
+    [isOpen]="sheetOpen"
+    [initialBreakpoint]="0.9"
+    [breakpoints]="[0, 0.9]"
+    (didDismiss)="sheetOpen = false"
+  >
+    <ng-template>
+      <div class="sheet">
+        <h2 class="sheet__title">Filter by date</h2>
+        <div class="vp-field">
+          <label class="vp-label" for="tut-date">Date</label>
+          <input id="tut-date" type="date" class="vp-input" [(ngModel)]="sheetDraft" />
+        </div>
+        <div class="sheet__actions">
+          <button type="button" class="vp-btn vp-btn--ghost vp-btn--form" (click)="clearDate()">Clear</button>
+          <button type="button" class="vp-btn vp-btn--primary vp-btn--form" (click)="applyDate(sheetDraft)">Apply</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+</ion-content>

@@ -1,0 +1,97 @@
+/* Kiểu menu lấy từ Profile.dc.html */
+.more {
+  gap: 14px;
+}
+.profile {
+  background: #fff;
+  border-radius: var(--vp-r-xl2);
+  padding: 18px;
+  box-shadow: var(--vp-sh-large);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.profile__name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+}
+.profile__sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-muted);
+  overflow-wrap: anywhere;
+}
+.profile__role {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: var(--vp-r-pill);
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--vp-indigo);
+  font-size: 12px;
+  font-weight: 700;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.group__title {
+  margin: 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vp-indigo-dark);
+}
+.group__box {
+  background: #fff;
+  border-radius: var(--vp-r-l);
+  box-shadow: var(--vp-sh-card);
+  overflow: hidden;
+}
+.item {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--vp-fill-2);
+  background: transparent;
+  color: var(--vp-text-body);
+  font: 600 15px var(--vp-font);
+  text-align: left;
+  cursor: pointer;
+}
+.item:last-child {
+  border-bottom: 0;
+}
+.item:active {
+  background: var(--vp-fill);
+}
+.item__icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--vp-r-s);
+  background: var(--vp-indigo-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.item__label {
+  flex: 1;
+  min-width: 0;
+}
+.item__chev {
+  color: var(--vp-placeholder);
+}
+.item--danger {
+  color: var(--vp-danger);
+}
+.item--danger .item__icon {
+  background: #fef2f2;
+}

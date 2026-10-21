@@ -1,0 +1,119 @@
+/* Style dùng chung cho các màn Admin tools (design-mobile/screens/Admin*.dc.html). */
+
+/* Header đứng yên của màn gốc tab: eyebrow 12px + tiêu đề lớn + dòng phụ 13px */
+.adm-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vp-indigo-dark);
+}
+.adm-title {
+  margin-top: 2px;
+}
+.adm-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+
+/* Danh sách card trong vùng cuộn (gap 10–12 như design) */
+.adm-list {
+  gap: 12px;
+}
+
+/* Phân trang: Prev | Page x / y | Next (nút xanh dương, README §2.1) */
+.adm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+}
+.adm-pager .vp-btn {
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.adm-pager__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-text-body);
+}
+
+/* Bottom sheet (ion-modal breakpoint) */
+.adm-sheet {
+  padding: 20px var(--vp-gutter) calc(var(--vp-safe-bottom) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.adm-sheet__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vp-text);
+}
+.adm-sheet__actions {
+  display: flex;
+  gap: 10px;
+}
+.adm-sheet__actions .vp-btn {
+  flex: 1;
+}
+ion-modal.adm-modal {
+  --background: #fff;
+  --border-radius: 22px;
+}
+
+/* Ô tìm kiếm có icon (46px, r12) */
+.adm-search {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  box-sizing: border-box;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--vp-placeholder);
+}
+.adm-search:focus-within {
+  border-color: var(--vp-focus-border);
+  box-shadow: var(--vp-focus-ring);
+}
+.adm-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--vp-text);
+  font: 500 16px var(--vp-font);
+}
+.adm-search input::placeholder {
+  color: var(--vp-placeholder);
+}
+
+/* Nhãn ẩn cho trình đọc màn hình */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Nút màu riêng của Admin */
+.adm-btn-success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+.adm-btn-black {
+  background: #111827;
+  color: #fff;
+}

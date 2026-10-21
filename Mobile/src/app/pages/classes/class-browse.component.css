@@ -1,0 +1,182 @@
+/* Find classes — giá trị theo GroupClasses.dc.html */
+.search-row {
+  display: flex;
+  gap: 8px;
+}
+.search {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  box-sizing: border-box;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--vp-placeholder);
+}
+.search:focus-within {
+  border-color: var(--vp-focus-border);
+  box-shadow: var(--vp-focus-ring);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--vp-text);
+  font: 500 16px var(--vp-font);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.search input::placeholder {
+  color: var(--vp-placeholder);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.filters-btn {
+  padding: 0 14px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--vp-indigo);
+  color: #fff;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.topics {
+  gap: 6px;
+}
+
+/* Card lớp */
+.head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.teacher {
+  font-size: 14px;
+  font-weight: 700;
+}
+.sub {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.rate {
+  color: var(--vp-warning);
+  font-weight: 700;
+}
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.price {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+  flex-shrink: 0;
+}
+.desc {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--vp-text-body-2);
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.facts span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.facts .wide {
+  grid-column: 1 / -1;
+}
+.facts b {
+  color: var(--vp-text-body);
+}
+.days {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.day {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--vp-tag-bg);
+  color: var(--vp-primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.actions .vp-btn {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
+}
+
+/* Bottom sheet */
+.sheet {
+  --background: #fff;
+}
+.sheet__body {
+  padding: 8px var(--vp-gutter) calc(var(--vp-safe-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+.sheet__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--vp-heading);
+}
+.sheet__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.sheet__actions .vp-btn {
+  flex: 1;
+}
+select.vp-input:disabled {
+  background-color: var(--vp-fill);
+  color: var(--vp-placeholder);
+}

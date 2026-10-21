@@ -1,0 +1,45 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Lesson" defaultHref="/learn" />
+</ion-header>
+
+<ion-content>
+  @if (loading) {
+    <vp-loading text="Loading lesson..." />
+  } @else if (unit) {
+    <div class="vp-scroll page">
+      <div>
+        <span class="vp-eyebrow eyebrow">Current lesson</span>
+        <h2 class="title">{{ title }}</h2>
+      </div>
+
+      <div class="video">
+        @if (videoSrc) {
+          <video [src]="videoSrc" controls playsinline preload="metadata"></video>
+        } @else {
+          <p class="video__none">No video for this lesson</p>
+        }
+      </div>
+
+      @if (unit.objective) {
+        <section class="box box--soft">
+          <h3 class="box__title">Objective</h3>
+          <p class="vp-body">{{ unit.objective }}</p>
+        </section>
+      }
+      @if (unit.description) {
+        <section class="box box--card">
+          <h3 class="box__title">Description</h3>
+          <p class="vp-body">{{ unit.description }}</p>
+        </section>
+      }
+    </div>
+  }
+</ion-content>
+
+@if (unit) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="startTest()">Start Test</button>
+    </div>
+  </ion-footer>
+}

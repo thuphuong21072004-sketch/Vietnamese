@@ -1,0 +1,152 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Speaking Practice" defaultHref="/learn" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll page">
+    <p class="intro">Translate and practice Vietnamese pronunciation</p>
+
+    <!-- Card dịch -->
+    <section class="vp-card translate">
+      <div class="lang lang--en">
+        <div class="lang__head">
+          <label for="sp-en" class="lang__label">English</label>
+          <button
+            type="button"
+            class="listen"
+            aria-label="Listen in English"
+            [disabled]="!englishText"
+            (click)="speakEnglish()"
+          >
+            <vp-icon [d]="icons.speaker" [size]="18" />
+          </button>
+        </div>
+        <textarea
+          id="sp-en"
+          rows="2"
+          class="lang__input"
+          placeholder="Type in English..."
+          [(ngModel)]="englishText"
+          (ngModelChange)="onEnglishInput($event)"
+        ></textarea>
+      </div>
+
+      <div class="mid">
+        <button type="button" class="round" aria-label="Clear" (click)="clearAll()">
+          <vp-icon [d]="icons.close" [size]="18" />
+        </button>
+        <button type="button" class="round round--indigo" aria-label="Translate again" (click)="translateNow()">
+          <vp-icon [d]="icons.swap" [size]="18" />
+        </button>
+      </div>
+
+      <div class="lang lang--vi">
+        <div class="lang__head">
+          <label for="sp-vi" class="lang__label">Tiếng Việt</label>
+          <button
+            type="button"
+            class="listen listen--vi"
+            aria-label="Listen in Vietnamese"
+            [class.is-busy]="isSpeakingVi"
+            [disabled]="!vietnameseText || isSpeakingVi"
+            (click)="speakVietnamese()"
+          >
+            @if (isSpeakingVi) {
+              <span class="mini-spin"></span>
+            } @else {
+              <vp-icon [d]="icons.speaker" [size]="18" />
+            }
+          </button>
+        </div>
+        <textarea
+          id="sp-vi"
+          rows="2"
+          class="lang__input lang__input--vi"
+          placeholder="Type in Vietnamese..."
+          [(ngModel)]="vietnameseText"
+          (ngModelChange)="onVietnameseInput($event)"
+        ></textarea>
+      </div>
+
+      @if (isLoading) {
+        <p class="status"><span class="mini-spin"></span> Translating...</p>
+      } @else if (translateError) {
+        <p class="status status--error">{{ translateError }}</p>
+      }
+    </section>
+
+    <!-- Card luyện nói (khi đã có câu tiếng Việt) -->
+    @if (vietnameseText && !isLoading) {
+      <section class="vp-card practice">
+        <div class="rec" [class.is-on]="isRecording">
+          <span class="rec__ring rec__ring--outer" aria-hidden="true"></span>
+          <span class="rec__ring rec__ring--inner" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="rec__btn"
+            [attr.aria-label]="isRecording ? 'Stop recording' : 'Start recording'"
+            [disabled]="isTranscribing"
+            (click)="toggleRecording()"
+          >
+            @if (isRecording) {
+              <vp-icon [d]="icons.stop" [size]="28" [fill]="true" />
+            } @else {
+              <vp-icon [d]="icons.mic" [size]="30" />
+            }
+          </button>
+        </div>
+        <p class="rec__hint" [class.is-alert]="isRecording || isTranscribing">{{ recordHint }}</p>
+
+        @if (transcribedText && !isTranscribing) {
+          <div class="result">
+            <div class="said">
+              <div class="vp-grow">
+                <p class="small-label">You said:</p>
+                <p class="said__text">{{ transcribedText }}</p>
+              </div>
+              <div class="said__end">
+                @if (gradeResult) {
+                  <span class="score" [class]="'score score--' + scoreTone">
+                    {{ gradeResult.score | number: '1.0-0' }} · {{ scoreTone }}
+                  </span>
+                }
+                @if (recordedBlobUrl) {
+                  <button type="button" class="listen" aria-label="Play back recording" (click)="playRecording()">
+                    <vp-icon [d]="icons.speaker" [size]="18" />
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (gradeResult) {
+              <p class="small-label">Pronunciation Score</p>
+              <div class="words">
+                @for (w of wordResults; track $index) {
+                  <span
+                    class="word"
+                    [style.background]="wordBg(w.status)"
+                    [style.color]="wordFg(w.status)"
+                    [class.is-missing]="w.status === 'missing'"
+                  >
+                    {{ w.word }}
+                    @if (w.actual) {
+                      <small class="word__actual">→ {{ w.actual }}</small>
+                    }
+                  </span>
+                }
+                @for (x of extraWords; track $index) {
+                  <span class="word" [style.background]="wordBg('extra')" [style.color]="wordFg('extra')">{{ x }}</span>
+                }
+              </div>
+              <div class="legend">
+                @for (g of legend; track g.t) {
+                  <span class="legend__item"><span class="legend__dot" [style.background]="g.c"></span>{{ g.t }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</ion-content>

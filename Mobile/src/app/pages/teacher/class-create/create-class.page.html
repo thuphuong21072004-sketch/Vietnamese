@@ -1,0 +1,147 @@
+<ion-header class="vp-header">
+  <div class="safe"></div>
+  <div class="bar">
+    <button type="button" class="bar__close" aria-label="Close" (click)="close()">
+      <vp-icon [d]="icons.close" [size]="22" />
+    </button>
+    <h1 class="bar__title">Create Class</h1>
+    <span class="bar__end"></span>
+  </div>
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll form-scroll">
+    <form class="form-card" (ngSubmit)="generateSchedule()" novalidate>
+      <div class="vp-field">
+        <label for="ti" class="vp-label">Title</label>
+        <input id="ti" name="title" type="text" class="vp-input cc" [(ngModel)]="teacherClass.title" />
+      </div>
+      <div class="vp-field">
+        <label for="ds" class="vp-label">Description</label>
+        <textarea id="ds" name="description" rows="3" class="vp-input cc" [(ngModel)]="teacherClass.description"></textarea>
+      </div>
+
+      <div class="vp-grid-2">
+        <div class="vp-field">
+          <label for="mt" class="vp-label">Main Topic</label>
+          <select id="mt" name="mainTopic" class="vp-input cc cc--sm" [(ngModel)]="teacherClass.mainTopic" (ngModelChange)="onMainTopicChange()">
+            <option value="">Select Main Topic</option>
+            @for (t of mainTopics; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+        @if (teacherClass.mainTopic !== 'Travel') {
+          <div class="vp-field">
+            <label for="st" class="vp-label">Sub Topic</label>
+            <select id="st" name="subTopic" class="vp-input cc cc--sm" [(ngModel)]="teacherClass.subTopic">
+              <option value="">Select Sub Topic</option>
+              @for (t of subTopics[teacherClass.mainTopic] || []; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+        } @else {
+          <div class="vp-field">
+            <label for="pv" class="vp-label">Province</label>
+            <select id="pv" name="province" class="vp-input cc cc--sm" [(ngModel)]="selectedProvince" (ngModelChange)="onProvinceChange()">
+              <option value="">-- Select Province --</option>
+              @for (g of destinations; track g.province) {
+                <option [value]="g.province">{{ g.province }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+
+      @if (teacherClass.mainTopic === 'Travel') {
+        <div class="vp-field">
+          <label for="sl" class="vp-label">Specific Location</label>
+          <select id="sl" name="specificLocation" class="vp-input cc" [(ngModel)]="teacherClass.specificLocation" [disabled]="!selectedProvince">
+            <option value="">-- Select Location --</option>
+            @for (s of spots; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <div class="vp-grid-3">
+        <div class="vp-field">
+          <label for="pc" class="vp-label">Price</label>
+          <input id="pc" name="price" type="number" inputmode="decimal" min="0" class="vp-input cc cc--sm" [class.is-invalid]="priceTooHigh" [(ngModel)]="teacherClass.price" (blur)="loadMaxPrice()" />
+        </div>
+        <div class="vp-field">
+          <label for="ms" class="vp-label">Max Students</label>
+          <input id="ms" name="maxStudents" type="number" inputmode="numeric" min="1" max="10" class="vp-input cc cc--sm" [(ngModel)]="teacherClass.maxStudents" (change)="loadMaxPrice()" />
+        </div>
+        <div class="vp-field">
+          <label for="ts" class="vp-label">Sessions</label>
+          <input id="ts" name="totalSessions" type="number" inputmode="numeric" min="1" class="vp-input cc cc--sm" [(ngModel)]="teacherClass.totalSessions" (change)="loadMaxPrice()" />
+        </div>
+      </div>
+      @if (maxPrice > 0) {
+        <span class="max-price">Maximum allowed price: {{ maxPrice }}</span>
+      }
+
+      <div class="vp-grid-3">
+        <div class="vp-field">
+          <label for="sd" class="vp-label">Start Date</label>
+          <input id="sd" name="startDate" type="date" class="vp-input cc cc--sm cc--15" [(ngModel)]="teacherClass.startDate" />
+        </div>
+        <div class="vp-field">
+          <label for="sti" class="vp-label">Start Time</label>
+          <input id="sti" name="startTime" type="time" class="vp-input cc cc--sm cc--15" [(ngModel)]="teacherClass.startTime" (change)="loadMaxPrice()" />
+        </div>
+        <div class="vp-field">
+          <label for="eti" class="vp-label">End Time</label>
+          <input id="eti" name="endTime" type="time" class="vp-input cc cc--sm cc--15" [(ngModel)]="teacherClass.endTime" (change)="loadMaxPrice()" />
+        </div>
+      </div>
+
+      <fieldset class="days-field">
+        <legend class="vp-label">Study Days</legend>
+        <div class="t-days">
+          @for (d of weekDays; track d) {
+            <button type="button" [class.on]="isDayOn(d)" [attr.aria-pressed]="isDayOn(d)" (click)="toggleDay(d)">{{ shortDay(d) }}</button>
+          }
+        </div>
+      </fieldset>
+
+      <button type="submit" class="vp-btn vp-btn--secondary vp-btn--form gen" [disabled]="generating">
+        {{ generating ? 'Generating...' : 'Generate Schedule' }}
+      </button>
+    </form>
+
+    @if (teacherClass.sessions.length > 0) {
+      <section class="form-card sessions">
+        <h2 class="vp-section-title">Sessions</h2>
+        @for (s of teacherClass.sessions; track s.sessionNumber) {
+          <div class="session">
+            <span class="session__n">{{ s.sessionNumber }}</span>
+            <span class="session__d">{{ s.studyDate | date: 'EEE dd/MM' }}</span>
+            <label class="sr-only" [for]="'topic' + s.sessionNumber">Topic</label>
+            <input [id]="'topic' + s.sessionNumber" type="text" class="vp-input cc session__t" placeholder="Topic" [(ngModel)]="s.topic" />
+          </div>
+        }
+      </section>
+    }
+
+    @if (travelDeadlineError) {
+      <div class="vp-alert vp-alert--warning" role="alert">⚠️ {{ travelDeadlineError }}</div>
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="vp-footer">
+  <div class="vp-bottom-bar">
+    <button
+      type="button"
+      class="vp-btn vp-btn--primary vp-btn--cta"
+      [disabled]="loading || teacherClass.sessions.length === 0 || !!travelDeadlineError"
+      (click)="saveClass()"
+    >
+      {{ loading ? 'Saving...' : 'Save Class' }}
+    </button>
+  </div>
+</ion-footer>

@@ -1,0 +1,143 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <div>
+      <h1 class="vp-large-title">User Management</h1>
+      <p class="adm-sub">Manage all users in the Vietnamese learning system</p>
+    </div>
+    <form class="tools" (ngSubmit)="search()" role="search">
+      <div class="adm-search">
+        <vp-icon [d]="icons.search" [size]="18" />
+        <label for="usr-email" class="sr-only">Search Email</label>
+        <input
+          id="usr-email"
+          name="email"
+          type="search"
+          inputmode="email"
+          autocomplete="off"
+          enterkeyhint="search"
+          placeholder="Search Email"
+          [(ngModel)]="email"
+          (ngModelChange)="onSearchInput()"
+        />
+      </div>
+      <button type="button" class="filter-btn" aria-label="Filter by status and role" (click)="openFilters()">
+        <vp-icon [d]="filterIcon" [size]="20" />
+        @if (activeFilterCount) {
+          <span class="filter-btn__dot">{{ activeFilterCount }}</span>
+        }
+      </button>
+    </form>
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadUsers($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll list">
+    @if (loading) {
+      <vp-loading text="Loading users..." />
+    } @else {
+      @for (u of users; track u.email; let i = $index) {
+        <div class="user">
+          <div class="user__head">
+            <vp-avatar [name]="u.name" [url]="avatar(u)" [size]="40" />
+            <div class="vp-grow">
+              <p class="user__name">{{ u.name }}</p>
+              <p class="user__mail">{{ u.email }} · {{ u.country || 'N/A' }}</p>
+            </div>
+            <span class="user__n">#{{ rowNumber(i) }}</span>
+          </div>
+          @if (u.bio) {
+            <p class="user__bio">{{ u.bio }}</p>
+          }
+          <div class="user__edit">
+            <div class="uf">
+              <label [for]="'st' + i">Status</label>
+              <select
+                [id]="'st' + i"
+                [class.on]="u.status === 1"
+                [class.off]="u.status !== 1"
+                [(ngModel)]="u.status"
+              >
+                <option [ngValue]="1">Active</option>
+                <option [ngValue]="0">Inactive</option>
+              </select>
+            </div>
+            <div class="uf">
+              <label [for]="'ro' + i">Role</label>
+              <select [id]="'ro' + i" [(ngModel)]="u.roleName">
+                @for (r of roleNames; track r) {
+                  <option [value]="r">{{ r }}</option>
+                }
+              </select>
+            </div>
+            <button type="button" class="vp-btn vp-btn--blue save" [disabled]="savingEmail === u.email" (click)="saveUser(u)">
+              {{ savingEmail === u.email ? '...' : 'Save' }}
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <vp-empty text="No users found." />
+      }
+
+      <div class="adm-pager">
+        <button type="button" class="vp-btn vp-btn--blue" [disabled]="page <= 1" (click)="prevPage()">Prev</button>
+        <span class="adm-pager__label">Page {{ page }} / {{ totalPage }}</span>
+        <button type="button" class="vp-btn vp-btn--blue" [disabled]="page >= totalPage" (click)="nextPage()">Next</button>
+      </div>
+    }
+  </div>
+
+  <!-- Filters: bottom sheet -->
+  <ion-modal
+    class="adm-modal"
+    [isOpen]="filtersOpen"
+    [initialBreakpoint]="0.9"
+    [breakpoints]="[0, 0.9]"
+    (didDismiss)="filtersOpen = false"
+  >
+    <ng-template>
+      <div class="adm-sheet">
+        <h2 class="adm-sheet__title">Filters</h2>
+        <div class="vp-field">
+          <span class="vp-label">Status</span>
+          <div class="vp-chips" role="radiogroup" aria-label="Status">
+            @for (o of statusOptions; track o.label) {
+              <button
+                type="button"
+                class="vp-chip"
+                role="radio"
+                [attr.aria-checked]="draftStatus === o.value"
+                [class.is-active]="draftStatus === o.value"
+                (click)="draftStatus = o.value"
+              >
+                {{ o.label }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="vp-field">
+          <span class="vp-label">Role</span>
+          <div class="vp-chips" role="radiogroup" aria-label="Role">
+            @for (o of roleOptions; track o.label) {
+              <button
+                type="button"
+                class="vp-chip"
+                role="radio"
+                [attr.aria-checked]="draftRoleId === o.value"
+                [class.is-active]="draftRoleId === o.value"
+                (click)="draftRoleId = o.value"
+              >
+                {{ o.label }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="adm-sheet__actions">
+          <button type="button" class="vp-btn vp-btn--back vp-btn--form" (click)="clearFilters()">Clear</button>
+          <button type="button" class="vp-btn vp-btn--accent vp-btn--form" (click)="applyFilters()">Apply</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+</ion-content>

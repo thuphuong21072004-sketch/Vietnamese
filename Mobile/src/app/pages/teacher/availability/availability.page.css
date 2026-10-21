@@ -1,0 +1,93 @@
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: var(--vp-sh-large);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.av-input {
+  border-radius: var(--vp-r-s);
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+.form-actions .cancel {
+  flex: 1;
+  font-size: 15px;
+}
+.form-actions .submit {
+  flex: 2;
+  font-size: 15px;
+}
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.date-filter__row {
+  display: flex;
+  gap: 8px;
+}
+.date-filter__row .vp-input {
+  flex: 1;
+  min-width: 0;
+}
+.total {
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+.total b {
+  color: var(--vp-text);
+}
+.slot {
+  background: #fff;
+  border-radius: var(--vp-r-l);
+  padding: 12px;
+  box-shadow: var(--vp-sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.slot__badge {
+  align-self: flex-start;
+}
+.slot__d {
+  font-size: 13px;
+  color: var(--vp-muted);
+  font-weight: 600;
+}
+.slot__t {
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 800;
+}
+.slot__actions {
+  display: flex;
+  gap: 6px;
+}
+.slot__btn {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--vp-r-s);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  color: var(--vp-text-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+.slot__btn--del {
+  border: 0;
+  background: var(--vp-danger-bg);
+  color: var(--vp-danger);
+}
+.slot__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

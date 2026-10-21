@@ -1,0 +1,90 @@
+<ion-header class="vp-header">
+  <vp-nav-bar [title]="unitId > 0 ? 'Edit Unit' : 'Add New Unit'" [defaultHref]="backHref" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll">
+    @if (loading) {
+      <vp-loading />
+    } @else {
+      <section class="vp-card vp-card--lg">
+        <div class="head">
+          <div class="vp-grow">
+            <p class="vp-eyebrow">Learning content</p>
+            <h2 class="head__title">{{ unitId > 0 ? 'Edit Unit' : 'Add New Unit' }}</h2>
+          </div>
+          <span class="vp-badge" [class.vp-badge--success]="unit.isActive" [class.vp-badge--neutral]="!unit.isActive">
+            {{ unit.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <!-- Vùng upload: chạm để chọn file, kéo-thả khi xem trên trình duyệt -->
+        <label
+          class="upload"
+          [class.is-dragging]="isDragging"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+        >
+          <span class="upload__icon"><vp-icon [d]="uploadIcon" [size]="22" /></span>
+          <strong class="upload__title">{{ uploading ? 'Uploading video...' : 'Upload unit video' }}</strong>
+          <small class="upload__sub">Drag and drop a video here, or tap to browse</small>
+          <input type="file" accept="video/*" class="cm-hidden-file" (change)="onFileSelect($event)" />
+        </label>
+
+        @if (videoFullUrl) {
+          <div class="preview">
+            <div class="preview__head">
+              <span class="vp-label">Video preview</span>
+              @if (unit.duration) {
+                <span class="vp-meta">{{ durationText }}</span>
+              }
+            </div>
+            <video [src]="videoFullUrl" controls playsinline preload="metadata" (loadedmetadata)="onVideoLoaded($event)"></video>
+          </div>
+        }
+
+        <div class="vp-field">
+          <label class="vp-label" for="u-title">Unit title <span class="cm-req">*</span></label>
+          <input id="u-title" class="vp-input" [(ngModel)]="unit.unitName" placeholder="Enter unit title" />
+        </div>
+        <div class="vp-field">
+          <label class="vp-label" for="u-desc">Description</label>
+          <textarea id="u-desc" class="vp-input" rows="3" [(ngModel)]="unit.description" placeholder="Short description"></textarea>
+        </div>
+        <div class="vp-field">
+          <label class="vp-label" for="u-obj">Objective</label>
+          <textarea id="u-obj" class="vp-input" rows="3" [(ngModel)]="unit.objective" placeholder="Learning objective"></textarea>
+        </div>
+
+        <label class="publish">
+          <input type="checkbox" [(ngModel)]="unit.isActive" />
+          <span>
+            <strong>Publish this unit</strong>
+            <small>Students can access this lesson when it is active.</small>
+          </span>
+        </label>
+      </section>
+
+      @if (unitId > 0) {
+        <section class="vp-card quiz-panel">
+          <div class="vp-grow">
+            <p class="vp-eyebrow">Assessment</p>
+            <h3 class="vp-card-title">Unit quiz</h3>
+          </div>
+          <button type="button" class="vp-btn vp-btn--secondary" (click)="manageQuiz()">Manage Quiz</button>
+        </section>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (!loading) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" [disabled]="saving || uploading" (click)="save()">
+        {{ saving ? 'Saving...' : 'Save Unit' }}
+      </button>
+    </div>
+  </ion-footer>
+}

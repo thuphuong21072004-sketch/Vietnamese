@@ -1,0 +1,114 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Booking Detail" defaultHref="/tutoring?seg=bookings" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll gap14">
+    @if (loading) {
+      <vp-loading text="Loading booking..." />
+    } @else if (!booking) {
+      <vp-empty title="Booking not found" text="This booking may have been removed." />
+    } @else {
+      <!-- Giáo viên -->
+      <section class="vp-card head-card teacher">
+        <vp-avatar [name]="teacherName" [url]="bookingService.getAvatar(booking)" [size]="56" />
+        <div class="vp-grow">
+          <p class="head-name">{{ teacherName }}</p>
+          <p class="vp-meta teacher__spec">{{ specialty }}</p>
+        </div>
+        <vp-badge [label]="bookingService.getStatusText(booking.status)" />
+      </section>
+
+      <!-- Phòng học (In Progress) -->
+      @if (room && booking.status === 2) {
+        <section class="room">
+          <h2 class="room__title">Online Class Room</h2>
+          <div class="room__row"><span>Room Code</span><b class="code">{{ room.roomCode }}</b></div>
+          <div class="room__row"><span>Expired At</span><b>{{ room.expiredAt | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+          @if (canJoinRoom()) {
+            <button type="button" class="vp-btn vp-btn--primary join" [disabled]="joinLoading" (click)="joinRoom()">
+              <vp-icon [d]="videoIcon" [size]="20" />
+              {{ joinLoading ? 'Opening...' : 'Join Room' }}
+            </button>
+          } @else if (joinWindowMessage()) {
+            <p class="room__note">{{ joinWindowMessage() }}</p>
+          }
+          @if (room.joinUrl) {
+            <button type="button" class="room__link" (click)="openRoomLink()">Open class room</button>
+          }
+        </section>
+      }
+
+      <!-- Thông tin booking -->
+      <section class="vp-card info">
+        <h2 class="vp-section-title info__title">Booking Information</h2>
+        <div class="kv"><span>Booking ID</span><b>#{{ booking.bookingId }}</b></div>
+        <div class="kv"><span>Booking Date</span><b>{{ booking.createdDate | date: 'dd/MM/yyyy' }}</b></div>
+        <div class="kv"><span>Class Date</span><b>{{ booking.startTime | date: 'dd/MM/yyyy' }}</b></div>
+        <div class="kv">
+          <span>Class Time</span><b>{{ booking.startTime | date: 'HH:mm' }} – {{ booking.endTime | date: 'HH:mm' }}</b>
+        </div>
+        <div class="kv"><span>Duration</span><b>{{ durationText }}</b></div>
+        <div class="kv"><span>Total Amount</span><b>{{ money(booking.totalPrice) }}</b></div>
+        @if (paymentStatus) {
+          <div class="kv"><span>Payment Status</span><b>{{ paymentStatus }}</b></div>
+        }
+        @if (paymentMethod) {
+          <div class="kv"><span>Payment Method</span><b>{{ paymentMethod }}</b></div>
+        }
+        @if (payment?.transactionCode) {
+          <div class="kv"><span>Transaction Code</span><b class="mono">{{ payment.transactionCode }}</b></div>
+        }
+      </section>
+
+      @if (booking.status === 0) {
+        <p class="vp-alert vp-alert--warning">Please complete payment within 5 minutes to confirm your booking.</p>
+      }
+
+      <!-- Đánh giá -->
+      @if (review) {
+        <section class="vp-card info">
+          <h2 class="vp-section-title info__title">Student Review</h2>
+          <div class="kv"><span>Rating</span><b class="stars">{{ review.rating }} / 5</b></div>
+          @if (review.comment) {
+            <div class="kv kv--col"><span>Comment</span><b>{{ review.comment }}</b></div>
+          }
+          @if (review.studentName) {
+            <div class="kv"><span>By</span><b>{{ review.studentName }}</b></div>
+          }
+        </section>
+      } @else if (canReview()) {
+        <section class="dashed">
+          <h2 class="dashed__title">Student Review</h2>
+          <p class="dashed__text">How was your class? Share your feedback with the teacher.</p>
+          <button type="button" class="vp-btn vp-btn--secondary review-btn" (click)="writeReview()">Write Review</button>
+        </section>
+      } @else if (booking.status !== 3) {
+        <section class="dashed">
+          <h2 class="dashed__title">Student Review</h2>
+          <p class="dashed__text">Review is available after the class is completed.</p>
+        </section>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (booking && (canPay() || canCancel())) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      @if (canCancel()) {
+        <button
+          type="button"
+          class="vp-btn vp-btn--danger vp-btn--cta grow cancel"
+          [disabled]="cancelLoading"
+          (click)="cancelBooking()"
+        >
+          {{ cancelLoading ? 'Cancelling...' : 'Cancel Booking' }}
+        </button>
+      }
+      @if (canPay()) {
+        <button type="button" class="vp-btn vp-btn--primary vp-btn--cta grow" (click)="goPayment()">Pay Now</button>
+      }
+    </div>
+  </ion-footer>
+}

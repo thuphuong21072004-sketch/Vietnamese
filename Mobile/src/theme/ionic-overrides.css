@@ -1,0 +1,125 @@
+/* Map token → biến Ionic + các khác biệt iOS / Android (README §3). */
+:root {
+  --ion-font-family: var(--vp-font);
+  --ion-text-color: var(--vp-text);
+  --ion-background-color: #f5f3ff;
+  --ion-color-primary: #7c3aed;
+  --ion-color-primary-rgb: 124, 58, 237;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #5a2db5;
+  --ion-color-primary-tint: #8b5cf6;
+  --vp-safe-bottom-tab: var(--ion-safe-area-bottom, 0px);
+}
+
+/* ---------- Tab bar ---------- */
+ion-tab-bar.vp-tabbar {
+  --background: rgba(255, 255, 255, 0.97);
+  --border: 0;
+  height: auto;
+  border-top: 1px solid var(--vp-hairline);
+  padding: 8px 4px var(--vp-safe-bottom-tab);
+  contain: none;
+}
+
+ion-tab-bar.vp-tabbar ion-tab-button {
+  --color: var(--vp-muted);
+  --color-selected: var(--vp-accent);
+  --background: transparent;
+  --background-focused: transparent;
+  --ripple-color: transparent;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  min-height: var(--vp-tab-h);
+  max-width: none;
+}
+
+.vp-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.vp-tab__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html.md .vp-tab__icon {
+  width: 60px;
+}
+
+ion-tab-button.tab-selected .vp-tab {
+  font-weight: 700;
+}
+
+html.md ion-tab-button.tab-selected .vp-tab__icon {
+  background: #ede9fe;
+}
+
+/* ---------- Nền màn hình ----------
+   Nền đặt trên host của page (.ion-page) để header, nội dung và footer liền một nền như artboard.
+   Page chọn module bằng host class: bg-admin | bg-travel | bg-auth | bg-quiz (mặc định: học viên). */
+.ion-page {
+  background: var(--vp-bg-student);
+}
+.ion-page.bg-admin {
+  background: var(--vp-bg-admin);
+}
+.ion-page.bg-travel {
+  background: var(--vp-bg-travel);
+}
+.ion-page.bg-auth {
+  background: var(--vp-bg-auth);
+  color: #fff;
+}
+.ion-page.bg-quiz {
+  background: var(--vp-bg-quiz);
+}
+vp-tabs-shell.ion-page {
+  background: transparent;
+}
+ion-content {
+  --background: transparent;
+}
+ion-content::part(scroll) {
+  scrollbar-width: none;
+}
+
+/* Header / footer tự vẽ, bỏ viền & bóng mặc định của Ionic */
+ion-header.vp-header,
+ion-footer.vp-footer {
+  box-shadow: none;
+}
+ion-header.vp-header::after,
+ion-footer.vp-footer::before {
+  display: none;
+}
+
+/* Toast & alert theo token */
+ion-toast.vp-toast {
+  --border-radius: 14px;
+  --box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  font-family: var(--vp-font);
+  font-weight: 600;
+}
+ion-alert.vp-alert {
+  --background: #fff;
+  font-family: var(--vp-font);
+}
+ion-alert.vp-alert .alert-button.vp-alert-danger {
+  color: var(--vp-danger);
+  font-weight: 700;
+}
+ion-alert.vp-alert .alert-button.vp-alert-confirm {
+  color: var(--vp-accent);
+  font-weight: 700;
+}

@@ -1,0 +1,228 @@
+:host-context(html.ios) .tut-title {
+  font-size: 30px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Find tutors ---------- */
+.intro-eyebrow {
+  font-size: 12px;
+}
+.intro-title {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+}
+.search {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  box-sizing: border-box;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--vp-placeholder);
+}
+.search:focus-within {
+  border-color: var(--vp-focus-border);
+  box-shadow: var(--vp-focus-ring);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--vp-text);
+  font: 500 16px var(--vp-font);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.search input::placeholder {
+  color: var(--vp-placeholder);
+}
+.date-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--vp-r-m);
+  border: 1px solid var(--vp-border);
+  background: #fff;
+  color: var(--vp-indigo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+.date-btn.is-on {
+  border: 1.5px solid var(--vp-accent);
+  background: var(--vp-fill-violet);
+  color: var(--vp-accent);
+}
+
+.summary {
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+.summary b {
+  color: var(--vp-text);
+}
+
+.slot {
+  gap: 12px;
+}
+.slot__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.slot__head .vp-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.slot__spec {
+  margin-top: 2px;
+}
+.pill {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-success-bg);
+  color: var(--vp-success);
+  font-size: 11px;
+  font-weight: 700;
+}
+.pill--booked {
+  background: var(--vp-warning-bg);
+  color: var(--vp-warning);
+}
+.rating {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-warning);
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-m);
+  padding: 10px;
+}
+.cells__k {
+  font-size: 11px;
+  color: var(--vp-muted);
+  font-weight: 600;
+}
+.cells__v {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.actions .vp-btn {
+  flex: 1;
+  min-width: 0;
+}
+.actions--wrap {
+  flex-wrap: wrap;
+}
+.actions--wrap .vp-btn {
+  flex: 1 1 30%;
+}
+.btn-off {
+  background: var(--vp-border-2);
+  color: var(--vp-muted-2);
+  opacity: 0.8;
+}
+.btn-off--sm {
+  font-size: 12px;
+  line-height: 1.15;
+  padding: 0 8px;
+  white-space: normal;
+  text-align: center;
+}
+.btn-white {
+  background: #fff;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+/* ---------- My Bookings ---------- */
+.chips {
+  gap: 6px;
+}
+.booking__when {
+  margin-top: 2px;
+}
+.sumline {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--vp-text-body-2);
+  background: var(--vp-fill);
+  border-radius: var(--vp-r-s);
+  padding: 8px 10px;
+}
+.sumline b {
+  color: var(--vp-text);
+}
+.pay-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-warning);
+  background: #fffbeb;
+  border-radius: var(--vp-r-s);
+  padding: 8px 10px;
+}
+
+/* ---------- Bottom sheet ---------- */
+ion-modal.tut-modal {
+  --background: #fff;
+  --border-radius: 22px;
+}
+.sheet {
+  padding: 20px var(--vp-gutter) calc(var(--vp-safe-bottom) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sheet__title {
+  font-size: 18px;
+  font-weight: 800;
+}
+.sheet__actions {
+  display: flex;
+  gap: 10px;
+}
+.sheet__actions .vp-btn {
+  flex: 1;
+}

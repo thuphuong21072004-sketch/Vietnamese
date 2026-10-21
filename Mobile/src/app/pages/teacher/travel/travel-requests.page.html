@@ -1,0 +1,74 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Travel Requests" defaultHref="/teacher/travel/schedules" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    <vp-teacher-travel-tabs active="requests" />
+
+    <div class="vp-chips" role="group" aria-label="Status">
+      @for (c of statusChips; track c.value) {
+        <button type="button" class="vp-chip" [class.is-active]="filterStatus === c.value" (click)="filterStatus = c.value">{{ c.label }}</button>
+      }
+    </div>
+    <div class="tr-filter-row">
+      <div class="vp-field">
+        <label for="ff" class="vp-label">From</label>
+        <input id="ff" type="date" class="vp-input vp-input--sm" [(ngModel)]="filterFrom" />
+      </div>
+      <div class="vp-field">
+        <label for="ft" class="vp-label">To</label>
+        <input id="ft" type="date" class="vp-input vp-input--sm" [(ngModel)]="filterTo" />
+      </div>
+      @if (hasFilter) {
+        <button type="button" class="vp-icon-btn" aria-label="Clear filters" (click)="clearFilters()">
+          <vp-icon [d]="icons.close" [size]="18" />
+        </button>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading text="Loading..." />
+    } @else {
+      @for (r of filtered; track r.matchRequestId) {
+        <article class="t-card">
+          <div class="who">
+            <span class="you">You</span>
+            <vp-icon class="swap" [d]="icons.swap" [size]="18" />
+            <vp-avatar [name]="r.studentName" [url]="avatar(r.studentAvatarUrl)" [size]="40" />
+            <div class="vp-grow">
+              <p class="who__name">{{ r.studentName }}</p>
+              <p class="who__dir">{{ typeLabel(r) }}</p>
+            </div>
+            <vp-badge [label]="statusLabel(r.status)" />
+          </div>
+          <div class="t-strip strip">
+            <span class="tr-pin"><vp-icon [d]="icons.pin" [size]="14" />{{ r.destination }}{{ r.specificLocation ? ' — ' + r.specificLocation : '' }}</span>
+            <span>{{ r.startDate | date: 'dd/MM' }} – {{ r.endDate | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="t-actions">
+            <a class="vp-btn t-btn-white" [routerLink]="['/user', r.studentId]">View Profile</a>
+            @if (r.status === 0 && iSent(r)) {
+              <button type="button" class="vp-btn vp-btn--danger" (click)="cancel(r)">Cancel</button>
+            }
+            @if (r.status === 0 && !iSent(r)) {
+              <button type="button" class="vp-btn vp-btn--danger" (click)="reject(r)">Reject</button>
+              <button type="button" class="vp-btn vp-btn--travel" (click)="accept(r)">Accept</button>
+            }
+            @if (r.status === 1) {
+              @if (r.classId) {
+                <a class="vp-btn vp-btn--travel" [routerLink]="['/teacher/classes', r.classId]">View Class Detail</a>
+              } @else {
+                <a class="vp-btn vp-btn--travel" routerLink="/teacher/classes/new" [queryParams]="createClassParams(r)">+ Create Class</a>
+              }
+            }
+          </div>
+        </article>
+      } @empty {
+        <vp-empty text="No requests found." />
+      }
+    }
+  </div>
+</ion-content>

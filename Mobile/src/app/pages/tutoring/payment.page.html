@@ -1,0 +1,169 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Secure Payment" [defaultHref]="isClass ? '/classes' : '/tutoring'" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll gap14">
+    @if (dataLoading) {
+      <vp-loading text="Loading payment..." />
+    } @else {
+      <!-- Hero số tiền -->
+      <section class="vp-hero hero">
+        <div class="hero__top">
+          <span class="hero__label">Payment Details</span>
+          <span class="hero__pill">{{ isClass ? 'Online Course' : 'Private Lesson' }}</span>
+        </div>
+        <p class="hero__amount">{{ money(amount) }}</p>
+        @if (booking) {
+          <p class="hero__sub">
+            {{ teacherName }} · {{ booking.startTime | date: 'dd/MM/yyyy' }} ·
+            {{ booking.startTime | date: 'HH:mm' }}–{{ booking.endTime | date: 'HH:mm' }}
+          </p>
+        } @else if (enrollment) {
+          <p class="hero__sub">{{ courseTitle }}{{ teacherName ? ' · ' + teacherName : '' }}</p>
+        }
+      </section>
+
+      <!-- Thông tin booking / lớp -->
+      @if (booking) {
+        <section class="vp-card info">
+          <h2 class="vp-section-title info__title">Booking Information</h2>
+          <div class="kv"><span>Booking ID</span><b>#{{ refId }}</b></div>
+          <div class="kv"><span>Teacher</span><b>{{ teacherName }}</b></div>
+          <div class="kv"><span>Date</span><b>{{ booking.startTime | date: 'dd/MM/yyyy' }}</b></div>
+          <div class="kv">
+            <span>Time</span><b>{{ booking.startTime | date: 'HH:mm' }} – {{ booking.endTime | date: 'HH:mm' }}</b>
+          </div>
+          <div class="kv"><span>Duration</span><b>{{ duration }}</b></div>
+          <div class="kv"><span>Price / Hour</span><b>{{ money(pricePerHour || booking.totalPrice) }}</b></div>
+          <div class="kv"><span>Total Payment</span><b>{{ money(amount) }}</b></div>
+        </section>
+      } @else if (enrollment) {
+        <section class="vp-card info">
+          <h2 class="vp-section-title info__title">Course Information</h2>
+          <div class="kv"><span>Enrollment ID</span><b>#{{ enrollment.enrollmentId || refId }}</b></div>
+          <div class="kv"><span>Course</span><b>{{ courseTitle }}</b></div>
+          <div class="kv"><span>Teacher</span><b>{{ teacherName }}</b></div>
+          <div class="kv"><span>Students</span><b>{{ tc?.currentStudents }} / {{ tc?.maxStudents }}</b></div>
+          @if (tc?.description) {
+            <div class="kv kv--col"><span>Description</span><b>{{ tc.description }}</b></div>
+          }
+          <div class="kv"><span>Course Fee</span><b>{{ money(amount) }}</b></div>
+        </section>
+      }
+
+      @if (isPaid) {
+        <!-- Đã thanh toán -->
+        <section class="vp-card state">
+          <span class="state__icon state__icon--ok"><vp-icon [d]="checkIcon" [size]="28" [stroke]="3" /></span>
+          <h3 class="state__title">Payment Successful</h3>
+          <p class="vp-meta">Your payment has been completed successfully.</p>
+        </section>
+      } @else if (isBankPending) {
+        <!-- Đã báo chuyển khoản -->
+        <section class="vp-card state">
+          <span class="state__icon state__icon--wait"><vp-icon [d]="clockIcon" [size]="28" /></span>
+          <h3 class="state__title">Awaiting Confirmation</h3>
+          <p class="vp-meta">Your bank transfer has been submitted. Please wait for admin to confirm your payment.</p>
+        </section>
+      } @else {
+        <h2 class="vp-section-title method-title">Select Payment Method</h2>
+        <div class="methods" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            class="method"
+            [class.is-on]="method === 'stripe'"
+            [attr.aria-selected]="method === 'stripe'"
+            (click)="setMethod('stripe')"
+          >
+            <vp-icon [d]="cardIcon" [size]="20" />
+            Credit / Debit Card
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="method"
+            [class.is-on]="method === 'bank'"
+            [attr.aria-selected]="method === 'bank'"
+            (click)="setMethod('bank')"
+          >
+            <vp-icon [d]="bankIcon" [size]="20" />
+            Bank Transfer (VietQR)
+          </button>
+        </div>
+
+        @if (method === 'stripe') {
+          <!-- Tab thẻ (Stripe Checkout) -->
+          <section class="vp-card pane">
+            <div class="amount-box">
+              <span>Amount to pay</span>
+              <strong>{{ money(amount) }}</strong>
+            </div>
+            @if (payment?.status === 0) {
+              <span class="vp-badge vp-badge--warning">Pending Payment</span>
+            } @else if (payment?.status === 2) {
+              <span class="vp-badge vp-badge--danger">Payment Failed</span>
+            }
+            <div class="gateway">
+              <span class="gateway__icon"><vp-icon [d]="lockIcon" [size]="20" /></span>
+              <div class="vp-grow">
+                <p class="gateway__title">{{ payment ? 'Continue Payment' : 'Ready For Payment' }}</p>
+                <p class="vp-meta">
+                  {{
+                    payment
+                      ? 'Your payment is pending. Continue through Stripe.'
+                      : 'Proceed to Stripe secure payment gateway.'
+                  }}
+                </p>
+              </div>
+            </div>
+          </section>
+        } @else {
+          <!-- Tab chuyển khoản VietQR -->
+          <section class="vp-card pane pane--center">
+            @if (bankInfo) {
+              <div class="qr" role="img" aria-label="VietQR code">
+                <img [src]="qrUrl" alt="VietQR" />
+              </div>
+              <div class="bank">
+                <div class="kv"><span>Bank</span><b>{{ bankInfo.bankId | uppercase }}</b></div>
+                <div class="kv"><span>Account No</span><b>{{ bankInfo.accountNo }}</b></div>
+                <div class="kv"><span>Account Name</span><b>{{ bankInfo.accountName }}</b></div>
+                <div class="kv"><span>Amount (VND)</span><b>{{ bankInfo.vndAmount | number: '1.0-0' }} ₫</b></div>
+                <div class="kv"><span>Description</span><b>{{ bankInfo.note }} #{{ refId }}</b></div>
+              </div>
+            } @else {
+              <vp-loading text="Loading bank info..." />
+            }
+          </section>
+        }
+      }
+    }
+  </div>
+</ion-content>
+
+@if (!dataLoading) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      @if (isPaid || isBankPending) {
+        <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="goList()">
+          {{ isClass ? 'View My Classes' : 'Go to My Bookings' }}
+        </button>
+      } @else if (method === 'stripe') {
+        <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" [disabled]="loading" (click)="pay()">
+          {{ loading ? 'Processing...' : payment ? 'Continue Payment' : 'Pay Now' }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="vp-btn vp-btn--travel vp-btn--cta transfer"
+          [disabled]="loading || !bankInfo"
+          (click)="submitBankTransfer()"
+        >
+          {{ loading ? 'Processing...' : "I've Transferred" }}
+        </button>
+      }
+    </div>
+  </ion-footer>
+}

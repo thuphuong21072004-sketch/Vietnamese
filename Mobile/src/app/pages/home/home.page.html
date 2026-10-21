@@ -1,0 +1,90 @@
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <header class="top">
+    <vp-avatar [name]="auth.user()?.name" [url]="auth.user()?.avatarUrl" [size]="44" />
+    <div class="vp-grow">
+      <h1 class="hello">Hello, <span>{{ firstName }}</span></h1>
+      <p class="vp-meta sub">Keep up the great work today!</p>
+    </div>
+    <button type="button" class="vp-icon-btn" aria-label="Notifications" (click)="notifications()">
+      <vp-icon [d]="icons.bell" [size]="20" />
+    </button>
+  </header>
+
+  <div class="vp-scroll">
+    <!-- Continue learning -->
+    <section class="vp-hero">
+      @if (progress) {
+        <span class="hero-tag">Continue learning</span>
+        <div>
+          <p class="hero-level">{{ progress.levelLine }}</p>
+          <h2 class="hero-unit">{{ progress.unitTitle }}</h2>
+        </div>
+        <div class="bar" role="progressbar" [attr.aria-valuenow]="percent" aria-valuemin="0" aria-valuemax="100">
+          <div class="bar__fill" [style.width.%]="percent"></div>
+        </div>
+        <div class="hero-foot">
+          <span>{{ progress.done }} of {{ progress.total }} units done</span>
+          <a routerLink="/learn" class="vp-btn vp-btn--white hero-btn">Continue</a>
+        </div>
+      } @else {
+        <span class="hero-tag">Get started</span>
+        <div>
+          <p class="hero-level">{{ loading ? 'Loading your progress...' : 'No level assigned yet' }}</p>
+          <h2 class="hero-unit">Take a placement test</h2>
+        </div>
+        <div class="hero-foot">
+          <span>Find the right level for you</span>
+          <a routerLink="/learn/tests" class="vp-btn vp-btn--white hero-btn">Start</a>
+        </div>
+      }
+    </section>
+
+    <!-- Số liệu -->
+    <section class="vp-grid-3">
+      <div class="mini"><p class="mini__k">Levels</p><p class="mini__v">{{ counts.levels }}</p></div>
+      <div class="mini"><p class="mini__k">Courses</p><p class="mini__v">{{ counts.courses }}</p></div>
+      <div class="mini"><p class="mini__k">Units</p><p class="mini__v">{{ counts.units }}</p></div>
+    </section>
+
+    <!-- Practice -->
+    <section class="vp-section">
+      <h2 class="vp-section-title">Practice</h2>
+      <div class="vp-grid-2">
+        @for (q of quick; track q.link) {
+          <a [routerLink]="q.link" class="quick">
+            <span class="quick__icon"><vp-icon [d]="q.d" [size]="20" /></span>
+            <span class="quick__label">{{ q.label }}</span>
+          </a>
+        }
+      </div>
+    </section>
+
+    <!-- Next session -->
+    <section class="vp-section">
+      <h2 class="vp-section-title">Next session</h2>
+      @if (next) {
+        <a class="vp-card session" routerLink="/classes" [queryParams]="{ seg: 'mine' }">
+          <div class="date">
+            <span class="date__m">{{ next.studyDate | date: 'MMM' | uppercase }}</span>
+            <span class="date__d">{{ next.studyDate | date: 'dd' }}</span>
+          </div>
+          <div class="vp-grow">
+            <p class="session__title">{{ next.classTitle }}</p>
+            <p class="vp-meta">Session {{ next.sessionNumber }} · {{ time(next.startTime) }} – {{ time(next.endTime) }}</p>
+          </div>
+          <span class="vp-badge vp-badge--upcoming">Upcoming</span>
+        </a>
+      } @else {
+        <div class="vp-card session-empty">
+          <p class="vp-meta">{{ loading ? 'Loading...' : 'No upcoming sessions' }}</p>
+        </div>
+      }
+    </section>
+
+    @if (auth.currentGroup() === 'student') {
+      <a routerLink="/me/become-teacher" class="vp-btn vp-btn--orange become">Become a Teacher</a>
+    }
+  </div>
+</ion-content>

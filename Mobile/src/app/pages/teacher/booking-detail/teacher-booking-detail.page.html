@@ -1,0 +1,88 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Booking Detail" defaultHref="/teacher/bookings" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll detail">
+    @if (loading) {
+      <vp-loading text="Loading booking..." />
+    } @else if (!booking) {
+      <vp-empty title="Booking not found" text="This booking could not be loaded." />
+    } @else {
+      <section class="student">
+        <vp-avatar [name]="name" [url]="avatar" [size]="56" />
+        <div class="vp-grow">
+          <span class="t-eyebrow">Teaching Session</span>
+          <p class="student__name">{{ name }}</p>
+        </div>
+        <vp-badge [label]="statusText" />
+      </section>
+
+      @if (canJoin || isWaiting) {
+        <section class="room">
+          <h2 class="room__title">Session Actions</h2>
+          <div class="room__row">
+            <span>Class time</span>
+            <b>{{ booking.startTime | date: 'dd/MM/yyyy HH:mm' }} – {{ booking.endTime | date: 'HH:mm' }}</b>
+          </div>
+          @if (canJoin) {
+            <button type="button" class="vp-btn vp-btn--primary room__btn" (click)="join()">
+              <vp-icon [d]="icons.video" [size]="20" />
+              Join Room
+            </button>
+          }
+          @if (isWaiting) {
+            <button type="button" class="vp-btn t-btn-wait room__btn" disabled>Waiting for class time</button>
+          }
+        </section>
+      }
+
+      <section class="vp-card info">
+        <h2 class="vp-section-title info__title">Booking Information</h2>
+        <div class="row"><span>Booking ID</span><b>#{{ booking.bookingId }}</b></div>
+        <div class="row"><span>Booking Date</span><b>{{ booking.createdDate | date: 'dd/MM/yyyy HH:mm' }}</b></div>
+        <div class="row"><span>Class Date</span><b>{{ booking.startTime | date: 'dd/MM/yyyy' }}</b></div>
+        <div class="row"><span>Time</span><b>{{ booking.startTime | date: 'HH:mm' }} - {{ booking.endTime | date: 'HH:mm' }}</b></div>
+        <div class="row"><span>Duration</span><b>{{ duration }} hour(s)</b></div>
+        @if (payment) {
+          <div class="row"><span>Payment Status</span><b>{{ paymentStatusText }}</b></div>
+          <div class="row"><span>Payment Method</span><b>{{ paymentMethodText }}</b></div>
+        }
+        @if (payment?.transactionCode) {
+          <div class="row"><span>Transaction Code</span><b class="code">{{ payment.transactionCode }}</b></div>
+        }
+        <div class="row"><span>Total Revenue</span><b class="vp-price">{{ totalRevenue | currency: 'USD' : 'symbol' : '1.2-2' }}</b></div>
+      </section>
+
+      @if (hasReview) {
+        <section class="vp-card">
+          <h2 class="vp-section-title">Student Review</h2>
+          <div class="review-head">
+            <span class="stars" [attr.aria-label]="review.rating + ' of 5'">
+              @for (s of stars; track s) {
+                <vp-icon [d]="icons.star" [size]="16" [fill]="s <= review.rating" [class.on]="s <= review.rating" />
+              }
+            </span>
+            <span class="vp-meta">{{ review.createdDate | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <p class="vp-body">{{ review.comment }}</p>
+        </section>
+      } @else if (booking.status === 3) {
+        <section class="no-review">
+          <h2 class="no-review__title">Student Review</h2>
+          <p>Student has not reviewed this class yet.</p>
+        </section>
+      }
+    }
+  </div>
+</ion-content>
+
+@if (booking && canCancel) {
+  <ion-footer class="vp-footer">
+    <div class="vp-bottom-bar">
+      <button type="button" class="vp-btn vp-btn--danger vp-btn--cta cancel" (click)="cancel()">Cancel Booking</button>
+    </div>
+  </ion-footer>
+}

@@ -1,0 +1,90 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Placement Tests" defaultHref="/admin/more" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+  <div class="vp-scroll vp-scroll--tight">
+    <div class="intro">
+      <p class="vp-meta vp-grow">Manage your placement test assessments</p>
+      @if (placements.length) {
+        <span class="vp-badge vp-badge--upcoming">Total: {{ placements.length }}</span>
+      }
+    </div>
+
+    @if (loading) {
+      <vp-loading />
+    } @else if (!placements.length) {
+      <vp-empty text="No placement tests yet. Create your first one!">
+        <button type="button" class="vp-btn vp-btn--secondary" (click)="openAdd()">+ Create Placement</button>
+      </vp-empty>
+    } @else {
+      @for (p of placements; track p.placementId) {
+        <div class="cm-card">
+          <button type="button" class="pl-main" (click)="openEdit(p)">
+            <span class="vp-grow">
+              <span class="cm-name pl-name">{{ p.name }}</span>
+              <span class="cm-desc pl-desc" [class.cm-empty-text]="!p.description">{{ p.description || '(No description)' }}</span>
+            </span>
+          </button>
+          <div class="pl-actions">
+            <span class="cm-by">ID: {{ p.placementId }}</span>
+            <button type="button" class="vp-btn vp-btn--secondary vp-btn--sm" (click)="openEdit(p)">Manage</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="vp-footer">
+  <div class="vp-bottom-bar">
+    <button type="button" class="vp-btn vp-btn--primary vp-btn--cta" (click)="openAdd()">+ Create Placement</button>
+  </div>
+</ion-footer>
+
+<!-- Bottom sheet chi tiết / sửa -->
+<ion-modal class="cm-modal" [isOpen]="!!form" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="closeSheet()">
+  <ng-template>
+    <ion-content>
+      @if (form; as f) {
+        <div class="cm-sheet">
+          <div>
+            <p class="cm-sheet__title">{{ f.placementId ? 'Edit Placement Test' : 'Create Placement Test' }}</p>
+            @if (f.placementId) {
+              <p class="vp-meta">ID: {{ f.placementId }}</p>
+            }
+          </div>
+          <p class="vp-section-title">Test Details</p>
+          <div class="vp-field">
+            <label class="vp-label" for="pl-name">Test Name <span class="cm-req">*</span></label>
+            <input id="pl-name" class="vp-input" [(ngModel)]="f.name" placeholder="Enter placement test name..." />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="pl-desc">Description</label>
+            <textarea
+              id="pl-desc"
+              class="vp-input"
+              rows="4"
+              [(ngModel)]="f.description"
+              placeholder="Enter description or instructions for students..."
+            ></textarea>
+          </div>
+          <div class="cm-sheet__actions">
+            <button type="button" class="vp-btn vp-btn--primary vp-btn--block vp-btn--form" [disabled]="saving" (click)="save()">
+              {{ saving ? 'Saving...' : 'Save Placement' }}
+            </button>
+            @if (f.placementId) {
+              <button type="button" class="vp-btn vp-btn--secondary vp-btn--block vp-btn--form" [disabled]="saving" (click)="manageQuiz()">
+                Manage Quiz
+              </button>
+              <button type="button" class="vp-btn vp-btn--danger vp-btn--block vp-btn--form" [disabled]="saving" (click)="remove()">
+                Delete
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

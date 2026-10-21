@@ -1,0 +1,137 @@
+<div class="vp-scroll vp-scroll--tight">
+  <!-- Upcoming Schedule (gộp từ màn Upcoming Classes) -->
+  <section class="upcoming">
+    @if (upcomingLoading) {
+      <span class="vp-eyebrow up-eyebrow">Upcoming Schedule</span>
+      <p class="vp-meta">Loading schedule...</p>
+    } @else if (!nextSession) {
+      <span class="vp-eyebrow up-eyebrow">Upcoming Schedule</span>
+      <div>
+        <p class="up-title">No upcoming sessions</p>
+        <p class="up-meta">There are currently no scheduled classes.</p>
+      </div>
+    } @else {
+      @let s = nextSession!;
+      <div class="up-head">
+        <span class="vp-eyebrow up-eyebrow">Upcoming Schedule</span>
+        <span class="session-badge">Session {{ s.sessionNumber }}</span>
+      </div>
+      <div>
+        <p class="up-title">{{ s.classTitle }}</p>
+        <p class="up-meta">{{ s.topic }} · {{ dayLabel(s.studyDate) }} · {{ timeRange(s.startTime, s.endTime) }}</p>
+        @if (s.teacherName) {
+          <p class="up-meta">Teacher: {{ s.teacherName }}</p>
+        }
+      </div>
+      <button
+        type="button"
+        class="vp-btn vp-btn--primary vp-btn--block join"
+        [disabled]="!canJoin(s) || joiningId === s.sessionId"
+        (click)="join(s)"
+      >
+        <vp-icon [d]="videoIcon" [size]="18" />Join Zoom Room
+      </button>
+      @if (!canJoin(s)) {
+        <p class="vp-hint up-hint">The room opens 15 minutes before the session starts.</p>
+      }
+
+      @if (moreSessions.length) {
+        @if (showAllUpcoming) {
+          @for (m of moreSessions; track m.sessionId) {
+            <div class="up-row">
+              <div class="vp-grow">
+                <p class="up-row__title">{{ m.classTitle }} · Session {{ m.sessionNumber }}</p>
+                <p class="up-meta">{{ m.topic }} · {{ dayLabel(m.studyDate) }} · {{ timeRange(m.startTime, m.endTime) }}</p>
+              </div>
+              @if (canJoin(m)) {
+                <button type="button" class="vp-btn vp-btn--primary vp-btn--sm" [disabled]="joiningId === m.sessionId" (click)="join(m)">
+                  Join
+                </button>
+              }
+            </div>
+          }
+        }
+        <button type="button" class="vp-link up-more" (click)="showAllUpcoming = !showAllUpcoming">
+          {{ showAllUpcoming ? 'Show less' : 'Show all sessions (' + schedules.length + ')' }}
+        </button>
+      }
+    }
+  </section>
+
+  <!-- Lọc: tên + ngày học + trạng thái -->
+  <div class="filter-row">
+    <label class="search">
+      <vp-icon [d]="icons.search" [size]="18" />
+      <span class="sr-only">Class Name</span>
+      <input type="search" placeholder="Class Name" [(ngModel)]="titleFilter" />
+    </label>
+    <label class="date">
+      <span class="sr-only">Study Date</span>
+      <input type="date" class="vp-input" [(ngModel)]="studyDateFilter" aria-label="Study Date" />
+    </label>
+  </div>
+
+  <div class="vp-chips chips">
+    @for (c of chips; track c.value) {
+      <button type="button" class="vp-chip" [class.is-active]="statusFilter === c.value" (click)="statusFilter = c.value">
+        {{ c.label }}
+      </button>
+    }
+  </div>
+
+  @if (hasFilter) {
+    <div class="clear-row">
+      <span class="vp-meta">{{ filtered.length }} result(s)</span>
+      <button type="button" class="vp-link" (click)="clearFilters()">Clear</button>
+    </div>
+  }
+
+  @if (loading) {
+    <vp-loading text="Loading classes..." />
+  } @else if (!filtered.length) {
+    <vp-empty title="No enrolled classes" text="Start learning by joining a class." />
+  } @else {
+    @for (e of filtered; track e.enrollmentId) {
+      <article class="vp-card cls">
+        <div class="head">
+          <vp-avatar [name]="e.teacherName" [url]="avatar(e)" [size]="40" />
+          <div class="vp-grow">
+            <p class="title">{{ e.classTitle }}</p>
+            <p class="sub">{{ e.teacherName }}{{ e.teacherCountry ? ' · ' + e.teacherCountry : '' }}</p>
+          </div>
+          <vp-badge [label]="statusLabel(e.status)" [classLifecycle]="true" />
+        </div>
+
+        <div class="meta-row">
+          <span>Enrolled on {{ e.enrolledDate | date: 'dd/MM/yyyy' }}</span>
+          <span>{{ hhmm(e.startTime) }}–{{ hhmm(e.endTime) }} · <b>{{ money(e.price) }}</b></span>
+        </div>
+
+        <div class="actions">
+          @if (showView(e)) {
+            <button type="button" class="vp-btn vp-btn--secondary" (click)="viewClass(e.classId)">View Class</button>
+          }
+          @if (e.status === 0) {
+            <button type="button" class="vp-btn vp-btn--primary" (click)="pay(e)">Pay Now</button>
+          }
+          @if (e.status === 1) {
+            <button type="button" class="vp-btn vp-btn--danger" [disabled]="busyId === e.enrollmentId" (click)="cancel(e)">
+              Cancel Enrollment
+            </button>
+          }
+          @if ((e.status === 4 || e.status === 5) && canEnrollAgain(e)) {
+            <button type="button" class="vp-btn vp-btn--primary" [disabled]="busyId === e.enrollmentId" (click)="enroll(e)">
+              Enroll Again
+            </button>
+          }
+          @if (e.status === 3 && e.hasReview === false) {
+            <button type="button" class="vp-btn vp-btn--ghost review" (click)="review(e)">Review Teacher</button>
+          }
+          @if (e.status === 3 && e.hasReview === true) {
+            <button type="button" class="vp-btn vp-btn--ghost review" (click)="review(e)">View Review</button>
+          }
+        </div>
+      </article>
+    }
+  }
+</div>

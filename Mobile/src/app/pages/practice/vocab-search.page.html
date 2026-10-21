@@ -1,0 +1,114 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Vocabulary Search" [defaultHref]="backHref" />
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll page">
+    <div>
+      <span class="eyebrow">Pronunciation search</span>
+      <h2 class="hero-title">Hear Vietnamese in real clips</h2>
+    </div>
+
+    <form class="search" (ngSubmit)="search()">
+      <label for="vs-q" class="sr-only">Search word</label>
+      <input
+        id="vs-q"
+        type="search"
+        name="q"
+        class="vp-input search__input"
+        placeholder="Enter a Vietnamese word..."
+        autocomplete="off"
+        enterkeyhint="search"
+        [(ngModel)]="keyword"
+      />
+      <button type="submit" class="vp-btn vp-btn--primary search__btn" [disabled]="searching">Search</button>
+    </form>
+
+    <div class="try">
+      <span class="try__label">Try:</span>
+      @for (w of examples; track w) {
+        <button type="button" class="try__chip" (click)="search(w)">{{ w }}</button>
+      }
+    </div>
+
+    @if (hasSearched) {
+      <p class="results-title">Results for “{{ searchKeyword }}”</p>
+    }
+
+    @if (searching) {
+      <vp-loading text="Searching..." />
+    } @else if (noResult) {
+      <vp-empty [text]="'No videos found for “' + searchKeyword + '”'" />
+    }
+
+    <!-- Video: phần tử luôn có trong DOM để gắn YT.Player -->
+    <div class="video" [class.is-hidden]="!videoId">
+      <div #playerHost class="video__player"></div>
+      @if (subtitleParts.length) {
+        <span class="video__sub">
+          @for (p of subtitleParts; track $index) {
+            @if (p.hit) {
+              <span class="video__hit">{{ p.t }}</span>
+            } @else {
+              {{ p.t }}
+            }
+          }
+        </span>
+      }
+    </div>
+
+    @if (videoId) {
+      <div class="controls">
+        @for (c of controls; track c.key) {
+          <button
+            type="button"
+            class="ctrl"
+            [class.ctrl--main]="c.key === 'play'"
+            [attr.aria-label]="c.key === 'play' ? (isPlaying ? 'Pause' : 'Play') : c.label"
+            [disabled]="isDisabled(c.key)"
+            (click)="control(c.key)"
+          >
+            <vp-icon [d]="iconFor(c.key)" [size]="20" [fill]="c.key === 'play' && !isPlaying" />
+          </button>
+        }
+      </div>
+      @if (results.length > 1) {
+        <p class="counter">Clip {{ index + 1 }} of {{ results.length }}</p>
+      }
+    }
+
+    @if (dictionaryData) {
+      <section class="vp-card dict">
+        <div class="dict__head">
+          <h3 class="dict__word">{{ dictionaryData.word }}</h3>
+          <span class="dict__sub">Vietnamese to English</span>
+        </div>
+
+        @if (dictionaryData.meanings?.length) {
+          @for (group of dictionaryData.meanings; track $index) {
+            <div class="meaning">
+              <span class="meaning__type">{{ group[0] }}</span>
+              @for (sense of group[2]; track $index) {
+                <p class="meaning__en">{{ sense[0] }}</p>
+                @if (similar(sense)) {
+                  <p class="meaning__sim">Similar: {{ similar(sense) }}</p>
+                }
+              }
+            </div>
+          }
+        } @else if (dictionaryData.translation) {
+          <p class="meaning__en">{{ dictionaryData.translation }}</p>
+        }
+
+        @if (dictionaryData.examples?.length) {
+          <div class="examples">
+            <p class="examples__title">Example Sentences</p>
+            @for (ex of dictionaryData.examples; track $index) {
+              <p class="examples__item" [innerHTML]="ex[0]"></p>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</ion-content>

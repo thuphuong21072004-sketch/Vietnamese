@@ -1,0 +1,101 @@
+<ion-header class="vp-header">
+  <vp-nav-bar title="Student Trips" defaultHref="/teacher/travel" />
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="vp-scroll vp-scroll--tight">
+    <vp-teacher-travel-tabs active="open-trips" />
+
+    <div>
+      <h2 class="title">Students Looking for a Teacher</h2>
+      <p class="t-sub">Students who haven't found a travel companion yet — invite them if your schedule matches.</p>
+    </div>
+
+    <form class="search-row" (ngSubmit)="load()">
+      <label class="search">
+        <vp-icon [d]="icons.search" [size]="18" />
+        <span class="sr-only">Destination</span>
+        <input type="search" name="destination" placeholder="e.g. Hà Nội, Đà Nẵng…" enterkeyhint="search" [(ngModel)]="filterDestination" />
+      </label>
+      <button type="submit" class="vp-btn vp-btn--travel search-btn">Search</button>
+      @if (filterDestination) {
+        <button type="button" class="vp-icon-btn" aria-label="Clear" (click)="clear()">
+          <vp-icon [d]="icons.close" [size]="18" />
+        </button>
+      }
+    </form>
+
+    @if (loading) {
+      <vp-loading text="Loading…" />
+    } @else if (trips.length === 0) {
+      <vp-empty [text]="'No open student trips found' + (appliedDestination ? ' for &quot;' + appliedDestination + '&quot;' : '') + '.'" />
+    } @else {
+      <p class="summary">{{ trips.length }} trip{{ trips.length !== 1 ? 's' : '' }} looking for a teacher</p>
+
+      @for (trip of trips; track trip.tripId) {
+        <article class="t-card">
+          <div class="vp-row">
+            <vp-avatar [name]="trip.studentName" [url]="avatar(trip.studentAvatarUrl)" [size]="44" />
+            <div class="vp-grow">
+              <p class="name">{{ trip.studentName }}</p>
+              @if (trip.studentCountry) {
+                <p class="vp-meta tr-pin"><vp-icon [d]="icons.globe" [size]="13" />{{ trip.studentCountry }}</p>
+              }
+            </div>
+            @if (trip.hasEnrolledInClass) {
+              <span class="vp-badge vp-badge--success">Enrolled in class</span>
+            } @else {
+              <span class="vp-badge vp-badge--info">Finding teacher</span>
+            }
+          </div>
+
+          <div>
+            <p class="tr-dest tr-pin"><vp-icon [d]="icons.pin" [size]="18" />{{ trip.destination }}</p>
+            @if (trip.specificLocation) {
+              <p class="vp-meta spot">{{ trip.specificLocation }}</p>
+            }
+          </div>
+          <div class="dates">
+            <span class="tr-date-chip">{{ dmy(trip.startDate) }} → {{ dmy(trip.endDate) }}</span>
+            <span class="vp-meta posted">Posted {{ dmy(trip.createdAt) }}</span>
+          </div>
+
+          <!-- Footer theo trạng thái -->
+          @if (sentRequest(trip); as req) {
+            <div class="foot">
+              <span class="vp-badge vp-badge--warning">✉ Invite sent</span>
+              <button type="button" class="vp-btn vp-btn--danger vp-btn--sm" (click)="cancelInvite(req)">Cancel</button>
+            </div>
+          } @else if (trip.hasEnrolledInClass) {
+            <p class="vp-alert vp-alert--success">✅ Student already enrolled in a class</p>
+          } @else {
+            @if (matchingSchedule(trip); as sched) {
+              <p class="vp-alert vp-alert--success">
+                ✅ Your schedule matches ({{ sched.availableFrom | date: 'dd/MM/yyyy' }} – {{ sched.availableTo | date: 'dd/MM/yyyy' }})
+              </p>
+              <button type="button" class="vp-btn vp-btn--travel vp-btn--block" [disabled]="sendingTripId === trip.tripId" (click)="invite(trip)">
+                <vp-icon [d]="icons.mail" [size]="18" />
+                {{ sendingTripId === trip.tripId ? 'Sending…' : 'Send Invite' }}
+              </button>
+            } @else {
+              <p class="no-match">No matching schedule for this destination &amp; dates</p>
+            }
+            @if (reservedByTrip[trip.tripId]) {
+              <a class="vp-btn vp-btn--outline-travel vp-btn--block" [routerLink]="['/teacher/classes', reservedByTrip[trip.tripId]]">
+                <vp-icon [d]="icons.school" [size]="18" />
+                View my class
+              </a>
+            } @else if (canCreateClass(trip)) {
+              <button type="button" class="vp-btn vp-btn--outline-travel vp-btn--block" (click)="createClass(trip)">
+                <vp-icon [d]="icons.school" [size]="18" />
+                Create class for this trip
+              </button>
+            }
+          }
+        </article>
+      }
+    }
+  </div>
+</ion-content>

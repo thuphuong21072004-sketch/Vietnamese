@@ -1,0 +1,86 @@
+.teacher {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.teacher__spec {
+  margin-top: 2px;
+}
+
+/* Online Class Room (design: nền #eef2ff, viền tím nhạt, r20) */
+.room {
+  border-radius: 20px;
+  padding: 16px;
+  background: var(--vp-indigo-soft);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.room__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #3730a3;
+}
+.room__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.room__row span {
+  color: var(--vp-text-body-2);
+}
+.room__row .code {
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.join {
+  height: 50px;
+  border-radius: var(--vp-r-m2);
+  font-size: 16px;
+}
+.room__note {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-indigo-dark);
+}
+.room__link {
+  align-self: center;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  font: 600 14px var(--vp-font);
+  color: var(--vp-accent);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.kv--col {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 0;
+}
+.kv--col > b {
+  text-align: left;
+  font-weight: 600;
+}
+.mono {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.stars {
+  color: var(--vp-warning);
+}
+.review-btn {
+  margin-top: 8px;
+  align-self: stretch;
+}
+
+.cancel {
+  height: 50px;
+  font-size: 15px;
+}

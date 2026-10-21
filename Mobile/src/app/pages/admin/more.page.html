@@ -1,0 +1,36 @@
+<ion-header class="vp-header">
+  <header class="vp-tab-header">
+    <h1 class="vp-large-title">More</h1>
+  </header>
+</ion-header>
+
+<ion-content>
+  <div class="vp-scroll more">
+    <!-- Thẻ thông tin admin -->
+    <section class="profile">
+      <vp-avatar [name]="auth.user()?.name" [url]="auth.user()?.avatarUrl" [size]="68" radius="22px" />
+      <div class="vp-grow">
+        <p class="profile__name">{{ auth.user()?.name }}</p>
+        @if (subtitle) {
+          <p class="profile__sub">{{ subtitle }}</p>
+        }
+        <span class="profile__role">{{ auth.user()?.role || 'Admin' }}</span>
+      </div>
+    </section>
+
+    @for (g of groups; track g.title) {
+      <section class="group">
+        <h2 class="group__title">{{ g.title }}</h2>
+        <div class="group__box">
+          @for (it of g.items; track it.label) {
+            <button type="button" class="item" [class.item--danger]="it.danger" (click)="open(it)">
+              <span class="item__icon"><vp-icon [d]="it.icon" [size]="18" /></span>
+              <span class="item__label">{{ it.label }}</span>
+              <vp-icon class="item__chev" [d]="chevron" [size]="18" />
+            </button>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</ion-content>

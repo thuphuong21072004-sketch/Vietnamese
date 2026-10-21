@@ -1,0 +1,241 @@
+<div class="vp-scroll vp-scroll--tight">
+  <!-- Tìm theo tên + nút Filters -->
+  <form class="search-row" (submit)="submitTitle($event)">
+    <label class="search">
+      <vp-icon [d]="icons.search" [size]="18" />
+      <span class="sr-only">Class Name</span>
+      <input
+        type="search"
+        name="title"
+        placeholder="Class Name"
+        enterkeyhint="search"
+        [(ngModel)]="filter.title"
+        (ngModelChange)="onTitleInput()"
+      />
+    </label>
+    <button type="button" class="vp-btn vp-btn--secondary vp-btn--form filters-btn" (click)="openSheet()">
+      <vp-icon [d]="slidersIcon" [size]="18" />Filters
+      @if (activeCount) {
+        <span class="count">{{ activeCount }}</span>
+      }
+    </button>
+  </form>
+
+  <!-- Chip chủ đề chính -->
+  <div class="vp-chips topics">
+    <button type="button" class="vp-chip" [class.is-active]="!filter.mainTopic" (click)="pickTopic('')">All topics</button>
+    @for (t of mainTopics; track t) {
+      <button type="button" class="vp-chip" [class.is-active]="filter.mainTopic === t" (click)="pickTopic(t)">{{ t }}</button>
+    }
+  </div>
+
+  @if (loading && !classes.length) {
+    <vp-loading text="Loading classes..." />
+  } @else if (!visibleClasses.length) {
+    <vp-empty title="No classes found." text="Try other filters or clear them." />
+  } @else {
+    @for (c of visibleClasses; track c.classId) {
+      @let st = statusOf(c.classId);
+      <article class="vp-card cls">
+        <div class="head">
+          <vp-avatar [name]="c.teacherName" [url]="avatar(c)" [size]="40" />
+          <div class="vp-grow">
+            <p class="teacher">{{ c.teacherName }}</p>
+            <p class="sub">
+              {{ c.country || '—' }} · <span class="rate">★ {{ c.ratingAverage != null ? (c.ratingAverage | number: '1.1-1') : '0.0' }}</span>
+            </p>
+          </div>
+          @if (st !== null) {
+            <vp-badge [label]="statusLabel(st)" [classLifecycle]="true" />
+          }
+        </div>
+
+        <div class="title-row">
+          <p class="title">{{ c.title }}</p>
+          <p class="price">{{ money(c.price) }}</p>
+        </div>
+
+        @if (c.description) {
+          <p class="desc">{{ c.description }}</p>
+        }
+
+        <div class="facts">
+          <span>Topic <b>{{ c.mainTopic || '—' }}</b></span>
+          @if (c.mainTopic === 'Travel') {
+            <span>Province <b>{{ c.province || '—' }}</b></span>
+            @if (c.specificLocation) {
+              <span class="wide">Location <b>{{ c.specificLocation }}</b></span>
+            }
+          } @else {
+            <span>Sub Topic <b>{{ c.subTopic || '—' }}</b></span>
+          }
+          <span>Time <b>{{ hhmm(c.startTime) }}–{{ hhmm(c.endTime) }}</b></span>
+          <span>Students <b>{{ c.currentStudents }}/{{ c.maxStudents }}</b></span>
+          <span>Sessions <b>{{ c.totalSessions }}</b></span>
+        </div>
+
+        @if (c.scheduleDays.length) {
+          <div class="days">
+            @for (d of c.scheduleDays; track d.id) {
+              <span class="day">{{ shortDay(d.dayOfWeek) }}</span>
+            }
+          </div>
+        }
+
+        <div class="actions">
+          @if (showDetails(c)) {
+            <button type="button" class="vp-btn vp-btn--secondary" (click)="viewClass(c.classId)">View Details</button>
+          }
+          @switch (st) {
+            @case (null) {
+              <button type="button" class="vp-btn vp-btn--primary" [disabled]="busyId === c.classId" (click)="enroll(c.classId)">
+                Enroll Now
+              </button>
+            }
+            @case (0) {
+              <button type="button" class="vp-btn vp-btn--primary" (click)="pay(c.classId)">Pay Now</button>
+            }
+            @case (1) {
+              <button type="button" class="vp-btn vp-btn--danger" [disabled]="busyId === c.classId" (click)="cancel(c.classId)">
+                Cancel Enrollment
+              </button>
+            }
+            @case (2) {
+              <button type="button" class="vp-btn vp-btn--primary" (click)="viewClass(c.classId)">Enter Class</button>
+            }
+            @case (3) {
+              <button type="button" class="vp-btn vp-btn--secondary" (click)="viewClass(c.classId)">View Result</button>
+            }
+          }
+          @if (canReview(c.classId)) {
+            <button type="button" class="vp-btn vp-btn--ghost" (click)="review(c.classId)">Review Teacher</button>
+          }
+          @if (hasReviewed(c.classId)) {
+            <button type="button" class="vp-btn vp-btn--ghost" (click)="review(c.classId)">View Review</button>
+          }
+          @if ((st === 4 || st === 5) && canEnrollAgain(c)) {
+            <button type="button" class="vp-btn vp-btn--primary" [disabled]="busyId === c.classId" (click)="enroll(c.classId)">
+              Enroll Again
+            </button>
+          }
+        </div>
+      </article>
+    }
+  }
+</div>
+
+<!-- Bottom sheet bộ lọc (README §6.4) -->
+<ion-modal [isOpen]="sheetOpen" [initialBreakpoint]="0.9" [breakpoints]="[0, 0.9]" (didDismiss)="closeSheet()">
+  <ng-template>
+    <ion-content class="sheet">
+      <div class="sheet__body">
+        <div class="sheet__head">
+          <h2 class="sheet__title">Filters</h2>
+          <button type="button" class="vp-link" (click)="closeSheet()">Close</button>
+        </div>
+
+        <div class="vp-field">
+          <label class="vp-label" for="f-country">Country</label>
+          <select id="f-country" class="vp-input" [(ngModel)]="draft.country">
+            <option value="">Country</option>
+            @for (c of countries; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="vp-field">
+          <label class="vp-label" for="f-rating">Minimum Rating</label>
+          <select id="f-rating" class="vp-input" [(ngModel)]="draft.minRating">
+            <option [ngValue]="null">Any Rating</option>
+            @for (r of ratings; track r.value) {
+              <option [ngValue]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="vp-field">
+          <label class="vp-label" for="f-main">Main Topic</label>
+          <select id="f-main" class="vp-input" [(ngModel)]="draft.mainTopic" (ngModelChange)="onDraftMainTopic()">
+            <option value="">All Main Topics</option>
+            @for (t of mainTopics; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        @if (draft.mainTopic === 'Travel') {
+          <div class="vp-field">
+            <label class="vp-label" for="f-province">Province</label>
+            <select id="f-province" class="vp-input" [(ngModel)]="draft.province" (ngModelChange)="onDraftProvince()">
+              <option value="">All Provinces</option>
+              @for (g of destinations; track g.province) {
+                <option [value]="g.province">{{ g.province }}</option>
+              }
+            </select>
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-spot">Specific Location</label>
+            <select id="f-spot" class="vp-input" [(ngModel)]="draft.specificLocation" [disabled]="!draft.province">
+              <option value="">All Locations</option>
+              @for (s of draftSpots; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+        } @else {
+          <div class="vp-field">
+            <label class="vp-label" for="f-sub">Sub Topic</label>
+            <select id="f-sub" class="vp-input" [(ngModel)]="draft.subTopic" [disabled]="!draft.mainTopic">
+              <option value="">All Sub Topics</option>
+              @for (s of draftSubTopics; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+        }
+
+          <div class="vp-field">
+            <label class="vp-label" for="f-minp">Min Price</label>
+            <input id="f-minp" class="vp-input" type="number" min="0" inputmode="decimal" [(ngModel)]="draft.minPrice" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-maxp">Max Price</label>
+            <input id="f-maxp" class="vp-input" type="number" min="0" inputmode="decimal" [(ngModel)]="draft.maxPrice" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-sd">Start Date</label>
+            <input id="f-sd" class="vp-input" type="date" [(ngModel)]="draft.startDate" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-ed">End Date</label>
+            <input id="f-ed" class="vp-input" type="date" [(ngModel)]="draft.endDate" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-st">Start Time</label>
+            <input id="f-st" class="vp-input" type="time" [(ngModel)]="draft.startTime" />
+          </div>
+          <div class="vp-field">
+            <label class="vp-label" for="f-et">End Time</label>
+            <input id="f-et" class="vp-input" type="time" [(ngModel)]="draft.endTime" />
+          </div>
+
+        <div class="vp-field">
+          <span class="vp-label">Study Days</span>
+          <div class="vp-chips">
+            @for (d of weekDays; track d) {
+              <button type="button" class="vp-chip" [class.is-active]="draft.daysOfWeek.includes(d)" (click)="toggleDay(d)">
+                {{ d }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="sheet__actions">
+          <button type="button" class="vp-btn vp-btn--ghost vp-btn--form" (click)="clear()">Clear Filters</button>
+          <button type="button" class="vp-btn vp-btn--primary vp-btn--form" (click)="apply()">Search Classes</button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

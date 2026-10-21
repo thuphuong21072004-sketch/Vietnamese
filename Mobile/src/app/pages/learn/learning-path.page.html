@@ -1,0 +1,74 @@
+<ion-header class="vp-header">
+  <header class="head">
+    @if (level) {
+      <span class="vp-eyebrow eyebrow">{{ level.orderIndex ? 'Level ' + level.orderIndex : 'Your level' }}</span>
+      <h1 class="vp-large-title title">{{ level.levelName }}</h1>
+      @if (level.description) {
+        <p class="desc">{{ level.description }}</p>
+      }
+    } @else {
+      <span class="vp-eyebrow eyebrow">Learn</span>
+      <h1 class="vp-large-title title">Learning Path</h1>
+    }
+  </header>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="load($any($event))"><ion-refresher-content /></ion-refresher>
+
+  <div class="body">
+    @if (loading) {
+      <vp-loading text="Loading your progress..." />
+    } @else if (!level) {
+      <vp-empty title="No level assigned yet" text="Take a placement test to find your starting level.">
+        <a routerLink="/learn/tests" class="vp-btn vp-btn--primary">Practice Tests</a>
+      </vp-empty>
+    } @else {
+      @for (c of courses; track c.course.courseId) {
+        <div class="course">
+          <div>
+            <p class="course__k">Course {{ c.order }}</p>
+            <p class="course__name">{{ c.course.courseName }}</p>
+          </div>
+          <span class="course__count">{{ c.done }} / {{ c.total }} units</span>
+        </div>
+
+        <div class="path">
+          @for (n of c.nodes; track n.unit.unitId) {
+            <div class="node" [class.is-current]="n.state === 'current'" [style.transform]="'translateX(' + n.x + 'px)'">
+              <button
+                type="button"
+                class="node__btn"
+                [class]="'node__btn node__btn--' + n.state"
+                [disabled]="n.state === 'locked'"
+                [attr.aria-label]="n.unit.unitName + ', ' + (n.state === 'done' ? 'completed' : n.state === 'current' ? 'current lesson' : 'locked')"
+                (click)="openUnit(n)"
+              >
+                <vp-icon [d]="icons[n.state]" [size]="26" [stroke]="2.4" [fill]="n.state === 'current'" />
+              </button>
+              <span class="node__label" [class]="'node__label node__label--' + n.state">{{ n.unit.unitName }}</span>
+            </div>
+          }
+
+          <div class="node">
+            <button
+              type="button"
+              class="skip"
+              [class]="'skip skip--' + c.state"
+              [disabled]="c.state !== 'current'"
+              aria-label="Skip Course Test"
+              (click)="openCourseQuiz(c)"
+            >
+              <vp-icon [d]="c.state === 'done' ? icons.done : icons.star" [size]="28" [fill]="c.state !== 'done'" [stroke]="c.state === 'done' ? 2.4 : 0" />
+            </button>
+            <span class="node__label" [class.node__label--locked]="c.state !== 'current'">Skip Course Test</span>
+          </div>
+        </div>
+      }
+
+      <button type="button" class="level-test" [disabled]="levelState !== 'current'" (click)="openLevelQuiz()">
+        <vp-icon [d]="icons.trophy" [size]="18" />Skip Level Test
+      </button>
+    }
+  </div>
+</ion-content>

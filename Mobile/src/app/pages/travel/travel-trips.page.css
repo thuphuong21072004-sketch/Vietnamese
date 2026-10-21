@@ -1,0 +1,211 @@
+.page {
+  gap: 12px;
+  /* chừa chỗ cho FAB */
+  padding-bottom: 96px;
+}
+
+/* ---- Nav tile ---- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tile {
+  min-height: 56px;
+  border-radius: var(--vp-r-m2);
+  background: #fff;
+  border: 1.5px solid var(--vp-emerald);
+  color: var(--vp-emerald);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 8px;
+  text-align: center;
+}
+.tile--on {
+  background: var(--vp-emerald);
+  color: #fff;
+}
+
+/* ---- Card chuyến đi ---- */
+.trip__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.trip__top vp-badge {
+  flex-shrink: 0;
+}
+.trip__dest {
+  font-size: 17px;
+  font-weight: 800;
+}
+.trip__spot {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-muted);
+}
+.date-chip {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: var(--vp-r-pill);
+  background: var(--vp-emerald-soft);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 700;
+}
+.enrolled {
+  padding: 10px 12px;
+  border-radius: var(--vp-r-m);
+  background: var(--vp-emerald-soft);
+  color: #065f46;
+  font-size: 13px;
+  font-weight: 600;
+}
+.enrolled a {
+  color: #047857;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ---- Panel giáo viên / lớp ---- */
+.panel {
+  background: #f0fdf4;
+  border-radius: var(--vp-r-m2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.panel__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #065f46;
+}
+.panel__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-muted);
+}
+.panel__empty {
+  font-size: 13px;
+  color: var(--vp-muted);
+  line-height: 1.45;
+}
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.person--link {
+  text-decoration: none;
+  color: inherit;
+}
+.person__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.person__name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.person__meta {
+  margin-top: 1px;
+  font-size: 12px;
+  color: var(--vp-muted);
+}
+.person__link {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #047857;
+}
+.person__price {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--vp-primary-dark);
+}
+.person__chev {
+  color: var(--vp-placeholder);
+  flex-shrink: 0;
+}
+.person__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.mini {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--vp-r-s);
+  border: 0;
+  background: var(--vp-emerald);
+  color: #fff;
+  font: 700 13px var(--vp-font);
+  cursor: pointer;
+}
+.mini--danger {
+  background: var(--vp-danger-bg);
+  color: var(--vp-danger);
+}
+.mini:disabled {
+  opacity: 0.6;
+}
+.enrolled-badge {
+  margin-left: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+.empty-cta {
+  margin-top: 6px;
+  padding: 0 18px;
+}
+
+/* ---- FAB ---- */
+.fab {
+  right: 16px;
+  bottom: calc(var(--vp-safe-bottom) + 8px);
+  height: 56px;
+  padding: 0 20px;
+  border-radius: var(--vp-fab-r);
+  border: 0;
+  background: var(--vp-grad-travel);
+  color: #fff;
+  font: 700 15px var(--vp-font);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 30px rgba(5, 150, 105, 0.35);
+  cursor: pointer;
+}
+
+.optional {
+  font-weight: 500;
+  color: var(--vp-placeholder);
+}
