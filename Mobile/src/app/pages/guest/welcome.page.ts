@@ -6,6 +6,7 @@ import { catchError } from 'rxjs/operators';
 import { LearningService } from '@web/services/learning.service';
 import { IconComponent, ICONS } from '../../ui/icon.component';
 import { LoadingComponent } from '../../ui/states.component';
+import { canSwitchToDesktop, switchToDesktopSite } from '../../core/site-switch';
 
 interface GuestCourse {
   courseId: number;
@@ -51,6 +52,8 @@ export class WelcomePage implements OnInit {
     { title: 'Progress visibility', text: 'Track your courses, units, and skills so you always know what to study next.', d: this.icons.chart },
   ];
 
+  readonly showDesktopLink = canSwitchToDesktop();
+  readonly switchToDesktop = switchToDesktopSite;
   loading = true;
   error = '';
   levels: GuestLevel[] = [];

@@ -41,6 +41,7 @@
 
             <!-- Logged out: show buttons -->
             <ng-container *ngIf="!isLogin">
+                <a class="btn-ghost" *ngIf="mobileSiteAvailable && chosenDesktop" (click)="openMobileSite()">Mobile version</a>
                 <a class="btn-ghost" routerLink="/login">Đăng nhập</a>
                 <a class="btn-primary" routerLink="user/register">Đăng ký miễn phí</a>
             </ng-container>
@@ -69,6 +70,10 @@
                     <button class="dd-item" routerLink="/profile" (click)="showAccountMenu = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         Profile
+                    </button>
+                    <button class="dd-item" *ngIf="mobileSiteAvailable" (click)="openMobileSite()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                        Mobile version
                     </button>
                     <button class="dd-item dd-logout" (click)="logout()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>

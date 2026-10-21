@@ -108,6 +108,9 @@
         }
       }
     </section>
+    @if (showDesktopLink) {
+      <button type="button" class="vp-link desktop-link" (click)="switchToDesktop()">Desktop version</button>
+    }
   </div>
 </ion-content>
 

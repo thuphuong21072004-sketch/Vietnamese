@@ -8,7 +8,11 @@ import { environment } from '../../environments/environment';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = localStorage.getItem('token');
-  const isBackend = req.url.startsWith(environment.apiBaseUrl) || req.url.startsWith(environment.serverUrl);
+  // serverUrl rỗng (bản web ở /m, cùng địa chỉ backend) → backend nhận diện qua đường dẫn tương đối;
+  // không gắn token vào request ra ngoài (Google Translate, restcountries…)
+  const isBackend =
+    req.url.startsWith(environment.apiBaseUrl) ||
+    (environment.serverUrl ? req.url.startsWith(environment.serverUrl) : req.url.startsWith('/'));
 
   if (isBackend) {
     req = req.clone({

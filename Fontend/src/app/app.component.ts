@@ -131,6 +131,25 @@ export class AppComponent {
     this.router.navigate(['/home']);
   }
 
+  /** Giao diện điện thoại (Mobile/) chỉ có ở bản build do backend phục vụ, đường dẫn /m. */
+  readonly mobileSiteAvailable = environment.production;
+
+  /** Người dùng điện thoại đã chọn "Desktop version" ở giao diện mobile. */
+  get chosenDesktop(): boolean {
+    try {
+      return localStorage.getItem('vp-view') === 'desktop';
+    } catch {
+      return false;
+    }
+  }
+
+  openMobileSite() {
+    try {
+      localStorage.removeItem('vp-view');
+    } catch {}
+    window.location.href = '/m/';
+  }
+
   get userInitial(): string {
     return (this.name || 'U').trim().charAt(0).toUpperCase();
   }

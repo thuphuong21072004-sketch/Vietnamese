@@ -215,3 +215,12 @@
   font-size: 13px;
   color: var(--vp-text-body);
 }
+
+.desktop-link {
+  align-self: center;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--vp-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -2,10 +2,11 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService, RoleGroup } from './auth.service';
 
-/** Bắt buộc đăng nhập. */
-export const authGuard: CanActivateFn = () => {
+/** Bắt buộc đăng nhập. Khách mở /home (trang công khai của web cũ) → trang giới thiệu /welcome. */
+export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
-  return auth.isLoggedIn ? true : inject(Router).parseUrl('/login');
+  if (auth.isLoggedIn) return true;
+  return inject(Router).parseUrl(state.url.split('?')[0] === '/home' ? '/welcome' : '/login');
 };
 
 /** Màn Login / Register: đã đăng nhập thì vào thẳng màn chính theo vai trò. */

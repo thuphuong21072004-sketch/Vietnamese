@@ -193,3 +193,5 @@ PublishProfiles/
 
 # Ban build Angular do run-demo chep vao
 Backend/Backend/ClientApp/
+# Ban build giao dien dien thoai (Mobile, npm run build:web) cho /m
+Backend/Backend/ClientMobile/

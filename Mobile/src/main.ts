@@ -22,6 +22,16 @@ bootstrapApplication(AppComponent, {
   if (environment.simulateSafeArea && !isNative()) {
     document.documentElement.classList.add('vp-sim-safe');
   }
+  if (!isNative()) {
+    // Người dùng đang ở giao diện mobile → web cũ (Fontend/src/main.ts) không đẩy ngược về bản desktop
+    try {
+      localStorage.setItem('vp-view', 'mobile');
+    } catch {}
+    // PWA (bản build ở /m): service worker để "Thêm vào màn hình chính" / "Cài ứng dụng"
+    if (environment.production && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  }
   // Service dùng chung của web (BaseService.handleError) gọi alert() → hiện toast thay vì hộp thoại trình duyệt
   const feedback = appRef.injector.get(FeedbackService);
   window.alert = (message?: unknown) => {

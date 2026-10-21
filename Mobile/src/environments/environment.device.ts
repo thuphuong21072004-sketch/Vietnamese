@@ -1,9 +1,11 @@
-// Bản cài lên điện thoại (npm run build:device): điện thoại gọi backend qua IP Wi-Fi của máy chạy backend.
-// Đổi IP nếu máy đổi mạng. Backend phải nghe trên mọi địa chỉ:  dotnet run --urls http://0.0.0.0:5108
+// Bản cài lên điện thoại (npm run build:device): gọi backend qua địa chỉ HTTPS công khai (Tailscale Funnel)
+// → dùng được ở mọi nơi có Internet, miễn máy chạy backend + Tailscale đang bật.
+// Thử trong mạng LAN thay vì ts.net: đổi thành 'http://<IP Wi-Fi của máy>:5108' và chạy backend với
+//   dotnet run --urls http://0.0.0.0:5108
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://192.168.1.41:5108/api',
-  serverUrl: 'http://192.168.1.41:5108',
+  apiBaseUrl: 'https://vietphuong.burmilla-porbeagle.ts.net/api',
+  serverUrl: 'https://vietphuong.burmilla-porbeagle.ts.net',
   // Thiết bị thật có safe-area riêng → không giả lập
   simulateSafeArea: false,
 };
