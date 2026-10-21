@@ -1,0 +1,1 @@
+import{Wa as o}from"./chunk-2L6ZRVQL.js";function n(){return document.documentElement.classList.contains("md")}var e="M15 18l-6-6 6-6",r="M19 12H5M12 19l-7-7 7-7";function c(){return o().includes("capacitor")}export{n as a,e as b,r as c,c as d};

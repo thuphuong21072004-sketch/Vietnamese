@@ -1,0 +1,1 @@
+import{a as t}from"./chunk-KP7UOPMT.js";function i(r,e){return r?/^(https?:|data:|blob:)/.test(r)?r:r.startsWith("/")?`${t.serverUrl}${r}`:`${t.serverUrl}/${e}/${r}`:""}function o(r){return(r||"U").trim().charAt(0).toUpperCase()||"U"}export{i as a,o as b};

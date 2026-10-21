@@ -1,0 +1,1 @@
+function o(r,t){if(!r)return t;try{let e=typeof r.error=="string"?JSON.parse(r.error):r.error;return e?.message||(typeof e=="string"?e:"")||t}catch{return typeof r.error=="string"&&r.error?r.error:t}}export{o as a};
