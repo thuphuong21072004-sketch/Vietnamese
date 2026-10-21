@@ -10,6 +10,8 @@
     "prebuild": "npm run sync-web",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "prebuild:web": "npm run sync-web",
+    "build:web": "ng build --configuration web",
     "prebuild:device": "npm run sync-web",
     "build:device": "ng build --configuration device",
     "cap:sync": "npm run build:device && npx cap sync",

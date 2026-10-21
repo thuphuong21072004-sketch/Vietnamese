@@ -66,6 +66,29 @@ Export Excel (Travel Bookings) dùng `xlsx` 0.18.5, cùng phiên bản với web
 
 Nền màn hình đặt bằng host class của page: `bg-admin`, `bg-travel`, `bg-auth` hoặc `bg-quiz`. Mặc định là nền học viên.
 
+## Chạy trên web: laptop ra web cũ, điện thoại ra giao diện mobile
+
+Cùng một địa chỉ, ví dụ `https://vietphuong.burmilla-porbeagle.ts.net`:
+
+| Thiết bị | Kết quả |
+|---|---|
+| Laptop / tablet | Web cũ (`Fontend/`, backend phục vụ từ `Backend/Backend/ClientApp`) |
+| Điện thoại | Web cũ tự chuyển sang `/m/<cùng đường dẫn>`: giao diện mobile, phục vụ từ `Backend/Backend/ClientMobile` |
+
+Cập nhật giao diện: double-click `build-deploy.cmd` ở gốc repo, rồi khởi động lại backend. Script này:
+- build web cũ → chép vào `ClientApp`;
+- chạy `npm run build:web` → ra thẳng `ClientMobile`.
+
+Chi tiết:
+- **Cùng origin với web cũ:** dùng chung đăng nhập (`localStorage.token`).
+- **`environment.web.ts`:** gọi API bằng đường dẫn tương đối `/api`.
+- **Đường dẫn cũ của web:** được đưa về màn mobile tương ứng (`src/app/legacy.routes.ts`), gồm cả `/my-bookings?payment=…` khi Stripe trả về.
+- **PWA:** có `manifest.webmanifest` và `sw.js` (không cache), nên điện thoại "Thêm vào màn hình chính" được, mở toàn màn hình như app.
+  - Android Chrome: ⋮ → Cài đặt ứng dụng.
+  - iPhone Safari: Chia sẻ → Thêm vào MH chính.
+- **Laptop mở `/m`:** giao diện hiện trong khung điện thoại 430px ở giữa, có nút "Desktop version" để về web cũ. Trên điện thoại nút này ẩn.
+- **Menu avatar của web cũ:** có "Mobile version".
+
 ## Cài lên điện thoại (Android / iOS)
 
 Project native đã có sẵn trong `android/` và `ios/` (Capacitor 6).

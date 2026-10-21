@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonContent, IonHeader } from '@ionic/angular/standalone';
 import { AuthService } from '../../core/auth.service';
 import { FeedbackService } from '../../core/feedback.service';
+import { DESKTOP_ICON, canSwitchToDesktop, switchToDesktopSite } from '../../core/site-switch';
 import { AvatarComponent } from '../../ui/avatar.component';
 import { IconComponent, ICONS } from '../../ui/icon.component';
 
@@ -10,7 +11,7 @@ interface MenuItem {
   label: string;
   icon: string;
   link?: string;
-  action?: 'teacher' | 'logout';
+  action?: 'teacher' | 'logout' | 'desktop';
   danger?: boolean;
 }
 
@@ -64,6 +65,7 @@ export class AdminMorePage {
       items: [
         { label: 'Update Information', icon: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', link: '/me/edit' },
         { label: 'Change Password', icon: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4', link: '/me/password' },
+        ...(canSwitchToDesktop() ? [{ label: 'Desktop version', icon: DESKTOP_ICON, action: 'desktop' as const }] : []),
         { label: 'Log out', icon: ICONS.logout, action: 'logout', danger: true },
       ],
     },
@@ -77,6 +79,10 @@ export class AdminMorePage {
   async open(item: MenuItem): Promise<void> {
     if (item.link) {
       this.router.navigateByUrl(item.link);
+      return;
+    }
+    if (item.action === 'desktop') {
+      switchToDesktopSite();
       return;
     }
     if (item.action === 'teacher') {

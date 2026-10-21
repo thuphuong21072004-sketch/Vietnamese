@@ -13,6 +13,7 @@ import * as TRAVEL from './pages/travel/travel.routes';
 import * as CONTENT from './pages/content/content.routes';
 import * as TEACHER from './pages/teacher/teacher.routes';
 import * as GUEST from './pages/guest/guest.routes';
+import { LEGACY_WEB_ROUTES } from './legacy.routes';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,9 @@ export const routes: Routes = [
       return router.createUrlTree(['/classes'], { queryParams: { ...queryParams, seg: 'mine' } });
     },
   },
+
+  // Đường dẫn của web cũ → màn mobile (phải đứng trước user/:id và các tab shell)
+  ...LEGACY_WEB_ROUTES,
 
   // Khách (chưa đăng nhập)
   ...GUEST.FULLSCREEN_ROUTES,

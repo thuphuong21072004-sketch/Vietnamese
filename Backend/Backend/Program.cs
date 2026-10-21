@@ -203,6 +203,21 @@ var clientAppFiles = Directory.Exists(clientAppPath) ? new PhysicalFileProvider(
 if (clientAppFiles != null)
     app.UseStaticFiles(new StaticFileOptions { FileProvider = clientAppFiles });
 
+// Giao diện điện thoại (Mobile/, npm run build:web) chạy ở /m — web cũ tự chuyển điện thoại sang đây.
+var clientMobilePath = Path.Combine(app.Environment.ContentRootPath, "ClientMobile");
+var clientMobileFiles = Directory.Exists(clientMobilePath) ? new PhysicalFileProvider(clientMobilePath) : null;
+if (clientMobileFiles != null)
+{
+    var mobileContentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+    mobileContentTypes.Mappings[".webmanifest"] = "application/manifest+json";
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = clientMobileFiles,
+        RequestPath = "/m",
+        ContentTypeProvider = mobileContentTypes,
+    });
+}
+
 if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -227,6 +242,13 @@ app.MapGet("/uploads/{**file}", (string file, IWebHostEnvironment env) =>
         Path.Combine(env.WebRootPath, "images", "default-avatar.svg"),
         "image/svg+xml");
 });
+
+if (clientMobileFiles != null)
+{
+    // route của giao diện điện thoại (/m/learn, /m/tutoring...) khi F5 / mở thẳng link -> index.html của bản mobile
+    // :nonfile → không bắt đường dẫn có đuôi file (sw.js, icons/*.png...) để UseStaticFiles ở trên phục vụ file thật
+    app.MapFallbackToFile("/m/{**path:nonfile}", "index.html", new StaticFileOptions { FileProvider = clientMobileFiles });
+}
 
 if (clientAppFiles != null)
 {

@@ -37,6 +37,18 @@
               ],
               "outputHashing": "all"
             },
+            "web": {
+              "baseHref": "/m/",
+              "outputPath": { "base": "../Backend/Backend/ClientMobile", "browser": "" },
+              "budgets": [
+                { "type": "initial", "maximumWarning": "2MB", "maximumError": "5MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "20kB", "maximumError": "40kB" }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                { "replace": "src/environments/environment.ts", "with": "src/environments/environment.web.ts" }
+              ]
+            },
             "device": {
               "budgets": [
                 { "type": "initial", "maximumWarning": "2MB", "maximumError": "5MB" },

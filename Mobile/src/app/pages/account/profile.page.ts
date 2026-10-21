@@ -6,6 +6,7 @@ import { AccountService } from '@web/services/account.service';
 import { AuthService } from '../../core/auth.service';
 import { FeedbackService } from '../../core/feedback.service';
 import { errorMessage } from '../../core/errors';
+import { DESKTOP_ICON, canSwitchToDesktop, switchToDesktopSite } from '../../core/site-switch';
 import { mediaUrl } from '../../core/media';
 import { AvatarComponent } from '../../ui/avatar.component';
 import { IconComponent, ICONS } from '../../ui/icon.component';
@@ -71,6 +72,8 @@ export class ProfilePage {
       items: [
         { label: 'Update Information', d: I.edit, link: '/me/edit' },
         { label: 'Change Password', d: I.lock, link: '/me/password' },
+        // Bản web ở /m: chuyển sang giao diện máy tính (web cũ)
+        ...(canSwitchToDesktop() ? [{ label: 'Desktop version', d: DESKTOP_ICON, action: () => switchToDesktopSite() }] : []),
         { label: 'Log out', d: ICONS.logout, action: () => this.logout(), danger: true },
       ],
     };
