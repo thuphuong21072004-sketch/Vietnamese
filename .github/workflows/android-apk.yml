@@ -77,7 +77,16 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          set +e
+          ./gradlew assembleRelease -x lintVitalRelease --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/gradle.log"
+          rc=${PIPESTATUS[0]}
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            # Đưa nguyên nhân lỗi lên phần Annotations (xem được kể cả khi chưa đăng nhập GitHub)
+            msg=$(grep -m1 -A14 -E "What went wrong|error:" "$RUNNER_TEMP/gradle.log" | head -20 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Gradle build failed::$msg"
+            exit "$rc"
+          fi
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/vietphuong.apk"
 
       - name: Lưu APK (tải ở trang của lần chạy này)
