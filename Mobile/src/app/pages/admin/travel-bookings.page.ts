@@ -6,13 +6,14 @@ import { TravelService } from '@web/services/travel.service';
 import { TravelBookingAdminDto } from '@web/models/travel.model';
 import { FeedbackService } from '../../core/feedback.service';
 import { errorMessage } from '../../core/errors';
+import { isNative, saveAndShareNativeFile } from '../../core/native-file';
 import { IconComponent, ICONS } from '../../ui/icon.component';
 import { NavBarComponent } from '../../ui/nav-bar.component';
 import { EmptyStateComponent, LoadingComponent } from '../../ui/states.component';
 
 /**
  * Confirmed Travel Bookings (chưa có design — dựng theo ui-spec §3.4)
- * Export Excel: thư viện xlsx giống web (trong app native cần thêm Filesystem/Share để lưu file).
+ * Export Excel: thư viện xlsx giống web; trong app Android/iOS lưu file + mở bảng Chia sẻ (core/native-file.ts).
  */
 @Component({
   standalone: true,
@@ -120,7 +121,14 @@ export class TravelBookingsPage implements OnInit {
       ];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Travel Bookings');
-      XLSX.writeFile(wb, `travel-bookings${this.filterDate ? '-' + this.filterDate : ''}.xlsx`);
+      const fileName = `travel-bookings${this.filterDate ? '-' + this.filterDate : ''}.xlsx`;
+      if (isNative()) {
+        // App Android/iOS: WebView không tải file được → lưu vào bộ nhớ app rồi mở bảng Chia sẻ (Zalo, Drive, Gmail…)
+        const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+        await saveAndShareNativeFile(fileName, base64, 'Travel Bookings');
+      } else {
+        XLSX.writeFile(wb, fileName);
+      }
     } catch (err) {
       this.fb.toast(errorMessage(err, 'Export failed'), 'error');
     } finally {

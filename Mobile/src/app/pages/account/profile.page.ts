@@ -6,7 +6,14 @@ import { AccountService } from '@web/services/account.service';
 import { AuthService } from '../../core/auth.service';
 import { FeedbackService } from '../../core/feedback.service';
 import { errorMessage } from '../../core/errors';
-import { DESKTOP_ICON, canSwitchToDesktop, switchToDesktopSite } from '../../core/site-switch';
+import {
+  ANDROID_APK_URL,
+  DESKTOP_ICON,
+  DOWNLOAD_ICON,
+  canOfferAndroidApp,
+  canSwitchToDesktop,
+  switchToDesktopSite,
+} from '../../core/site-switch';
 import { mediaUrl } from '../../core/media';
 import { AvatarComponent } from '../../ui/avatar.component';
 import { IconComponent, ICONS } from '../../ui/icon.component';
@@ -74,6 +81,8 @@ export class ProfilePage {
         { label: 'Change Password', d: I.lock, link: '/me/password' },
         // Bản web ở /m: chuyển sang giao diện máy tính (web cũ)
         ...(canSwitchToDesktop() ? [{ label: 'Desktop version', d: DESKTOP_ICON, action: () => switchToDesktopSite() }] : []),
+        // Bản web trên Android: gợi ý tải app (APK do GitHub Actions build)
+        ...(canOfferAndroidApp() ? [{ label: 'Get the Android app', d: DOWNLOAD_ICON, action: () => window.open(ANDROID_APK_URL, '_blank') }] : []),
         { label: 'Log out', d: ICONS.logout, action: () => this.logout(), danger: true },
       ],
     };

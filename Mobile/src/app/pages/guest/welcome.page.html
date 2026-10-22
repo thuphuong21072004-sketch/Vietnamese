@@ -5,7 +5,6 @@
       <p class="top__brand">VietPhuong</p>
       <p class="top__tag">Learn Vietnamese with us, every day.</p>
     </div>
-    <a routerLink="/login" class="vp-btn vp-btn--ghost vp-btn--sm top__login">Login</a>
   </header>
 </ion-header>
 
@@ -23,6 +22,27 @@
         <a routerLink="/login" class="vp-btn hero-outline">Login</a>
       </div>
     </section>
+
+    <!-- Cài app: Android tải APK, iPhone "Thêm vào MH chính" -->
+    @if (offerAndroidApp) {
+      <a class="vp-card install-card" [href]="apkUrl" target="_blank" rel="noopener">
+        <span class="install-card__icon"><vp-icon [d]="downloadIcon" [size]="22" /></span>
+        <div class="vp-grow">
+          <p class="vp-card-title">Get the Android app</p>
+          <p class="vp-meta">Download VietPhuong.apk and install it on your phone</p>
+        </div>
+        <vp-icon [d]="icons.chevronRight" [size]="20" class="search-card__chev" />
+      </a>
+    }
+    @if (offerIosHint) {
+      <div class="vp-card install-card install-card--ios">
+        <span class="install-card__icon"><vp-icon [d]="downloadIcon" [size]="22" /></span>
+        <div class="vp-grow">
+          <p class="vp-card-title">Install on your iPhone</p>
+          <p class="vp-meta">In Safari tap <b>Share</b> → <b>Add to Home Screen</b> to open VietPhuong like an app.</p>
+        </div>
+      </div>
+    }
 
     <!-- Số liệu -->
     <section class="vp-grid-3">
@@ -113,9 +133,3 @@
     }
   </div>
 </ion-content>
-
-<ion-footer class="vp-footer">
-  <div class="vp-bottom-bar">
-    <a routerLink="/register" class="vp-btn vp-btn--primary vp-btn--cta">Create free account</a>
-  </div>
-</ion-footer>

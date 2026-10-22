@@ -1,12 +1,19 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IonContent, IonFooter, IonHeader, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { LearningService } from '@web/services/learning.service';
 import { IconComponent, ICONS } from '../../ui/icon.component';
 import { LoadingComponent } from '../../ui/states.component';
-import { canSwitchToDesktop, switchToDesktopSite } from '../../core/site-switch';
+import {
+  ANDROID_APK_URL,
+  DOWNLOAD_ICON,
+  canOfferAndroidApp,
+  canOfferIosInstallHint,
+  canSwitchToDesktop,
+  switchToDesktopSite,
+} from '../../core/site-switch';
 
 interface GuestCourse {
   courseId: number;
@@ -24,12 +31,12 @@ interface GuestLevel {
 
 /**
  * Trang giới thiệu cho khách (chưa đăng nhập) — chưa có design, dựng theo ui-spec §3 "Home" của web:
- * hero + nút Register/Login, số liệu, lý do chọn, lộ trình (level → khóa học) dạng accordion,
+ * hero (nút Register / Login duy nhất trên trang), số liệu, lý do chọn, lộ trình (level → khóa học) dạng accordion,
  * lối vào Vocabulary Search (/search) không cần tài khoản.
  */
 @Component({
   standalone: true,
-  imports: [IonHeader, IonContent, IonFooter, IonRefresher, IonRefresherContent, RouterLink, IconComponent, LoadingComponent],
+  imports: [IonHeader, IonContent, IonRefresher, IonRefresherContent, RouterLink, IconComponent, LoadingComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './welcome.page.html',
   styleUrls: ['./welcome.page.css'],
@@ -54,6 +61,10 @@ export class WelcomePage implements OnInit {
 
   readonly showDesktopLink = canSwitchToDesktop();
   readonly switchToDesktop = switchToDesktopSite;
+  readonly offerAndroidApp = canOfferAndroidApp();
+  readonly offerIosHint = canOfferIosInstallHint();
+  readonly apkUrl = ANDROID_APK_URL;
+  readonly downloadIcon = DOWNLOAD_ICON;
   loading = true;
   error = '';
   levels: GuestLevel[] = [];

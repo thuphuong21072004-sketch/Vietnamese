@@ -89,32 +89,44 @@ Chi tiết:
 - **Laptop mở `/m`:** giao diện hiện trong khung điện thoại 430px ở giữa, có nút "Desktop version" để về web cũ. Trên điện thoại nút này ẩn.
 - **Menu avatar của web cũ:** có "Mobile version".
 
-## Cài lên điện thoại (Android / iOS)
+## App Android (APK): build miễn phí trên GitHub
 
-Project native đã có sẵn trong `android/` và `ios/` (Capacitor 6).
+Không cần cài Android SDK. File `.github/workflows/android-apk.yml` tự build mỗi lần push lên `main`, khi có sửa `Mobile/**` hoặc `Fontend/src/app/features/**`. Muốn build ngay thì vào tab **Actions → Android APK → Run workflow**.
 
-1. Chạy backend nghe trên mạng LAN (điện thoại và máy tính cùng Wi-Fi):
-   ```bash
-   dotnet run --urls http://0.0.0.0:5108
-   ```
-2. Sửa IP trong `src/environments/environment.device.ts` nếu IP Wi-Fi của máy khác `192.168.1.41`.
-3. Build + đồng bộ vào project native, rồi mở IDE:
-   ```bash
-   npm run cap:android   # mở Android Studio → Run trên máy thật / emulator
-   npm run cap:ios       # trên macOS: cd ios/App && pod install, rồi Run trong Xcode
-   ```
+- **Link tải, luôn là bản mới nhất:** `https://github.com/thuphuong21072004-sketch/Vietnamese/releases/download/android-latest/vietphuong.apk`
+- **Cài lên điện thoại:**
+  - Trên giao diện `/m` của Android có nút "Get the Android app", ở trang chủ khách và tab Me.
+  - Hoặc mở thẳng link tải → mở file → cho phép "Cài ứng dụng không rõ nguồn gốc" → Cài đặt.
+- **App lấy dữ liệu từ đâu:** địa chỉ ghi trong `src/environments/environment.device.ts`, hiện là `https://vietphuong.burmilla-porbeagle.ts.net`. Máy chạy backend và Tailscale **phải đang bật** thì app mới dùng được. Đổi server thì sửa file này rồi push; GitHub sẽ build lại.
+- **Số phiên bản:** `versionCode` = số lần chạy workflow, nên bản mới cài đè lên bản cũ được.
 
-Đã cấu hình sẵn:
+**Khóa ký app (làm một lần):**
+- Khóa nằm ở `D:\Android\keys\`, ngoài repo. **Giữ bí mật, không làm mất**: mất khóa thì người dùng phải gỡ app rồi cài lại.
+- Mở `D:\Android\keys\README.txt` rồi thêm 4 secret tại **Settings → Secrets and variables → Actions**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
+- Chưa có secret thì workflow vẫn build, nhưng ký bằng khóa tạm; mỗi bản mới phải gỡ app cũ trước khi cài.
+
+**Đã cấu hình sẵn cho app:**
+- Icon VietPhuong (`android/app/src/main/res/mipmap-*`, iOS `AppIcon`).
+- Quyền micro: `RECORD_AUDIO` trên Android, `NSMicrophoneUsageDescription` trên iOS.
 - `capacitor.config.ts`:
-  - `androidScheme: 'http'` + `cleartext`: gọi được backend HTTP trong mạng LAN.
-  - `allowNavigation` cho `*.stripe.com`: trang Stripe Checkout mở ngay trong app.
-  - Nhờ Origin `http://localhost`, Stripe trả về `/my-bookings` / `/user/myclass` là quay lại chính app.
-- Quyền micro:
-  - Android: `RECORD_AUDIO` trong `AndroidManifest.xml`.
-  - iOS: `NSMicrophoneUsageDescription` trong `Info.plist`.
-- iOS: `NSAllowsArbitraryLoads` (ATS) để gọi backend HTTP — bỏ khi backend có HTTPS.
-- Ghi âm: tự chọn `audio/webm` (Android/Chrome) hoặc `audio/mp4` (iOS). Bản ghi được đổi sang WAV trước khi chấm. Quiz editor lưu `.m4a`; backend đã nhận định dạng này.
+  - `androidScheme: 'http'`.
+  - `allowNavigation` cho `*.stripe.com`: trang Stripe Checkout mở ngay trong app. Origin là `http://localhost` nên Stripe trả về `/my-bookings` chính là quay lại app.
+- Export Excel trong app: lưu file rồi mở bảng Chia sẻ (`src/app/core/native-file.ts`, plugin `@capacitor/filesystem` + `@capacitor/share`).
+- Ghi âm: dùng `audio/webm` (Android) hoặc `audio/mp4` (iOS); đổi sang WAV trước khi chấm.
 
-Còn giới hạn:
-- **Stripe trên iOS:** WKWebView chạy ở `capacitor://localhost`. Backend không nhận Origin này nên trả về `http://localhost:4200`. Muốn quay lại app trên iOS cần một trang trả về HTTPS / universal link trên domain thật.
-- **Export Excel trong app native:** `XLSX.writeFile` chỉ tải file trên trình duyệt. Trong app cần thêm `@capacitor/filesystem` + `@capacitor/share` để lưu / chia sẻ file.
+**Build bằng máy tính (không bắt buộc):** cần Android Studio; chạy `npm run cap:android`.
+
+## iPhone
+
+- **Miễn phí:** dùng PWA. Mở link trên Safari → **Chia sẻ** → **Thêm vào MH chính**. Trang chủ khách trên iPhone có hiện hướng dẫn này.
+- **App thật trên chính iPhone của bạn:** cần mượn máy Mac. Xem `IOS-BUILD.md` (miễn phí nhưng app hết hạn sau 7 ngày).
+- **Phát app iPhone cho người khác:** bắt buộc có Apple Developer (99 USD/năm). Không làm.
+
+## Lưu ý bảo mật
+
+Repo đang **public**, trong khi `Backend/Backend/appsettings.json` chứa khóa bí mật (Stripe, JWT…). Nên:
+- tạo khóa mới (rotate);
+- chuyển khóa sang biến môi trường hoặc `dotnet user-secrets`;
+- xóa khóa khỏi lịch sử git, hoặc chuyển repo sang private.
+
+Nếu chuyển repo sang private, link tải APK sẽ cần đăng nhập GitHub. Khi đó chép APK vào `Backend/Backend/wwwroot/download/` để tải qua ts.net.
